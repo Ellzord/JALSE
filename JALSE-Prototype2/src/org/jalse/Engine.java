@@ -25,9 +25,9 @@ import java.util.logging.Logger;
 import org.jalse.actions.Action;
 import org.jalse.misc.JALSEException;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 abstract class Engine {
 
-    @SuppressWarnings("rawtypes")
     private class AtomicAction {
 
 	private Action action;
@@ -51,7 +51,6 @@ abstract class Engine {
 	    return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void perform() {
 
 	    synchronized (AtomicAction.this) {
@@ -73,7 +72,6 @@ abstract class Engine {
 	}
     }
 
-    @SuppressWarnings("rawtypes")
     private class Worker implements Runnable, Comparable<Worker> {
 
 	private final Action action;
@@ -111,7 +109,6 @@ abstract class Engine {
 	    return key.hashCode();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
 
@@ -221,38 +218,12 @@ abstract class Engine {
 	}
     }
 
-    static void parkNanos(final long end) {
-
-	long timeLeft;
-
-	while ((timeLeft = end - System.nanoTime()) > 0) {
-
-	    if (timeLeft > SPIN_YIELD_THRESHOLD) {
-
-		LockSupport.parkNanos(timeLeft - SPIN_YIELD_THRESHOLD);
-	    }
-	    else {
-
-		Thread.yield();
-	    }
-	}
-    }
-
-    static long requireNonNegative(final long value) {
-
-	if (value <= 0) {
-
-	    throw new IllegalArgumentException();
-	}
-
-	return value;
-    }
-
     private static final Logger logger = Logger.getLogger(Engine.class.getCanonicalName());
 
     private static final long SECOND = TimeUnit.SECONDS.toNanos(1);
 
     private static final long SPIN_YIELD_THRESHOLD;
+
     private static final long TERMINATION_TIMEOUT;
 
     static {
@@ -275,9 +246,36 @@ abstract class Engine {
 	TERMINATION_TIMEOUT = tt != null && tt.length() > 0 ? Long.valueOf(tt) : 2 * SECOND;
     }
 
+    private static void parkNanos(final long end) {
+
+	long timeLeft;
+
+	while ((timeLeft = end - System.nanoTime()) > 0) {
+
+	    if (timeLeft > SPIN_YIELD_THRESHOLD) {
+
+		LockSupport.parkNanos(timeLeft - SPIN_YIELD_THRESHOLD);
+	    }
+	    else {
+
+		Thread.yield();
+	    }
+	}
+    }
+
+    private static long requireNonNegative(final long value) {
+
+	if (value <= 0) {
+
+	    throw new IllegalArgumentException();
+	}
+
+	return value;
+    }
+
     private final ThreadPoolExecutor executor;
-    private final Map<UUID, Future<?>> futures;
     private final AtomicAction first;
+    private final Map<UUID, Future<?>> futures;
     private final AtomicAction last;
     private final StampedLock lock;
     private final Phaser phaser;
@@ -375,7 +373,7 @@ abstract class Engine {
 	}
     }
 
-    Runnable control() {
+    private Runnable control() {
 
 	return () -> {
 

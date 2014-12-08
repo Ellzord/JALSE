@@ -15,7 +15,7 @@ public abstract class NonAttributeWrapper<T> implements Attribute {
     public boolean equals(final Object obj) {
 
 	return this == obj || obj instanceof NonAttributeWrapper<?>
-		&& Objects.equals(((NonAttributeWrapper<?>) obj).obj, this.obj);
+	&& Objects.equals(((NonAttributeWrapper<?>) obj).obj, this.obj);
     }
 
     @Override

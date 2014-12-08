@@ -16,6 +16,25 @@ import org.jalse.misc.JALSEException;
 
 public final class Wrappers {
 
+    private static Set<Method> CACHED_METHODS = Collections.unmodifiableSet(new HashSet<Method>() {
+
+	private static final long serialVersionUID = -3273614078225830902L;
+
+	{
+	    addAll(Arrays.asList(AgentWrapper.class.getMethods()));
+	    addAll(Arrays.asList(Object.class.getMethods()));
+	}
+    });
+
+    private static Set<Class<?>> VALID_WRAPPERS = new CopyOnWriteArraySet<Class<?>>() {
+
+	private static final long serialVersionUID = -3273614078225830902L;
+
+	{
+	    add(AgentWrapper.class);
+	}
+    };
+
     private static void validateWrapper(final Class<?> clazz) {
 
 	if (!AgentWrapper.class.isAssignableFrom(clazz)) {
@@ -108,25 +127,6 @@ public final class Wrappers {
 		    return result;
 		});
     }
-
-    private static Set<Method> CACHED_METHODS = Collections.unmodifiableSet(new HashSet<Method>() {
-
-	private static final long serialVersionUID = -3273614078225830902L;
-
-	{
-	    addAll(Arrays.asList(AgentWrapper.class.getMethods()));
-	    addAll(Arrays.asList(Object.class.getMethods()));
-	}
-    });
-
-    private static Set<Class<?>> VALID_WRAPPERS = new CopyOnWriteArraySet<Class<?>>() {
-
-	private static final long serialVersionUID = -3273614078225830902L;
-
-	{
-	    add(AgentWrapper.class);
-	}
-    };
 
     private Wrappers() {
 

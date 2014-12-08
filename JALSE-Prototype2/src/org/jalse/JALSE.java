@@ -61,17 +61,13 @@ public class JALSE extends Engine implements Taggable {
 
     public int getAgentCount() {
 
-	int result;
-
 	synchronized (agentCount) {
 
-	    result = agentCount.get();
+	    return agentCount.get();
 	}
-
-	return result;
     }
 
-    public AtomicInteger getAgentCount0() {
+    AtomicInteger getAgentCount0() {
 
 	return agentCount;
     }
@@ -94,14 +90,10 @@ public class JALSE extends Engine implements Taggable {
 
     public int getClusterCount() {
 
-	int result;
-
 	synchronized (clusterCount) {
 
-	    result = clusterCount.get();
+	    return clusterCount.get();
 	}
-
-	return result;
     }
 
     public int getClusterLimit() {
