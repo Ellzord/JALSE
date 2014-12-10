@@ -39,7 +39,7 @@ abstract class Engine {
 	    actor = null;
 	}
 
-	private Action<?> getAction() {
+	public Action<?> getAction() {
 
 	    Action<?> result;
 
@@ -51,7 +51,7 @@ abstract class Engine {
 	    return result;
 	}
 
-	private void perform() {
+	public void perform() {
 
 	    synchronized (AtomicAction.this) {
 
@@ -62,7 +62,7 @@ abstract class Engine {
 	    }
 	}
 
-	private void set(final Action action, final Object actor) {
+	public void set(final Action action, final Object actor) {
 
 	    synchronized (AtomicAction.this) {
 
