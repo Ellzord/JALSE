@@ -25,59 +25,9 @@ import org.jalse.wrappers.Wrappers;
 
 public class Cluster extends Core<Cluster> {
 
-    private class Suppliers {
-
-	private final Map<Supplier<?>, Set<Map<UUID, AttributeListener<?>>>> suppliersAndChildren;
-
-	private Suppliers() {
-
-	    suppliersAndChildren = new ConcurrentHashMap<>();
-	}
-
-	public void add(final Supplier<?> supplier) {
-
-	    // TODO
-	}
-
-	public void addChild(final Supplier<?> supplier, final UUID owner, final AttributeListener<?> child) {
-
-	    // TODO
-	}
-
-	public boolean contains(final Supplier<?> supplier) {
-
-	    return suppliersAndChildren.containsKey(supplier);
-	}
-
-	public Set<Supplier<?>> getSuppliers() {
-
-	    return suppliersAndChildren.keySet();
-	}
-
-	public boolean isEmpty() {
-
-	    return suppliersAndChildren.isEmpty();
-	}
-
-	public void remove(final Supplier<?> supplier) {
-
-	    // TODO
-	}
-
-	public AttributeListener<?> removeChild(final Supplier<?> supplier, final UUID owner) {
-
-	    return null; // TODO
-	}
-
-	public void removeChildren(final UUID owner) {
-
-	    // TODO
-	}
-    }
-
     private final Set<AgentListener> agentListeners;
     private final Map<UUID, Agent> agents;
-    private final Map<Class<?>, Suppliers> listenerSuppliers;
+    private final Map<Class<?>, Set<Supplier<?>>> listenerSuppliers;
 
     protected Cluster(final JALSE jalse, final UUID id) {
 
@@ -97,7 +47,7 @@ public class Cluster extends Core<Cluster> {
     public <T extends Attribute> boolean addListenerSupplier(final Class<T> attr,
 	    final Supplier<AttributeListener<T>> supplier) {
 
-	Suppliers suppliers;
+	Set<Supplier<?>> suppliers;
 
 	synchronized (listenerSuppliers) {
 
@@ -105,28 +55,21 @@ public class Cluster extends Core<Cluster> {
 
 	    if (suppliers == null) {
 
-		listenerSuppliers.put(attr, suppliers = new Suppliers());
+		listenerSuppliers.put(attr, suppliers = new CopyOnWriteArraySet<>());
 	    }
 	}
 
-	final boolean add = !suppliers.contains(supplier);
+	final boolean added = suppliers.add(supplier);
 
-	if (add) {
-
-	    suppliers.add(supplier);
+	if (added) {
 
 	    for (final Agent a : agents.values()) {
 
-		final AttributeListener<T> listener = supplier.get();
-
-		if (a.addListener(attr, listener)) {
-
-		    suppliers.addChild(supplier, a.getID(), listener);
-		}
+		a.addListener(attr, supplier.get());
 	    }
 	}
 
-	return add;
+	return added;
     }
 
     public Set<AgentWrapper> filterAgents(final Predicate<AgentWrapper> filter) {
@@ -170,7 +113,7 @@ public class Cluster extends Core<Cluster> {
     @SuppressWarnings("unchecked")
     public <T extends Attribute> Set<Supplier<AttributeListener<T>>> getListenerSuppliers(final Class<T> attr) {
 
-	Suppliers suppliers;
+	Set<Supplier<?>> suppliers;
 
 	synchronized (listenerSuppliers) {
 
@@ -178,8 +121,7 @@ public class Cluster extends Core<Cluster> {
 	}
 
 	return suppliers != null ? Collections
-		.unmodifiableSet((Set<? extends Supplier<AttributeListener<T>>>) suppliers.getSuppliers())
-		: Collections.emptySet();
+		.unmodifiableSet((Set<? extends Supplier<AttributeListener<T>>>) suppliers) : Collections.emptySet();
     }
 
     public boolean kill() {
@@ -193,23 +135,11 @@ public class Cluster extends Core<Cluster> {
 
 	if ((killed = agents.remove(id)) != null) {
 
-	    killed.cancelTasks0();
+	    killed.cancelTasks();
 
 	    for (final AgentListener listener : agentListeners) {
 
 		listener.agentKilled(id);
-	    }
-
-	    Set<Suppliers> values;
-
-	    synchronized (listenerSuppliers) {
-
-		values = new HashSet<>(listenerSuppliers.values());
-	    }
-
-	    for (final Suppliers suppliers : values) {
-
-		suppliers.removeChildren(id);
 	    }
 	}
 
@@ -251,24 +181,20 @@ public class Cluster extends Core<Cluster> {
 	    listener.agentCreated(id);
 	}
 
-	Set<Entry<Class<?>, Suppliers>> entrySet;
+	Set<Entry<Class<?>, Set<Supplier<?>>>> entrySet;
 
 	synchronized (listenerSuppliers) {
 
 	    entrySet = new HashSet<>(listenerSuppliers.entrySet());
 	}
 
-	for (final Entry<Class<?>, Suppliers> entry : entrySet) {
+	for (final Entry<Class<?>, Set<Supplier<?>>> entry : entrySet) {
 
 	    final Class<?> clazz = entry.getKey();
-	    final Suppliers suppliers = entry.getValue();
 
-	    for (final Supplier<?> supplier : suppliers.getSuppliers()) {
+	    for (final Supplier<?> supplier : entry.getValue()) {
 
-		final AttributeListener<?> listener = (AttributeListener<?>) supplier.get();
-
-		agent.addListener0(clazz, listener);
-		suppliers.addChild(supplier, agent.getID(), listener);
+		agent.addListener0(clazz, supplier.get());
 	    }
 	}
 
@@ -288,42 +214,29 @@ public class Cluster extends Core<Cluster> {
     public <T extends Attribute> boolean removeListenerSupplier(final Class<T> attr,
 	    final Supplier<AttributeListener<T>> supplier) {
 
-	Suppliers suppliers;
+	Set<Supplier<?>> suppliers;
 
 	synchronized (listenerSuppliers) {
 
 	    suppliers = listenerSuppliers.get(requireNonNullAttrSub(attr));
 	}
 
-	boolean remove = false;
+	boolean removed = false;
 
 	if (suppliers != null) {
 
-	    if (remove = suppliers.contains(supplier)) {
+	    removed = suppliers.remove(supplier);
 
-		for (final Agent a : agents.values()) {
+	    synchronized (listenerSuppliers) {
 
-		    final AttributeListener<?> listener = suppliers.removeChild(supplier, a.getID());
+		if (suppliers.isEmpty()) {
 
-		    if (listener != null) {
-
-			a.removeListener0(attr, listener);
-		    }
-		}
-
-		suppliers.remove(supplier);
-
-		synchronized (listenerSuppliers) {
-
-		    if (suppliers.isEmpty()) {
-
-			listenerSuppliers.remove(attr);
-		    }
+		    listenerSuppliers.remove(attr);
 		}
 	    }
 	}
 
-	return remove;
+	return removed;
     }
 
     public boolean transferAgent(final Cluster cluster, final UUID id) {

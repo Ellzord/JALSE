@@ -145,7 +145,7 @@ public class JALSE extends Engine implements Taggable {
 
 	if ((killed = clusters.remove(id)) != null) {
 
-	    killed.cancelTasks0();
+	    killed.cancelTasks();
 
 	    for (final ClusterListener listener : clusterListeners) {
 
