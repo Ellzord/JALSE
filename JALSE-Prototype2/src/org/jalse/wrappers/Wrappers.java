@@ -98,34 +98,36 @@ public final class Wrappers {
 
 	validateWrapper(clazz);
 
-	return (T) Proxy.newProxyInstance(
-		clazz.getClassLoader(),
-		new Class[] { clazz },
-		(p, m, a) -> {
+	return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, (p, m, a) -> {
 
-		    Object result = null;
+	    Object result = null;
 
-		    if (CACHED_METHODS.contains(m)) {
+	    if (CACHED_METHODS.contains(m)) {
 
-			result = m.invoke(agent, a);
-		    }
-		    else {
+		result = m.invoke(agent, a);
+	    }
+	    else {
 
-			final Class<? extends Attribute> attr = (Class<? extends Attribute>) ((ParameterizedType) m
-				.getGenericReturnType()).getActualTypeArguments()[0];
+		final Type rt = m.getGenericReturnType();
 
-			if (a == null || a.length == 0) {
+		if (a == null || a.length == 0) {
 
-			    result = agent.getAttribute(attr);
-			}
-			else {
+		    result = agent.getAttribute(getAttrClass(rt));
+		}
+		else {
 
-			    result = a[0] != null ? agent.associate((Attribute) a[0]) : agent.disassociate(attr);
-			}
-		    }
+		    result = a[0] != null ? agent.associate((Attribute) a[0]) : agent.disassociate(getAttrClass(rt));
+		}
+	    }
 
-		    return result;
-		});
+	    return result;
+	});
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Class<? extends Attribute> getAttrClass(Type type) {
+
+	return (Class<? extends Attribute>) ((ParameterizedType) type).getActualTypeArguments()[0];
     }
 
     private Wrappers() {
