@@ -35,6 +35,12 @@ public final class Wrappers {
 	}
     };
 
+    @SuppressWarnings("unchecked")
+    private static Class<? extends Attribute> getAttrClass(final Type type) {
+
+	return (Class<? extends Attribute>) ((ParameterizedType) type).getActualTypeArguments()[0];
+    }
+
     private static void validateWrapper(final Class<?> clazz) {
 
 	if (!AgentWrapper.class.isAssignableFrom(clazz)) {
@@ -122,12 +128,6 @@ public final class Wrappers {
 
 	    return result;
 	});
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Class<? extends Attribute> getAttrClass(Type type) {
-
-	return (Class<? extends Attribute>) ((ParameterizedType) type).getActualTypeArguments()[0];
     }
 
     private Wrappers() {

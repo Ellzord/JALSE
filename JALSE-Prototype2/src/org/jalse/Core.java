@@ -2,7 +2,6 @@ package org.jalse;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -202,14 +201,6 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
     public UUID getID() {
 
 	return id;
-    }
-
-    Set<Class<?>> getListenerTypes() {
-
-	synchronized (listeners) {
-
-	    return new HashSet<>(listeners.keySet());
-	}
     }
 
     @SuppressWarnings("unchecked")
