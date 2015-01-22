@@ -37,4 +37,9 @@ public class JALSEException extends RuntimeException {
 
 	super(message);
     }
+
+    public JALSEException(final String message, Throwable cause) {
+
+	super(message, cause);
+    }
 }

@@ -226,9 +226,4 @@ public class JALSE extends Engine implements Taggable {
 
 	setLastAction0(action, this);
     }
-
-    public boolean transferCluster(final JALSE jalse, final UUID id) {
-
-	throw new UnsupportedOperationException(); // TODO ..
-    }
 }

@@ -238,9 +238,4 @@ public class Cluster extends Core<Cluster> {
 
 	return removed;
     }
-
-    public boolean transferAgent(final Cluster cluster, final UUID id) {
-
-	throw new UnsupportedOperationException(); // TODO
-    }
 }
