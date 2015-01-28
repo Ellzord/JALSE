@@ -226,7 +226,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 	return Collections.unmodifiableSet(tags);
     }
 
-    Set<Tag> getTags0() {
+    protected Set<Tag> getTags0() {
 
 	return tags;
     }

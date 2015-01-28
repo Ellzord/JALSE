@@ -30,7 +30,7 @@ public class JALSEExceptions {
 	throw new UnsupportedOperationException();
     }
 
-    public static void throwRE(final Supplier<RuntimeException> supplier) {
+    public static void throwRE(final Supplier<? extends RuntimeException> supplier) {
 
 	throw supplier.get();
     }

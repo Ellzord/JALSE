@@ -439,12 +439,12 @@ public abstract class Engine {
 	};
     }
 
-    Action<?> getFirstAction0() {
+    protected Action<?> getFirstAction0() {
 
 	return first.getAction();
     }
 
-    Action<?> getLastAction0() {
+    protected Action<?> getLastAction0() {
 
 	return last.getAction();
     }
@@ -492,7 +492,7 @@ public abstract class Engine {
 	}
     }
 
-    UUID schedule0(final Action<?> action, final Object actor, final long initialDelay, final long period,
+    protected UUID schedule0(final Action<?> action, final Object actor, final long initialDelay, final long period,
 	    final TimeUnit unit) {
 
 	final UUID key = UUID.randomUUID();
@@ -506,12 +506,12 @@ public abstract class Engine {
 	return key;
     }
 
-    void setFirstAction0(final Action<?> action, final Object actor) {
+    protected void setFirstAction0(final Action<?> action, final Object actor) {
 
 	first.set(action, actor);
     }
 
-    void setLastAction0(final Action<?> action, final Object actor) {
+    protected void setLastAction0(final Action<?> action, final Object actor) {
 
 	last.set(action, actor);
     }

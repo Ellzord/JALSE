@@ -118,7 +118,7 @@ public class Cluster extends Core<JALSE, Cluster> {
 	return Collections.unmodifiableSet(agents.keySet());
     }
 
-    Set<UUID> getAgents0() {
+    protected Set<UUID> getAgents0() {
 
 	return agents.keySet();
     }

@@ -72,7 +72,7 @@ public class JALSE extends Engine implements Taggable {
 	}
     }
 
-    AtomicInteger getAgentCount0() {
+    protected AtomicInteger getAgentCount0() {
 
 	return agentCount;
     }
