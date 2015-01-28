@@ -1,6 +1,4 @@
-package jalse;
-
-import jalse.tags.Tag;
+package jalse.tags;
 
 public enum State implements Tag {
 

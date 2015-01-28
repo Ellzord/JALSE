@@ -2,13 +2,14 @@ package jalse;
 
 import jalse.actions.Action;
 import jalse.actions.Scheduler;
+import jalse.agents.Agent;
 import jalse.attributes.Attributable;
 import jalse.attributes.Attribute;
 import jalse.listeners.AttributeListener;
-import jalse.misc.JALSEException;
+import jalse.misc.Identifiable;
+import jalse.misc.JALSEExceptions;
 import jalse.tags.Tag;
 import jalse.tags.Taggable;
-import jalse.wrappers.AgentWrapper;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,13 +23,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
-abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
+public abstract class Core<T extends Engine, S> implements Identifiable, Attributable, Taggable, Scheduler<S> {
 
-    static Class<?> requireNonNullAttrSub(final Class<?> clazz) {
+    protected static Class<?> requireNonNullAttrSub(final Class<?> clazz) {
 
 	if (Attribute.class.equals(Objects.requireNonNull(clazz))) {
 
-	    throw JALSEException.INVALID_ATTRIBUTE_CLASS.get();
+	    throw JALSEExceptions.INVALID_ATTRIBUTE_CLASS.get();
 	}
 
 	return clazz;
@@ -36,14 +37,14 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
 
     private final Map<Class<?>, Attribute> attributes;
     protected UUID id;
-    protected JALSE jalse;
+    protected T engine;
     private final Map<Class<?>, Set<AttributeListener<?>>> listeners;
     private final Set<Tag> tags;
     private final Set<UUID> tasks;
 
-    Core(final JALSE jalse, final UUID id) {
+    protected Core(final T jalse, final UUID id) {
 
-	this.jalse = jalse;
+	this.engine = jalse;
 	this.id = id;
 
 	tasks = Collections.newSetFromMap(new WeakHashMap<>());
@@ -54,7 +55,7 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
     }
 
     @Override
-    public <S extends Attribute> boolean addListener(final Class<S> attr, final AttributeListener<S> listener) {
+    public <U extends Attribute> boolean addListener(final Class<U> attr, final AttributeListener<U> listener) {
 
 	return addListener0(attr, listener);
     }
@@ -78,27 +79,27 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <S extends Attribute> Optional<S> associate(final S attr) {
+    public <U extends Attribute> Optional<U> associate(final U attr) {
 
 	final Class<?> clazz = attr.getClass();
 
-	final S previous = (S) attributes.put(clazz, attr);
+	final U previous = (U) attributes.put(clazz, attr);
 
 	if (previous != null) {
 
 	    fireAttributeRemoved(previous);
 	}
 
-	Set<? extends AttributeListener<S>> ls;
+	Set<? extends AttributeListener<U>> ls;
 
 	synchronized (listeners) {
 
-	    ls = (Set<? extends AttributeListener<S>>) listeners.get(clazz);
+	    ls = (Set<? extends AttributeListener<U>>) listeners.get(clazz);
 	}
 
 	if (ls != null) {
 
-	    for (final AttributeListener<S> l : ls) {
+	    for (final AttributeListener<U> l : ls) {
 
 		l.attributeAdded(attr);
 	    }
@@ -110,10 +111,10 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
     @Override
     public boolean cancel(final UUID action) {
 
-	return jalse.cancel(action);
+	return engine.cancel(action);
     }
 
-    void cancelTasks() {
+    public void cancelTasks() {
 
 	synchronized (tasks) {
 
@@ -126,9 +127,9 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <S extends Attribute> Optional<S> disassociate(final Class<S> attr) {
+    public <U extends Attribute> Optional<U> disassociate(final Class<U> attr) {
 
-	final S previous = (S) attributes.remove(requireNonNullAttrSub(attr));
+	final U previous = (U) attributes.remove(requireNonNullAttrSub(attr));
 
 	if (previous != null) {
 
@@ -142,27 +143,27 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
     public boolean equals(final Object obj) {
 
 	return this == obj || obj != null && obj.getClass().equals(getClass())
-		&& Objects.equals(id, ((AgentWrapper) obj).getID());
+		&& Objects.equals(id, ((Agent) obj).getID());
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <S extends Attribute> boolean fireAttributeChanged(final Class<S> attr) {
+    public <U extends Attribute> boolean fireAttributeChanged(final Class<U> attr) {
 
-	final Optional<S> op = getAttribute(attr);
+	final Optional<U> op = getAttribute(attr);
 
 	op.ifPresent(a -> {
 
-	    Set<? extends AttributeListener<S>> ls;
+	    Set<? extends AttributeListener<U>> ls;
 
 	    synchronized (listeners) {
 
-		ls = (Set<? extends AttributeListener<S>>) listeners.get(attr);
+		ls = (Set<? extends AttributeListener<U>>) listeners.get(attr);
 	    }
 
 	    if (ls != null) {
 
-		for (final AttributeListener<S> l : ls) {
+		for (final AttributeListener<U> l : ls) {
 
 		    l.attributeChanged(a);
 		}
@@ -173,18 +174,18 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private <S extends Attribute> void fireAttributeRemoved(final S attr) {
+    private <U extends Attribute> void fireAttributeRemoved(final U attr) {
 
-	Set<? extends AttributeListener<S>> ls;
+	Set<? extends AttributeListener<U>> ls;
 
 	synchronized (listeners) {
 
-	    ls = (Set<? extends AttributeListener<S>>) listeners.get(attr.getClass());
+	    ls = (Set<? extends AttributeListener<U>>) listeners.get(attr.getClass());
 	}
 
 	if (ls != null) {
 
-	    for (final AttributeListener<S> l : ls) {
+	    for (final AttributeListener<U> l : ls) {
 
 		l.attributeRemoved(attr);
 	    }
@@ -193,11 +194,12 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <S extends Attribute> Optional<S> getAttribute(final Class<S> attr) {
+    public <U extends Attribute> Optional<U> getAttribute(final Class<U> attr) {
 
-	return Optional.ofNullable((S) attributes.get(requireNonNullAttrSub(attr)));
+	return Optional.ofNullable((U) attributes.get(requireNonNullAttrSub(attr)));
     }
 
+    @Override
     public UUID getID() {
 
 	return id;
@@ -205,7 +207,7 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <S extends Attribute> Set<AttributeListener<S>> getListeners(final Class<S> attr) {
+    public <U extends Attribute> Set<AttributeListener<U>> getListeners(final Class<U> attr) {
 
 	Set<AttributeListener<?>> ls;
 
@@ -214,7 +216,7 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
 	    ls = listeners.get(requireNonNullAttrSub(requireNonNullAttrSub(attr)));
 	}
 
-	return ls != null ? Collections.unmodifiableSet((Set<? extends AttributeListener<S>>) ls) : Collections
+	return ls != null ? Collections.unmodifiableSet((Set<? extends AttributeListener<U>>) ls) : Collections
 		.emptySet();
     }
 
@@ -238,11 +240,11 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
     @Override
     public boolean isActive(final UUID action) {
 
-	return jalse.isActive(action);
+	return engine.isActive(action);
     }
 
     @Override
-    public <S extends Attribute> boolean removeListener(final Class<S> attr, final AttributeListener<S> listener) {
+    public <U extends Attribute> boolean removeListener(final Class<U> attr, final AttributeListener<U> listener) {
 
 	return removeListener0(attr, listener);
     }
@@ -278,26 +280,26 @@ abstract class Core<T> implements Attributable, Taggable, Scheduler<T> {
     }
 
     @Override
-    public UUID schedule(final Action<T> action) {
+    public UUID schedule(final Action<S> action) {
 
 	return schedule(action, 0L, TimeUnit.NANOSECONDS);
     }
 
     @Override
-    public UUID schedule(final Action<T> action, final long initialDelay, final long period, final TimeUnit unit) {
+    public UUID schedule(final Action<S> action, final long initialDelay, final long period, final TimeUnit unit) {
 
 	UUID task;
 
 	synchronized (tasks) {
 
-	    tasks.add(task = jalse.schedule0(action, this, initialDelay, period, unit));
+	    tasks.add(task = engine.schedule0(action, this, initialDelay, period, unit));
 	}
 
 	return task;
     }
 
     @Override
-    public UUID schedule(final Action<T> action, final long initialDelay, final TimeUnit unit) {
+    public UUID schedule(final Action<S> action, final long initialDelay, final TimeUnit unit) {
 
 	return schedule(action, initialDelay, 0L, unit);
     }

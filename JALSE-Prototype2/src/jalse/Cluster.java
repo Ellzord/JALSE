@@ -1,11 +1,13 @@
 package jalse;
 
+import static jalse.agents.Agents.wrap;
+import static jalse.misc.JALSEExceptions.AGENT_ALREADY_ASSOCIATED;
+import static jalse.misc.JALSEExceptions.AGENT_LIMIT_REARCHED;
+import static jalse.misc.JALSEExceptions.throwRE;
+import jalse.agents.Agent;
 import jalse.attributes.Attribute;
 import jalse.listeners.AgentListener;
 import jalse.listeners.AttributeListener;
-import jalse.misc.JALSEException;
-import jalse.wrappers.AgentWrapper;
-import jalse.wrappers.Wrappers;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,11 +24,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class Cluster extends Core<Cluster> {
+public class Cluster extends Core<JALSE, Cluster> {
 
     private final Set<AgentListener> agentListeners;
-    private final Map<UUID, Agent> agents;
+    private final Map<UUID, DefaultAgent> agents;
     private final Map<Class<?>, Set<Supplier<?>>> listenerSuppliers;
 
     protected Cluster(final JALSE jalse, final UUID id) {
@@ -63,7 +66,7 @@ public class Cluster extends Core<Cluster> {
 
 	if (added) {
 
-	    for (final Agent a : agents.values()) {
+	    for (final DefaultAgent a : agents.values()) {
 
 		a.addListener(attr, supplier.get());
 	    }
@@ -72,27 +75,37 @@ public class Cluster extends Core<Cluster> {
 	return added;
     }
 
-    public Set<AgentWrapper> filterAgents(final Predicate<AgentWrapper> filter) {
+    public Stream<Agent> streamAgents() {
+
+	return Collections.<Agent> unmodifiableCollection(agents.values()).stream();
+    }
+
+    public <T extends Agent> Stream<T> streamAgents(final Class<T> clazz) {
+
+	return streamAgents().map(a -> wrap(a, clazz));
+    }
+
+    public Set<Agent> filterAgents(final Predicate<Agent> filter) {
 
 	return Collections.unmodifiableSet(agents.values().stream().filter(filter).collect(Collectors.toSet()));
     }
 
-    public <T extends AgentWrapper> Set<T> filterAgents(final Predicate<T> filter, final Class<T> clazz) {
+    public <T extends Agent> Set<T> filterAgents(final Predicate<T> filter, final Class<T> clazz) {
 
-	return Collections.unmodifiableSet(agents.values().stream().map(a -> Wrappers.wrap(a, clazz)).filter(filter)
+	return Collections.unmodifiableSet(agents.values().stream().map(a -> wrap(a, clazz)).filter(filter)
 		.collect(Collectors.toSet()));
     }
 
-    public Optional<AgentWrapper> getAgent(final UUID id) {
+    public Optional<Agent> getAgent(final UUID id) {
 
 	return Optional.ofNullable(agents.get(id));
     }
 
-    public <T extends AgentWrapper> Optional<T> getAgent(final UUID id, final Class<T> clazz) {
+    public <T extends Agent> Optional<T> getAgent(final UUID id, final Class<T> clazz) {
 
-	final Optional<AgentWrapper> agent = getAgent(id);
+	final Optional<Agent> agent = getAgent(id);
 
-	return agent.isPresent() ? Optional.of(Wrappers.wrap(agent.get(), clazz)) : Optional.empty();
+	return agent.isPresent() ? Optional.of(wrap(agent.get(), clazz)) : Optional.empty();
     }
 
     public Set<AgentListener> getAgentListeners() {
@@ -126,12 +139,12 @@ public class Cluster extends Core<Cluster> {
 
     public boolean kill() {
 
-	return jalse.killCluster(id);
+	return engine.killCluster(id);
     }
 
     public boolean killAgent(final UUID id) {
 
-	Agent killed;
+	DefaultAgent killed;
 
 	if ((killed = agents.remove(id)) != null) {
 
@@ -140,6 +153,13 @@ public class Cluster extends Core<Cluster> {
 	    for (final AgentListener listener : agentListeners) {
 
 		listener.agentKilled(id);
+	    }
+
+	    AtomicInteger agentCount;
+
+	    synchronized (agentCount = engine.getAgentCount0()) {
+
+		agentCount.decrementAndGet();
 	    }
 	}
 
@@ -155,25 +175,25 @@ public class Cluster extends Core<Cluster> {
 	return id;
     }
 
-    public AgentWrapper newAgent(final UUID id) {
+    public Agent newAgent(final UUID id) {
 
 	AtomicInteger agentCount;
 
-	synchronized (agentCount = jalse.getAgentCount0()) {
+	synchronized (agentCount = engine.getAgentCount0()) {
 
-	    if (agentCount.get() >= jalse.getAgentLimit()) {
+	    if (agentCount.get() >= engine.getAgentLimit()) {
 
-		throw JALSEException.AGENT_LIMIT_REARCHED.get();
+		throwRE(AGENT_LIMIT_REARCHED);
 	    }
 
 	    agentCount.incrementAndGet();
 	}
 
-	final Agent agent;
+	final DefaultAgent agent;
 
-	if (agents.putIfAbsent(id, agent = new Agent(this, id)) != null) {
+	if (agents.putIfAbsent(id, agent = new DefaultAgent(this, id)) != null) {
 
-	    throw JALSEException.AGENT_ALREADY_ASSOCIATED.get();
+	    throwRE(AGENT_ALREADY_ASSOCIATED);
 	}
 
 	for (final AgentListener listener : agentListeners) {
@@ -201,9 +221,9 @@ public class Cluster extends Core<Cluster> {
 	return agent;
     }
 
-    public <T extends AgentWrapper> T newAgent(final UUID id, final Class<T> clazz) {
+    public <T extends Agent> T newAgent(final UUID id, final Class<T> clazz) {
 
-	return Wrappers.wrap(newAgent(id), clazz);
+	return wrap(newAgent(id), clazz);
     }
 
     public boolean removeAgentListener(final AgentListener listener) {

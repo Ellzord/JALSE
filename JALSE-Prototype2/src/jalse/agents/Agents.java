@@ -1,7 +1,8 @@
-package jalse.wrappers;
+package jalse.agents;
 
+import static jalse.misc.JALSEExceptions.INVALID_AGENT;
+import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.attributes.Attribute;
-import jalse.misc.JALSEException;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -14,24 +15,24 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public final class Wrappers {
+public final class Agents {
 
     private static Set<Method> CACHED_METHODS = Collections.unmodifiableSet(new HashSet<Method>() {
 
 	private static final long serialVersionUID = -3273614078225830902L;
 
 	{
-	    addAll(Arrays.asList(AgentWrapper.class.getMethods()));
+	    addAll(Arrays.asList(Agent.class.getMethods()));
 	    addAll(Arrays.asList(Object.class.getMethods()));
 	}
     });
 
-    private static Set<Class<?>> VALID_WRAPPERS = new CopyOnWriteArraySet<Class<?>>() {
+    private static Set<Class<?>> VALID_AGENTS = new CopyOnWriteArraySet<Class<?>>() {
 
 	private static final long serialVersionUID = -3273614078225830902L;
 
 	{
-	    add(AgentWrapper.class);
+	    add(Agent.class);
 	}
     };
 
@@ -41,14 +42,14 @@ public final class Wrappers {
 	return (Class<? extends Attribute>) ((ParameterizedType) type).getActualTypeArguments()[0];
     }
 
-    private static void validateWrapper(final Class<?> clazz) {
+    private static void validateAgent(final Class<?> clazz) {
 
-	if (!AgentWrapper.class.isAssignableFrom(clazz)) {
+	if (!Agent.class.isAssignableFrom(clazz)) {
 
-	    throw JALSEException.INVALID_AGENT_WRAPPER.get();
+	    throwRE(INVALID_AGENT);
 	}
 
-	if (!VALID_WRAPPERS.contains(clazz)) {
+	if (!VALID_AGENTS.contains(clazz)) {
 
 	    for (final Method m : clazz.getDeclaredMethods()) {
 
@@ -86,23 +87,23 @@ public final class Wrappers {
 
 		if (!valid) {
 
-		    throw JALSEException.INVALID_AGENT_WRAPPER.get();
+		    throwRE(INVALID_AGENT);
 		}
 	    }
 
-	    VALID_WRAPPERS.add(clazz);
+	    VALID_AGENTS.add(clazz);
 
 	    for (final Class<?> iter : clazz.getInterfaces()) {
 
-		validateWrapper(iter);
+		validateAgent(iter);
 	    }
 	}
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends AgentWrapper> T wrap(final AgentWrapper agent, final Class<T> clazz) {
+    public static <T extends Agent> T wrap(final Agent agent, final Class<T> clazz) {
 
-	validateWrapper(clazz);
+	validateAgent(clazz);
 
 	return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, (p, m, a) -> {
 
@@ -130,7 +131,7 @@ public final class Wrappers {
 	});
     }
 
-    private Wrappers() {
+    private Agents() {
 
 	throw new UnsupportedOperationException();
     }

@@ -1,8 +1,12 @@
 package jalse;
 
+import static jalse.misc.JALSEExceptions.CLUSTER_ALREADY_ASSOCIATED;
+import static jalse.misc.JALSEExceptions.CLUSTER_LIMIT_REARCHED;
+import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
+import jalse.agents.Agent;
+import jalse.agents.Agents;
 import jalse.listeners.ClusterListener;
-import jalse.misc.JALSEException;
 import jalse.tags.Tag;
 import jalse.tags.Taggable;
 
@@ -18,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JALSE extends Engine implements Taggable {
 
@@ -79,8 +84,18 @@ public class JALSE extends Engine implements Taggable {
 
     public Set<UUID> getAgents() {
 
-	return Collections.unmodifiableSet(clusters.values().stream().flatMap(cluster -> cluster.getAgents0().stream())
+	return Collections.unmodifiableSet(clusters.values().stream().flatMap(c -> c.getAgents0().stream())
 		.collect(Collectors.toSet()));
+    }
+
+    public Stream<Agent> streamAgents() {
+
+	return clusters.values().stream().flatMap(c -> c.streamAgents());
+    }
+
+    public <T extends Agent> Stream<T> streamAgents(final Class<T> clazz) {
+
+	return streamAgents().map(a -> Agents.wrap(a, clazz));
     }
 
     public Optional<Cluster> getCluster(final UUID id) {
@@ -109,6 +124,11 @@ public class JALSE extends Engine implements Taggable {
     public Set<UUID> getClusters() {
 
 	return Collections.unmodifiableSet(clusters.keySet());
+    }
+
+    public Stream<Cluster> streamClusters() {
+
+	return Collections.<Cluster> unmodifiableCollection(clusters.values()).stream();
     }
 
     @SuppressWarnings("unchecked")
@@ -176,7 +196,7 @@ public class JALSE extends Engine implements Taggable {
 
 	    if (clusterCount.get() >= clusterLimit) {
 
-		throw JALSEException.CLUSTER_LIMIT_REARCHED.get();
+		throwRE(CLUSTER_LIMIT_REARCHED);
 	    }
 
 	    clusterCount.incrementAndGet();
@@ -186,7 +206,7 @@ public class JALSE extends Engine implements Taggable {
 
 	if (clusters.putIfAbsent(id, cluster = new Cluster(this, id)) != null) {
 
-	    throw JALSEException.CLUSTER_ALREADY_ASSOCIATED.get();
+	    throwRE(CLUSTER_ALREADY_ASSOCIATED);
 	}
 
 	for (final ClusterListener listener : clusterListeners) {

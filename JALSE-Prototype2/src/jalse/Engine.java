@@ -1,7 +1,8 @@
 package jalse;
 
 import jalse.actions.Action;
-import jalse.misc.JALSEException;
+import jalse.misc.JALSEExceptions;
+import jalse.tags.State;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-abstract class Engine {
+public abstract class Engine {
 
     private class AtomicAction {
 
@@ -286,7 +287,7 @@ abstract class Engine {
 
     private final Queue<Worker> work;
 
-    Engine(final int tps, final int totalThreads) {
+    protected Engine(final int tps, final int totalThreads) {
 
 	if (tps <= 0 || totalThreads <= 0) {
 
@@ -334,7 +335,7 @@ abstract class Engine {
 	final long stamp = lock.writeLock();
 
 	boolean allow = false;
-	JALSEException je = null;
+	RuntimeException e = null;
 
 	switch (this.state) {
 
@@ -356,7 +357,7 @@ abstract class Engine {
 
 	case STOPPED:
 
-	    je = JALSEException.ENGINE_SHUTDOWN.get();
+	    e = JALSEExceptions.ENGINE_SHUTDOWN.get();
 	    break;
 	}
 
@@ -367,9 +368,9 @@ abstract class Engine {
 
 	lock.unlockWrite(stamp);
 
-	if (je != null) {
+	if (e != null) {
 
-	    throw je;
+	    throw e;
 	}
     }
 

@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public abstract class NonAttributeWrapper<T> implements Attribute {
 
-    public static <S> S forceUnwrap(final Optional<? extends NonAttributeWrapper<S>> attr) {
+    public static <S> S unwrap(final Optional<? extends NonAttributeWrapper<S>> attr) {
 
 	return attr.get().unwrap();
     }
@@ -21,7 +21,7 @@ public abstract class NonAttributeWrapper<T> implements Attribute {
     public boolean equals(final Object obj) {
 
 	return this == obj || obj instanceof NonAttributeWrapper<?>
-	&& Objects.equals(this.obj, ((NonAttributeWrapper<?>) obj).obj);
+		&& Objects.equals(this.obj, ((NonAttributeWrapper<?>) obj).obj);
     }
 
     @Override

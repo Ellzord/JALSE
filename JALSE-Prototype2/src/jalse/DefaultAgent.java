@@ -1,16 +1,16 @@
 package jalse;
 
-import jalse.wrappers.AgentWrapper;
+import jalse.agents.Agent;
 
 import java.util.UUID;
 
-public class Agent extends Core<AgentWrapper> implements AgentWrapper {
+class DefaultAgent extends Core<JALSE, Agent> implements Agent {
 
     private final Cluster cluster;
 
-    protected Agent(final Cluster cluster, final UUID id) {
+    DefaultAgent(final Cluster cluster, final UUID id) {
 
-	super(cluster.jalse, id);
+	super(cluster.engine, id);
 
 	this.cluster = cluster;
     }

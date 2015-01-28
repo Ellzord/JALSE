@@ -3,7 +3,10 @@ package jalse.actions;
 import jalse.Cluster;
 import jalse.JALSE;
 import jalse.TickInfo;
-import jalse.wrappers.AgentWrapper;
+import jalse.agents.Agent;
+import jalse.attributes.Attributable;
+import jalse.attributes.Attribute;
+import jalse.misc.Identifiable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -14,53 +17,53 @@ import java.util.stream.Collectors;
 @FunctionalInterface
 public interface Action<T> {
 
-    default <S extends AgentWrapper> Predicate<S> agentID(final UUID id) {
+    default Optional<Agent> anyAgent(final Cluster cluster) {
 
-	return a -> a.getID().equals(id);
+	return cluster.streamAgents().findAny();
     }
 
-    default Optional<AgentWrapper> anyAgent(final Cluster cluster) {
+    default <S extends Agent> Optional<S> anyAgent(final Cluster cluster, final Class<S> clazz) {
 
-	return cluster.filterAgents(a -> true).stream().findAny();
-    }
-
-    default <S extends AgentWrapper> Optional<S> anyAgent(final Cluster cluster, final Class<S> clazz) {
-
-	return cluster.filterAgents(a -> true, clazz).stream().findAny();
+	return cluster.streamAgents(clazz).findAny();
     }
 
     default Optional<Cluster> anyCluster(final JALSE jalse) {
 
-	return jalse.filterClusters(c -> true).stream().findAny();
+	return jalse.streamClusters().findAny();
     }
 
-    default Predicate<Cluster> clusterID(final UUID id) {
+    default <S extends Attributable, U extends Attribute> Predicate<S> notPresent(final Class<U> attr) {
+
+	return c -> c.getAttribute(attr).isPresent();
+    }
+
+    default <S extends Attributable, U extends Attribute> Predicate<S> isPresent(final Class<U> attr) {
+
+	return this.<S, U> notPresent(attr).negate();
+    }
+
+    default <S extends Identifiable> Predicate<S> isID(final UUID id) {
 
 	return c -> c.getID().equals(id);
     }
 
-    default Set<AgentWrapper> filterAgents(final JALSE jalse, final Predicate<Cluster> clusterFilter,
-	    final Predicate<AgentWrapper> agentFilter) {
+    default Set<Agent> filterAgents(final JALSE jalse, final Predicate<Cluster> clusterFilter,
+	    final Predicate<Agent> agentFilter) {
 
 	return jalse.filterClusters(clusterFilter).stream().flatMap(c -> c.filterAgents(agentFilter).stream())
 		.collect(Collectors.toSet());
     }
 
-    default <S extends AgentWrapper> Set<S> filterAgents(final JALSE jalse, final Predicate<Cluster> clusterFilter,
+    default <S extends Agent> Set<S> filterAgents(final JALSE jalse, final Predicate<Cluster> clusterFilter,
 	    final Predicate<S> agentFilter, final Class<S> clazz) {
 
 	return jalse.filterClusters(clusterFilter).stream().flatMap(c -> c.filterAgents(agentFilter, clazz).stream())
 		.collect(Collectors.toSet());
     }
 
-    default <S extends AgentWrapper> Predicate<S> notAgentID(final UUID id) {
+    default <S extends Identifiable> Predicate<S> notID(final UUID id) {
 
-	return this.<S> agentID(id).negate();
-    }
-
-    default Predicate<Cluster> notClusterID(final UUID id) {
-
-	return clusterID(id).negate();
+	return this.<S> isID(id).negate();
     }
 
     void perform(T actor, TickInfo tick);
