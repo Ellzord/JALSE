@@ -4,11 +4,10 @@ import static jalse.misc.JALSEExceptions.CLUSTER_ALREADY_ASSOCIATED;
 import static jalse.misc.JALSEExceptions.CLUSTER_LIMIT_REARCHED;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
+import jalse.actions.Scheduler;
 import jalse.agents.Agent;
 import jalse.agents.Agents;
 import jalse.listeners.ClusterListener;
-import jalse.tags.Tag;
-import jalse.tags.Taggable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -24,7 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class JALSE extends Engine implements Taggable {
+public class JALSE extends Engine implements Scheduler<JALSE> {
 
     private final AtomicInteger agentCount;
     private final int agentLimit;
@@ -32,7 +31,6 @@ public class JALSE extends Engine implements Taggable {
     private final int clusterLimit;
     private final Set<ClusterListener> clusterListeners;
     private final Map<UUID, Cluster> clusters;
-    private final Set<Tag> tags;
 
     protected JALSE(final int tps, final int totalThreads, final int clusterLimit, final int agentLimit) {
 
@@ -51,7 +49,6 @@ public class JALSE extends Engine implements Taggable {
 
 	clusters = new ConcurrentHashMap<>();
 	clusterListeners = new CopyOnWriteArraySet<>();
-	tags = new CopyOnWriteArraySet<>();
     }
 
     public boolean addClusterListener(final ClusterListener listener) {
@@ -84,7 +81,7 @@ public class JALSE extends Engine implements Taggable {
 
     public Set<UUID> getAgents() {
 
-	return Collections.unmodifiableSet(clusters.values().stream().flatMap(c -> c.getAgents0().stream())
+	return Collections.unmodifiableSet(clusters.values().stream().flatMap(c -> c.getAgents().stream())
 		.collect(Collectors.toSet()));
     }
 
@@ -143,12 +140,6 @@ public class JALSE extends Engine implements Taggable {
 	return (Action<JALSE>) getLastAction0();
     }
 
-    @Override
-    public Set<Tag> getTags() {
-
-	return Collections.unmodifiableSet(tags);
-    }
-
     public boolean hasFirstAction() {
 
 	return getFirstAction0() != null;
@@ -165,16 +156,16 @@ public class JALSE extends Engine implements Taggable {
 
 	if ((killed = clusters.remove(id)) != null) {
 
+	    synchronized (clusterCount) {
+
+		clusterCount.decrementAndGet();
+	    }
+
 	    killed.cancelTasks();
 
 	    for (final ClusterListener listener : clusterListeners) {
 
 		listener.clusterKilled(id);
-	    }
-
-	    synchronized (clusterCount) {
-
-		clusterCount.decrementAndGet();
 	    }
 	}
 
@@ -222,19 +213,10 @@ public class JALSE extends Engine implements Taggable {
 	return clusterListeners.remove(Objects.requireNonNull(listener));
     }
 
-    public UUID schedule(final Action<JALSE> action) {
-
-	return schedule(action, 0L, TimeUnit.NANOSECONDS);
-    }
-
+    @Override
     public UUID schedule(final Action<JALSE> action, final long initialDelay, final long period, final TimeUnit unit) {
 
 	return schedule0(action, this, initialDelay, period, unit);
-    }
-
-    public UUID schedule(final Action<JALSE> action, final long initialDelay, final TimeUnit unit) {
-
-	return schedule(action, initialDelay, 0L, unit);
     }
 
     public void setFirstAction(final Action<JALSE> action) {

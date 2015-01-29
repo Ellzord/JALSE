@@ -3,14 +3,19 @@ package jalse;
 import jalse.actions.Action;
 import jalse.misc.JALSEExceptions;
 import jalse.tags.State;
+import jalse.tags.Tag;
+import jalse.tags.TagSet;
+import jalse.tags.Taggable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -27,7 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public abstract class Engine {
+public abstract class Engine implements Taggable {
 
     private class AtomicAction {
 
@@ -281,7 +286,7 @@ public abstract class Engine {
     private final StampedLock lock;
     private final Phaser phaser;
     private final AtomicBoolean running;
-    private State state;
+    protected TagSet tags;
 
     private final TickInfo tick;
 
@@ -301,9 +306,10 @@ public abstract class Engine {
 	running = new AtomicBoolean();
 	lock = new StampedLock();
 	tick = new TickInfo(tps);
-	state = State.INIT;
 	first = new AtomicAction();
 	last = new AtomicAction();
+	tags = new TagSet();
+	tags.add(State.INIT);
     }
 
     public boolean cancel(final UUID action) {
@@ -337,7 +343,7 @@ public abstract class Engine {
 	boolean allow = false;
 	RuntimeException e = null;
 
-	switch (this.state) {
+	switch (tags.get(State.class)) {
 
 	case INIT:
 
@@ -363,7 +369,7 @@ public abstract class Engine {
 
 	if (allow) {
 
-	    this.state = state;
+	    tags.add(state);
 	}
 
 	lock.unlockWrite(stamp);
@@ -458,7 +464,7 @@ public abstract class Engine {
 	    stamp = lock.readLock();
 	}
 
-	final State result = state;
+	final State result = tags.get(State.class);
 
 	lock.unlockRead(stamp);
 
@@ -552,6 +558,12 @@ public abstract class Engine {
 	}
 
 	return actions;
+    }
+
+    @Override
+    public Set<Tag> getTags() {
+
+	return Collections.unmodifiableSet(tags);
     }
 
     public void tick() {

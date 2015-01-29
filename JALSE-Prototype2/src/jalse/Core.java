@@ -9,6 +9,7 @@ import jalse.listeners.AttributeListener;
 import jalse.misc.Identifiable;
 import jalse.misc.JALSEExceptions;
 import jalse.tags.Tag;
+import jalse.tags.TagSet;
 import jalse.tags.Taggable;
 
 import java.util.Collections;
@@ -39,7 +40,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     protected UUID id;
     protected T engine;
     private final Map<Class<?>, Set<AttributeListener<?>>> listeners;
-    private final Set<Tag> tags;
+    protected final TagSet tags;
     private final Set<UUID> tasks;
 
     protected Core(final T jalse, final UUID id) {
@@ -51,7 +52,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
 	attributes = new ConcurrentHashMap<>();
 	listeners = new HashMap<>();
-	tags = new CopyOnWriteArraySet<>();
+	tags = new TagSet();
     }
 
     @Override
@@ -226,11 +227,6 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 	return Collections.unmodifiableSet(tags);
     }
 
-    protected Set<Tag> getTags0() {
-
-	return tags;
-    }
-
     @Override
     public int hashCode() {
 
@@ -280,12 +276,6 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     }
 
     @Override
-    public UUID schedule(final Action<S> action) {
-
-	return schedule(action, 0L, TimeUnit.NANOSECONDS);
-    }
-
-    @Override
     public UUID schedule(final Action<S> action, final long initialDelay, final long period, final TimeUnit unit) {
 
 	UUID task;
@@ -299,8 +289,8 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     }
 
     @Override
-    public UUID schedule(final Action<S> action, final long initialDelay, final TimeUnit unit) {
+    public String toString() {
 
-	return schedule(action, initialDelay, 0L, unit);
+	return toString(this);
     }
 }

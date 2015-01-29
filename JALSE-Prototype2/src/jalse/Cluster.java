@@ -31,6 +31,7 @@ public class Cluster extends Core<JALSE, Cluster> {
     private final Set<AgentListener> agentListeners;
     private final Map<UUID, DefaultAgent> agents;
     private final Map<Class<?>, Set<Supplier<?>>> listenerSuppliers;
+    private boolean alive;
 
     protected Cluster(final JALSE jalse, final UUID id) {
 
@@ -40,6 +41,8 @@ public class Cluster extends Core<JALSE, Cluster> {
 
 	listenerSuppliers = new HashMap<>();
 	agentListeners = new CopyOnWriteArraySet<>();
+
+	alive = true;
     }
 
     public boolean addAgentListener(final AgentListener listener) {
@@ -118,11 +121,6 @@ public class Cluster extends Core<JALSE, Cluster> {
 	return Collections.unmodifiableSet(agents.keySet());
     }
 
-    protected Set<UUID> getAgents0() {
-
-	return agents.keySet();
-    }
-
     @SuppressWarnings("unchecked")
     public <T extends Attribute> Set<Supplier<AttributeListener<T>>> getListenerSuppliers(final Class<T> attr) {
 
@@ -139,6 +137,8 @@ public class Cluster extends Core<JALSE, Cluster> {
 
     public boolean kill() {
 
+	alive = false;
+
 	return engine.killCluster(id);
     }
 
@@ -148,18 +148,18 @@ public class Cluster extends Core<JALSE, Cluster> {
 
 	if ((killed = agents.remove(id)) != null) {
 
-	    killed.cancelTasks();
-
-	    for (final AgentListener listener : agentListeners) {
-
-		listener.agentKilled(id);
-	    }
-
 	    AtomicInteger agentCount;
 
 	    synchronized (agentCount = engine.getAgentCount0()) {
 
 		agentCount.decrementAndGet();
+	    }
+
+	    killed.cancelTasks();
+
+	    for (final AgentListener listener : agentListeners) {
+
+		listener.agentKilled(id);
 	    }
 	}
 
@@ -173,6 +173,11 @@ public class Cluster extends Core<JALSE, Cluster> {
 	newAgent(id);
 
 	return id;
+    }
+
+    public boolean isAlive() {
+
+	return alive;
     }
 
     public Agent newAgent(final UUID id) {

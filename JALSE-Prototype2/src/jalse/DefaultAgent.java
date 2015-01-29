@@ -1,6 +1,7 @@
 package jalse;
 
 import jalse.agents.Agent;
+import jalse.tags.Parent;
 
 import java.util.UUID;
 
@@ -13,11 +14,21 @@ class DefaultAgent extends Core<JALSE, Agent> implements Agent {
 	super(cluster.engine, id);
 
 	this.cluster = cluster;
+
+	tags.add(new Parent(cluster.id));
     }
 
     @Override
     public boolean kill() {
 
+	tags.remove(Parent.class);
+
 	return cluster.killAgent(id);
+    }
+
+    @Override
+    public boolean isAlive() {
+
+	return tags.contains(Parent.class);
     }
 }

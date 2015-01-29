@@ -8,4 +8,6 @@ import jalse.tags.Taggable;
 public interface Agent extends Identifiable, Attributable, Taggable, Scheduler<Agent> {
 
     boolean kill();
+
+    boolean isAlive();
 }

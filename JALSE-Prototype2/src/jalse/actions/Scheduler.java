@@ -9,9 +9,15 @@ public interface Scheduler<T> {
 
     boolean isActive(final UUID action);
 
-    UUID schedule(final Action<T> action);
+    default UUID schedule(final Action<T> action) {
+
+	return schedule(action, 0L, TimeUnit.NANOSECONDS);
+    }
 
     UUID schedule(final Action<T> action, final long initialDelay, final long period, final TimeUnit unit);
 
-    UUID schedule(final Action<T> action, final long initialDelay, final TimeUnit unit);
+    default UUID schedule(final Action<T> action, final long initialDelay, final TimeUnit unit) {
+
+	return schedule(action, initialDelay, 0L, unit);
+    }
 }
