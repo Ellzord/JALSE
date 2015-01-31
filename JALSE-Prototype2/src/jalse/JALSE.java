@@ -1,5 +1,6 @@
 package jalse;
 
+import static jalse.misc.JALSEExceptions.AGENT_LIMIT_REARCHED;
 import static jalse.misc.JALSEExceptions.CLUSTER_ALREADY_ASSOCIATED;
 import static jalse.misc.JALSEExceptions.CLUSTER_LIMIT_REARCHED;
 import static jalse.misc.JALSEExceptions.throwRE;
@@ -8,28 +9,63 @@ import jalse.actions.Scheduler;
 import jalse.agents.Agent;
 import jalse.agents.Agents;
 import jalse.listeners.ClusterListener;
+import jalse.misc.ListenerSet;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JALSE extends Engine implements Scheduler<JALSE> {
 
-    private final AtomicInteger agentCount;
+    protected class DefensiveAtomicInteger extends AtomicInteger {
+
+	private static final long serialVersionUID = 5685665215057250307L;
+
+	private final Predicate<Integer> predicate;
+	private final Supplier<? extends RuntimeException> supplier;
+
+	public DefensiveAtomicInteger(final Predicate<Integer> predicate,
+		final Supplier<? extends RuntimeException> supplier) {
+
+	    this.predicate = predicate;
+	    this.supplier = supplier;
+	}
+
+	private void testPossibleAdd(final int i) {
+
+	    if (!predicate.test(get() + i)) {
+
+		throwRE(supplier);
+	    }
+	}
+
+	public synchronized void defensiveIncrement() {
+
+	    testPossibleAdd(1);
+	    incrementAndGet();
+	}
+
+	public synchronized void defensiveDecrement() {
+
+	    testPossibleAdd(-1);
+	    decrementAndGet();
+	}
+    }
+
+    private final DefensiveAtomicInteger agentCount;
     private final int agentLimit;
-    private final AtomicInteger clusterCount;
+    private final DefensiveAtomicInteger clusterCount;
     private final int clusterLimit;
-    private final Set<ClusterListener> clusterListeners;
+    private final ListenerSet<ClusterListener> clusterListeners;
     private final Map<UUID, Cluster> clusters;
 
     protected JALSE(final int tps, final int totalThreads, final int clusterLimit, final int agentLimit) {
@@ -44,16 +80,16 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
 	this.clusterLimit = clusterLimit;
 	this.agentLimit = agentLimit;
 
-	agentCount = new AtomicInteger();
-	clusterCount = new AtomicInteger();
+	agentCount = new DefensiveAtomicInteger(i -> i <= this.agentLimit, AGENT_LIMIT_REARCHED);
+	clusterCount = new DefensiveAtomicInteger(i -> i <= this.clusterLimit, CLUSTER_LIMIT_REARCHED);
 
 	clusters = new ConcurrentHashMap<>();
-	clusterListeners = new CopyOnWriteArraySet<>();
+	clusterListeners = new ListenerSet<>(ClusterListener.class);
     }
 
     public boolean addClusterListener(final ClusterListener listener) {
 
-	return clusterListeners.add(Objects.requireNonNull(listener));
+	return clusterListeners.add(listener);
     }
 
     public Set<Cluster> filterClusters(final Predicate<Cluster> filter) {
@@ -69,7 +105,7 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
 	}
     }
 
-    protected AtomicInteger getAgentCount0() {
+    protected DefensiveAtomicInteger getAgentCount0() {
 
 	return agentCount;
     }
@@ -156,17 +192,12 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
 
 	if ((killed = clusters.remove(id)) != null) {
 
-	    synchronized (clusterCount) {
+	    clusterCount.defensiveDecrement();
 
-		clusterCount.decrementAndGet();
-	    }
-
+	    killed.detatch();
 	    killed.cancelTasks();
 
-	    for (final ClusterListener listener : clusterListeners) {
-
-		listener.clusterKilled(id);
-	    }
+	    clusterListeners.getProxy().clusterCreated(id);
 	}
 
 	return killed != null;
@@ -183,15 +214,7 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
 
     public Cluster newCluster(final UUID id) {
 
-	synchronized (clusterCount) {
-
-	    if (clusterCount.get() >= clusterLimit) {
-
-		throwRE(CLUSTER_LIMIT_REARCHED);
-	    }
-
-	    clusterCount.incrementAndGet();
-	}
+	clusterCount.defensiveIncrement();
 
 	final Cluster cluster;
 
@@ -200,17 +223,14 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
 	    throwRE(CLUSTER_ALREADY_ASSOCIATED);
 	}
 
-	for (final ClusterListener listener : clusterListeners) {
-
-	    listener.clusterCreated(id);
-	}
+	clusterListeners.getProxy().clusterCreated(id);
 
 	return cluster;
     }
 
     public boolean removeAgentListener(final ClusterListener listener) {
 
-	return clusterListeners.remove(Objects.requireNonNull(listener));
+	return clusterListeners.remove(listener);
     }
 
     @Override

@@ -6,7 +6,7 @@ public interface Identifiable {
 
     UUID getID();
 
-    default String toString(Identifiable obj) {
+    default String toString(final Identifiable obj) {
 
 	return obj.getClass().getSimpleName() + " [id=" + obj.getID() + "]";
     }

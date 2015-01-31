@@ -25,6 +25,9 @@ public class JALSEExceptions {
     public static final Supplier<RuntimeException> INVALID_ATTRIBUTE_CLASS = () -> new IllegalArgumentException(
 	    "Invalid attribute class");
 
+    public static final Supplier<RuntimeException> NOT_ATTACHED = () -> new IllegalStateException(
+	    "Not attached to engine");
+
     private JALSEExceptions() {
 
 	throw new UnsupportedOperationException();

@@ -2,25 +2,23 @@ package jalse;
 
 import static jalse.agents.Agents.wrap;
 import static jalse.misc.JALSEExceptions.AGENT_ALREADY_ASSOCIATED;
-import static jalse.misc.JALSEExceptions.AGENT_LIMIT_REARCHED;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.agents.Agent;
 import jalse.attributes.Attribute;
 import jalse.listeners.AgentListener;
 import jalse.listeners.AttributeListener;
+import jalse.misc.ListenerSet;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -28,26 +26,23 @@ import java.util.stream.Stream;
 
 public class Cluster extends Core<JALSE, Cluster> {
 
-    private final Set<AgentListener> agentListeners;
+    private final ListenerSet<AgentListener> agentListeners;
     private final Map<UUID, DefaultAgent> agents;
     private final Map<Class<?>, Set<Supplier<?>>> listenerSuppliers;
-    private boolean alive;
 
     protected Cluster(final JALSE jalse, final UUID id) {
 
-	super(jalse, id);
+	super(id, jalse);
 
 	agents = new ConcurrentHashMap<>();
 
 	listenerSuppliers = new HashMap<>();
-	agentListeners = new CopyOnWriteArraySet<>();
-
-	alive = true;
+	agentListeners = new ListenerSet<>(AgentListener.class);
     }
 
     public boolean addAgentListener(final AgentListener listener) {
 
-	return agentListeners.add(Objects.requireNonNull(listener));
+	return agentListeners.add(listener);
     }
 
     public <T extends Attribute> boolean addListenerSupplier(final Class<T> attr,
@@ -137,8 +132,6 @@ public class Cluster extends Core<JALSE, Cluster> {
 
     public boolean kill() {
 
-	alive = false;
-
 	return engine.killCluster(id);
     }
 
@@ -148,19 +141,12 @@ public class Cluster extends Core<JALSE, Cluster> {
 
 	if ((killed = agents.remove(id)) != null) {
 
-	    AtomicInteger agentCount;
-
-	    synchronized (agentCount = engine.getAgentCount0()) {
-
-		agentCount.decrementAndGet();
-	    }
+	    engine.getAgentCount0().defensiveDecrement();
 
 	    killed.cancelTasks();
+	    killed.detatch();
 
-	    for (final AgentListener listener : agentListeners) {
-
-		listener.agentKilled(id);
-	    }
+	    agentListeners.getProxy().agentKilled(id);
 	}
 
 	return killed != null;
@@ -177,34 +163,21 @@ public class Cluster extends Core<JALSE, Cluster> {
 
     public boolean isAlive() {
 
-	return alive;
+	return isAttached();
     }
 
     public Agent newAgent(final UUID id) {
 
-	AtomicInteger agentCount;
-
-	synchronized (agentCount = engine.getAgentCount0()) {
-
-	    if (agentCount.get() >= engine.getAgentLimit()) {
-
-		throwRE(AGENT_LIMIT_REARCHED);
-	    }
-
-	    agentCount.incrementAndGet();
-	}
+	engine.getAgentCount0().defensiveIncrement();
 
 	final DefaultAgent agent;
 
-	if (agents.putIfAbsent(id, agent = new DefaultAgent(this, id)) != null) {
+	if (agents.putIfAbsent(id, agent = new DefaultAgent(id, this)) != null) {
 
 	    throwRE(AGENT_ALREADY_ASSOCIATED);
 	}
 
-	for (final AgentListener listener : agentListeners) {
-
-	    listener.agentCreated(id);
-	}
+	agentListeners.getProxy().agentCreated(id);
 
 	Set<Entry<Class<?>, Set<Supplier<?>>>> entrySet;
 
@@ -233,7 +206,7 @@ public class Cluster extends Core<JALSE, Cluster> {
 
     public boolean removeAgentListener(final AgentListener listener) {
 
-	return agentListeners.remove(Objects.requireNonNull(listener));
+	return agentListeners.remove(listener);
     }
 
     public <T extends Attribute> boolean removeListenerSupplier(final Class<T> attr,

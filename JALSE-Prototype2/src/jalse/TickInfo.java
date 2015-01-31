@@ -13,7 +13,7 @@ public final class TickInfo {
     private final AtomicInteger ticks;
     private final int tps;
 
-    TickInfo(final int tps) {
+    protected TickInfo(final int tps) {
 
 	this.tps = tps;
 
@@ -44,17 +44,17 @@ public final class TickInfo {
 	return tps;
     }
 
-    void incrementTicks() {
+    protected void incrementTicks() {
 
 	ticks.incrementAndGet();
     }
 
-    void setCurrentTPS(final int currentTps) {
+    protected void setCurrentTPS(final int currentTps) {
 
 	this.currentTps.set(currentTps);
     }
 
-    void setDelta(final long delta) {
+    protected void setDelta(final long delta) {
 
 	this.delta.set(delta);
     }

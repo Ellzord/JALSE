@@ -1,5 +1,7 @@
 package jalse;
 
+import static jalse.misc.JALSEExceptions.NOT_ATTACHED;
+import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
 import jalse.actions.Scheduler;
 import jalse.agents.Agent;
@@ -43,16 +45,32 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     protected final TagSet tags;
     private final Set<UUID> tasks;
 
-    protected Core(final T jalse, final UUID id) {
+    protected Core(final UUID id, final T engine) {
 
-	this.engine = jalse;
 	this.id = id;
+
+	attach(engine);
 
 	tasks = Collections.newSetFromMap(new WeakHashMap<>());
 
 	attributes = new ConcurrentHashMap<>();
 	listeners = new HashMap<>();
 	tags = new TagSet();
+    }
+
+    protected void detatch() {
+
+	engine = null;
+    }
+
+    protected void attach(final T engine) {
+
+	this.engine = engine;
+    }
+
+    protected boolean isAttached() {
+
+	return engine != null;
     }
 
     @Override
@@ -111,6 +129,11 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
     @Override
     public boolean cancel(final UUID action) {
+
+	if (!isAttached()) {
+
+	    throwRE(NOT_ATTACHED);
+	}
 
 	return engine.cancel(action);
     }
@@ -236,6 +259,11 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     @Override
     public boolean isActive(final UUID action) {
 
+	if (!isAttached()) {
+
+	    throwRE(NOT_ATTACHED);
+	}
+
 	return engine.isActive(action);
     }
 
@@ -277,6 +305,11 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
     @Override
     public UUID schedule(final Action<S> action, final long initialDelay, final long period, final TimeUnit unit) {
+
+	if (!isAttached()) {
+
+	    throwRE(NOT_ATTACHED);
+	}
 
 	UUID task;
 

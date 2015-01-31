@@ -9,9 +9,9 @@ class DefaultAgent extends Core<JALSE, Agent> implements Agent {
 
     private final Cluster cluster;
 
-    DefaultAgent(final Cluster cluster, final UUID id) {
+    DefaultAgent(final UUID id, final Cluster cluster) {
 
-	super(cluster.engine, id);
+	super(id, cluster.engine);
 
 	this.cluster = cluster;
 
@@ -29,6 +29,6 @@ class DefaultAgent extends Core<JALSE, Agent> implements Agent {
     @Override
     public boolean isAlive() {
 
-	return tags.contains(Parent.class);
+	return isAttached();
     }
 }
