@@ -1,4 +1,4 @@
-package jalse.misc;
+package jalse.listeners;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

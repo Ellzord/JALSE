@@ -7,7 +7,7 @@ import jalse.agents.Agent;
 import jalse.attributes.Attribute;
 import jalse.listeners.AgentListener;
 import jalse.listeners.AttributeListener;
-import jalse.misc.ListenerSet;
+import jalse.listeners.ListenerSet;
 
 import java.util.Collections;
 import java.util.HashMap;

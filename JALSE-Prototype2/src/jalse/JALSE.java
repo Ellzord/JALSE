@@ -9,7 +9,7 @@ import jalse.actions.Scheduler;
 import jalse.agents.Agent;
 import jalse.agents.Agents;
 import jalse.listeners.ClusterListener;
-import jalse.misc.ListenerSet;
+import jalse.listeners.ListenerSet;
 
 import java.util.Collections;
 import java.util.Map;
