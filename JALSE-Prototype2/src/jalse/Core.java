@@ -1,5 +1,6 @@
 package jalse;
 
+import static jalse.misc.JALSEExceptions.INVALID_ATTRIBUTE_CLASS;
 import static jalse.misc.JALSEExceptions.NOT_ATTACHED;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
@@ -9,7 +10,6 @@ import jalse.attributes.Attributable;
 import jalse.attributes.Attribute;
 import jalse.listeners.AttributeListener;
 import jalse.misc.Identifiable;
-import jalse.misc.JALSEExceptions;
 import jalse.tags.Tag;
 import jalse.tags.TagSet;
 import jalse.tags.Taggable;
@@ -26,25 +26,70 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Core can have its own {@link Attribute}, {@link Tag} and it can be attached
+ * to {@link Engine}. {@link Action} can be performed on core and it also holds
+ * its own tasks for cancellation. Core also offers {@link AttributeListener} so
+ * on the change of {@link Attribute} trigger code can be added.
+ *
+ * @author Elliot Ford
+ *
+ * @param <T>
+ *            Engine type attached to core.
+ * @param <S>
+ *            The subclass of core that actions can be performed on.
+ *
+ * @see Attributable
+ * @see Taggable
+ * @see Scheduler
+ */
 public abstract class Core<T extends Engine, S> implements Identifiable, Attributable, Taggable, Scheduler<S> {
 
+    /**
+     * Validates whether the class is not null and a subclass of
+     * {@link Attribute}.
+     *
+     * @param clazz
+     *            Class to validate.
+     * @return Whether the class is a subclass of {@link Attribute}.
+     */
     protected static Class<?> requireNonNullAttrSub(final Class<?> clazz) {
 
-	if (Attribute.class.equals(Objects.requireNonNull(clazz))) {
+	if (clazz == null || !Attribute.class.isAssignableFrom(clazz) || Attribute.class.equals(clazz)) {
 
-	    throw JALSEExceptions.INVALID_ATTRIBUTE_CLASS.get();
+	    throwRE(INVALID_ATTRIBUTE_CLASS);
 	}
 
 	return clazz;
     }
 
-    private final Map<Class<?>, Attribute> attributes;
-    protected UUID id;
+    /**
+     * Unique identifier of core.
+     */
+    protected final UUID id;
+
+    /**
+     * Current attached engine.
+     */
     protected T engine;
-    private final Map<Class<?>, Set<AttributeListener<?>>> listeners;
+
+    /**
+     * Current state information.
+     */
     protected final TagSet tags;
+
+    private final Map<Class<?>, Attribute> attributes;
+    private final Map<Class<?>, Set<AttributeListener<?>>> listeners;
     private final Set<UUID> tasks;
 
+    /**
+     * Creates a new instance of core.
+     *
+     * @param id
+     *            Unique identifier.
+     * @param engine
+     *            engine to attach to.
+     */
     protected Core(final UUID id, final T engine) {
 
 	this.id = id;
@@ -58,16 +103,30 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 	tags = new TagSet();
     }
 
+    /**
+     * Detaches from the engine.
+     */
     protected void detatch() {
 
 	engine = null;
     }
 
+    /**
+     * Attaches to an engine.
+     *
+     * @param engine
+     *            Engine to attach to.
+     */
     protected void attach(final T engine) {
 
 	this.engine = engine;
     }
 
+    /**
+     * Whether core is attached to an engine.
+     *
+     * @return Engine attachment.
+     */
     protected boolean isAttached() {
 
 	return engine != null;
@@ -138,6 +197,9 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 	return engine.cancel(action);
     }
 
+    /**
+     * Cancels all active/unscheduled tasks by core.
+     */
     public void cancelTasks() {
 
 	synchronized (tasks) {

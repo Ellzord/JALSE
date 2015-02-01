@@ -2,20 +2,15 @@ package jalse;
 
 import jalse.actions.Action;
 import jalse.misc.JALSEExceptions;
-import jalse.tags.State;
-import jalse.tags.Tag;
-import jalse.tags.TagSet;
 import jalse.tags.Taggable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -31,6 +26,17 @@ import java.util.concurrent.locks.StampedLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * A task based engine for scheduling {@link Action} at different intervals.
+ * This engine will use up to the number of threads specified upon creation
+ * (depending on number of {@link Action} waiting to be executed per tick). The
+ * engine will not be active upon creation it must be started with
+ * {@link #tick()}.
+ *
+ * @author Elliot Ford
+ *
+ * @see Action#perform(Object, TickInfo)
+ */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class Engine implements Taggable {
 
@@ -45,36 +51,23 @@ public abstract class Engine implements Taggable {
 	    actor = null;
 	}
 
-	public Action<?> getAction() {
+	public synchronized Action<?> getAction() {
 
-	    Action<?> result;
-
-	    synchronized (AtomicAction.this) {
-
-		result = action;
-	    }
-
-	    return result;
+	    return action;
 	}
 
-	public void perform() {
+	public synchronized void perform() {
 
-	    synchronized (AtomicAction.this) {
+	    if (action != null && actor != null) {
 
-		if (action != null && actor != null) {
-
-		    action.perform(actor, tick);
-		}
+		action.perform(actor, tick);
 	    }
 	}
 
-	public void set(final Action action, final Object actor) {
+	public synchronized void set(final Action action, final Object actor) {
 
-	    synchronized (AtomicAction.this) {
-
-		this.action = action;
-		this.actor = actor;
-	    }
+	    this.action = action;
+	    this.actor = actor;
 	}
     }
 
@@ -228,26 +221,50 @@ public abstract class Engine implements Taggable {
 
     private static final long SECOND = TimeUnit.SECONDS.toNanos(1);
 
-    private static final long SPIN_YIELD_THRESHOLD;
+    /**
+     * The engine is not ticking and has been shutdown.
+     */
+    public static final int STOPPED = 0;
 
-    private static final long TERMINATION_TIMEOUT;
+    /**
+     * The engine is ready to be used.
+     */
+    public static final int INIT = 1;
+
+    /**
+     * The engine is currently in tick (processing).
+     */
+    public static final int IN_TICK = 2;
+
+    /**
+     * The engine is currently waiting.
+     */
+    public static final int IN_WAIT = 3;
+
+    /**
+     * The engine is paused but can be resumed.
+     */
+    public static final int PAUSED = 4;
+
+    /**
+     * When Java sleeps it can sometimes be inaccurate, the engine will sleep up
+     * to this threshold then spin yield until the desired wake time.
+     */
+    public static final long SPIN_YIELD_THRESHOLD;
+
+    /**
+     * How long the engine will wait until it times out and interrupts running
+     * threads on shutdown.
+     */
+    public static final long TERMINATION_TIMEOUT;
 
     static {
 
-	/**
-	 * Spin yield threshold - When Java sleeps it can sometimes be
-	 * inaccurate, the engine will sleep up to this threshold then spin
-	 * yield until the desired time.
-	 */
-	final String syt = System.getProperty("jalse.spin_yield_threshold");
+	final String syt = System.getProperty("jalse.engine.spin_yield_threshold");
 
 	SPIN_YIELD_THRESHOLD = syt != null && syt.length() > 0 ? Long.valueOf(syt) : TimeUnit.MILLISECONDS.toNanos(10);
 
-	/**
-	 * Termination timeout - How long the engine will wait until it times
-	 * out and interrupts running threads on shutdown.
-	 */
-	final String tt = System.getProperty("jalse.termination_timeout");
+	final String tt = System.getProperty("jalse.engine.termination_timeout");
 
 	TERMINATION_TIMEOUT = tt != null && tt.length() > 0 ? Long.valueOf(tt) : 2 * SECOND;
     }
@@ -286,12 +303,18 @@ public abstract class Engine implements Taggable {
     private final StampedLock lock;
     private final Phaser phaser;
     private final AtomicBoolean running;
-    protected TagSet tags;
-
     private final TickInfo tick;
-
     private final Queue<Worker> work;
+    private int state;
 
+    /**
+     * Creates a new instance of Engine.
+     *
+     * @param tps
+     *            Maximum ticks per second to run at.
+     * @param totalThreads
+     *            Maximum number of threads to use.
+     */
     protected Engine(final int tps, final int totalThreads) {
 
 	if (tps <= 0 || totalThreads <= 0) {
@@ -308,11 +331,22 @@ public abstract class Engine implements Taggable {
 	tick = new TickInfo(tps);
 	first = new AtomicAction();
 	last = new AtomicAction();
-	tags = new TagSet();
-	tags.add(State.INIT);
+
+	state = INIT;
     }
 
+    /**
+     * Cancels the action with the given ID.
+     *
+     * @param action
+     *            ID of the action.
+     * @return Whether the action was actually cancelled.
+     * @throws NullPointerException
+     *             If ID is null.
+     */
     public boolean cancel(final UUID action) {
+
+	Objects.requireNonNull(action);
 
 	boolean result = false;
 
@@ -336,29 +370,29 @@ public abstract class Engine implements Taggable {
 	return result;
     }
 
-    private void changeState(final State state) {
+    private void changeState(final int state) {
 
 	final long stamp = lock.writeLock();
 
 	boolean allow = false;
 	RuntimeException e = null;
 
-	switch (tags.get(State.class)) {
+	switch (this.state) {
 
 	case INIT:
 
-	    allow = state != State.INIT;
+	    allow = state != INIT;
 	    break;
 
 	case IN_TICK:
 	case IN_WAIT:
 
-	    allow = state == State.IN_TICK || state == State.IN_WAIT || state == State.PAUSED || state == State.STOPPED;
+	    allow = state == IN_TICK || state == IN_WAIT || state == PAUSED || state == STOPPED;
 	    break;
 
 	case PAUSED:
 
-	    allow = state == State.IN_TICK || state == State.STOPPED;
+	    allow = state == IN_TICK || state == STOPPED;
 	    break;
 
 	case STOPPED:
@@ -369,7 +403,7 @@ public abstract class Engine implements Taggable {
 
 	if (allow) {
 
-	    tags.add(state);
+	    this.state = state;
 	}
 
 	lock.unlockWrite(stamp);
@@ -382,6 +416,9 @@ public abstract class Engine implements Taggable {
 
     private Runnable control() {
 
+	/*
+	 * Main work loop.
+	 */
 	return () -> {
 
 	    long lastStart = System.nanoTime(), lastTpsCalc = System.nanoTime();
@@ -391,7 +428,7 @@ public abstract class Engine implements Taggable {
 
 	    while (running.get()) {
 
-		changeState(State.IN_TICK);
+		changeState(IN_TICK);
 
 		final long start = System.nanoTime(), interval = tick.getIntervalAsNanos(), estimatedEnd = start
 			+ interval;
@@ -445,17 +482,33 @@ public abstract class Engine implements Taggable {
 	};
     }
 
+    /**
+     * Gets the first action to be run before other work is scheduled.
+     *
+     * @return First action to be run or null if not set.
+     */
     protected Action<?> getFirstAction0() {
 
 	return first.getAction();
     }
 
+    /**
+     * Gets the last action to be run after other work is scheduled.
+     *
+     * @return Last action to be run or null if not set.
+     */
     protected Action<?> getLastAction0() {
 
 	return last.getAction();
     }
 
-    public State getState() {
+    /**
+     * Gets the current state of the engine.
+     *
+     * @return Current state.
+     *
+     */
+    public int getState() {
 
 	long stamp = lock.tryOptimisticRead();
 
@@ -464,18 +517,30 @@ public abstract class Engine implements Taggable {
 	    stamp = lock.readLock();
 	}
 
-	final State result = tags.get(State.class);
+	final int result = state;
 
 	lock.unlockRead(stamp);
 
 	return result;
     }
 
+    /**
+     * Gets the current TickInfo.
+     *
+     * @return Current tick information.
+     */
     public TickInfo getTickInfo() {
 
 	return tick;
     }
 
+    /**
+     * Whether the action is currently active in the engine.
+     *
+     * @param action
+     *            Action ID.
+     * @return Whether the action is still being executed or is about to.
+     */
     public boolean isActive(final UUID action) {
 
 	boolean result = false;
@@ -490,14 +555,33 @@ public abstract class Engine implements Taggable {
 	return result;
     }
 
+    /**
+     * Pauses the engine ticking.
+     */
     public void pause() {
 
 	if (running.getAndSet(false)) {
 
-	    changeState(State.PAUSED);
+	    changeState(PAUSED);
 	}
     }
 
+    /**
+     * Schedules an action to be run on a specific actor. This can be run once
+     * actions or recurring.
+     *
+     * @param action
+     *            Action to perform.
+     * @param actor
+     *            Actor to perform on.
+     * @param initialDelay
+     *            Wait before running.
+     * @param period
+     *            Interval to repeat (can be 0 for run once actions).
+     * @param unit
+     *            TimeUnit for all parameters.
+     * @return Scheduled action ID.
+     */
     protected UUID schedule0(final Action<?> action, final Object actor, final long initialDelay, final long period,
 	    final TimeUnit unit) {
 
@@ -512,23 +596,48 @@ public abstract class Engine implements Taggable {
 	return key;
     }
 
+    /**
+     * Sets the first action to be run before other work is scheduled.
+     *
+     * @param action
+     *            Action to set.
+     * @param actor
+     *            Actor to perform action on.
+     */
     protected void setFirstAction0(final Action<?> action, final Object actor) {
 
 	first.set(action, actor);
     }
 
+    /**
+     * Sets the last action to be run after other work is scheduled.
+     *
+     * @param action
+     *            Action to set.
+     * @param actor
+     *            Actor to perform action on.
+     */
     protected void setLastAction0(final Action<?> action, final Object actor) {
 
 	last.set(action, actor);
     }
 
+    /**
+     * Permanently stops the engine. All work that has not yet been executed
+     * will be cancelled and all work currently executing will be given a
+     * timeout before interruption.
+     *
+     * @return All work to be executed or currently executing.
+     *
+     * @see #TERMINATION_TIMEOUT
+     */
     public List<Action<?>> stop() {
 
 	final List<Action<?>> actions = new ArrayList<>();
 
 	if (running.getAndSet(false)) {
 
-	    changeState(State.STOPPED);
+	    changeState(STOPPED);
 
 	    synchronized (work) {
 
@@ -560,17 +669,14 @@ public abstract class Engine implements Taggable {
 	return actions;
     }
 
-    @Override
-    public Set<Tag> getTags() {
-
-	return Collections.unmodifiableSet(tags);
-    }
-
+    /**
+     * Starts ticking the engine.
+     */
     public void tick() {
 
 	if (!running.getAndSet(true)) {
 
-	    changeState(State.IN_TICK);
+	    changeState(IN_TICK);
 
 	    executor.submit(control());
 	}
