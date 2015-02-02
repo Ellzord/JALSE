@@ -3,6 +3,7 @@ package jalse.agents;
 import static jalse.misc.JALSEExceptions.INVALID_AGENT;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.attributes.Attribute;
+import jalse.misc.JALSEExceptions;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -147,6 +148,7 @@ public final class Agents {
      *             If the agent type does not meet the standards defined.
      *
      * @see Agents
+     * @see JALSEExceptions#INVALID_AGENT
      */
     @SuppressWarnings("unchecked")
     public static <T extends Agent> T wrap(final Agent agent, final Class<T> clazz) {
