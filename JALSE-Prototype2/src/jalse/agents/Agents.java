@@ -15,6 +15,38 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * Agents is a utility for wrapping agents to different agent types. If the
+ * agent an {@code interface} inherits from {@link Agent} and the providing
+ * methods meet criteria it can be considered an agent type. Agent types can
+ * only provide get or set style methods (though they do not have to be named as
+ * such). Get methods must have a return type of {@link Optional} containing the
+ * {@Attribute} type that to retrieve and take no arguments
+ * (equivalent to {@link Agent#getAttribute(Class)}). Set methods can have
+ * either a void return type or a return type of {@link Optional} containing the
+ * {@link Attribute} to be set and take only the attribute as an argument
+ * (equivalent to {@link Agent#associate(Attribute)}). When set methods have
+ * void return types the replaced value can not be returned when setting a new
+ * value. Setting a new value to null will remove the attribute (equivalent to
+ * {@link Agent#disassociate(Class)}).
+ *
+ * An example agent type:
+ *
+ * <pre>
+ * <code>
+ * public interface Cow extends Agent {
+ *
+ * 	Optional{@code<Moo>} getMoo();
+ *
+ * 	void setMoo(Moo m);
+ * }
+ * </code>
+ *
+ * <pre>
+ *
+ * @author Elliot Ford
+ *
+ */
 public final class Agents {
 
     private static Set<Method> CACHED_METHODS = Collections.unmodifiableSet(new HashSet<Method>() {
@@ -100,6 +132,22 @@ public final class Agents {
 	}
     }
 
+    /**
+     * Wraps an agent as the supplied agent type.
+     *
+     * @param agent
+     *            Agent to wrap.
+     * @param clazz
+     *            Agent type to wrap to.
+     * @return The wrapped agent.
+     *
+     * @throws NullPointerException
+     *             If the agent or agent type are null.
+     * @throws IllegalArgumentException
+     *             If the agent type does not meet the standards defined.
+     *
+     * @see Agents
+     */
     @SuppressWarnings("unchecked")
     public static <T extends Agent> T wrap(final Agent agent, final Class<T> clazz) {
 

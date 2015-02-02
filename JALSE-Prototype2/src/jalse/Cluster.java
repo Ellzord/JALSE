@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 /**
  * Cluster is a container for {@link Agent} but it also has its own
- * {@link Attribute}. Agents can be created, filtered and killed. Cluster gives
+ * {@link Attribute}. Agents can be created, filtered and killed. Cluster have
  * the ability to add {@link AgentListener} as well as suppliers for
  * {@link AttributeListener} for all agents. {@link Action} can be performed and
  * scheduled on cluster.
@@ -316,7 +316,7 @@ public class Cluster extends Core<JALSE, Cluster> {
     /**
      * Whether the cluster is alive.
      *
-     * @return Alive state.
+     * @return Whether the cluster is associated to a JALSE.
      */
     public boolean isAlive() {
 
