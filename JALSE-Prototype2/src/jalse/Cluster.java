@@ -185,7 +185,8 @@ public class Cluster extends Core<JALSE, Cluster> {
      *
      * @param id
      *            Unique ID of the agent.
-     * @return Gets an Optional of the resulting agent.
+     * @return Gets an Optional of the resulting agent or an empty Optional if
+     *         it was not found.
      * @throws NullPointerException
      *             If the ID is null.
      */
@@ -202,7 +203,8 @@ public class Cluster extends Core<JALSE, Cluster> {
      *            Unique ID of the agent.
      * @param clazz
      *            Agent type to wrap to.
-     * @return Gets an Optional of the resulting agent.
+     * @return Gets an Optional of the resulting agent or an empty Optional if
+     *         it was not found.
      * @throws NullPointerException
      *             If the ID or type are null.
      *

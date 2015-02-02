@@ -255,7 +255,8 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
      *
      * @param id
      *            Unique ID of the cluster.
-     * @return Gets an Optional of the resulting cluster.
+     * @return Gets an Optional of the resulting cluster or an empty Optional if
+     *         it was not found.
      * @throws NullPointerException
      *             If the ID is null.
      */
@@ -297,7 +298,7 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
     /**
      * Gets the unique identifiers of all clusters.
      *
-     * @return Ids of all clusters.
+     * @return IDs of all clusters.
      */
     public Set<UUID> getClusters() {
 

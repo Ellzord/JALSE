@@ -568,7 +568,7 @@ public abstract class Engine implements Taggable {
 
     /**
      * Schedules an action to be run on a specific actor. This can be run once
-     * actions or recurring.
+     * actions or recurring. An action may only be executed once per tick.
      *
      * @param action
      *            Action to perform.
@@ -577,9 +577,9 @@ public abstract class Engine implements Taggable {
      * @param initialDelay
      *            Wait before running.
      * @param period
-     *            Interval to repeat (can be 0 for run once actions).
+     *            Interval to repeat (should be 0 for run once actions).
      * @param unit
-     *            TimeUnit for all parameters.
+     *            TimeUnit for delay and period.
      * @return Scheduled action ID.
      */
     protected UUID schedule0(final Action<?> action, final Object actor, final long initialDelay, final long period,
