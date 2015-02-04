@@ -5,10 +5,10 @@ import static jalse.misc.JALSEExceptions.NOT_ATTACHED;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
 import jalse.actions.Scheduler;
-import jalse.agents.Agent;
 import jalse.attributes.Attributable;
 import jalse.attributes.Attribute;
 import jalse.listeners.AttributeListener;
+import jalse.listeners.ListenerSet;
 import jalse.misc.Identifiable;
 import jalse.tags.Tag;
 import jalse.tags.TagSet;
@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -79,7 +78,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     protected final TagSet tags;
 
     private final Map<Class<?>, Attribute> attributes;
-    private final Map<Class<?>, Set<AttributeListener<?>>> listeners;
+    private final Map<Class<?>, ListenerSet<AttributeListener<?>>> listeners;
     private final Set<UUID> tasks;
 
     /**
@@ -138,9 +137,10 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 	return addListener0(attr, listener);
     }
 
+    @SuppressWarnings("unchecked")
     boolean addListener0(final Class<?> attr, final Object listener) {
 
-	Set<AttributeListener<?>> ls;
+	ListenerSet<AttributeListener<?>> ls;
 
 	synchronized (listeners) {
 
@@ -148,7 +148,12 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
 	    if (ls == null) {
 
-		listeners.put(attr, ls = new CopyOnWriteArraySet<>());
+		/*
+		 * Defeating type erasure..
+		 */
+		final Class<?> listenerClazz = AttributeListener.class;
+		listeners.put(attr, ls = new ListenerSet<AttributeListener<?>>(
+			(Class<AttributeListener<?>>) listenerClazz));
 	    }
 	}
 
@@ -168,19 +173,16 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 	    fireAttributeRemoved(previous);
 	}
 
-	Set<? extends AttributeListener<U>> ls;
+	ListenerSet<? extends AttributeListener<U>> ls;
 
 	synchronized (listeners) {
 
-	    ls = (Set<? extends AttributeListener<U>>) listeners.get(clazz);
+	    ls = (ListenerSet<? extends AttributeListener<U>>) listeners.get(clazz);
 	}
 
 	if (ls != null) {
 
-	    for (final AttributeListener<U> l : ls) {
-
-		l.attributeAdded(attr);
-	    }
+	    ls.getProxy().attributeAdded(attr);
 	}
 
 	return Optional.ofNullable(previous);
@@ -228,8 +230,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     @Override
     public boolean equals(final Object obj) {
 
-	return this == obj || obj != null && obj.getClass().equals(getClass())
-		&& Objects.equals(id, ((Agent) obj).getID());
+	return obj instanceof Identifiable && Identifiable.equals(this, (Identifiable) obj);
     }
 
     @SuppressWarnings("unchecked")
@@ -240,19 +241,16 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
 	op.ifPresent(a -> {
 
-	    Set<? extends AttributeListener<U>> ls;
+	    ListenerSet<? extends AttributeListener<U>> ls;
 
 	    synchronized (listeners) {
 
-		ls = (Set<? extends AttributeListener<U>>) listeners.get(attr);
+		ls = (ListenerSet<? extends AttributeListener<U>>) listeners.get(attr);
 	    }
 
 	    if (ls != null) {
 
-		for (final AttributeListener<U> l : ls) {
-
-		    l.attributeChanged(a);
-		}
+		ls.getProxy().attributeChanged(a);
 	    }
 	});
 
@@ -262,19 +260,16 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     @SuppressWarnings("unchecked")
     private <U extends Attribute> void fireAttributeRemoved(final U attr) {
 
-	Set<? extends AttributeListener<U>> ls;
+	ListenerSet<? extends AttributeListener<U>> ls;
 
 	synchronized (listeners) {
 
-	    ls = (Set<? extends AttributeListener<U>>) listeners.get(attr.getClass());
+	    ls = (ListenerSet<? extends AttributeListener<U>>) listeners.get(attr.getClass());
 	}
 
 	if (ls != null) {
 
-	    for (final AttributeListener<U> l : ls) {
-
-		l.attributeRemoved(attr);
-	    }
+	    ls.getProxy().attributeRemoved(attr);
 	}
     }
 
@@ -350,14 +345,11 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
 	    removed = ls.remove(listener);
 
-	    if (removed) {
+	    if (ls.isEmpty()) {
 
 		synchronized (listeners) {
 
-		    if (ls.isEmpty()) {
-
-			listeners.remove(attr);
-		    }
+		    listeners.remove(attr);
 		}
 	    }
 	}

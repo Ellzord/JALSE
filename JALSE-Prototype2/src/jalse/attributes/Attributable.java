@@ -89,7 +89,7 @@ public interface Attributable {
      *            Attribute type to remove association with.
      * @param listener
      *            Listener to remove.
-     * @return Whether the listener was actually assigned.
+     * @return Whether the listener was assigned.
      */
     <T extends Attribute> boolean removeListener(Class<T> attr, AttributeListener<T> listener);
 }

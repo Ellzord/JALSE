@@ -25,9 +25,9 @@ import java.util.Optional;
  * <pre>
  *
  * @author Elliot Ford
- *
+ * 
  * @param <T> Existing or final class to wrap.
- *
+ * 
  * @see Object#equals(Object)
  * @see Object#hashCode()
  */
@@ -65,7 +65,7 @@ public abstract class NonAttributeWrapper<T> implements Attribute {
     public boolean equals(final Object obj) {
 
 	return this == obj || obj instanceof NonAttributeWrapper<?>
-	&& Objects.equals(this.obj, ((NonAttributeWrapper<?>) obj).obj);
+		&& this.obj.equals(((NonAttributeWrapper<?>) obj).obj);
     }
 
     @Override

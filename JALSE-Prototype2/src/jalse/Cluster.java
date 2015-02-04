@@ -14,7 +14,6 @@ import jalse.misc.JALSEExceptions;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -350,20 +349,16 @@ public class Cluster extends Core<JALSE, Cluster> {
 
 	agentListeners.getProxy().agentCreated(id);
 
-	Set<Entry<Class<?>, Set<Supplier<?>>>> entrySet;
-
 	synchronized (listenerSuppliers) {
 
-	    entrySet = new HashSet<>(listenerSuppliers.entrySet());
-	}
+	    for (final Entry<Class<?>, Set<Supplier<?>>> entry : listenerSuppliers.entrySet()) {
 
-	for (final Entry<Class<?>, Set<Supplier<?>>> entry : entrySet) {
+		final Class<?> clazz = entry.getKey();
 
-	    final Class<?> clazz = entry.getKey();
+		for (final Supplier<?> supplier : entry.getValue()) {
 
-	    for (final Supplier<?> supplier : entry.getValue()) {
-
-		agent.addListener0(clazz, supplier.get());
+		    agent.addListener0(clazz, supplier.get());
+		}
 	    }
 	}
 
@@ -437,9 +432,9 @@ public class Cluster extends Core<JALSE, Cluster> {
 
 	    removed = suppliers.remove(supplier);
 
-	    synchronized (listenerSuppliers) {
+	    if (suppliers.isEmpty()) {
 
-		if (suppliers.isEmpty()) {
+		synchronized (listenerSuppliers) {
 
 		    listenerSuppliers.remove(attr);
 		}

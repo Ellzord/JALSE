@@ -12,12 +12,12 @@ import java.util.List;
  * actions to only be run in a specific order (or in group). This is not
  * intended to replace first or last run actions but to provide an easy way to
  * group logically oriented actions.
- * 
+ *
  * @author Elliot Ford
  *
  * @param <T>
  *            Actor type to perform on.
- * 
+ *
  * @see JALSE#setFirstAction(Action)
  * @see JALSE#setLastAction(Action)
  */
@@ -26,7 +26,7 @@ public class ActionChain<T> implements Action<T> {
     /**
      * Convenience method for creating action chains with arrays or an
      * undetermined number of actions.
-     * 
+     *
      * @param actions
      *            Actions used to create the chain.
      * @return The newly created action chain.
@@ -41,7 +41,7 @@ public class ActionChain<T> implements Action<T> {
 
     /**
      * Creates a new action chain with the specified actions.
-     * 
+     *
      * @param chain
      *            List of actions to use as the chain.
      */
@@ -61,7 +61,7 @@ public class ActionChain<T> implements Action<T> {
 
     /**
      * Gets the number of actions in the chain.
-     * 
+     *
      * @return Size of the chain.
      */
     public int size() {

@@ -140,8 +140,8 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
 	this.clusterLimit = clusterLimit;
 	this.agentLimit = agentLimit;
 
-	agentCount = new DefensiveAtomicInteger(i -> i <= this.agentLimit, AGENT_LIMIT_REARCHED);
-	clusterCount = new DefensiveAtomicInteger(i -> i <= this.clusterLimit, CLUSTER_LIMIT_REARCHED);
+	agentCount = new DefensiveAtomicInteger(i -> i <= agentLimit, AGENT_LIMIT_REARCHED);
+	clusterCount = new DefensiveAtomicInteger(i -> i <= clusterLimit, CLUSTER_LIMIT_REARCHED);
 
 	clusters = new ConcurrentHashMap<>();
 	clusterListeners = new ListenerSet<>(ClusterListener.class);

@@ -15,9 +15,9 @@ import jalse.tags.Taggable;
  * add, removal or change of those attributes. Agents can be wrapped to a
  * specific agent type as long as the inheriting interface follows what is
  * outlined in {@link Agents}.
- * 
+ *
  * @author Elliot Ford
- * 
+ *
  * @see Agents#wrap(Agent, Class)
  *
  */

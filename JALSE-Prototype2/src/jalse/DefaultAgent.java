@@ -21,7 +21,7 @@ class DefaultAgent extends Core<JALSE, Agent> implements Agent {
     @Override
     public boolean kill() {
 
-	tags.remove(Parent.class);
+	tags.removeOfType(Parent.class);
 
 	return cluster.killAgent(id);
     }

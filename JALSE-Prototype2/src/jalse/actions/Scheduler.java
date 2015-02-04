@@ -23,7 +23,7 @@ public interface Scheduler<T> {
      *
      * @param action
      *            ID of the action.
-     * @return Whether the action was actually cancelled.
+     * @return Whether the action was cancelled.
      * @throws NullPointerException
      *             If ID is null.
      */
