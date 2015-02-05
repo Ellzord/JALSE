@@ -71,7 +71,7 @@ public interface Attributable {
      * @return Optional containing the attribute or else empty optional if none
      *         found.
      */
-    <T extends Attribute> Optional<T> getAttribute(Class<T> attr);
+    <T extends Attribute> Optional<T> getOfType(Class<T> attr);
 
     /**
      * Gets all attribute listeners associated to the supplied attribute type.

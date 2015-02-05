@@ -348,7 +348,7 @@ public abstract class Engine implements Taggable {
 
 	Objects.requireNonNull(action);
 
-	boolean result = false;	
+	boolean result = false;
 
 	synchronized (work) {
 

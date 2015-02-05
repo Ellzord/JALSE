@@ -236,7 +236,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     @Override
     public <U extends Attribute> boolean fireAttributeChanged(final Class<U> attr) {
 
-	final Optional<U> op = getAttribute(attr);
+	final Optional<U> op = getOfType(attr);
 
 	op.ifPresent(a -> {
 
@@ -274,7 +274,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
     @SuppressWarnings("unchecked")
     @Override
-    public <U extends Attribute> Optional<U> getAttribute(final Class<U> attr) {
+    public <U extends Attribute> Optional<U> getOfType(final Class<U> attr) {
 
 	return Optional.ofNullable((U) attributes.get(requireNonNullAttrSub(attr)));
     }

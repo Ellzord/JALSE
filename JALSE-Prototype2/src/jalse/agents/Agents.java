@@ -23,8 +23,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * only provide get or set style methods (though they do not have to be named as
  * such). Get methods must have a return type of {@link Optional} containing the
  * {@Attribute} type that to retrieve and take no arguments
- * (equivalent to {@link Agent#getAttribute(Class)}). Set methods can have
- * either a void return type or a return type of {@link Optional} containing the
+ * (equivalent to {@link Agent#getOfType(Class)}). Set methods can have either a
+ * void return type or a return type of {@link Optional} containing the
  * {@link Attribute} to be set and take only the attribute as an argument
  * (equivalent to {@link Agent#associate(Attribute)}). When set methods have
  * void return types the replaced value can not be returned when setting a new
@@ -169,7 +169,7 @@ public final class Agents {
 
 		if (a == null || a.length == 0) {
 
-		    result = agent.getAttribute(getAttrClass(rt));
+		    result = agent.getOfType(getAttrClass(rt));
 		}
 		else {
 

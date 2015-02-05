@@ -14,9 +14,9 @@ import java.util.Set;
  * set will allow multiple tags of the same type as long as none of them are
  * considered equal. It is possible to query and remove tags by type as well as
  * by instance.
- * 
+ *
  * @author Elliot Ford
- * 
+ *
  * @see Object#equals(Object)
  * @see Object#hashCode()
  *
@@ -49,7 +49,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 
     /**
      * Gets all of the tags matching the specified type.
-     * 
+     *
      * @param clazz
      *            Type of tag.
      * @return All tags of that type or an empty set if none are found.
@@ -70,7 +70,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 
     /**
      * Checks whether the tag set contains any tags of that type.
-     * 
+     *
      * @param clazz
      *            Type of tag.
      * @return {@code true} if the set contains any tags of the specified type
@@ -102,7 +102,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 
     /**
      * Removes all tags of the specified type.
-     * 
+     *
      * @param clazz
      *            Type of tag.
      * @return Whether any tags were removed.

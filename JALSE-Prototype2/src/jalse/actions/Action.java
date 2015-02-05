@@ -106,7 +106,7 @@ public interface Action<T> {
      */
     default <S extends Attributable, U extends Attribute> Predicate<S> isPresent(final Class<U> attr) {
 
-	return c -> c.getAttribute(attr).isPresent();
+	return c -> c.getOfType(attr).isPresent();
     }
 
     /**
