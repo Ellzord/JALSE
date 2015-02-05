@@ -295,12 +295,13 @@ public class Cluster extends Core<JALSE, Cluster> {
     }
 
     /**
-     * Creates a new agent.
+     * Creates a new agent with a random ID.
      *
      * @return The newly created agent's ID.
      * @throws IllegalStateException
      *             If the agent limit has been reached.
      *
+     * @see UUID#randomUUID()
      * @see JALSEExceptions#AGENT_LIMIT_REARCHED
      */
     public UUID newAgent() {
@@ -310,6 +311,25 @@ public class Cluster extends Core<JALSE, Cluster> {
 	newAgent(id);
 
 	return id;
+    }
+
+    /**
+     * Creates a new agent with a random ID. This agent is wrapped to the
+     * specified agent type.
+     * 
+     * @param clazz
+     *            Agent type to wrap to.
+     * @return The newly created agent.
+     * @throws IllegalStateException
+     *             If the agent limit has been reached.
+     *
+     * @see UUID#randomUUID()
+     * @see JALSEExceptions#AGENT_LIMIT_REARCHED
+     * @see Agents#wrap(Agent, Class)
+     */
+    public <T extends Agent> T newAgent(Class<T> clazz) {
+
+	return newAgent(UUID.randomUUID(), clazz);
     }
 
     /**
@@ -323,7 +343,7 @@ public class Cluster extends Core<JALSE, Cluster> {
     }
 
     /**
-     * Creates new agent with the given ID.
+     * Creates new agent with the specified ID.
      *
      * @param id
      *            Agent ID.
@@ -366,7 +386,7 @@ public class Cluster extends Core<JALSE, Cluster> {
     }
 
     /**
-     * Creates new agent with the given ID. This agent is wrapped to the
+     * Creates new agent with the specified ID. This agent is wrapped to the
      * specified agent type.
      *
      * @param id

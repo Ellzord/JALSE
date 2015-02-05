@@ -390,12 +390,13 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
     }
 
     /**
-     * Creates a new cluster.
+     * Creates a new cluster with a random ID.
      *
      * @return The newly created cluster's ID.
      * @throws IllegalStateException
      *             If the cluster limit has been reached.
      *
+     * @see UUID#randomUUID()
      * @see JALSEExceptions#CLUSTER_LIMIT_REARCHED
      */
     public UUID newCluster() {
