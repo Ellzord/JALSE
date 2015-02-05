@@ -13,6 +13,7 @@ import jalse.listeners.ListenerSet;
 import jalse.misc.JALSEExceptions;
 import jalse.tags.Tag;
 import jalse.tags.TagSet;
+import jalse.tags.Taggable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -38,7 +39,7 @@ import java.util.stream.Stream;
  * @author Elliot Ford
  *
  */
-public class JALSE extends Engine implements Scheduler<JALSE> {
+public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
 
     /**
      * An {@link AtomicInteger} implementation with defensive
@@ -128,7 +129,7 @@ public class JALSE extends Engine implements Scheduler<JALSE> {
      * @throws IllegalArgumentException
      *             All parameters must be above zero.
      */
-    protected JALSE(final int tps, final int totalThreads, final int clusterLimit, final int agentLimit) {
+    public JALSE(final int tps, final int totalThreads, final int clusterLimit, final int agentLimit) {
 
 	super(tps, totalThreads);
 

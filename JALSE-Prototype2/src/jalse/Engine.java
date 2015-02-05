@@ -2,7 +2,6 @@ package jalse;
 
 import jalse.actions.Action;
 import jalse.misc.JALSEExceptions;
-import jalse.tags.Taggable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +37,7 @@ import java.util.logging.Logger;
  * @see Action#perform(Object, TickInfo)
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public abstract class Engine implements Taggable {
+public abstract class Engine {
 
     private class AtomicAction {
 
