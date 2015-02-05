@@ -152,8 +152,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 		 * Defeating type erasure..
 		 */
 		final Class<?> listenerClazz = AttributeListener.class;
-		listeners.put(attr, ls = new ListenerSet<AttributeListener<?>>(
-			(Class<AttributeListener<?>>) listenerClazz));
+		listeners.put(attr, ls = new ListenerSet<>((Class<AttributeListener<?>>) listenerClazz));
 	    }
 	}
 
