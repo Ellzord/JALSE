@@ -46,8 +46,6 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      * increment/decrement functionality. When doing so predicate must be met or
      * the supplied exception will be thrown.
      *
-     * @author Elliot Ford
-     *
      */
     protected class DefensiveAtomicInteger extends AtomicInteger {
 
