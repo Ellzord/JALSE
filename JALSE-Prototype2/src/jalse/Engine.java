@@ -285,7 +285,7 @@ public abstract class Engine {
 	}
     }
 
-    private static long requireNonNegative(final long value) {
+    private static long requireAboveZero(final long value) {
 
 	if (value <= 0) {
 
@@ -585,12 +585,17 @@ public abstract class Engine {
     protected UUID schedule0(final Action<?> action, final Object actor, final long initialDelay, final long period,
 	    final TimeUnit unit) {
 
+	if (period < 0) {
+
+	    throw new IllegalArgumentException();
+	}
+
 	final UUID key = UUID.randomUUID();
 
 	synchronized (work) {
 
 	    work.add(new Worker(key, Objects.requireNonNull(action), Objects.requireNonNull(actor), unit
-		    .toNanos(initialDelay), unit.toNanos(requireNonNegative(period))));
+		    .toNanos(requireAboveZero(initialDelay)), unit.toNanos(period)));
 	}
 
 	return key;

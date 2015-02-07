@@ -13,16 +13,16 @@ public interface ClusterListener {
     /**
      * Triggered on cluster creation.
      *
-     * @param id
+     * @param c
      *            Newly created cluster.
      */
-    void clusterCreated(Cluster id);
+    void clusterCreated(Cluster c);
 
     /**
      * Triggered on cluster death.
      *
-     * @param id
+     * @param c
      *            Newly deceased cluster.
      */
-    void clusterKilled(Cluster id);
+    void clusterKilled(Cluster c);
 }
