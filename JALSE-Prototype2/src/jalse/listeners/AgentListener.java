@@ -2,8 +2,6 @@ package jalse.listeners;
 
 import jalse.agents.Agent;
 
-import java.util.UUID;
-
 /**
  * Listener for {@link Agent} creation and death.
  *
@@ -15,16 +13,16 @@ public interface AgentListener {
     /**
      * Triggered on agent creation.
      *
-     * @param id
-     *            Identifier of newly created agent.
+     * @param a
+     *            Newly created agent.
      */
-    void agentCreated(UUID id);
+    void agentCreated(Agent a);
 
     /**
      * Triggered on agent death.
      *
-     * @param id
-     *            Identifier of newly deceased agent.
+     * @param a
+     *            Newly deceased agent.
      */
-    void agentKilled(UUID id);
+    void agentKilled(Agent a);
 }

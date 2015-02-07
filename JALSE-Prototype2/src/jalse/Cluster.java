@@ -108,7 +108,7 @@ public class Cluster extends Core<JALSE, Cluster> {
 
 	if (added) {
 
-	    for (final DefaultAgent a : agents.values()) {
+	    for (final Agent a : agents.values()) {
 
 		a.addListener(attr, supplier.get());
 	    }
@@ -288,7 +288,7 @@ public class Cluster extends Core<JALSE, Cluster> {
 	    killed.cancelTasks();
 	    killed.detatch();
 
-	    agentListeners.getProxy().agentKilled(id);
+	    agentListeners.getProxy().agentKilled(killed);
 	}
 
 	return killed != null;
@@ -358,6 +358,11 @@ public class Cluster extends Core<JALSE, Cluster> {
      */
     public Agent newAgent(final UUID id) {
 
+	return newAgent0(id, null);
+    }
+
+    private Agent newAgent0(final UUID id, Class<? extends Agent> type) {
+
 	engine.getAgentCount0().defensiveIncrement();
 
 	final DefaultAgent agent;
@@ -367,7 +372,10 @@ public class Cluster extends Core<JALSE, Cluster> {
 	    throwRE(AGENT_ALREADY_ASSOCIATED);
 	}
 
-	agentListeners.getProxy().agentCreated(id);
+	if (type != null) {
+
+	    agent.markAsType(type);
+	}
 
 	synchronized (listenerSuppliers) {
 
@@ -382,7 +390,9 @@ public class Cluster extends Core<JALSE, Cluster> {
 	    }
 	}
 
-	return agent;
+	agentListeners.getProxy().agentCreated(agent);
+
+	return type != null ? asType(agent, type) : agent;
     }
 
     /**
@@ -404,12 +414,10 @@ public class Cluster extends Core<JALSE, Cluster> {
      *
      * @see Agents#asType(Agent, Class)
      */
+    @SuppressWarnings("unchecked")
     public <T extends Agent> T newAgent(final UUID id, final Class<T> type) {
 
-	final Agent a = newAgent(id);
-	a.markAsType(type);
-
-	return asType(a, type);
+	return (T) newAgent0(id, type);
     }
 
     /**

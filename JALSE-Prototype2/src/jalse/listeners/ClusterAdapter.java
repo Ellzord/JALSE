@@ -1,6 +1,6 @@
 package jalse.listeners;
 
-import java.util.UUID;
+import jalse.Cluster;
 
 /**
  * An abstract adapter for {@link ClusterListener}. This is a convenience class
@@ -13,12 +13,12 @@ import java.util.UUID;
 public abstract class ClusterAdapter implements ClusterListener {
 
     @Override
-    public void clusterCreated(final UUID id) {
+    public void clusterCreated(final Cluster c) {
 
     }
 
     @Override
-    public void clusterKilled(final UUID id) {
+    public void clusterKilled(final Cluster c) {
 
     }
 }

@@ -1,6 +1,6 @@
 package jalse.listeners;
 
-import java.util.UUID;
+import jalse.agents.Agent;
 
 /**
  * An abstract adapter for {@link AgentListener}. This is a convenience class
@@ -13,12 +13,12 @@ import java.util.UUID;
 public abstract class AgentAdapter implements AgentListener {
 
     @Override
-    public void agentCreated(final UUID id) {
+    public void agentCreated(final Agent a) {
 
     }
 
     @Override
-    public void agentKilled(final UUID id) {
+    public void agentKilled(final Agent a) {
 
     }
 }

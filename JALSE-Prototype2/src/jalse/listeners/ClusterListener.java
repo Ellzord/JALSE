@@ -2,8 +2,6 @@ package jalse.listeners;
 
 import jalse.Cluster;
 
-import java.util.UUID;
-
 /**
  * Listener for {@link Cluster} creation and death.
  *
@@ -16,15 +14,15 @@ public interface ClusterListener {
      * Triggered on cluster creation.
      *
      * @param id
-     *            Identifier of newly created cluster.
+     *            Newly created cluster.
      */
-    void clusterCreated(UUID id);
+    void clusterCreated(Cluster id);
 
     /**
      * Triggered on cluster death.
      *
      * @param id
-     *            Identifier of newly deceased cluster.
+     *            Newly deceased cluster.
      */
-    void clusterKilled(UUID id);
+    void clusterKilled(Cluster id);
 }

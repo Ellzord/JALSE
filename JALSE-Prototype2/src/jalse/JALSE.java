@@ -382,7 +382,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
 	    killed.detatch();
 	    killed.cancelTasks();
 
-	    clusterListeners.getProxy().clusterCreated(id);
+	    clusterListeners.getProxy().clusterCreated(killed);
 	}
 
 	return killed != null;
@@ -432,7 +432,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
 	    throwRE(CLUSTER_ALREADY_ASSOCIATED);
 	}
 
-	clusterListeners.getProxy().clusterCreated(id);
+	clusterListeners.getProxy().clusterCreated(cluster);
 
 	return cluster;
     }
