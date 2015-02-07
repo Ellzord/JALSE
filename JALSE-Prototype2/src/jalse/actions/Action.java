@@ -132,7 +132,7 @@ public interface Action<T> {
      * @return Predicate of {@code true} if the agent is of the type or
      *         {@code false} if it is not.
      */
-    default Predicate<? super Agent> isMarkedAs(final Class<? extends Agent> type) {
+    default <S extends Agent> Predicate<S> isMarkedAs(final Class<? extends Agent> type) {
 
 	return a -> a.isMarkedAsType(type);
     }
@@ -145,9 +145,9 @@ public interface Action<T> {
      * @return Predicate of {@code true} if the agent is not of the type or
      *         {@code false} if it is.
      */
-    default Predicate<? super Agent> notMarkedAs(final Class<? extends Agent> type) {
+    default <S extends Agent> Predicate<S> notMarkedAs(final Class<? extends Agent> type) {
 
-	return isMarkedAs(type).negate();
+	return this.<S> isMarkedAs(type).negate();
     }
 
     /**

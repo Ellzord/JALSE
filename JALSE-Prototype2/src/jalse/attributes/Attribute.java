@@ -37,7 +37,7 @@ import jalse.listeners.AttributeListener;
  * <pre>
  *
  * @author Elliot Ford
- *
+ * 
  * @see Core
  * @see Cluster
  * @see Agent
