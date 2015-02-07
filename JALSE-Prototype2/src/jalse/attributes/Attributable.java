@@ -92,4 +92,34 @@ public interface Attributable {
      * @return Whether the listener was assigned.
      */
     <T extends Attribute> boolean removeListener(Class<T> attr, AttributeListener<T> listener);
+
+    /**
+     * This is a convenience method for getting an attribute (no optional).
+     * 
+     * @param attr
+     *            Attribute type to check for.
+     * @return The attribute matching the supplied type or null if none found.
+     */
+    default <T extends Attribute> T getOfTypeOrNull(Class<T> attr) {
+
+	Optional<T> a = getOfType(attr);
+
+	return a.isPresent() ? a.get() : null;
+    }
+
+    /**
+     * This is a convenience method for getting an attribute wrapper and
+     * unwrapping the result.
+     * 
+     * @param attr
+     *            Attribute wrapper type.
+     * @return The unwrapped attribute or null if the type had no association.
+     * 
+     * @see #getOfType(Class)
+     * @see NonAttributeWrapper#unwrap()
+     */
+    default <T, S extends NonAttributeWrapper<T>> T getOfTypeAndUnwrap(Class<S> attr) {
+
+	return NonAttributeWrapper.unwrap(getOfType(attr));
+    }
 }
