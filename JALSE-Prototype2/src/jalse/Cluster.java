@@ -1,6 +1,6 @@
 package jalse;
 
-import static jalse.agents.Agents.wrap;
+import static jalse.agents.Agents.asType;
 import static jalse.misc.JALSEExceptions.AGENT_ALREADY_ASSOCIATED;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
@@ -131,18 +131,18 @@ public class Cluster extends Core<JALSE, Cluster> {
      * Provides a stream of the agents from the cluster. These agents are
      * wrapped with the supplied agent type.
      *
-     * @param clazz
+     * @param type
      *            Agent type to wrap to.
      * @return A stream of the agents in the cluster wrapped to the specified
      *         agent type.
      * @throws NullPointerException
      *             If the agent type is null.
      *
-     * @see Agents#wrap(Agent, Class)
+     * @see Agents#asType(Agent, Class)
      */
-    public <T extends Agent> Stream<T> streamAgents(final Class<T> clazz) {
+    public <T extends Agent> Stream<T> streamAgents(final Class<T> type) {
 
-	return streamAgents().map(a -> wrap(a, clazz));
+	return streamAgents().map(a -> asType(a, type));
     }
 
     /**
@@ -165,17 +165,17 @@ public class Cluster extends Core<JALSE, Cluster> {
      *
      * @param filter
      *            Accepted criteria for an agent.
-     * @param clazz
+     * @param type
      *            Agent type to wrap to.
      * @return The filtered list or empty if no agents met the criteria.
      * @throws NullPointerException
      *             if the filter is null.
      *
-     * @see Agents#wrap(Agent, Class)
+     * @see Agents#asType(Agent, Class)
      */
-    public <T extends Agent> Set<T> filterAgents(final Predicate<T> filter, final Class<T> clazz) {
+    public <T extends Agent> Set<T> filterAgents(final Predicate<T> filter, final Class<T> type) {
 
-	return Collections.unmodifiableSet(agents.values().stream().map(a -> wrap(a, clazz)).filter(filter)
+	return Collections.unmodifiableSet(agents.values().stream().map(a -> asType(a, type)).filter(filter)
 		.collect(Collectors.toSet()));
     }
 
@@ -200,20 +200,20 @@ public class Cluster extends Core<JALSE, Cluster> {
      *
      * @param id
      *            Unique ID of the agent.
-     * @param clazz
+     * @param type
      *            Agent type to wrap to.
      * @return Gets an Optional of the resulting agent or an empty Optional if
      *         it was not found.
      * @throws NullPointerException
      *             If the ID or type are null.
      *
-     * @see Agents#wrap(Agent, Class)
+     * @see Agents#asType(Agent, Class)
      */
-    public <T extends Agent> Optional<T> getAgent(final UUID id, final Class<T> clazz) {
+    public <T extends Agent> Optional<T> getAgent(final UUID id, final Class<T> type) {
 
 	final Optional<Agent> agent = getAgent(id);
 
-	return agent.isPresent() ? Optional.of(wrap(agent.get(), clazz)) : Optional.empty();
+	return agent.isPresent() ? Optional.of(asType(agent.get(), type)) : Optional.empty();
     }
 
     /**
@@ -316,8 +316,8 @@ public class Cluster extends Core<JALSE, Cluster> {
     /**
      * Creates a new agent with a random ID. This agent is wrapped to the
      * specified agent type.
-     * 
-     * @param clazz
+     *
+     * @param type
      *            Agent type to wrap to.
      * @return The newly created agent.
      * @throws IllegalStateException
@@ -325,11 +325,11 @@ public class Cluster extends Core<JALSE, Cluster> {
      *
      * @see UUID#randomUUID()
      * @see JALSEExceptions#AGENT_LIMIT_REARCHED
-     * @see Agents#wrap(Agent, Class)
+     * @see Agents#asType(Agent, Class)
      */
-    public <T extends Agent> T newAgent(Class<T> clazz) {
+    public <T extends Agent> T newAgent(final Class<T> type) {
 
-	return newAgent(UUID.randomUUID(), clazz);
+	return newAgent(UUID.randomUUID(), type);
     }
 
     /**
@@ -391,7 +391,7 @@ public class Cluster extends Core<JALSE, Cluster> {
      *
      * @param id
      *            Agent ID.
-     * @param clazz
+     * @param type
      *            Agent type to wrap to.
      * @return The newly created agent.
      * @throws IllegalStateException
@@ -402,11 +402,14 @@ public class Cluster extends Core<JALSE, Cluster> {
      * @see JALSEExceptions#AGENT_LIMIT_REARCHED
      * @see JALSEExceptions#AGENT_ALREADY_ASSOCIATED
      *
-     * @see Agents#wrap(Agent, Class)
+     * @see Agents#asType(Agent, Class)
      */
-    public <T extends Agent> T newAgent(final UUID id, final Class<T> clazz) {
+    public <T extends Agent> T newAgent(final UUID id, final Class<T> type) {
 
-	return wrap(newAgent(id), clazz);
+	final Agent a = newAgent(id);
+	a.markAsType(type);
+
+	return asType(a, type);
     }
 
     /**

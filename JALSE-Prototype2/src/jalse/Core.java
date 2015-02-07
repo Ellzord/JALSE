@@ -1,6 +1,6 @@
 package jalse;
 
-import static jalse.misc.JALSEExceptions.INVALID_ATTRIBUTE_CLASS;
+import static jalse.misc.JALSEExceptions.INVALID_ATTRIBUTE_TYPE;
 import static jalse.misc.JALSEExceptions.NOT_ATTACHED;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
@@ -56,7 +56,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
 	if (clazz == null || !Attribute.class.isAssignableFrom(clazz) || Attribute.class.equals(clazz)) {
 
-	    throwRE(INVALID_ATTRIBUTE_CLASS);
+	    throwRE(INVALID_ATTRIBUTE_TYPE);
 	}
 
 	return clazz;
@@ -163,9 +163,9 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     @Override
     public <U extends Attribute> Optional<U> associate(final U attr) {
 
-	final Class<?> clazz = attr.getClass();
+	final Class<?> type = attr.getClass();
 
-	final U previous = (U) attributes.put(clazz, attr);
+	final U previous = (U) attributes.put(type, attr);
 
 	if (previous != null) {
 
@@ -176,7 +176,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
 	synchronized (listeners) {
 
-	    ls = (ListenerSet<? extends AttributeListener<U>>) listeners.get(clazz);
+	    ls = (ListenerSet<? extends AttributeListener<U>>) listeners.get(type);
 	}
 
 	if (ls != null) {

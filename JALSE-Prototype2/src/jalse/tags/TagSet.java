@@ -50,16 +50,16 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
     /**
      * Gets all of the tags matching the specified type.
      *
-     * @param clazz
+     * @param type
      *            Type of tag.
      * @return All tags of that type or an empty set if none are found.
      */
     @SuppressWarnings("unchecked")
-    public synchronized <T extends Tag> Set<T> getOfType(final Class<T> clazz) {
+    public synchronized <T extends Tag> Set<T> getOfType(final Class<T> type) {
 
-	final Set<T> tagsOfType = (Set<T>) tags.get(clazz);
+	final Set<T> tagsOfType = (Set<T>) tags.get(type);
 
-	return tagsOfType != null ? Collections.unmodifiableSet(tagsOfType) : Collections.emptySet();
+	return tagsOfType != null ? new HashSet<>(tagsOfType) : Collections.emptySet();
     }
 
     @Override
@@ -71,14 +71,14 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
     /**
      * Checks whether the tag set contains any tags of that type.
      *
-     * @param clazz
+     * @param type
      *            Type of tag.
      * @return {@code true} if the set contains any tags of the specified type
      *         or {@code false} if it does not.
      */
-    public synchronized boolean containsOfType(final Class<? extends Tag> clazz) {
+    public synchronized boolean containsOfType(final Class<? extends Tag> type) {
 
-	return tags.containsKey(clazz);
+	return tags.containsKey(type);
     }
 
     @Override
@@ -103,13 +103,13 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
     /**
      * Removes all tags of the specified type.
      *
-     * @param clazz
+     * @param type
      *            Type of tag.
      * @return Whether any tags were removed.
      */
-    public synchronized boolean removeOfType(final Class<? extends Tag> clazz) {
+    public synchronized boolean removeOfType(final Class<? extends Tag> type) {
 
-	return tags.remove(clazz) != null;
+	return tags.remove(type) != null;
     }
 
     @Override

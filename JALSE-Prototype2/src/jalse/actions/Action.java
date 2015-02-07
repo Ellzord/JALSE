@@ -54,19 +54,19 @@ public interface Action<T> {
      *
      * @param cluster
      *            Cluster to get agent from.
-     * @param clazz
+     * @param type
      *            Agent type to wrap to.
      * @return Gets an Optional of the resulting agent or an empty optional if
      *         none were found.
      * @throws NullPointerException
      *             If the agent type is null.
      *
-     * @see Agents#wrap(Agent, Class)
+     * @see Agents#asType(Agent, Class)
      *
      */
-    default <S extends Agent> Optional<S> anyAgent(final Cluster cluster, final Class<S> clazz) {
+    default <S extends Agent> Optional<S> anyAgent(final Cluster cluster, final Class<S> type) {
 
-	return cluster.streamAgents(clazz).findAny();
+	return cluster.streamAgents(type).findAny();
     }
 
     /**
@@ -125,6 +125,32 @@ public interface Action<T> {
     }
 
     /**
+     * Checks to see if the agent has been tagged with the type.
+     *
+     * @param type
+     *            Agent type to check for.
+     * @return Predicate of {@code true} if the agent is of the type or
+     *         {@code false} if it is not.
+     */
+    default Predicate<? extends Agent> isMarkedAs(final Class<? extends Agent> type) {
+
+	return a -> a.isMarkedAsType(type);
+    }
+
+    /**
+     * Checks to see if the agent has not been tagged with the type.
+     *
+     * @param type
+     *            Agent type to check for.
+     * @return Predicate of {@code true} if the agent is not of the type or
+     *         {@code false} if it is.
+     */
+    default Predicate<? extends Agent> notMarkedAs(final Class<? extends Agent> type) {
+
+	return isMarkedAs(type).negate();
+    }
+
+    /**
      * Convenience method for filtering on clusters and then agents.
      *
      * @param jalse
@@ -155,7 +181,7 @@ public interface Action<T> {
      *            Predicate to filter clusters.
      * @param agentFilter
      *            Predicate to filter agents.
-     * @param clazz
+     * @param type
      *            Agent type to wrap to.
      * @return Filtered set of agents or an empty set if none were suitable.
      *
@@ -163,9 +189,9 @@ public interface Action<T> {
      * @see Cluster#filterAgents(Predicate, Class)
      */
     default <S extends Agent> Set<S> filterAgents(final JALSE jalse, final Predicate<Cluster> clusterFilter,
-	    final Predicate<S> agentFilter, final Class<S> clazz) {
+	    final Predicate<S> agentFilter, final Class<S> type) {
 
-	return jalse.filterClusters(clusterFilter).stream().flatMap(c -> c.filterAgents(agentFilter, clazz).stream())
+	return jalse.filterClusters(clusterFilter).stream().flatMap(c -> c.filterAgents(agentFilter, type).stream())
 		.collect(Collectors.toSet());
     }
 

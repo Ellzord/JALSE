@@ -1,6 +1,6 @@
 package jalse.agents;
 
-import static jalse.misc.JALSEExceptions.INVALID_AGENT;
+import static jalse.misc.JALSEExceptions.INVALID_AGENT_TYPE;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.attributes.Attribute;
 import jalse.misc.JALSEExceptions;
@@ -17,19 +17,21 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Agents is a utility for wrapping agents to different agent types. If the
- * agent an {@code interface} inherits from {@link Agent} and the providing
- * methods meet criteria it can be considered an agent type. Agent types can
- * only provide get or set style methods (though they do not have to be named as
- * such). Get methods must have a return type of {@link Optional} containing the
- * {@Attribute} type that to retrieve and take no arguments
- * (equivalent to {@link Agent#getOfType(Class)}). Set methods can have either a
- * void return type or a return type of {@link Optional} containing the
- * {@link Attribute} to be set and take only the attribute as an argument
- * (equivalent to {@link Agent#associate(Attribute)}). When set methods have
- * void return types the replaced value can not be returned when setting a new
- * value. Setting a new value to null will remove the attribute (equivalent to
- * {@link Agent#disassociate(Class)}).
+ * Agents is a utility for wrapping agents to different agent types. An agent
+ * type requires two criteria be met:<br>
+ * 1. The type {@code interface} inherits from {@link Agent} as well as so do
+ * all of its ancestors.<br>
+ * 2. Agent types can only provide get or set style methods (though they do not
+ * have to be named as such). Get methods must have a return type of
+ * {@link Optional} containing the {@Attribute} type that to
+ * retrieve and take no arguments (equivalent to {@link Agent#getOfType(Class)}
+ * ). Set methods can have either a void return type or a return type of
+ * {@link Optional} containing the {@link Attribute} to be set and take only the
+ * attribute as an argument (equivalent to {@link Agent#associate(Attribute)}).
+ * When set methods have void return types the replaced value can not be
+ * returned when setting a new value. Setting a new value to null will remove
+ * the attribute (equivalent to {@link Agent#disassociate(Class)}).<br>
+ * <br>
  *
  * An example agent type:
  *
@@ -75,11 +77,79 @@ public final class Agents {
 	return (Class<? extends Attribute>) ((ParameterizedType) type).getActualTypeArguments()[0];
     }
 
-    private static void validateAgent(final Class<?> clazz) {
+    /**
+     * Checks if the specified type is descendant from the specified ancestor.
+     * type.
+     *
+     * @param descendant
+     *            Descendant type.
+     * @param ancestor
+     *            Ancestor type.
+     * @return Whether the descendant is descended from the ancestor type.
+     */
+
+    /**
+     * Gets all ancestors for the specified descendant type (not including
+     * {@link Agent}).
+     *
+     * @param type
+     *            Descendant type.
+     * @return All ancestors or an empty set if its only ancestor is
+     *         {@link Agent}.
+     *
+     * @throws IllegalArgumentException
+     *             If the agent type is invalid
+     *
+     * @see JALSEExceptions#INVALID_AGENT_TYPE
+     */
+    public static Set<Class<? extends Agent>> getAncestry(final Class<? extends Agent> type) {
+
+	validateType(type);
+
+	final Set<Class<? extends Agent>> ancestry = new HashSet<>();
+
+	addAncestors(ancestry, type);
+
+	return ancestry;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void addAncestors(final Set<Class<? extends Agent>> ancestry, final Class<?> type) {
+
+	for (final Class<?> t : type.getInterfaces()) {
+
+	    if (!t.equals(Agent.class) && ancestry.add((Class<? extends Agent>) t)) {
+
+		addAncestors(ancestry, t);
+	    }
+	}
+    }
+
+    /**
+     * Validates a specified agent type according the criteria defined above.
+     * The ancestor {@code interface} {@link Agents} is considered to be
+     * invalid.
+     *
+     * @param type
+     *            Agent type to validate.
+     * @throws IllegalArgumentException
+     *             If the agent type fails validation.
+     */
+    public static void validateType(final Class<? extends Agent> type) {
+
+	if (type.equals(Agent.class)) {
+
+	    throwRE(INVALID_AGENT_TYPE);
+	}
+
+	validateType0(type);
+    }
+
+    private static void validateType0(final Class<?> clazz) {
 
 	if (!Agent.class.isAssignableFrom(clazz)) {
 
-	    throwRE(INVALID_AGENT);
+	    throwRE(INVALID_AGENT_TYPE);
 	}
 
 	if (!VALID_AGENTS.contains(clazz)) {
@@ -120,7 +190,7 @@ public final class Agents {
 
 		if (!valid) {
 
-		    throwRE(INVALID_AGENT);
+		    throwRE(INVALID_AGENT_TYPE);
 		}
 	    }
 
@@ -128,7 +198,7 @@ public final class Agents {
 
 	    for (final Class<?> iter : clazz.getInterfaces()) {
 
-		validateAgent(iter);
+		validateType0(iter);
 	    }
 	}
     }
@@ -138,24 +208,24 @@ public final class Agents {
      *
      * @param agent
      *            Agent to wrap.
-     * @param clazz
+     * @param type
      *            Agent type to wrap to.
      * @return The wrapped agent.
      *
      * @throws NullPointerException
      *             If the agent or agent type are null.
      * @throws IllegalArgumentException
-     *             If the agent type does not meet the standards defined.
+     *             If the agent type does not meet the criteria defined above.
      *
      * @see Agents
-     * @see JALSEExceptions#INVALID_AGENT
+     * @see JALSEExceptions#INVALID_AGENT_TYPE
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Agent> T wrap(final Agent agent, final Class<T> clazz) {
+    public static <T extends Agent> T asType(final Agent agent, final Class<T> type) {
 
-	validateAgent(clazz);
+	validateType(type);
 
-	return (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, (p, m, a) -> {
+	return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[] { type }, (p, m, a) -> {
 
 	    Object result = null;
 
@@ -184,5 +254,20 @@ public final class Agents {
     private Agents() {
 
 	throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Checks if the specified type is descendant from the specified ancestor.
+     * type.
+     *
+     * @param descendant
+     *            Descendant type.
+     * @param ancestor
+     *            Ancestor type.
+     * @return Whether the descendant is descended from the ancestor type.
+     */
+    public static boolean isDescendant(final Class<? extends Agent> descendant, final Class<? extends Agent> ancestor) {
+
+	return !descendant.equals(ancestor) && ancestor.isAssignableFrom(descendant);
     }
 }

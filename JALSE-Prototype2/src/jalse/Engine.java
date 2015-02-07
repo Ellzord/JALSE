@@ -216,7 +216,7 @@ public abstract class Engine {
 	}
     }
 
-    private static final Logger logger = Logger.getLogger(Engine.class.getCanonicalName());
+    private static final Logger logger = Logger.getLogger(Engine.class.getName());
 
     private static final long SECOND = TimeUnit.SECONDS.toNanos(1);
 
@@ -580,7 +580,7 @@ public abstract class Engine {
      * @param unit
      *            TimeUnit for delay and period.
      * @return Scheduled action ID.
-     * 
+     *
      */
     protected UUID schedule0(final Action<?> action, final Object actor, final long initialDelay, final long period,
 	    final TimeUnit unit) {

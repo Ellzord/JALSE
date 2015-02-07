@@ -11,7 +11,8 @@ import jalse.listeners.AttributeListener;
  * data type to store/retrieve. {@link Attributable} is an attribute container
  * where attributes can be stored and {@link AttributeListener} can be set to
  * trigger on value updates. Existing or {@code final} classes can be made into
- * attributes by extending {@link NonAttributeWrapper}.
+ * attributes by extending {@link NonAttributeWrapper}.<br>
+ * <br>
  *
  * An example attribute:
  *

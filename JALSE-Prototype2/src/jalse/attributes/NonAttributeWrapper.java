@@ -7,7 +7,8 @@ import java.util.Optional;
  * This is an existing or final classes {@link Attribute} wrapper. Extending
  * non-attribute wrapper will define the existing class as a attribute type
  * allowing its usage within JALSE. Comparing two non-attribute wrappers will
- * compare the objects they are wrapping.
+ * compare the objects they are wrapping.<br>
+ * <br>
  *
  * An example non-attribute wrapper:
  *

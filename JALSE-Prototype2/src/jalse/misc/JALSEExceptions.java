@@ -71,8 +71,8 @@ public class JALSEExceptions {
      *
      * @see Agents
      */
-    public static final Supplier<RuntimeException> INVALID_AGENT = () -> new IllegalArgumentException(
-	    "Agent is invalid");
+    public static final Supplier<RuntimeException> INVALID_AGENT_TYPE = () -> new IllegalArgumentException(
+	    "Agent type is invalid");
 
     /**
      * Runtime exception supplier for when a type is used that does not
@@ -80,8 +80,8 @@ public class JALSEExceptions {
      *
      * @see Core
      */
-    public static final Supplier<RuntimeException> INVALID_ATTRIBUTE_CLASS = () -> new IllegalArgumentException(
-	    "Invalid attribute class");
+    public static final Supplier<RuntimeException> INVALID_ATTRIBUTE_TYPE = () -> new IllegalArgumentException(
+	    "Invalid attribute type");
 
     /**
      * Runtime exception supplier for when {@link Scheduler} methods are used

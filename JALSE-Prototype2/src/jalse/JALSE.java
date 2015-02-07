@@ -235,18 +235,18 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      * Provides a stream of all the agents from each cluster. These agents are
      * wrapped with the supplied agent type.
      *
-     * @param clazz
+     * @param type
      *            Agent type to wrap to.
      * @return A stream of all the agents in the simulation wrapped to the
      *         specified agent type.
      * @throws NullPointerException
      *             If the agent type is null.
      *
-     * @see Agents#wrap(Agent, Class)
+     * @see Agents#asType(Agent, Class)
      */
-    public <T extends Agent> Stream<T> streamAgents(final Class<T> clazz) {
+    public <T extends Agent> Stream<T> streamAgents(final Class<T> type) {
 
-	return streamAgents().map(a -> Agents.wrap(a, clazz));
+	return streamAgents().map(a -> Agents.asType(a, type));
     }
 
     /**
