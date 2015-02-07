@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,7 +38,7 @@ import java.util.stream.Stream;
 public class Cluster extends Core<JALSE, Cluster> {
 
     private final ListenerSet<AgentListener> agentListeners;
-    private final Map<UUID, DefaultAgent> agents;
+    private final Map<UUID, Agent> agents;
     private final Map<Class<?>, Set<Supplier<?>>> listenerSuppliers;
 
     /**
@@ -124,59 +123,47 @@ public class Cluster extends Core<JALSE, Cluster> {
      */
     public Stream<Agent> streamAgents() {
 
-	return Collections.<Agent> unmodifiableCollection(agents.values()).stream();
+	return agents.values().stream();
     }
 
     /**
-     * Provides a stream of the agents from the cluster. These agents are
-     * wrapped with the supplied agent type.
+     * Gets a stream of agents marked with the specified type.
      *
      * @param type
-     *            Agent type to wrap to.
-     * @return A stream of the agents in the cluster wrapped to the specified
-     *         agent type.
-     * @throws NullPointerException
-     *             If the agent type is null.
+     *            Agent type to check for.
+     * @return Set of agents marked with the type.
      *
-     * @see Agents#asType(Agent, Class)
+     * @see Agent#isMarkedAsType(Class)
+     * @see Agent#asType(Class)
      */
-    public <T extends Agent> Stream<T> streamAgents(final Class<T> type) {
+    public <T extends Agent> Stream<T> streamAgentsOfType(final Class<T> type) {
 
-	return streamAgents().map(a -> asType(a, type));
+	return streamAgents().filter(a -> a.isMarkedAsType(type)).map(a -> asType(a, type));
     }
 
     /**
-     * Returns a filtered set of agents which met the predicate.
+     * Gets all the agents within the cluster.
      *
-     * @param filter
-     *            Accepted criteria for an agent.
-     * @return The filtered list or empty if no agents met the criteria.
-     * @throws NullPointerException
-     *             if the filter is null.
+     * @return Gets all agents within the cluster.
      */
-    public Set<Agent> filterAgents(final Predicate<Agent> filter) {
+    public Set<Agent> getAgents() {
 
-	return Collections.unmodifiableSet(agents.values().stream().filter(filter).collect(Collectors.toSet()));
+	return streamAgents().collect(Collectors.toSet());
     }
 
     /**
-     * Returns a filtered set of agents which met the predicate. These agents
-     * are wrapped with the supplied agent type.
+     * Gets all the agents marked with the specified type.
      *
-     * @param filter
-     *            Accepted criteria for an agent.
      * @param type
-     *            Agent type to wrap to.
-     * @return The filtered list or empty if no agents met the criteria.
-     * @throws NullPointerException
-     *             if the filter is null.
+     *            Agent type to check for.
+     * @return Set of agents marked with the type.
      *
-     * @see Agents#asType(Agent, Class)
+     * @see Agent#isMarkedAsType(Class)
+     * @see Agent#asType(Class)
      */
-    public <T extends Agent> Set<T> filterAgents(final Predicate<T> filter, final Class<T> type) {
+    public <T extends Agent> Set<T> getAgentsOfType(final Class<T> type) {
 
-	return Collections.unmodifiableSet(agents.values().stream().map(a -> asType(a, type)).filter(filter)
-		.collect(Collectors.toSet()));
+	return streamAgentsOfType(type).collect(Collectors.toSet());
     }
 
     /**
@@ -209,11 +196,9 @@ public class Cluster extends Core<JALSE, Cluster> {
      *
      * @see Agents#asType(Agent, Class)
      */
-    public <T extends Agent> Optional<T> getAgent(final UUID id, final Class<T> type) {
+    public <T extends Agent> Optional<T> getAgentAsType(final UUID id, final Class<T> type) {
 
-	final Optional<Agent> agent = getAgent(id);
-
-	return agent.isPresent() ? Optional.of(asType(agent.get(), type)) : Optional.empty();
+	return getAgent(id).map(a -> asType(a, type));
     }
 
     /**
@@ -231,7 +216,7 @@ public class Cluster extends Core<JALSE, Cluster> {
      *
      * @return Set of all agent identifiers.
      */
-    public Set<UUID> getAgents() {
+    public Set<UUID> getAgentIDs() {
 
 	return Collections.unmodifiableSet(agents.keySet());
     }
@@ -281,7 +266,7 @@ public class Cluster extends Core<JALSE, Cluster> {
 
 	DefaultAgent killed;
 
-	if ((killed = agents.remove(id)) != null) {
+	if ((killed = (DefaultAgent) agents.remove(id)) != null) {
 
 	    engine.getAgentCount0().defensiveDecrement();
 
@@ -304,13 +289,9 @@ public class Cluster extends Core<JALSE, Cluster> {
      * @see UUID#randomUUID()
      * @see JALSEExceptions#AGENT_LIMIT_REARCHED
      */
-    public UUID newAgent() {
+    public Agent newAgent() {
 
-	final UUID id = UUID.randomUUID();
-
-	newAgent(id);
-
-	return id;
+	return newAgent(UUID.randomUUID());
     }
 
     /**
@@ -361,7 +342,7 @@ public class Cluster extends Core<JALSE, Cluster> {
 	return newAgent0(id, null);
     }
 
-    private Agent newAgent0(final UUID id, Class<? extends Agent> type) {
+    private Agent newAgent0(final UUID id, final Class<? extends Agent> type) {
 
 	engine.getAgentCount0().defensiveIncrement();
 
@@ -392,7 +373,7 @@ public class Cluster extends Core<JALSE, Cluster> {
 
 	agentListeners.getProxy().agentCreated(agent);
 
-	return type != null ? asType(agent, type) : agent;
+	return agent;
     }
 
     /**
@@ -414,10 +395,9 @@ public class Cluster extends Core<JALSE, Cluster> {
      *
      * @see Agents#asType(Agent, Class)
      */
-    @SuppressWarnings("unchecked")
     public <T extends Agent> T newAgent(final UUID id, final Class<T> type) {
 
-	return (T) newAgent0(id, type);
+	return asType(newAgent0(id, type), type);
     }
 
     /**

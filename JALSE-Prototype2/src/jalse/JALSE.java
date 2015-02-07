@@ -167,20 +167,6 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
     }
 
     /**
-     * Returns a filtered set of clusters which met the predicate.
-     *
-     * @param filter
-     *            Accepted criteria for a cluster.
-     * @return The filtered list or empty if no clusters met the criteria.
-     * @throws NullPointerException
-     *             if the filter is null.
-     */
-    public Set<Cluster> filterClusters(final Predicate<Cluster> filter) {
-
-	return Collections.unmodifiableSet(clusters.values().stream().filter(filter).collect(Collectors.toSet()));
-    }
-
-    /**
      * Gets the total number of agents.
      *
      * @return Total number of agents within all clusters.
@@ -215,10 +201,9 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      *
      * @return All agents in the simulation.
      */
-    public Set<UUID> getAgents() {
+    public Set<UUID> getAgentIDs() {
 
-	return Collections.unmodifiableSet(clusters.values().stream().flatMap(c -> c.getAgents().stream())
-		.collect(Collectors.toSet()));
+	return streamClusters().flatMap(c -> c.getAgentIDs().stream()).collect(Collectors.toSet());
     }
 
     /**
@@ -228,7 +213,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      */
     public Stream<Agent> streamAgents() {
 
-	return clusters.values().stream().flatMap(c -> c.streamAgents());
+	return streamClusters().flatMap(c -> c.streamAgents());
     }
 
     /**
@@ -244,9 +229,9 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      *
      * @see Agents#asType(Agent, Class)
      */
-    public <T extends Agent> Stream<T> streamAgents(final Class<T> type) {
+    public <T extends Agent> Stream<T> streamAgentsOfType(final Class<T> type) {
 
-	return streamAgents().map(a -> Agents.asType(a, type));
+	return streamClusters().flatMap(c -> c.streamAgentsOfType(type));
     }
 
     /**
@@ -299,7 +284,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      *
      * @return IDs of all clusters.
      */
-    public Set<UUID> getClusters() {
+    public Set<UUID> getClusterIDs() {
 
 	return Collections.unmodifiableSet(clusters.keySet());
     }
@@ -311,7 +296,17 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      */
     public Stream<Cluster> streamClusters() {
 
-	return Collections.<Cluster> unmodifiableCollection(clusters.values()).stream();
+	return clusters.values().stream();
+    }
+
+    /**
+     * Gets all of the clusters within JALSE.
+     *
+     * @return All of the clusters.
+     */
+    public Set<Cluster> getClusters() {
+
+	return streamClusters().collect(Collectors.toSet());
     }
 
     /**
@@ -391,20 +386,14 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
     /**
      * Creates a new cluster with a random ID.
      *
-     * @return The newly created cluster's ID.
-     * @throws IllegalStateException
-     *             If the cluster limit has been reached.
+     * @return The newly created cluster.
      *
      * @see UUID#randomUUID()
      * @see JALSEExceptions#CLUSTER_LIMIT_REARCHED
      */
-    public UUID newCluster() {
+    public Cluster newCluster() {
 
-	final UUID id = UUID.randomUUID();
-
-	newCluster(id);
-
-	return id;
+	return newCluster(UUID.randomUUID());
     }
 
     /**

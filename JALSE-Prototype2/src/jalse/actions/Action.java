@@ -10,10 +10,8 @@ import jalse.attributes.Attribute;
 import jalse.misc.Identifiable;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Action is the JALSE equivalent of {@link Runnable}. Actions are performed
@@ -49,24 +47,21 @@ public interface Action<T> {
     }
 
     /**
-     * Gets any agent from a cluster. The agent is wrapped to the specified
-     * type.
+     * Gets any agent marked of the specified type from the cluster.
      *
      * @param cluster
      *            Cluster to get agent from.
      * @param type
-     *            Agent type to wrap to.
+     *            Type agent has been marked by.
      * @return Gets an Optional of the resulting agent or an empty optional if
-     *         none were found.
-     * @throws NullPointerException
-     *             If the agent type is null.
+     *         none matching were found.
      *
+     * @see Agent#isMarkedAsType(Class)
      * @see Agents#asType(Agent, Class)
-     *
      */
-    default <S extends Agent> Optional<S> anyAgent(final Cluster cluster, final Class<S> type) {
+    default <S extends Agent> Optional<S> anyAgentOfType(final Cluster cluster, final Class<S> type) {
 
-	return cluster.streamAgents(type).findAny();
+	return cluster.streamAgentsOfType(type).findAny();
     }
 
     /**
@@ -132,7 +127,7 @@ public interface Action<T> {
      * @return Predicate of {@code true} if the agent is of the type or
      *         {@code false} if it is not.
      */
-    default <S extends Agent> Predicate<S> isMarkedAs(final Class<? extends Agent> type) {
+    default <S extends Agent> Predicate<S> isMarkedAsType(final Class<? extends Agent> type) {
 
 	return a -> a.isMarkedAsType(type);
     }
@@ -145,54 +140,9 @@ public interface Action<T> {
      * @return Predicate of {@code true} if the agent is not of the type or
      *         {@code false} if it is.
      */
-    default <S extends Agent> Predicate<S> notMarkedAs(final Class<? extends Agent> type) {
+    default <S extends Agent> Predicate<S> notMarkedAsType(final Class<? extends Agent> type) {
 
-	return this.<S> isMarkedAs(type).negate();
-    }
-
-    /**
-     * Convenience method for filtering on clusters and then agents.
-     *
-     * @param jalse
-     *            JALSE to start from.
-     * @param clusterFilter
-     *            Predicate to filter clusters.
-     * @param agentFilter
-     *            Predicate to filter agents.
-     * @return Filtered set of agents or an empty set if none were suitable.
-     *
-     * @see JALSE#filterClusters(Predicate)
-     * @see Cluster#filterAgents(Predicate)
-     */
-    default Set<Agent> filterAgents(final JALSE jalse, final Predicate<Cluster> clusterFilter,
-	    final Predicate<Agent> agentFilter) {
-
-	return jalse.filterClusters(clusterFilter).stream().flatMap(c -> c.filterAgents(agentFilter).stream())
-		.collect(Collectors.toSet());
-    }
-
-    /**
-     * Convenience method for filtering on clusters and then agents. The agents
-     * are wrapped to the specified type.
-     *
-     * @param jalse
-     *            JALSE to start from.
-     * @param clusterFilter
-     *            Predicate to filter clusters.
-     * @param agentFilter
-     *            Predicate to filter agents.
-     * @param type
-     *            Agent type to wrap to.
-     * @return Filtered set of agents or an empty set if none were suitable.
-     *
-     * @see JALSE#filterClusters(Predicate)
-     * @see Cluster#filterAgents(Predicate, Class)
-     */
-    default <S extends Agent> Set<S> filterAgents(final JALSE jalse, final Predicate<Cluster> clusterFilter,
-	    final Predicate<S> agentFilter, final Class<S> type) {
-
-	return jalse.filterClusters(clusterFilter).stream().flatMap(c -> c.filterAgents(agentFilter, type).stream())
-		.collect(Collectors.toSet());
+	return this.<S> isMarkedAsType(type).negate();
     }
 
     /**

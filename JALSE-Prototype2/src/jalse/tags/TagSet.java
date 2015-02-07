@@ -84,7 +84,9 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
     @Override
     public synchronized boolean contains(final Object o) {
 
-	return tags.get(o.getClass()).contains(o);
+	final Set<Tag> tagsOfType = tags.get(o.getClass());
+
+	return tagsOfType != null && tagsOfType.contains(o);
     }
 
     @Override
