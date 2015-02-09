@@ -43,10 +43,7 @@ class DefaultAgent extends Core<JALSE, Agent> implements Agent {
 
 	    for (final Class<? extends Agent> t : Agents.getAncestry(type)) {
 
-		if (!tags.add(new AgentType(t))) {
-
-		    break;
-		}
+		tags.add(new AgentType(t));
 	    }
 	}
 
