@@ -59,7 +59,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 
 	final Set<T> tagsOfType = (Set<T>) tags.get(type);
 
-	return tagsOfType != null ? new HashSet<>(tagsOfType) : Collections.emptySet();
+	return tagsOfType != null ? Collections.unmodifiableSet(tagsOfType) : Collections.emptySet();
     }
 
     @Override

@@ -5,7 +5,9 @@ import jalse.agents.Agents;
 import jalse.tags.AgentType;
 import jalse.tags.Parent;
 
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 class DefaultAgent extends Core<JALSE, Agent> implements Agent {
 
@@ -37,43 +39,32 @@ class DefaultAgent extends Core<JALSE, Agent> implements Agent {
     @Override
     public boolean markAsType(final Class<? extends Agent> type) {
 
-	boolean added = false;
+	boolean result = false;
 
-	if (added = tags.add(new AgentType(type))) {
+	if (!isMarkedAsType(type)) {
 
-	    for (final Class<? extends Agent> t : Agents.getAncestry(type)) {
-
-		tags.add(new AgentType(t));
-	    }
+	    tags.add(new AgentType(type));
+	    Agents.getAncestry(type).stream().map(t -> new AgentType(t)).forEach(tags::add);
+	    result = true;
 	}
 
-	return added;
+	return result;
     }
 
     @Override
     public boolean isMarkedAsType(final Class<? extends Agent> type) {
 
-	return tags.contains(new AgentType(type));
+	return tags.getOfType(AgentType.class).stream().anyMatch(at -> Agents.isOrDescendant(at.getType(), type));
     }
 
     @Override
     public boolean unmarkAsType(final Class<? extends Agent> type) {
 
-	boolean removed;
+	final Set<AgentType> descendants = tags.getOfType(AgentType.class).stream()
+		.filter(at -> Agents.isOrDescendant(at.getType(), type)).collect(Collectors.toSet());
 
-	if (removed = tags.remove(new AgentType(type))) {
+	descendants.forEach(tags::remove);
 
-	    for (final AgentType at : tags.getOfType(AgentType.class)) {
-
-		final Class<? extends Agent> t = at.getType();
-
-		if (Agents.isDescendant(t, type)) {
-
-		    tags.remove(at);
-		}
-	    }
-	}
-
-	return removed;
+	return !descendants.isEmpty();
     }
 }

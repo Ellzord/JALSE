@@ -257,17 +257,19 @@ public final class Agents {
     }
 
     /**
-     * Checks if the specified type is descendant from the specified ancestor.
-     * type.
+     * Checks if the specified type is equal to or a descendant from the
+     * specified ancestor. type.
      *
      * @param descendant
      *            Descendant type.
      * @param ancestor
      *            Ancestor type.
-     * @return Whether the descendant is descended from the ancestor type.
+     * @return Whether the descendant is equal or descended from the ancestor
+     *         type.
      */
-    public static boolean isDescendant(final Class<? extends Agent> descendant, final Class<? extends Agent> ancestor) {
+    public static boolean isOrDescendant(final Class<? extends Agent> descendant,
+	    final Class<? extends Agent> ancestor) {
 
-	return !descendant.equals(ancestor) && ancestor.isAssignableFrom(descendant);
+	return ancestor.isAssignableFrom(descendant);
     }
 }
