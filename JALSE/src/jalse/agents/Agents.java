@@ -5,6 +5,7 @@ import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.attributes.Attribute;
 import jalse.misc.JALSEExceptions;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -71,10 +72,53 @@ public final class Agents {
 	}
     };
 
-    @SuppressWarnings("unchecked")
-    private static Class<? extends Attribute> getAttrClass(final Type type) {
+    private static class AgentHandler implements InvocationHandler {
 
-	return (Class<? extends Attribute>) ((ParameterizedType) type).getActualTypeArguments()[0];
+	private final Agent agent;
+
+	public AgentHandler(final Agent agent) {
+
+	    this.agent = agent;
+	}
+
+	@Override
+	public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+
+	    Object result = null;
+
+	    if (CACHED_METHODS.contains(method)) {
+
+		result = method.invoke(agent, args);
+	    }
+	    else {
+
+		final Type rt = method.getGenericReturnType();
+
+		if (args == null) {
+
+		    result = agent.getOfType(getAttrClass(rt));
+		}
+		else {
+
+		    result = args[0] != null ? agent.associate((Attribute) args[0]) : agent
+			    .disassociate(getAttrClass(rt));
+		}
+	    }
+
+	    return result;
+	}
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void addAncestors(final Set<Class<? extends Agent>> ancestry, final Class<?> type) {
+
+	for (final Class<?> t : type.getInterfaces()) {
+
+	    if (!t.equals(Agent.class) && ancestry.add((Class<? extends Agent>) t)) {
+
+		addAncestors(ancestry, t);
+	    }
+	}
     }
 
     /**
@@ -87,6 +131,39 @@ public final class Agents {
      *            Ancestor type.
      * @return Whether the descendant is descended from the ancestor type.
      */
+
+    /**
+     * Wraps an agent as the supplied agent type.
+     *
+     * @param agent
+     *            Agent to wrap.
+     * @param type
+     *            Agent type to wrap to.
+     * @return The wrapped agent.
+     *
+     * @throws NullPointerException
+     *             If the agent or agent type are null.
+     * @throws IllegalArgumentException
+     *             If the agent type does not meet the criteria defined above.
+     *
+     * @see Agents
+     * @see JALSEExceptions#INVALID_AGENT_TYPE
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Agent> T asType(final Agent agent, final Class<T> type) {
+
+	validateType(type);
+
+	InvocationHandler handler = null;
+
+	if (Proxy.isProxyClass(agent.getClass())) {
+
+	    handler = Proxy.getInvocationHandler(agent);
+	}
+
+	return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[] { type },
+		handler instanceof AgentHandler ? handler : new AgentHandler(agent));
+    }
 
     /**
      * Gets all ancestors for the specified descendant type (not including
@@ -114,15 +191,25 @@ public final class Agents {
     }
 
     @SuppressWarnings("unchecked")
-    private static void addAncestors(final Set<Class<? extends Agent>> ancestry, final Class<?> type) {
+    private static Class<? extends Attribute> getAttrClass(final Type type) {
 
-	for (final Class<?> t : type.getInterfaces()) {
+	return (Class<? extends Attribute>) ((ParameterizedType) type).getActualTypeArguments()[0];
+    }
 
-	    if (!t.equals(Agent.class) && ancestry.add((Class<? extends Agent>) t)) {
+    /**
+     * Checks if the specified type is equal to or a descendant from the
+     * specified ancestor. type.
+     *
+     * @param descendant
+     *            Descendant type.
+     * @param ancestor
+     *            Ancestor type.
+     * @return Whether the descendant is equal or descended from the ancestor
+     *         type.
+     */
+    public static boolean isOrDescendant(final Class<? extends Agent> descendant, final Class<? extends Agent> ancestor) {
 
-		addAncestors(ancestry, t);
-	    }
-	}
+	return ancestor.isAssignableFrom(descendant);
     }
 
     /**
@@ -203,73 +290,8 @@ public final class Agents {
 	}
     }
 
-    /**
-     * Wraps an agent as the supplied agent type.
-     *
-     * @param agent
-     *            Agent to wrap.
-     * @param type
-     *            Agent type to wrap to.
-     * @return The wrapped agent.
-     *
-     * @throws NullPointerException
-     *             If the agent or agent type are null.
-     * @throws IllegalArgumentException
-     *             If the agent type does not meet the criteria defined above.
-     *
-     * @see Agents
-     * @see JALSEExceptions#INVALID_AGENT_TYPE
-     */
-    @SuppressWarnings("unchecked")
-    public static <T extends Agent> T asType(final Agent agent, final Class<T> type) {
-
-	validateType(type);
-
-	return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[] { type }, (p, m, a) -> {
-
-	    Object result = null;
-
-	    if (CACHED_METHODS.contains(m)) {
-
-		result = m.invoke(agent, a);
-	    }
-	    else {
-
-		final Type rt = m.getGenericReturnType();
-
-		if (a == null || a.length == 0) {
-
-		    result = agent.getOfType(getAttrClass(rt));
-		}
-		else {
-
-		    result = a[0] != null ? agent.associate((Attribute) a[0]) : agent.disassociate(getAttrClass(rt));
-		}
-	    }
-
-	    return result;
-	});
-    }
-
     private Agents() {
 
 	throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Checks if the specified type is equal to or a descendant from the
-     * specified ancestor. type.
-     *
-     * @param descendant
-     *            Descendant type.
-     * @param ancestor
-     *            Ancestor type.
-     * @return Whether the descendant is equal or descended from the ancestor
-     *         type.
-     */
-    public static boolean isOrDescendant(final Class<? extends Agent> descendant,
-	    final Class<? extends Agent> ancestor) {
-
-	return ancestor.isAssignableFrom(descendant);
     }
 }
