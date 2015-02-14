@@ -493,7 +493,7 @@ public abstract class Engine {
      *
      * @return First action to be run or null if not set.
      */
-    protected Action<?> getFirstAction0() {
+    protected Action<?> getFirstAction() {
 
 	return first.getAction();
     }
@@ -503,7 +503,7 @@ public abstract class Engine {
      *
      * @return Last action to be run or null if not set.
      */
-    protected Action<?> getLastAction0() {
+    protected Action<?> getLastAction() {
 
 	return last.getAction();
     }
@@ -611,7 +611,7 @@ public abstract class Engine {
      * @param actor
      *            Actor to perform action on.
      */
-    protected void setFirstAction0(final Action<?> action, final Object actor) {
+    protected void setFirstAction(final Action<?> action, final Object actor) {
 
 	first.set(action, actor);
     }
@@ -624,7 +624,7 @@ public abstract class Engine {
      * @param actor
      *            Actor to perform action on.
      */
-    protected void setLastAction0(final Action<?> action, final Object actor) {
+    protected void setLastAction(final Action<?> action, final Object actor) {
 
 	last.set(action, actor);
     }

@@ -43,7 +43,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
 
     /**
      * An {@link AtomicInteger} implementation with defensive
-     * increment/decrement functionality. When doing so predicate must be met or
+     * increment/decrement functionality. When doing so if the predicate is met
      * the supplied exception will be thrown.
      *
      */
@@ -72,7 +72,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
 
 	private void testPossibleAdd(final int i) {
 
-	    if (!predicate.test(get() + i)) {
+	    if (predicate.test(get() + i)) {
 
 		throwRE(supplier);
 	    }
@@ -139,8 +139,8 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
 	this.clusterLimit = clusterLimit;
 	this.agentLimit = agentLimit;
 
-	agentCount = new DefensiveAtomicInteger(i -> i <= agentLimit, AGENT_LIMIT_REARCHED);
-	clusterCount = new DefensiveAtomicInteger(i -> i <= clusterLimit, CLUSTER_LIMIT_REARCHED);
+	agentCount = new DefensiveAtomicInteger(i -> i > agentLimit, AGENT_LIMIT_REARCHED);
+	clusterCount = new DefensiveAtomicInteger(i -> i > clusterLimit, CLUSTER_LIMIT_REARCHED);
 
 	clusters = new ConcurrentHashMap<>();
 	clusterListeners = new ListenerSet<>(ClusterListener.class);
@@ -317,7 +317,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
     @SuppressWarnings("unchecked")
     public Action<JALSE> getFirstAction() {
 
-	return (Action<JALSE>) getFirstAction0();
+	return (Action<JALSE>) super.getFirstAction();
     }
 
     /**
@@ -328,7 +328,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
     @SuppressWarnings("unchecked")
     public Action<JALSE> getLastAction() {
 
-	return (Action<JALSE>) getLastAction0();
+	return (Action<JALSE>) super.getLastAction();
     }
 
     /**
@@ -341,7 +341,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      */
     public boolean hasFirstAction() {
 
-	return getFirstAction0() != null;
+	return super.getFirstAction() != null;
     }
 
     /**
@@ -354,7 +354,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      */
     public boolean hasLastAction() {
 
-	return getLastAction0() != null;
+	return super.getLastAction() != null;
     }
 
     /**
@@ -458,7 +458,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      */
     public void setFirstAction(final Action<JALSE> action) {
 
-	setFirstAction0(action, this);
+	setFirstAction(action, this);
     }
 
     /**
@@ -470,7 +470,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
      */
     public void setLastAction(final Action<JALSE> action) {
 
-	setLastAction0(action, this);
+	setLastAction(action, this);
     }
 
     @Override
