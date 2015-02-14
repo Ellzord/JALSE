@@ -27,14 +27,18 @@ import java.util.logging.Logger;
 
 /**
  * A task based engine for scheduling {@link Action} at different intervals.
- * This engine will use up to the number of threads specified upon creation
- * (depending on number of {@link Action} waiting to be executed per tick). The
+ * This engine will use up to the number of threads specified as workers
+ * (depending on number of {@link Action} waiting to be executed per tick). An
+ * extra control thread will be added to the engine for action maintenance. The
  * engine will not be active upon creation it must be started with
  * {@link #tick()}.
  *
  * @author Elliot Ford
  *
  * @see Action#perform(Object, TickInfo)
+ * 
+ * @see #SPIN_YIELD_THRESHOLD
+ * @see #TERMINATION_TIMEOUT
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class Engine {
@@ -247,13 +251,15 @@ public abstract class Engine {
 
     /**
      * When Java sleeps it can sometimes be inaccurate, the engine will sleep up
-     * to this threshold then spin yield until the desired wake time.
+     * to this threshold then spin yield until the desired wake time (configured
+     * via {@code jalse.engine.termination_timeout} system property).
      */
     public static final long SPIN_YIELD_THRESHOLD;
 
     /**
      * How long the engine will wait until it times out and interrupts running
-     * threads on shutdown.
+     * threads on shutdown (configured via
+     * {@code jalse.engine.spin_yield_threshold} system property).
      */
     public static final long TERMINATION_TIMEOUT;
 
@@ -307,21 +313,22 @@ public abstract class Engine {
     private int state;
 
     /**
-     * Creates a new instance of Engine.
+     * Creates a new instance of Engine. An extra thread is added for a control
+     * thread.
      *
      * @param tps
      *            Maximum ticks per second to run at.
      * @param totalThreads
-     *            Maximum number of threads to use.
+     *            Maximum number of threads to use for performing actions.
      */
     protected Engine(final int tps, final int totalThreads) {
 
-	if (tps <= 0 || totalThreads <= 0) {
+	if (tps <= 0 || totalThreads <= 0 || totalThreads == Integer.MAX_VALUE) {
 
 	    throw new IllegalArgumentException();
 	}
 
-	executor = new WorkExecutor(totalThreads < Integer.MAX_VALUE ? totalThreads + 1 : totalThreads);
+	executor = new WorkExecutor(totalThreads + 1);
 	work = new PriorityQueue<>();
 	phaser = new Phaser();
 	futures = new HashMap<>();
@@ -582,7 +589,7 @@ public abstract class Engine {
      * @return Scheduled action ID.
      *
      */
-    protected UUID schedule0(final Action<?> action, final Object actor, final long initialDelay, final long period,
+    protected UUID schedule(final Action<?> action, final Object actor, final long initialDelay, final long period,
 	    final TimeUnit unit) {
 
 	final UUID key = UUID.randomUUID();

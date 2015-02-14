@@ -1,7 +1,7 @@
 package jalse;
 
 import static jalse.misc.JALSEExceptions.INVALID_ATTRIBUTE_TYPE;
-import static jalse.misc.JALSEExceptions.NOT_ATTACHED;
+import static jalse.misc.JALSEExceptions.NOT_ALIVE;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
 import jalse.actions.Scheduler;
@@ -92,44 +92,20 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     protected Core(final UUID id, final T engine) {
 
 	this.id = id;
-
-	attach(engine);
+	this.engine = engine;
 
 	tasks = Collections.newSetFromMap(new WeakHashMap<>());
-
 	attributes = new ConcurrentHashMap<>();
 	listeners = new HashMap<>();
 	tags = new TagSet();
     }
 
     /**
-     * Detaches from the engine.
+     * Whether the core is alive and can submit to the engine.
+     * 
+     * @return Whether the core is alive.
      */
-    protected void detatch() {
-
-	engine = null;
-    }
-
-    /**
-     * Attaches to an engine.
-     *
-     * @param engine
-     *            Engine to attach to.
-     */
-    protected void attach(final T engine) {
-
-	this.engine = engine;
-    }
-
-    /**
-     * Whether core is attached to an engine.
-     *
-     * @return Engine attachment.
-     */
-    protected boolean isAttached() {
-
-	return engine != null;
-    }
+    public abstract boolean isAlive();
 
     @Override
     public <U extends Attribute> boolean addListener(final Class<U> attr, final AttributeListener<U> listener) {
@@ -189,11 +165,6 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
     @Override
     public boolean cancel(final UUID action) {
-
-	if (!isAttached()) {
-
-	    throwRE(NOT_ATTACHED);
-	}
 
 	return engine.cancel(action);
     }
@@ -315,11 +286,6 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     @Override
     public boolean isActive(final UUID action) {
 
-	if (!isAttached()) {
-
-	    throwRE(NOT_ATTACHED);
-	}
-
 	return engine.isActive(action);
     }
 
@@ -359,16 +325,16 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     @Override
     public UUID schedule(final Action<S> action, final long initialDelay, final long period, final TimeUnit unit) {
 
-	if (!isAttached()) {
+	if (!isAlive()) {
 
-	    throwRE(NOT_ATTACHED);
+	    throwRE(NOT_ALIVE);
 	}
 
 	UUID task;
 
 	synchronized (tasks) {
 
-	    tasks.add(task = engine.schedule0(action, this, initialDelay, period, unit));
+	    tasks.add(task = engine.schedule(action, this, initialDelay, period, unit));
 	}
 
 	return task;

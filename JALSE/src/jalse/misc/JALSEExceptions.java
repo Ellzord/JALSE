@@ -4,7 +4,7 @@ import jalse.Cluster;
 import jalse.Core;
 import jalse.Engine;
 import jalse.JALSE;
-import jalse.actions.Scheduler;
+import jalse.actions.Action;
 import jalse.agents.Agent;
 import jalse.agents.Agents;
 import jalse.attributes.Attribute;
@@ -84,13 +84,13 @@ public class JALSEExceptions {
 	    "Invalid attribute type");
 
     /**
-     * Runtime exception supplier for when {@link Scheduler} methods are used
-     * without being attached to an engine.
+     * Runtime exception supplier for when {@link Action} are scheduled without
+     * being alive.
      *
      * @see Core
      */
-    public static final Supplier<RuntimeException> NOT_ATTACHED = () -> new IllegalStateException(
-	    "Not attached to an engine");
+    public static final Supplier<RuntimeException> NOT_ALIVE = () -> new IllegalStateException(
+	    "Not alive so cannot submit more actions to be processed.");
 
     private JALSEExceptions() {
 

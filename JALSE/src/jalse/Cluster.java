@@ -271,7 +271,6 @@ public class Cluster extends Core<JALSE, Cluster> {
 	    engine.getAgentCount0().defensiveDecrement();
 
 	    killed.cancelTasks();
-	    killed.detatch();
 
 	    agentListeners.getProxy().agentKilled(killed);
 	}
@@ -320,7 +319,7 @@ public class Cluster extends Core<JALSE, Cluster> {
      */
     public boolean isAlive() {
 
-	return isAttached();
+	return engine.isClusterAlive(id);
     }
 
     /**
@@ -453,5 +452,18 @@ public class Cluster extends Core<JALSE, Cluster> {
 	}
 
 	return removed;
+    }
+
+    /**
+     * Checks whether the agent is alive within the cluster.
+     * 
+     * @param id
+     *            ID of agent.
+     * @return {@code true} if the cluster contains the agent and {@code false}
+     *         if it does not.
+     */
+    public boolean isAgentAlive(UUID id) {
+
+	return agents.containsKey(id);
     }
 }

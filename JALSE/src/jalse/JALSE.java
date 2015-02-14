@@ -374,7 +374,6 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
 
 	    clusterCount.defensiveDecrement();
 
-	    killed.detatch();
 	    killed.cancelTasks();
 
 	    clusterListeners.getProxy().clusterCreated(killed);
@@ -447,7 +446,7 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
     @Override
     public UUID schedule(final Action<JALSE> action, final long initialDelay, final long period, final TimeUnit unit) {
 
-	return schedule0(action, this, initialDelay, period, unit);
+	return schedule(action, this, initialDelay, period, unit);
     }
 
     /**
@@ -478,5 +477,18 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
     public Set<Tag> getTags() {
 
 	return Collections.unmodifiableSet(tags);
+    }
+
+    /**
+     * Checks whether the cluster is alive within the engine.
+     * 
+     * @param id
+     *            ID of cluster.
+     * @return {@code true} if the engine contains the cluster and {@code false}
+     *         if it does not.
+     */
+    public boolean isClusterAlive(UUID id) {
+
+	return clusters.containsKey(id);
     }
 }

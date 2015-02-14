@@ -33,7 +33,7 @@ class DefaultAgent extends Core<JALSE, Agent> implements Agent {
     @Override
     public boolean isAlive() {
 
-	return isAttached();
+	return cluster.isAgentAlive(id);
     }
 
     @Override
