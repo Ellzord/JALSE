@@ -1,12 +1,14 @@
 package jalse;
 
+import jalse.agents.Agent;
+
 /**
  * A builder for JALSE. Each method in this builder can be chained. Any
  * parameter not supplied will be defaulted to what is specified in the
  * {@code DEFAULT_} fields.
  *
  * @author Elliot Ford
- * 
+ *
  * @see #DEFAULT_TPS
  * @see #DEFAULT_TOTAL_THREADS
  * @see #DEFAULT_CLUSTER_LIMIT
@@ -15,15 +17,31 @@ package jalse;
  */
 public class JALSEBuilder {
 
+    /**
+     * The default ticks per second ({@code 30}).
+     */
     public static final int DEFAULT_TPS = 30;
+
+    /**
+     * The default total threads to be used by the engine for performing actions
+     * ({@code Integer.MAX_VALUE - 1}).
+     */
     public static final int DEFAULT_TOTAL_THREADS = Integer.MAX_VALUE - 1;
+
+    /**
+     * The default {@link Cluster} limit ({@code Integer.MAX_VALUE}).
+     */
     public static final int DEFAULT_CLUSTER_LIMIT = Integer.MAX_VALUE;
+
+    /**
+     * The default {@link Agent} limit ({@code Integer.MAX_VALUE}).
+     */
     public static final int DEFAULT_AGENT_LIMIT = Integer.MAX_VALUE;
 
     private int agentLimit;
     private int clusterLimit;
     private int totalThreads;
-    private final int tps;
+    private int tps;
 
     /**
      * Creates a new builder with only default values.
@@ -55,6 +73,20 @@ public class JALSEBuilder {
     public JALSE create() {
 
 	return new JALSE(tps, totalThreads, clusterLimit, agentLimit);
+    }
+
+    /**
+     * Sets the ticks per second.
+     *
+     * @param tps
+     *            Ticks per second.
+     * @return This builder.
+     */
+    public JALSEBuilder setTPS(final int tps) {
+
+	this.tps = tps;
+
+	return this;
     }
 
     /**
