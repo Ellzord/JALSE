@@ -28,4 +28,9 @@ public abstract class AttributeAdapter<T extends Attribute> implements Attribute
     public void attributeRemoved(final T attr) {
 
     }
+
+    @Override
+    public void attributeReplaced(T newAttr, T oldAttr) {
+
+    }
 }

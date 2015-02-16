@@ -169,11 +169,6 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
 	final U previous = (U) attributes.put(type, attr);
 
-	if (previous != null) {
-
-	    fireAttributeRemoved(previous);
-	}
-
 	ListenerSet<? extends AttributeListener<U>> ls;
 
 	synchronized (listeners) {
@@ -183,7 +178,14 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
 	if (ls != null) {
 
-	    ls.getProxy().attributeAdded(attr);
+	    if (previous != null) {
+
+		ls.getProxy().attributeReplaced(attr, previous);
+	    }
+	    else {
+
+		ls.getProxy().attributeAdded(attr);
+	    }
 	}
 
 	return Optional.ofNullable(previous);
@@ -217,7 +219,17 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 
 	if (previous != null) {
 
-	    fireAttributeRemoved(previous);
+	    ListenerSet<? extends AttributeListener<U>> ls;
+
+	    synchronized (listeners) {
+
+		ls = (ListenerSet<? extends AttributeListener<U>>) listeners.get(attr);
+	    }
+
+	    if (ls != null) {
+
+		ls.getProxy().attributeRemoved(previous);
+	    }
 	}
 
 	return Optional.ofNullable(previous);
@@ -251,22 +263,6 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 	});
 
 	return op.isPresent();
-    }
-
-    @SuppressWarnings("unchecked")
-    private <U extends Attribute> void fireAttributeRemoved(final U attr) {
-
-	ListenerSet<? extends AttributeListener<U>> ls;
-
-	synchronized (listeners) {
-
-	    ls = (ListenerSet<? extends AttributeListener<U>>) listeners.get(attr.getClass());
-	}
-
-	if (ls != null) {
-
-	    ls.getProxy().attributeRemoved(attr);
-	}
     }
 
     @SuppressWarnings("unchecked")
