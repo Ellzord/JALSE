@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Core can have its own {@link Attribute}, {@link Tag} and it can be attached
@@ -80,6 +81,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
     private final Map<Class<?>, Attribute> attributes;
     private final Map<Class<?>, ListenerSet<AttributeListener<?>>> listeners;
     private final Set<UUID> tasks;
+    private final AtomicBoolean alive;
 
     /**
      * Creates a new instance of core.
@@ -98,6 +100,7 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
 	attributes = new ConcurrentHashMap<>();
 	listeners = new HashMap<>();
 	tags = new TagSet();
+	alive = new AtomicBoolean();
     }
 
     /**
@@ -105,7 +108,30 @@ public abstract class Core<T extends Engine, S> implements Identifiable, Attribu
      * 
      * @return Whether the core is alive.
      */
-    public abstract boolean isAlive();
+    public boolean isAlive() {
+
+	return alive.get();
+    }
+
+    /**
+     * Marks the core as alive.
+     * 
+     * @return Whether the core was alive.
+     */
+    protected boolean markAsAlive() {
+
+	return alive.getAndSet(true);
+    }
+
+    /**
+     * Marks the core as dead.
+     * 
+     * @return Whether the core was alive.
+     */
+    protected boolean markAsDead() {
+
+	return alive.getAndSet(false);
+    }
 
     @Override
     public <U extends Attribute> boolean addListener(final Class<U> attr, final AttributeListener<U> listener) {

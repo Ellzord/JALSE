@@ -375,6 +375,8 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
 	    clusterCount.defensiveDecrement();
 
 	    killed.cancelTasks();
+	    killed.markAsDead();
+	    killed.killAgents();
 
 	    clusterListeners.getProxy().clusterCreated(killed);
 	}
@@ -419,6 +421,8 @@ public class JALSE extends Engine implements Taggable, Scheduler<JALSE> {
 
 	    throwRE(CLUSTER_ALREADY_ASSOCIATED);
 	}
+
+	cluster.markAsAlive();
 
 	clusterListeners.getProxy().clusterCreated(cluster);
 

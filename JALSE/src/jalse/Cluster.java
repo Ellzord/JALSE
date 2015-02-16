@@ -2,6 +2,7 @@ package jalse;
 
 import static jalse.agents.Agents.asType;
 import static jalse.misc.JALSEExceptions.AGENT_ALREADY_ASSOCIATED;
+import static jalse.misc.JALSEExceptions.NOT_ALIVE;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
 import jalse.agents.Agent;
@@ -14,6 +15,7 @@ import jalse.misc.JALSEExceptions;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -271,6 +273,7 @@ public class Cluster extends Core<JALSE, Cluster> {
 	    engine.getAgentCount0().defensiveDecrement();
 
 	    killed.cancelTasks();
+	    killed.markAsDead();
 
 	    agentListeners.getProxy().agentKilled(killed);
 	}
@@ -313,16 +316,6 @@ public class Cluster extends Core<JALSE, Cluster> {
     }
 
     /**
-     * Whether the cluster is alive.
-     *
-     * @return Whether the cluster is associated to a JALSE.
-     */
-    public boolean isAlive() {
-
-	return engine.isClusterAlive(id);
-    }
-
-    /**
      * Creates new agent with the specified ID.
      *
      * @param id
@@ -343,6 +336,11 @@ public class Cluster extends Core<JALSE, Cluster> {
 
     private Agent newAgent0(final UUID id, final Class<? extends Agent> type) {
 
+	if (!isAlive()) {
+
+	    throwRE(NOT_ALIVE);
+	}
+
 	engine.getAgentCount0().defensiveIncrement();
 
 	final DefaultAgent agent;
@@ -351,6 +349,8 @@ public class Cluster extends Core<JALSE, Cluster> {
 
 	    throwRE(AGENT_ALREADY_ASSOCIATED);
 	}
+
+	agent.markAsAlive();
 
 	if (type != null) {
 
@@ -465,5 +465,15 @@ public class Cluster extends Core<JALSE, Cluster> {
     public boolean isAgentAlive(UUID id) {
 
 	return agents.containsKey(id);
+    }
+
+    /**
+     * Kills all the agents in the cluster.
+     * 
+     * @see #killAgent(UUID)
+     */
+    protected void killAgents() {
+
+	new HashSet<>(agents.keySet()).forEach(this::killAgent);
     }
 }

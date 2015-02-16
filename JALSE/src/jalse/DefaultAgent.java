@@ -31,12 +31,6 @@ class DefaultAgent extends Core<JALSE, Agent> implements Agent {
     }
 
     @Override
-    public boolean isAlive() {
-
-	return cluster.isAgentAlive(id);
-    }
-
-    @Override
     public boolean markAsType(final Class<? extends Agent> type) {
 
 	boolean result = false;
