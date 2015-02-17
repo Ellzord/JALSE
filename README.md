@@ -16,7 +16,7 @@ JALSE is a lightweight framework for simple simulation written in Java 8.
 #### Clusters
 * Have unique IDs.
 * Can have Attributes.
-* Used Group agents.
+* Used to Group agents.
 * Updates can have trigger listeners.
 * Can automatically apply tigger listeners to Agents.
 * Can have Actions scheduled against them.
