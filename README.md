@@ -36,5 +36,5 @@ Check out the [Wiki](https://github.com/Ellzord/JALSE/wiki) for more information
 ### Going forward
 JALSE is still in development - to find out what is on the horizon see [Enhancements](https://github.com/Ellzord/JALSE/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) and [Future changes](https://github.com/Ellzord/JALSE/wiki/Future-changes)!
 
-### Performance tuning
+### Shout-outs
 I use [JProfiler](http://www.ej-technologies.com/products/jprofiler/overview.html) for performance tuning.
