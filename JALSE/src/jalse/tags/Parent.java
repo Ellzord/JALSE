@@ -1,8 +1,7 @@
 package jalse.tags;
 
-import jalse.misc.Identifiable;
+import jalse.misc.AbstractIdentifiable;
 
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -11,27 +10,14 @@ import java.util.UUID;
  * @author Elliot Ford
  *
  */
-public class Parent implements Tag, Identifiable {
-
-    private final UUID id;
+public class Parent extends AbstractIdentifiable implements Tag {
 
     /**
      * @param id
+     *            ID of the parent.
      */
     public Parent(final UUID id) {
 
-	this.id = Objects.requireNonNull(id);
-    }
-
-    @Override
-    public UUID getID() {
-
-	return id;
-    }
-
-    @Override
-    public String toString() {
-
-	return toString(this);
+	super(id);
     }
 }

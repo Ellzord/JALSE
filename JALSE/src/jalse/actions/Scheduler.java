@@ -45,9 +45,9 @@ public interface Scheduler<T> {
      *            Action to schedule.
      * @return Actions work ID.
      */
-    default UUID schedule(final Action<T> action) {
+    default UUID scheduleAction(final Action<T> action) {
 
-	return schedule(action, 0L, TimeUnit.NANOSECONDS);
+	return scheduleAction(action, 0L, TimeUnit.NANOSECONDS);
     }
 
     /**
@@ -65,7 +65,7 @@ public interface Scheduler<T> {
      *            Time unit of the delay and period.
      * @return Actions work ID.
      */
-    UUID schedule(final Action<T> action, final long initialDelay, final long period, final TimeUnit unit);
+    UUID scheduleAction(final Action<T> action, final long initialDelay, final long period, final TimeUnit unit);
 
     /**
      * Schedules an action to be performed next tick with the specified delay.
@@ -78,8 +78,8 @@ public interface Scheduler<T> {
      *            Time unit of the delay.
      * @return Actions work ID.
      */
-    default UUID schedule(final Action<T> action, final long initialDelay, final TimeUnit unit) {
+    default UUID scheduleAction(final Action<T> action, final long initialDelay, final TimeUnit unit) {
 
-	return schedule(action, initialDelay, 0L, unit);
+	return scheduleAction(action, initialDelay, 0L, unit);
     }
 }

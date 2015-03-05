@@ -1,15 +1,10 @@
 package jalse.actions;
 
-import jalse.Cluster;
-import jalse.JALSE;
-import jalse.TickInfo;
-import jalse.agents.Agent;
-import jalse.agents.Agents;
-import jalse.attributes.Attributable;
 import jalse.attributes.Attribute;
+import jalse.attributes.AttributeContainer;
+import jalse.entities.Entity;
 import jalse.misc.Identifiable;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -26,83 +21,12 @@ import java.util.function.Predicate;
  * @param <T>
  *            Type of actor to be supplied.
  *
- * @see Scheduler#schedule(Action, long, long, java.util.concurrent.TimeUnit)
+ * @see Scheduler#scheduleAction(Action, long, long,
+ *      java.util.concurrent.TimeUnit)
  * @see TickInfo#getDelta()
  */
 @FunctionalInterface
 public interface Action<T> {
-
-    /**
-     * Gets any agent from a cluster.
-     *
-     * @param cluster
-     *            Cluster to get agent from.
-     * @return Gets an Optional of the resulting agent or an empty optional if
-     *         none were found.
-     *
-     */
-    default Optional<Agent> anyAgent(final Cluster cluster) {
-
-	return cluster.streamAgents().findAny();
-    }
-
-    /**
-     * Gets any agent marked of the specified type from the cluster.
-     *
-     * @param cluster
-     *            Cluster to get agent from.
-     * @param type
-     *            Type agent has been marked by.
-     * @return Gets an Optional of the resulting agent or an empty optional if
-     *         none matching were found.
-     *
-     * @see Agent#isMarkedAsType(Class)
-     * @see Agents#asType(Agent, Class)
-     */
-    default <S extends Agent> Optional<S> anyAgentOfType(final Cluster cluster, final Class<S> type) {
-
-	return cluster.streamAgentsOfType(type).findAny();
-    }
-
-    /**
-     * Gets any cluster from JALSE.
-     *
-     * @param jalse
-     *            JALSE to get cluster from.
-     * @return Gets an Optional of the resulting cluster or an empty optional if
-     *         none were found.
-     *
-     */
-    default Optional<Cluster> anyCluster(final JALSE jalse) {
-
-	return jalse.streamClusters().findAny();
-    }
-
-    /**
-     * Predicate to check attribute is not present.
-     *
-     * @param attr
-     *            Attribute type.
-     * @return Predicate of {@code true} if the attribute is not present and
-     *         {@code false} if it is.
-     */
-    default <S extends Attributable, U extends Attribute> Predicate<S> notPresent(final Class<U> attr) {
-
-	return this.<S, U> isPresent(attr).negate();
-    }
-
-    /**
-     * Predicate to check attribute is present.
-     *
-     * @param attr
-     *            Attribute type.
-     * @return Predicate of {@code true} if the attribute is present and
-     *         {@code false} if it is not.
-     */
-    default <S extends Attributable, U extends Attribute> Predicate<S> isPresent(final Class<U> attr) {
-
-	return c -> c.getOfType(attr).isPresent();
-    }
 
     /**
      * Predicate to check if the ID is equal to that supplied.
@@ -114,35 +38,35 @@ public interface Action<T> {
      *
      * @see Identifiable#getID()
      */
-    default <S extends Identifiable> Predicate<S> isID(final UUID id) {
+    default Predicate<Identifiable> isID(final UUID id) {
 
-	return c -> c.getID().equals(id);
+	return i -> i.getID().equals(id);
     }
 
     /**
-     * Checks to see if the agent has been tagged with the type.
+     * Checks to see if the entity has been tagged with the type.
      *
      * @param type
-     *            Agent type to check for.
-     * @return Predicate of {@code true} if the agent is of the type or
+     *            Entity type to check for.
+     * @return Predicate of {@code true} if the entity is of the type or
      *         {@code false} if it is not.
      */
-    default <S extends Agent> Predicate<S> isMarkedAsType(final Class<? extends Agent> type) {
+    default Predicate<Entity> isMarkedAsType(final Class<? extends Entity> type) {
 
-	return a -> a.isMarkedAsType(type);
+	return i -> i.isMarkedAsType(type);
     }
 
     /**
-     * Checks to see if the agent has not been tagged with the type.
+     * Predicate to check attribute is present.
      *
-     * @param type
-     *            Agent type to check for.
-     * @return Predicate of {@code true} if the agent is not of the type or
-     *         {@code false} if it is.
+     * @param attr
+     *            Attribute type.
+     * @return Predicate of {@code true} if the attribute is present and
+     *         {@code false} if it is not.
      */
-    default <S extends Agent> Predicate<S> notMarkedAsType(final Class<? extends Agent> type) {
+    default Predicate<AttributeContainer> isPresent(final Class<? extends Attribute> attr) {
 
-	return this.<S> isMarkedAsType(type).negate();
+	return a -> a.getAttributeOfType(attr).isPresent();
     }
 
     /**
@@ -155,9 +79,35 @@ public interface Action<T> {
      *
      * @see Identifiable#getID()
      */
-    default <S extends Identifiable> Predicate<S> notID(final UUID id) {
+    default Predicate<Identifiable> notID(final UUID id) {
 
-	return this.<S> isID(id).negate();
+	return isID(id).negate();
+    }
+
+    /**
+     * Checks to see if the entity has not been tagged with the type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Predicate of {@code true} if the entity is not of the type or
+     *         {@code false} if it is.
+     */
+    default Predicate<Entity> notMarkedAsType(final Class<? extends Entity> type) {
+
+	return isMarkedAsType(type).negate();
+    }
+
+    /**
+     * Predicate to check attribute is not present.
+     *
+     * @param attr
+     *            Attribute type.
+     * @return Predicate of {@code true} if the attribute is not present and
+     *         {@code false} if it is.
+     */
+    default <S extends Attribute> Predicate<AttributeContainer> notPresent(final Class<S> attr) {
+
+	return isPresent(attr).negate();
     }
 
     /**

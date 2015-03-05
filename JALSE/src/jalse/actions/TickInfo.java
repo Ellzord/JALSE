@@ -1,4 +1,4 @@
-package jalse;
+package jalse.actions;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;

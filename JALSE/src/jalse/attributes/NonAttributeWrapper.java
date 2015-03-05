@@ -1,7 +1,6 @@
 package jalse.attributes;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * This is an existing or final classes {@link Attribute} wrapper. Extending
@@ -14,16 +13,18 @@ import java.util.Optional;
  *
  * <pre>
  * <code>
- * public class Moo extends NonAttributeWrapper{@code <Boolean>} {
+ * public class LoadPercentage extends NonAttributeWrapper{@code <Float>} {
  *
- *	public Moo(Boolean loud) {
+ *	public LoadPercentage(Float percentage) {
  *
- *		super(loud);
+ *		super(percentage);
  *	}
  * }
+ * 
+ * LoadPercentage lp; // Previously created attribute.
+ * float percentage = lp.unwrap();
  * </code>
- *
- * <pre>
+ * </pre>
  *
  * @author Elliot Ford
  * 
@@ -33,18 +34,6 @@ import java.util.Optional;
  * @see Object#hashCode()
  */
 public abstract class NonAttributeWrapper<T> implements Attribute {
-
-    /**
-     * Convenience method for getting the value within a optional wrapper.
-     *
-     * @param attr
-     *            Optional non-attribute wrapper.
-     * @return The unwrapped object or null if not present.
-     */
-    public static <S> S unwrap(final Optional<? extends NonAttributeWrapper<S>> attr) {
-
-	return attr.isPresent() ? attr.get().unwrap() : null;
-    }
 
     private final T obj;
 

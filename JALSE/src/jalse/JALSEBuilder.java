@@ -1,55 +1,45 @@
 package jalse;
 
-import jalse.agents.Agent;
+import jalse.entities.Entity;
 
 /**
- * A builder for JALSE. Each method in this builder can be chained. Any
- * parameter not supplied will be defaulted to what is specified in the
- * {@code DEFAULT_} fields.
+ * A JALSE instance builder. Each method in this builder can be chained. Any
+ * parameter not supplied will be defaulted.
  *
  * @author Elliot Ford
  *
- * @see #DEFAULT_TPS
  * @see #DEFAULT_TOTAL_THREADS
- * @see #DEFAULT_CLUSTER_LIMIT
- * @see #DEFAULT_AGENT_LIMIT
+ * @see #DEFAULT_TOTAL_ENTITY_LIMIT
  *
  */
 public class JALSEBuilder {
 
     /**
-     * The default ticks per second ({@code 30}).
+     * The default {@link Entity} limit ({@code Integer.MAX_VALUE}).
      */
-    public static final int DEFAULT_TPS = 30;
+    public static final int DEFAULT_TOTAL_ENTITY_LIMIT = Integer.MAX_VALUE;
 
     /**
      * The default total threads to be used by the engine for performing actions
-     * ({@code Integer.MAX_VALUE - 1}).
+     * ({@code 10}).
      */
-    public static final int DEFAULT_TOTAL_THREADS = Integer.MAX_VALUE - 1;
+    public static final int DEFAULT_TOTAL_THREADS = 10;
 
     /**
-     * The default {@link Cluster} limit ({@code Integer.MAX_VALUE}).
+     * Creates a single threaded JALSE instance with default values.
+     *
+     * @param tps
+     *            Ticks per second.
+     * @return Single threaded JALSE with supplied TPS.
      */
-    public static final int DEFAULT_CLUSTER_LIMIT = Integer.MAX_VALUE;
+    public static JALSE createSingleThreadedJALSE(final int tps) {
 
-    /**
-     * The default {@link Agent} limit ({@code Integer.MAX_VALUE}).
-     */
-    public static final int DEFAULT_AGENT_LIMIT = Integer.MAX_VALUE;
+	return new JALSE(tps, 1, DEFAULT_TOTAL_ENTITY_LIMIT);
+    }
 
-    private int agentLimit;
-    private int clusterLimit;
+    private int totalEntityLimit;
     private int totalThreads;
     private int tps;
-
-    /**
-     * Creates a new builder with only default values.
-     */
-    public JALSEBuilder() {
-
-	this(DEFAULT_TPS);
-    }
 
     /**
      * Creates a new builder with the given ticks per second and default values.
@@ -61,8 +51,7 @@ public class JALSEBuilder {
 
 	this.tps = tps;
 	totalThreads = DEFAULT_TOTAL_THREADS;
-	clusterLimit = DEFAULT_CLUSTER_LIMIT;
-	agentLimit = DEFAULT_AGENT_LIMIT;
+	totalEntityLimit = DEFAULT_TOTAL_ENTITY_LIMIT;
     }
 
     /**
@@ -72,7 +61,36 @@ public class JALSEBuilder {
      */
     public JALSE create() {
 
-	return new JALSE(tps, totalThreads, clusterLimit, agentLimit);
+	return new JALSE(tps, totalThreads, totalEntityLimit);
+    }
+
+    /**
+     * Sets the total entity limit parameter.
+     *
+     * @param totalEntityLimit
+     *            Maximum entity limited.
+     * @return This builder.
+     */
+    public JALSEBuilder setTotalEntityLimit(final int totalEntityLimit) {
+
+	this.totalEntityLimit = totalEntityLimit;
+
+	return this;
+    }
+
+    /**
+     * Sets the total threads that can be used.
+     *
+     * @param totalThreads
+     *            Total threads used by the engine.
+     * @return This builder.
+     *
+     */
+    public JALSEBuilder setTotalThreads(final int totalThreads) {
+
+	this.totalThreads = totalThreads;
+
+	return this;
     }
 
     /**
@@ -85,48 +103,6 @@ public class JALSEBuilder {
     public JALSEBuilder setTPS(final int tps) {
 
 	this.tps = tps;
-
-	return this;
-    }
-
-    /**
-     * Sets the agent limit parameter.
-     *
-     * @param agentLimit
-     *            Maximum agent limited.
-     * @return This builder.
-     */
-    public JALSEBuilder setAgentLimit(final int agentLimit) {
-
-	this.agentLimit = agentLimit;
-
-	return this;
-    }
-
-    /**
-     * Sets the cluster limit parameter.
-     *
-     * @param clusterLimit
-     *            Maximum cluster limited.
-     * @return This builder.
-     */
-    public JALSEBuilder setClusterLimit(final int clusterLimit) {
-
-	this.clusterLimit = clusterLimit;
-
-	return this;
-    }
-
-    /**
-     * Sets the total threads parameter.
-     *
-     * @param totalThreads
-     *            Total threads used by the engine.
-     * @return This builder.
-     */
-    public JALSEBuilder setTotalThreads(final int totalThreads) {
-
-	this.totalThreads = totalThreads;
 
 	return this;
     }

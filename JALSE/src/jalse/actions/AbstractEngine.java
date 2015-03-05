@@ -1,7 +1,6 @@
-package jalse;
+package jalse.actions;
 
-import jalse.actions.Action;
-import jalse.misc.JALSEExceptions;
+import static jalse.misc.JALSEExceptions.ENGINE_SHUTDOWN;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,12 +35,12 @@ import java.util.logging.Logger;
  * @author Elliot Ford
  *
  * @see Action#perform(Object, TickInfo)
- * 
+ *
  * @see #SPIN_YIELD_THRESHOLD
  * @see #TERMINATION_TIMEOUT
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public abstract class Engine {
+public abstract class AbstractEngine {
 
     private class AtomicAction {
 
@@ -220,20 +219,6 @@ public abstract class Engine {
 	}
     }
 
-    private static final Logger logger = Logger.getLogger(Engine.class.getName());
-
-    private static final long SECOND = TimeUnit.SECONDS.toNanos(1);
-
-    /**
-     * The engine is not ticking and has been shutdown.
-     */
-    public static final int STOPPED = 0;
-
-    /**
-     * The engine is ready to be used.
-     */
-    public static final int INIT = 1;
-
     /**
      * The engine is currently in tick (processing).
      */
@@ -245,9 +230,18 @@ public abstract class Engine {
     public static final int IN_WAIT = 3;
 
     /**
+     * The engine is ready to be used.
+     */
+    public static final int INIT = 1;
+
+    private static final Logger logger = Logger.getLogger(AbstractEngine.class.getName());
+
+    /**
      * The engine is paused but can be resumed.
      */
     public static final int PAUSED = 4;
+
+    private static final long SECOND = TimeUnit.SECONDS.toNanos(1);
 
     /**
      * When Java sleeps it can sometimes be inaccurate, the engine will sleep up
@@ -255,6 +249,11 @@ public abstract class Engine {
      * via {@code jalse.engine.termination_timeout} system property).
      */
     public static final long SPIN_YIELD_THRESHOLD;
+
+    /**
+     * The engine is not ticking and has been shutdown.
+     */
+    public static final int STOPPED = 0;
 
     /**
      * How long the engine will wait until it times out and interrupts running
@@ -265,11 +264,11 @@ public abstract class Engine {
 
     static {
 
-	final String syt = System.getProperty("jalse.engine.spin_yield_threshold");
+	final String syt = System.getProperty("jalse.actions.engine.spin_yield_threshold");
 
 	SPIN_YIELD_THRESHOLD = syt != null && syt.length() > 0 ? Long.valueOf(syt) : TimeUnit.MILLISECONDS.toNanos(10);
 
-	final String tt = System.getProperty("jalse.engine.termination_timeout");
+	final String tt = System.getProperty("jalse.actions.engine.termination_timeout");
 
 	TERMINATION_TIMEOUT = tt != null && tt.length() > 0 ? Long.valueOf(tt) : 2 * SECOND;
     }
@@ -308,9 +307,9 @@ public abstract class Engine {
     private final StampedLock lock;
     private final Phaser phaser;
     private final AtomicBoolean running;
+    private int state;
     private final TickInfo tick;
     private final Queue<Worker> work;
-    private int state;
 
     /**
      * Creates a new instance of Engine. An extra thread is added for a control
@@ -321,7 +320,7 @@ public abstract class Engine {
      * @param totalThreads
      *            Maximum number of threads to use for performing actions.
      */
-    protected Engine(final int tps, final int totalThreads) {
+    protected AbstractEngine(final int tps, final int totalThreads) {
 
 	if (tps <= 0 || totalThreads <= 0 || totalThreads == Integer.MAX_VALUE) {
 
@@ -403,7 +402,7 @@ public abstract class Engine {
 
 	case STOPPED:
 
-	    e = JALSEExceptions.ENGINE_SHUTDOWN.get();
+	    e = ENGINE_SHUTDOWN.get();
 	    break;
 	}
 
@@ -518,12 +517,14 @@ public abstract class Engine {
 
 	long stamp = lock.tryOptimisticRead();
 
-	if (!lock.validate(stamp)) {
+	if (lock.validate(stamp)) {
 
-	    stamp = lock.readLock();
+	    return state;
 	}
 
-	final int result = state;
+	stamp = lock.readLock();
+
+	int result = state;
 
 	lock.unlockRead(stamp);
 
@@ -589,8 +590,8 @@ public abstract class Engine {
      * @return Scheduled action ID.
      *
      */
-    protected UUID schedule(final Action<?> action, final Object actor, final long initialDelay, final long period,
-	    final TimeUnit unit) {
+    protected UUID scheduleAction(final Action<?> action, final Object actor, final long initialDelay,
+	    final long period, final TimeUnit unit) {
 
 	final UUID key = UUID.randomUUID();
 

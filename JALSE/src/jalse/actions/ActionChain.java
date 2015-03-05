@@ -1,10 +1,11 @@
 package jalse.actions;
 
 import jalse.JALSE;
-import jalse.TickInfo;
+import jalse.entities.EntityContainer;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A chain of {@link Action} that share the same actor and are performed one
@@ -32,7 +33,7 @@ public class ActionChain<T> implements Action<T> {
      * @return The newly created action chain.
      */
     @SafeVarargs
-    public static <S> ActionChain<S> newChain(final Action<S>... actions) {
+    public static <S extends EntityContainer> ActionChain<S> newChain(final Action<S>... actions) {
 
 	return new ActionChain<>(Arrays.asList(actions));
     }
@@ -47,7 +48,7 @@ public class ActionChain<T> implements Action<T> {
      */
     public ActionChain(final List<Action<T>> chain) {
 
-	this.chain = chain;
+	this.chain = Objects.requireNonNull(chain);
     }
 
     @Override

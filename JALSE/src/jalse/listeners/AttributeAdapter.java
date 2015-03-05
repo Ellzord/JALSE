@@ -15,22 +15,17 @@ import jalse.attributes.Attribute;
 public abstract class AttributeAdapter<T extends Attribute> implements AttributeListener<T> {
 
     @Override
-    public void attributeAdded(final T attr) {
+    public void attributeAdded(final AttributeEvent<T> event) {
 
     }
 
     @Override
-    public void attributeChanged(final T attr) {
+    public void attributeChanged(final AttributeEvent<T> event) {
 
     }
 
     @Override
-    public void attributeRemoved(final T attr) {
-
-    }
-
-    @Override
-    public void attributeReplaced(T newAttr, T oldAttr) {
+    public void attributeRemoved(final AttributeEvent<T> event) {
 
     }
 }

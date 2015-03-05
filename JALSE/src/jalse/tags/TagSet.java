@@ -36,15 +36,43 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
     }
 
     @Override
-    public synchronized Iterator<Tag> iterator() {
+    public synchronized boolean add(final Tag e) {
 
-	return tags.values().stream().flatMap(s -> s.stream()).iterator();
+	Set<Tag> tagsOfType = tags.get(e.getClass());
+
+	if (tagsOfType == null) {
+
+	    tags.put(e.getClass(), tagsOfType = new HashSet<>());
+	}
+
+	return tagsOfType.add(e);
     }
 
     @Override
-    public synchronized int size() {
+    public synchronized void clear() {
 
-	return tags.values().stream().mapToInt(s -> s.size()).sum();
+	tags.clear();
+    }
+
+    @Override
+    public synchronized boolean contains(final Object o) {
+
+	final Set<Tag> tagsOfType = tags.get(o.getClass());
+
+	return tagsOfType != null && tagsOfType.contains(o);
+    }
+
+    /**
+     * Checks whether the tag set contains any tags of that type.
+     *
+     * @param type
+     *            Type of tag.
+     * @return {@code true} if the set contains any tags of the specified type
+     *         or {@code false} if it does not.
+     */
+    public synchronized boolean containsOfType(final Class<? extends Tag> type) {
+
+	return tags.containsKey(type);
     }
 
     /**
@@ -68,50 +96,10 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 	return tags.isEmpty();
     }
 
-    /**
-     * Checks whether the tag set contains any tags of that type.
-     *
-     * @param type
-     *            Type of tag.
-     * @return {@code true} if the set contains any tags of the specified type
-     *         or {@code false} if it does not.
-     */
-    public synchronized boolean containsOfType(final Class<? extends Tag> type) {
-
-	return tags.containsKey(type);
-    }
-
     @Override
-    public synchronized boolean contains(final Object o) {
+    public synchronized Iterator<Tag> iterator() {
 
-	final Set<Tag> tagsOfType = tags.get(o.getClass());
-
-	return tagsOfType != null && tagsOfType.contains(o);
-    }
-
-    @Override
-    public synchronized boolean add(final Tag e) {
-
-	Set<Tag> tagsOfType = tags.get(e.getClass());
-
-	if (tagsOfType == null) {
-
-	    tags.put(e.getClass(), tagsOfType = new HashSet<>());
-	}
-
-	return tagsOfType.add(e);
-    }
-
-    /**
-     * Removes all tags of the specified type.
-     *
-     * @param type
-     *            Type of tag.
-     * @return Whether any tags were removed.
-     */
-    public synchronized boolean removeOfType(final Class<? extends Tag> type) {
-
-	return tags.remove(type) != null;
+	return tags.values().stream().flatMap(s -> s.stream()).iterator();
     }
 
     @Override
@@ -134,9 +122,21 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 	return removed;
     }
 
-    @Override
-    public synchronized void clear() {
+    /**
+     * Removes all tags of the specified type.
+     *
+     * @param type
+     *            Type of tag.
+     * @return Whether any tags were removed.
+     */
+    public synchronized boolean removeOfType(final Class<? extends Tag> type) {
 
-	tags.clear();
+	return tags.remove(type) != null;
+    }
+
+    @Override
+    public synchronized int size() {
+
+	return tags.values().stream().mapToInt(s -> s.size()).sum();
     }
 }

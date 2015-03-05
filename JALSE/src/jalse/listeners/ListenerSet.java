@@ -35,6 +35,12 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
 	proxy = (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, this);
     }
 
+    @Override
+    public boolean add(final T e) {
+
+	return super.add(Objects.requireNonNull(e));
+    }
+
     /**
      * Gets the group proxy for easy invocation of methods upon the group.
      *
@@ -46,18 +52,6 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
     }
 
     @Override
-    public boolean add(final T e) {
-
-	return super.add(Objects.requireNonNull(e));
-    }
-
-    @Override
-    public boolean remove(final Object o) {
-
-	return super.remove(Objects.requireNonNull(o));
-    }
-
-    @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
 
 	for (final T t : this) {
@@ -66,5 +60,11 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
 	}
 
 	return null;
+    }
+
+    @Override
+    public boolean remove(final Object o) {
+
+	return super.remove(Objects.requireNonNull(o));
     }
 }
