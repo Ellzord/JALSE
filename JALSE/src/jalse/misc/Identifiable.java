@@ -3,6 +3,7 @@ package jalse.misc;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * This is for anything that should be uniquely identifiable within JALSE. This
@@ -12,6 +13,13 @@ import java.util.UUID;
  *
  */
 public interface Identifiable extends Comparable<Identifiable> {
+
+    /**
+     * A hard-coded dummy ID that can be used to identify an Identifiable that
+     * does not need to be unique (not advised). ID =
+     * {@code 00000000-0000-0000-0000-000000000000}.
+     */
+    public static final UUID DUMMY_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     /**
      * Identifiable object comparator.
@@ -86,6 +94,36 @@ public interface Identifiable extends Comparable<Identifiable> {
     default int compareTo(final Identifiable o) {
 
 	return Objects.compare(this, o, COMPARATOR);
+    }
+
+    /**
+     * Predicate to check if the ID is equal to that supplied.
+     *
+     * @param id
+     *            ID to check for.
+     * @return Predicate of {@code true} if the ID is equal or {@code false} if
+     *         it is not.
+     *
+     * @see Identifiable#getID()
+     */
+    public static Predicate<Identifiable> isID(final UUID id) {
+
+	return i -> i.getID().equals(id);
+    }
+
+    /**
+     * Predicate to check if the ID is not equal to that supplied.
+     *
+     * @param id
+     *            ID to check for.
+     * @return Predicate of {@code false} if the ID is equal or {@code true} if
+     *         it is.
+     *
+     * @see Identifiable#getID()
+     */
+    public static Predicate<Identifiable> notID(final UUID id) {
+
+	return isID(id).negate();
     }
 
     /**

@@ -14,11 +14,11 @@ import java.util.Objects;
  * <pre>
  * <code>
  * public class LoadPercentage extends NonAttributeWrapper{@code <Float>} {
- *
- *	public LoadPercentage(Float percentage) {
- *
- *		super(percentage);
- *	}
+ * 
+ * public LoadPercentage(Float percentage) {
+ * 
+ * 	super(percentage);
+ * }
  * }
  * 
  * LoadPercentage lp; // Previously created attribute.
@@ -27,9 +27,10 @@ import java.util.Objects;
  * </pre>
  *
  * @author Elliot Ford
- * 
- * @param <T> Existing or final class to wrap.
- * 
+ *
+ * @param <T>
+ *            Existing or final class to wrap.
+ *
  * @see Object#equals(Object)
  * @see Object#hashCode()
  */

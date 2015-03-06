@@ -75,12 +75,6 @@ public class JALSE extends AbstractEngine implements EntityContainer, Identifiab
 	}
     }
 
-    /**
-     * A hard-coded ID that can be used to identify when a {@link Identifiable}
-     * is a JALSE instance. ID = {@code 00000000-0000-0000-0000-000000000000}.
-     */
-    public static final UUID ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
     private volatile int totalEntityCount;
     private final int totalEntityLimit;
 
@@ -179,7 +173,7 @@ public class JALSE extends AbstractEngine implements EntityContainer, Identifiab
     @Override
     public UUID getID() {
 
-	return ID;
+	return Identifiable.DUMMY_ID;
     }
 
     /**

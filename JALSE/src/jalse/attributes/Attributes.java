@@ -2,13 +2,10 @@ package jalse.attributes;
 
 import static jalse.misc.JALSEExceptions.INVALID_ATTRIBUTE_TYPE;
 import static jalse.misc.JALSEExceptions.throwRE;
-import jalse.listeners.AttributeListener;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.function.Predicate;
 
 /**
  * A utility for {@link Attribute} related functionality.
@@ -17,100 +14,6 @@ import java.util.stream.Stream;
  *
  */
 public final class Attributes {
-
-    private static class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
-
-	private final AttributeContainer delegate;
-
-	private UnmodifiableDelegateAttributeContainer(final AttributeContainer delegate) {
-
-	    this.delegate = delegate;
-	}
-
-	@Override
-	public boolean addAttributeListener(final AttributeListener<? extends Attribute> listener) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <T extends Attribute> Optional<T> addAttributeOfType(final T attr) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <T extends Attribute> boolean fireAttributeChanged(final Class<T> attr) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <T extends Attribute> Set<? extends AttributeListener<T>> getAttributeListeners(final Class<T> attr) {
-
-	    return delegate != null ? delegate.getAttributeListeners(attr) : Collections.emptySet();
-	}
-
-	@Override
-	public Set<? extends AttributeListener<? extends Attribute>> getAttributeListeners() {
-
-	    return delegate != null ? delegate.getAttributeListeners() : Collections.emptySet();
-	}
-
-	@Override
-	public Set<Class<? extends Attribute>> getAttributeListenerTypes() {
-
-	    return delegate != null ? delegate.getAttributeListenerTypes() : Collections.emptySet();
-	}
-
-	@Override
-	public <T extends Attribute> Optional<T> getAttributeOfType(final Class<T> attr) {
-
-	    return delegate != null ? delegate.getAttributeOfType(attr) : Optional.empty();
-	}
-
-	@Override
-	public boolean removeAttributeListener(final AttributeListener<? extends Attribute> listener) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Set<? extends Attribute> getAttributes() {
-
-	    return delegate != null ? delegate.getAttributes() : Collections.emptySet();
-	}
-
-	@Override
-	public int getAttributeCount() {
-
-	    return delegate != null ? delegate.getAttributeCount() : 0;
-	}
-
-	@Override
-	public void removeAttributes() {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Set<Class<? extends Attribute>> getAttributeTypes() {
-
-	    return delegate != null ? delegate.getAttributeTypes() : Collections.emptySet();
-	}
-
-	@Override
-	public <T extends Attribute> Optional<T> removeAttributeOfType(final Class<T> attr) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Stream<? extends Attribute> streamAttributes() {
-
-	    return delegate != null ? delegate.streamAttributes() : Stream.empty();
-	}
-    }
 
     /**
      * Creates an immutable empty attribute container.
@@ -166,6 +69,32 @@ public final class Attributes {
     public static <T> T unwrap(final Optional<? extends NonAttributeWrapper<T>> attr) {
 
 	return attr.isPresent() ? attr.get().unwrap() : null;
+    }
+
+    /**
+     * Predicate to check attribute is present.
+     *
+     * @param attr
+     *            Attribute type.
+     * @return Predicate of {@code true} if the attribute is present and
+     *         {@code false} if it is not.
+     */
+    public static Predicate<AttributeContainer> isPresent(final Class<? extends Attribute> attr) {
+
+	return a -> a.getAttributeOfType(attr).isPresent();
+    }
+
+    /**
+     * Predicate to check attribute is not present.
+     *
+     * @param attr
+     *            Attribute type.
+     * @return Predicate of {@code true} if the attribute is not present and
+     *         {@code false} if it is.
+     */
+    public static Predicate<AttributeContainer> notPresent(final Class<? extends Attribute> attr) {
+
+	return isPresent(attr).negate();
     }
 
     private Attributes() {

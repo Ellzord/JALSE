@@ -2,25 +2,18 @@ package jalse.entities;
 
 import static jalse.misc.JALSEExceptions.INVALID_ENTITY_TYPE;
 import static jalse.misc.JALSEExceptions.throwRE;
-import static jalse.misc.TypeParameterResolver.getTypeParameter;
-import static jalse.misc.TypeParameterResolver.toClass;
-import jalse.attributes.Attribute;
-import jalse.listeners.EntityListener;
+import jalse.entities.EntityVisitor.EntityVisitResult;
 import jalse.misc.JALSEExceptions;
-import jalse.misc.TypeParameterResolver;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -52,7 +45,7 @@ import java.util.stream.Stream;
  * &nbsp;&nbsp;&nbsp;&nbsp;a) Must return {@code Set<Entity_Type>}. <br>
  * &nbsp;&nbsp;&nbsp;&nbsp;b) Must have no parameters.<br>
  * 6. The Stream Entity method: <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;a) Must return {@code Stream<Entity_Type}. <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;a) Must return {@code Stream<Entity_Type>}. <br>
  * &nbsp;&nbsp;&nbsp;&nbsp;b) Must have no parameters. <br>
  * <br>
  * An example entity type:
@@ -80,204 +73,6 @@ import java.util.stream.Stream;
  *
  */
 public final class Entities {
-
-    private static class EntityHandler implements InvocationHandler {
-
-	private final Entity entity;
-
-	public EntityHandler(final Entity Entity) {
-
-	    entity = Entity;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-
-	    final Class<?> declaringClazz = method.getDeclaringClass();
-
-	    /*
-	     * Not entity type methods!
-	     */
-	    if (Entity.class.equals(declaringClazz) || !Entity.class.isAssignableFrom(declaringClazz)) {
-
-		return method.invoke(entity, args);
-	    }
-
-	    /*
-	     * Method info.
-	     */
-	    final Type[] params = method.getParameterTypes();
-	    final boolean hasParams = params != null && params.length > 0;
-	    final Type returnType = method.getGenericReturnType();
-	    final boolean hasReturnType = !Void.TYPE.equals(returnType);
-
-	    /*
-	     * addAttributeOfType(Attribute) / removeAttributeOfType(Class)
-	     */
-	    if (hasParams && Attribute.class.isAssignableFrom(toClass(params[0]))) {
-
-		return args[0] != null ? entity.addAttributeOfType((Attribute) args[0]) : entity
-			.removeAttributeOfType((Class<? extends Attribute>) params[0]);
-	    }
-
-	    /*
-	     * getEntitiesOfType(Class) / streamEntitiesOfType(Class)
-	     */
-	    if (hasParams && Entity.class.isAssignableFrom(toClass(params[0]))) {
-
-		final Class<?> clazz = toClass(returnType);
-
-		if (Set.class.equals(clazz)) {
-
-		    return entity.getEntitiesOfType((Class<? extends Entity>) SET_RESOLVER.resolve(returnType));
-		}
-
-		if (Stream.class.equals(clazz)) {
-
-		    return entity.streamEntitiesOfType((Class<? extends Entity>) STREAM_RESOLVER.resolve(returnType));
-		}
-
-		throw new UnsupportedOperationException();
-	    }
-
-	    /*
-	     * getAttributeOfType(Class)
-	     */
-	    if (hasReturnType && Optional.class.equals(toClass(returnType))) {
-
-		return entity.getAttributeOfType((Class<? extends Attribute>) OPTIONAL_RESOLVER.resolve(returnType));
-	    }
-
-	    throw new UnsupportedOperationException();
-	}
-    }
-
-    private static class UnmodifiableDelegateEntityContainer implements EntityContainer {
-
-	private final EntityContainer delegate;
-
-	private UnmodifiableDelegateEntityContainer(final EntityContainer delegate) {
-
-	    this.delegate = delegate;
-	}
-
-	@Override
-	public boolean addEntityListener(final EntityListener listener) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Set<Entity> getEntities() {
-
-	    return delegate != null ? delegate.getEntities() : Collections.emptySet();
-	}
-
-	@Override
-	public <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
-
-	    return delegate != null ? delegate.getEntitiesOfType(type) : Collections.emptySet();
-	}
-
-	@Override
-	public Optional<Entity> getEntity(final UUID id) {
-
-	    return delegate != null ? delegate.getEntity(id) : Optional.empty();
-	}
-
-	@Override
-	public int getEntityCount() {
-
-	    return delegate != null ? delegate.getEntityCount() : 0;
-	}
-
-	@Override
-	public Set<UUID> getEntityIDs() {
-
-	    return delegate != null ? delegate.getEntityIDs() : Collections.emptySet();
-	}
-
-	@Override
-	public Set<? extends EntityListener> getEntityListeners() {
-
-	    return delegate != null ? delegate.getEntityListeners() : Collections.emptySet();
-	}
-
-	@Override
-	public void killEntities() {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean killEntity(final UUID id) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Entity newEntity() {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <T extends Entity> T newEntity(final Class<T> type) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Entity newEntity(final UUID id) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean removeEntityListener(final EntityListener listener) {
-
-	    throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Stream<Entity> streamEntities() {
-
-	    return delegate != null ? delegate.streamEntities() : Stream.empty();
-	}
-
-	@Override
-	public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
-
-	    return delegate != null ? delegate.streamEntitiesOfType(type) : Stream.empty();
-	}
-    }
-
-    private static final Logger logger = Logger.getLogger(Entities.class.getName());
-
-    private static final TypeParameterResolver OPTIONAL_RESOLVER = new TypeParameterResolver(getTypeParameter(
-	    Optional.class, "T"));
-
-    private static final TypeParameterResolver SET_RESOLVER = new TypeParameterResolver(
-	    getTypeParameter(Set.class, "E"));
-
-    private static final TypeParameterResolver STREAM_RESOLVER = new TypeParameterResolver(getTypeParameter(
-	    Stream.class, "T"));
-
-    private static Set<Class<?>> VALID_ENTITY_TYPES = new CopyOnWriteArraySet<Class<?>>() {
-
-	private static final long serialVersionUID = -3273614078225830902L;
-
-	{
-	    add(Entity.class);
-	}
-    };
 
     @SuppressWarnings("unchecked")
     private static void addAncestors(final Set<Class<? extends Entity>> ancestry, final Class<?> type) {
@@ -321,7 +116,7 @@ public final class Entities {
 	}
 
 	return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[] { type },
-		handler instanceof EntityHandler ? handler : new EntityHandler(Entity));
+		handler instanceof EntityTypeHandler ? handler : new EntityTypeHandler(Entity));
     }
 
     /**
@@ -406,179 +201,160 @@ public final class Entities {
 	    throwRE(INVALID_ENTITY_TYPE);
 	}
 
-	validateType0(type);
+	EntityTypeHandler.validateType(type);
     }
 
-    private static void validateType0(final Class<?> clazz) {
+    /**
+     * Walks through all entities (recursive). Walking can be stopped or
+     * filtered based on the visit result returned.
+     *
+     * @param container
+     *            Entity container.
+     * @param visitor
+     *            Entity visitor.
+     *
+     * @see EntityVisitor
+     */
+    public static void walkEntities(final EntityContainer container, final EntityVisitor visitor) {
 
-	if (!Entity.class.isAssignableFrom(clazz)) {
+	final EntityWalker walker = new EntityWalker(container, visitor);
 
-	    throwRE(INVALID_ENTITY_TYPE);
-	}
+	do {
 
-	if (!VALID_ENTITY_TYPES.contains(clazz)) {
+	    walker.walk();
+	} while (walker.isWalking());
+    }
 
-	    /*
-	     * Previously validated types.
-	     */
-	    final Set<Type> addRemoves = new HashSet<>();
-	    final Set<Type> streams = new HashSet<>();
-	    final Set<Type> sets = new HashSet<>();
-	    final Set<Type> gets = new HashSet<>();
+    /**
+     * Gets the total entity count (recursive).
+     *
+     * @param container
+     *            Entity container.
+     *
+     * @return Direct child entity count.
+     */
+    public int getEntityCountRecursively(final EntityContainer container) {
 
-	    for (final Method method : clazz.getDeclaredMethods()) {
+	final AtomicInteger result = new AtomicInteger();
 
-		/*
-		 * Method info.
-		 */
-		final Type[] params = method.getParameterTypes();
-		final boolean hasParams = params != null && params.length > 0;
-		final Type returnType = method.getGenericReturnType();
-		final boolean hasReturnType = !Void.TYPE.equals(returnType);
+	walkEntities(container, e -> {
 
-		/*
-		 * All methods that accept parameters have only one.
-		 */
-		if (hasParams && params.length != 1) {
+	    result.incrementAndGet();
+	    return EntityVisitResult.CONTINUE;
+	});
 
-		    throwRE(INVALID_ENTITY_TYPE);
-		}
+	return result.get();
+    }
 
-		/*
-		 * addAttributeOfType(Attribute) / removeAttributeOfType(Class)
-		 */
-		if (hasParams && Attribute.class.isAssignableFrom(toClass(params[0]))) {
+    /**
+     * Gets the IDs of all the entities (recursive).
+     *
+     * @param container
+     *            Entity container.
+     *
+     * @return Set of all entity identifiers.
+     */
+    public Set<UUID> getEntityIDsRecursively(final EntityContainer container) {
 
-		    /*
-		     * Must be a subclass of Attribute.
-		     */
-		    if (Attribute.class.equals(params[0])) {
+	final Set<UUID> result = new HashSet<>();
 
-			throwRE(INVALID_ENTITY_TYPE);
-		    }
+	walkEntities(container, e -> {
 
-		    /*
-		     * Must be void or Optional<Attribute>.
-		     */
-		    if (hasReturnType) {
+	    result.add(e.getID());
+	    return EntityVisitResult.CONTINUE;
+	});
 
-			if (!Optional.class.equals(toClass(returnType))) {
+	return result;
+    }
 
-			    throwRE(INVALID_ENTITY_TYPE);
-			}
+    /**
+     * Provides a stream of entities from the container (recursive).
+     *
+     * @param container
+     *            Entity container.
+     *
+     * @return A stream of entities in the container.
+     */
+    public Stream<Entity> streamEntitiesRecursively(final EntityContainer container) {
 
-			final Type attributeClazz = OPTIONAL_RESOLVER.resolve(returnType);
+	return container.streamEntities().flatMap(c -> streamEntitiesRecursively(c));
+    }
 
-			/*
-			 * Must match parameter.
-			 */
-			if (!params[0].equals(attributeClazz)) {
+    /**
+     * Gets a stream of all entities marked with the specified type (recursive).
+     *
+     * @param container
+     *            Entity container.
+     * @param type
+     *            Entity type.
+     * @return Stream of entities marked with the type.
+     *
+     * @see Entity#isMarkedAsType(Class)
+     * @see Entity#asType(Class)
+     */
+    public <T extends Entity> Stream<T> streamEntitiesOfTypeRecursively(final EntityContainer container,
+	    final Class<T> type) {
 
-			    throwRE(INVALID_ENTITY_TYPE);
-			}
-		    }
+	return container.streamEntitiesOfType(type).flatMap(c -> streamEntitiesOfTypeRecursively(c, type));
+    }
 
-		    if (!addRemoves.add(params[0])) {
+    /**
+     * Gets any entity within the container.
+     *
+     * @param container
+     *            Entity container.
+     *
+     * @return Gets an Optional of the resulting entity or an empty Optional if
+     *         it was not found.
+     */
+    public static Optional<Entity> anyEntity(final EntityContainer container) {
 
-			logger.warning(String.format(
-				"Entity type (%s) has multiple add/remove definitions for Atribute (%s)",
-				clazz.getName(), params[0].getTypeName()));
-		    }
+	return container.streamEntities().findAny();
+    }
 
-		    continue;
-		}
+    /**
+     * Gets any entity within the container marked with the specified type.
+     *
+     * @param container
+     *            Entity container.
+     *
+     * @param type
+     *            Entity type.
+     *
+     * @return Gets an Optional of the resulting entity or an empty Optional if
+     *         it was not found.
+     *
+     * @see Entity#markAsType(Class)
+     */
+    public static <T extends Entity> Optional<T> anyEntityOfType(final EntityContainer container, final Class<T> type) {
 
-		/*
-		 * getEntitiesOfType(Class) / streamEntitiesOfType(Class)
-		 */
-		if (hasParams && Entity.class.isAssignableFrom(toClass(params[0]))) {
+	return container.streamEntitiesOfType(type).findAny();
+    }
 
-		    /*
-		     * Must be a subclass of Entity.
-		     */
-		    if (Entity.class.equals(params[0])) {
+    /**
+     * Checks to see if the entity has been tagged with the type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Predicate of {@code true} if the entity is of the type or
+     *         {@code false} if it is not.
+     */
+    public static Predicate<Entity> isMarkedAsType(final Class<? extends Entity> type) {
 
-			throwRE(INVALID_ENTITY_TYPE);
-		    }
+	return i -> i.isMarkedAsType(type);
+    }
 
-		    final Class<?> setOrStreamClazz = toClass(returnType);
-		    boolean isSet = false;
-		    Type entityClazz = null;
+    /**
+     * Checks to see if the entity has not been tagged with the type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Predicate of {@code true} if the entity is not of the type or
+     *         {@code false} if it is.
+     */
+    public static Predicate<Entity> notMarkedAsType(final Class<? extends Entity> type) {
 
-		    /*
-		     * Must be Set or Stream.
-		     */
-		    if (isSet = Set.class.equals(setOrStreamClazz)) {
-
-			entityClazz = SET_RESOLVER.resolve(returnType);
-		    }
-		    else if (Stream.class.equals(setOrStreamClazz)) {
-
-			entityClazz = STREAM_RESOLVER.resolve(returnType);
-		    }
-		    else {
-
-			throwRE(INVALID_ENTITY_TYPE);
-		    }
-
-		    /*
-		     * Must match parameter.
-		     */
-		    if (!params[0].equals(entityClazz)) {
-
-			throwRE(INVALID_ENTITY_TYPE);
-		    }
-
-		    if (!(isSet ? sets : streams).add(params[0])) {
-
-			logger.warning(String.format(
-				isSet ? "Entity type (%s) has multiple Set definitions for Entity (%s)"
-					: "Entity type (%s) has multiple Stream definitions for Entity (%s)", clazz
-					.getName(), params[0].getTypeName()));
-		    }
-
-		    continue;
-		}
-
-		/*
-		 * getAttributeOfType(Class)
-		 */
-		if (!hasParams && hasReturnType && Optional.class.equals(toClass(returnType))) {
-
-		    final Class<?> attributeClazz = toClass(OPTIONAL_RESOLVER.resolve(returnType));
-
-		    /*
-		     * Must be subclass of Attribute.
-		     */
-		    if (Attribute.class.equals(attributeClazz) || !Attribute.class.isAssignableFrom(attributeClazz)) {
-
-			throwRE(INVALID_ENTITY_TYPE);
-		    }
-
-		    if (!gets.add(attributeClazz)) {
-
-			logger.warning(String.format("Entity type (%s) has multiple get definitions for Atribute (%s)",
-				clazz.getTypeName(), attributeClazz.getTypeName()));
-		    }
-
-		    continue;
-		}
-
-		/*
-		 * If not found above then it is not a valid Entity type method.
-		 */
-		throwRE(INVALID_ENTITY_TYPE);
-	    }
-
-	    logger.info(String.format("Entity type (%s) is valid", clazz.getName()));
-
-	    VALID_ENTITY_TYPES.add(clazz);
-
-	    /*
-	     * Validate all super types.
-	     */
-	    Stream.of(clazz.getInterfaces()).forEach(Entities::validateType0);
-	}
+	return isMarkedAsType(type).negate();
     }
 
     private Entities() {

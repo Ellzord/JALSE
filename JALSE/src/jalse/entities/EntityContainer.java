@@ -243,37 +243,10 @@ public interface EntityContainer {
      *
      * @param type
      *            Entity type to check for.
-     * @return Set of entities marked with the type.
+     * @return Stream of entities marked with the type.
      *
      * @see Entity#isMarkedAsType(Class)
      * @see Entity#asType(Class)
      */
     <T extends Entity> Stream<T> streamEntitiesOfType(Class<T> type);
-
-    /**
-     * Gets any entity within the container.
-     *
-     * @return Gets an Optional of the resulting entity or an empty Optional if
-     *         it was not found.
-     */
-    default Optional<Entity> anyEntity() {
-
-	return streamEntities().findAny();
-    }
-
-    /**
-     * Gets any entity within the container marked with the specified type.
-     *
-     * @param type
-     *            Entity type.
-     *
-     * @return Gets an Optional of the resulting entity or an empty Optional if
-     *         it was not found.
-     *
-     * @see Entity#markAsType(Class)
-     */
-    default <S extends Entity> Optional<S> anyEntityOfType(final Class<S> type) {
-
-	return streamEntitiesOfType(type).findAny();
-    }
 }

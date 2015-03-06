@@ -524,7 +524,7 @@ public abstract class AbstractEngine {
 
 	stamp = lock.readLock();
 
-	int result = state;
+	final int result = state;
 
 	lock.unlockRead(stamp);
 
