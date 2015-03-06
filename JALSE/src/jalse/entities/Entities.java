@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  * Attribute).<br>
  * 2) Getting an Attribute of type. <br>
  * 3) Getting a Set of all of the child entities marked as type.<br>
- * 4) Getting a Stream of all of the child entities markd as type.<br>
+ * 4) Getting a Stream of all of the child entities marked as type.<br>
  * <br>
  * For an Entity type to be used it must be validated against the below
  * criteria: <br>
