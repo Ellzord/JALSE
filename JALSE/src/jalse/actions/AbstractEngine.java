@@ -219,6 +219,33 @@ public abstract class AbstractEngine {
 	}
     }
 
+    private static void parkNanos(final long end) {
+
+	long timeLeft;
+
+	while ((timeLeft = end - System.nanoTime()) > 0) {
+
+	    if (timeLeft > SPIN_YIELD_THRESHOLD) {
+
+		LockSupport.parkNanos(timeLeft - SPIN_YIELD_THRESHOLD);
+	    }
+	    else {
+
+		Thread.yield();
+	    }
+	}
+    }
+
+    private static long requireNonNegative(final long value) {
+
+	if (value < 0) {
+
+	    throw new IllegalArgumentException();
+	}
+
+	return value;
+    }
+
     /**
      * The engine is currently in tick (processing).
      */
@@ -271,33 +298,6 @@ public abstract class AbstractEngine {
 	final String tt = System.getProperty("jalse.actions.engine.termination_timeout");
 
 	TERMINATION_TIMEOUT = tt != null && tt.length() > 0 ? Long.valueOf(tt) : 2 * SECOND;
-    }
-
-    private static void parkNanos(final long end) {
-
-	long timeLeft;
-
-	while ((timeLeft = end - System.nanoTime()) > 0) {
-
-	    if (timeLeft > SPIN_YIELD_THRESHOLD) {
-
-		LockSupport.parkNanos(timeLeft - SPIN_YIELD_THRESHOLD);
-	    }
-	    else {
-
-		Thread.yield();
-	    }
-	}
-    }
-
-    private static long requireNonNegative(final long value) {
-
-	if (value < 0) {
-
-	    throw new IllegalArgumentException();
-	}
-
-	return value;
     }
 
     private final ThreadPoolExecutor executor;

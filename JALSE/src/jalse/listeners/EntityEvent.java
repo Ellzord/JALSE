@@ -39,16 +39,6 @@ public class EntityEvent extends AbstractIdentifiable {
     }
 
     /**
-     * Gets the event entity.
-     *
-     * @return The entity the event was triggered for.
-     */
-    public Entity getEntity() {
-
-	return entity;
-    }
-
-    /**
      * Gets the Entity's parent container.
      *
      * @return Entity's parent container.
@@ -56,5 +46,15 @@ public class EntityEvent extends AbstractIdentifiable {
     public EntityContainer getContainer() {
 
 	return container;
+    }
+
+    /**
+     * Gets the event entity.
+     *
+     * @return The entity the event was triggered for.
+     */
+    public Entity getEntity() {
+
+	return entity;
     }
 }

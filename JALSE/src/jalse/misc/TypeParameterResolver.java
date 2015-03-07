@@ -156,22 +156,6 @@ public class TypeParameterResolver {
     private final TypeVariable<? extends Class<?>> typeParameter;
 
     /**
-     * Creates a new instance of TypeParameterResolver that will look to resolve
-     * the supplied parameter.
-     *
-     * @param param
-     *            Parameter to resolve.
-     *
-     * @throws NullPointerException
-     *             If the parameter is null.
-     */
-    public TypeParameterResolver(final TypeVariable<? extends Class<?>> param) {
-
-	typeParameter = Objects.requireNonNull(param);
-	declaringClazz = param.getGenericDeclaration();
-    }
-
-    /**
      * Creates a new instance of TypeParameterResolver to resolve the supplied
      * parameter. This will look up the parameter using the class supplied and
      * the parameter name.
@@ -186,6 +170,22 @@ public class TypeParameterResolver {
     public TypeParameterResolver(final Class<?> clazz, final String name) {
 
 	this(getTypeParameter(clazz, name));
+    }
+
+    /**
+     * Creates a new instance of TypeParameterResolver that will look to resolve
+     * the supplied parameter.
+     *
+     * @param param
+     *            Parameter to resolve.
+     *
+     * @throws NullPointerException
+     *             If the parameter is null.
+     */
+    public TypeParameterResolver(final TypeVariable<? extends Class<?>> param) {
+
+	typeParameter = Objects.requireNonNull(param);
+	declaringClazz = param.getGenericDeclaration();
     }
 
     /**

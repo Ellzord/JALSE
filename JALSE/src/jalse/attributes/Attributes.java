@@ -26,16 +26,29 @@ public final class Attributes {
     }
 
     /**
-     * Creates an immutable read-only delegate attribute container for the
-     * supplied container.
+     * Predicate to check attribute is present.
      *
-     * @param container
-     *            Container to delegate for.
-     * @return Immutable attribute container.
+     * @param attr
+     *            Attribute type.
+     * @return Predicate of {@code true} if the attribute is present and
+     *         {@code false} if it is not.
      */
-    public static AttributeContainer unmodifiableAttributeContainer(final AttributeContainer container) {
+    public static Predicate<AttributeContainer> isPresent(final Class<? extends Attribute> attr) {
 
-	return new UnmodifiableDelegateAttributeContainer(Objects.requireNonNull(container));
+	return a -> a.getAttributeOfType(attr).isPresent();
+    }
+
+    /**
+     * Predicate to check attribute is not present.
+     *
+     * @param attr
+     *            Attribute type.
+     * @return Predicate of {@code true} if the attribute is not present and
+     *         {@code false} if it is.
+     */
+    public static Predicate<AttributeContainer> notPresent(final Class<? extends Attribute> attr) {
+
+	return isPresent(attr).negate();
     }
 
     /**
@@ -60,6 +73,19 @@ public final class Attributes {
     }
 
     /**
+     * Creates an immutable read-only delegate attribute container for the
+     * supplied container.
+     *
+     * @param container
+     *            Container to delegate for.
+     * @return Immutable attribute container.
+     */
+    public static AttributeContainer unmodifiableAttributeContainer(final AttributeContainer container) {
+
+	return new UnmodifiableDelegateAttributeContainer(Objects.requireNonNull(container));
+    }
+
+    /**
      * Convenience method for getting the value within a optional wrapper.
      *
      * @param attr
@@ -69,32 +95,6 @@ public final class Attributes {
     public static <T> T unwrap(final Optional<? extends NonAttributeWrapper<T>> attr) {
 
 	return attr.isPresent() ? attr.get().unwrap() : null;
-    }
-
-    /**
-     * Predicate to check attribute is present.
-     *
-     * @param attr
-     *            Attribute type.
-     * @return Predicate of {@code true} if the attribute is present and
-     *         {@code false} if it is not.
-     */
-    public static Predicate<AttributeContainer> isPresent(final Class<? extends Attribute> attr) {
-
-	return a -> a.getAttributeOfType(attr).isPresent();
-    }
-
-    /**
-     * Predicate to check attribute is not present.
-     *
-     * @param attr
-     *            Attribute type.
-     * @return Predicate of {@code true} if the attribute is not present and
-     *         {@code false} if it is.
-     */
-    public static Predicate<AttributeContainer> notPresent(final Class<? extends Attribute> attr) {
-
-	return isPresent(attr).negate();
     }
 
     private Attributes() {

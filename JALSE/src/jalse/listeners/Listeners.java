@@ -18,6 +18,17 @@ import java.util.function.Supplier;
 public final class Listeners {
 
     /**
+     * Creates a ListenerSet for AttributeListener.
+     *
+     * @return New AttributeListener ListenerSet.
+     */
+    @SuppressWarnings("rawtypes")
+    public static ListenerSet<AttributeListener> createAttributeListenerSet() {
+
+	return new ListenerSet<>(AttributeListener.class);
+    }
+
+    /**
      * Creates an AttributeListener supplier that will supply an
      * AttributeListener to all newly created direct Entity descendants.
      *
@@ -30,6 +41,29 @@ public final class Listeners {
 	    final Supplier<AttributeListener<? extends Attribute>> supplier) {
 
 	return new AttributeListenerSupplier(supplier, false);
+    }
+
+    /**
+     * Creates a ListenerSet for EntityListener.
+     *
+     * @return New EntityListener ListenerSet.
+     */
+    public static ListenerSet<EntityListener> createEntityListenerSet() {
+
+	return new ListenerSet<>(EntityListener.class);
+    }
+
+    /**
+     * Creates an EntityListener supplier that will supply an EntityListener to
+     * all newly created direct Entity descendants.
+     *
+     * @param supplier
+     *            EntityListener supplier.
+     * @return EntityLitener that adds supplied EntityLitenes to descendants.
+     */
+    public static EntityListener createEntityListenerSupplier(final Supplier<EntityListener> supplier) {
+
+	return new EntityListenerSupplier(supplier, false);
     }
 
     /**
@@ -59,40 +93,6 @@ public final class Listeners {
     public static EntityListener createRecursiveEntityListenerSupplier(final Supplier<EntityListener> supplier) {
 
 	return new EntityListenerSupplier(supplier, true);
-    }
-
-    /**
-     * Creates an EntityListener supplier that will supply an EntityListener to
-     * all newly created direct Entity descendants.
-     *
-     * @param supplier
-     *            EntityListener supplier.
-     * @return EntityLitener that adds supplied EntityLitenes to descendants.
-     */
-    public static EntityListener createEntityListenerSupplier(final Supplier<EntityListener> supplier) {
-
-	return new EntityListenerSupplier(supplier, false);
-    }
-
-    /**
-     * Creates a ListenerSet for EntityListener.
-     *
-     * @return New EntityListener ListenerSet.
-     */
-    public static ListenerSet<EntityListener> createEntityListenerSet() {
-
-	return new ListenerSet<>(EntityListener.class);
-    }
-
-    /**
-     * Creates a ListenerSet for AttributeListener.
-     *
-     * @return New AttributeListener ListenerSet.
-     */
-    @SuppressWarnings("rawtypes")
-    public static ListenerSet<AttributeListener> createAttributeListenerSet() {
-
-	return new ListenerSet<>(AttributeListener.class);
     }
 
     private Listeners() {

@@ -15,15 +15,15 @@ import jalse.entities.Entity;
 public class JALSEBuilder {
 
     /**
-     * The default {@link Entity} limit ({@code Integer.MAX_VALUE}).
-     */
-    public static final int DEFAULT_TOTAL_ENTITY_LIMIT = Integer.MAX_VALUE;
-
-    /**
      * The default total threads to be used by the engine for performing actions
      * ({@code 10}).
      */
     public static final int DEFAULT_TOTAL_THREADS = 10;
+
+    /**
+     * The default {@link Entity} limit ({@code Integer.MAX_VALUE}).
+     */
+    public static final int DEFAULT_TOTAL_ENTITY_LIMIT = Integer.MAX_VALUE;
 
     /**
      * Creates a single threaded JALSE instance with default values.

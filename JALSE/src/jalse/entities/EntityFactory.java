@@ -14,6 +14,15 @@ import java.util.UUID;
 public interface EntityFactory {
 
     /**
+     * Kills the specified entity.
+     *
+     * @param e
+     *            Entity to kill.
+     * @return Whether the entity was killed.
+     */
+    boolean killEntity(Entity e);
+
+    /**
      * Creates a new entity with the specified ID and parent container.
      *
      * @param id
@@ -23,13 +32,4 @@ public interface EntityFactory {
      * @return Newly created entity.
      */
     Entity newEntity(UUID id, EntityContainer container);
-
-    /**
-     * Kills the specified entity.
-     *
-     * @param e
-     *            Entity to kill.
-     * @return Whether the entity was killed.
-     */
-    boolean killEntity(Entity e);
 }

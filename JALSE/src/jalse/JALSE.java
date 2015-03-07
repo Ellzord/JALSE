@@ -1,5 +1,6 @@
 package jalse;
 
+import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
 import static jalse.misc.JALSEExceptions.ENTITY_LIMIT_REACHED;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.AbstractEngine;
@@ -10,12 +11,12 @@ import jalse.entities.EntityContainer;
 import jalse.entities.EntityFactory;
 import jalse.entities.EntitySet;
 import jalse.listeners.EntityListener;
-import jalse.misc.Identifiable;
 import jalse.tags.Tag;
 import jalse.tags.TagSet;
 import jalse.tags.Taggable;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -32,9 +33,16 @@ import java.util.stream.Stream;
  * @author Elliot Ford
  *
  */
-public class JALSE extends AbstractEngine implements EntityContainer, Identifiable, Taggable, Scheduler<JALSE> {
+public class JALSE extends AbstractEngine implements EntityContainer, Taggable, Scheduler<JALSE> {
 
     private class LimitingEntityFactory implements EntityFactory {
+
+	private final Set<UUID> entityIDs;
+
+	private LimitingEntityFactory() {
+
+	    entityIDs = new HashSet<>();
+	}
 
 	@Override
 	public synchronized boolean killEntity(final Entity e) {
@@ -45,16 +53,21 @@ public class JALSE extends AbstractEngine implements EntityContainer, Identifiab
 	    }
 
 	    final DefaultEntity de = (DefaultEntity) e;
-	    boolean result;
 
-	    if (result = de.markAsDead()) {
+	    if (!de.isAlive() || !entityIDs.remove(de.getID())) {
 
-		de.setEngine(null);
-
-		totalEntityCount--;
+		return false;
 	    }
 
-	    return result;
+	    de.markAsDead();
+	    de.cancelTasks();
+	    de.setEngine(null);
+
+	    totalEntityCount--;
+
+	    de.killEntities();
+
+	    return true;
 	}
 
 	@Override
@@ -65,11 +78,16 @@ public class JALSE extends AbstractEngine implements EntityContainer, Identifiab
 		throwRE(ENTITY_LIMIT_REACHED);
 	    }
 
-	    totalEntityCount++;
+	    if (!entityIDs.add(id)) {
+
+		throwRE(ENTITY_ALREADY_ASSOCIATED);
+	    }
 
 	    final DefaultEntity e = new DefaultEntity(id, LimitingEntityFactory.this, container);
 	    e.setEngine(JALSE.this);
 	    e.markAsAlive();
+
+	    totalEntityCount++;
 
 	    return e;
 	}
@@ -168,12 +186,6 @@ public class JALSE extends AbstractEngine implements EntityContainer, Identifiab
     public Action<JALSE> getFirstAction() {
 
 	return (Action<JALSE>) super.getFirstAction();
-    }
-
-    @Override
-    public UUID getID() {
-
-	return Identifiable.DUMMY_ID;
     }
 
     /**

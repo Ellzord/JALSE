@@ -42,47 +42,35 @@ public interface EntityContainer {
     boolean addEntityListener(EntityListener listener);
 
     /**
-     * Removes a entity listener.
+     * Gets all the entities within the containers.
      *
-     * @param listener
-     *            Listener to remove.
+     * @return Gets all entities or an empty set if none were found.
+     */
+    Set<Entity> getEntities();
+
+    /**
+     * Gets all the entities marked with the specified type.
      *
-     * @return {@code true} if the listener was removed.
+     * @param type
+     *            Entity type to check for.
+     * @return Set of entities marked with the type.
+     *
+     * @see Entity#isMarkedAsType(Class)
+     * @see Entity#asType(Class)
+     */
+    <T extends Entity> Set<T> getEntitiesOfType(Class<T> type);
+
+    /**
+     * Gets the entity with the specified ID.
+     *
+     * @param id
+     *            Unique ID of the entity.
+     * @return Gets an Optional of the resulting entity or an empty Optional if
+     *         it was not found.
      * @throws NullPointerException
-     *             if listener is null.
-     *
-     * @see ListenerSet#remove(Object)
-     *
+     *             If the ID is null.
      */
-    boolean removeEntityListener(EntityListener listener);
-
-    /**
-     * Gets all the entity listeners.
-     *
-     * @return All the entity listeners.
-     */
-    Set<? extends EntityListener> getEntityListeners();
-
-    /**
-     * Kills the specified entity.
-     *
-     * @param id
-     *            Entity ID.
-     * @return Whether the entity was alive.
-     */
-    boolean killEntity(UUID id);
-
-    /**
-     * Checks whether the entity is contained.
-     *
-     * @param id
-     *            Entity ID.
-     * @return Whether the entity was found.
-     */
-    default boolean hasEntity(final UUID id) {
-
-	return getEntity(id).isPresent();
-    }
+    Optional<Entity> getEntity(UUID id);
 
     /**
      * Gets the entity with the specified ID. The entity is wrapped with the
@@ -105,16 +93,25 @@ public interface EntityContainer {
     }
 
     /**
-     * Gets the entity with the specified ID.
+     * Gets the direct entity count.
      *
-     * @param id
-     *            Unique ID of the entity.
-     * @return Gets an Optional of the resulting entity or an empty Optional if
-     *         it was not found.
-     * @throws NullPointerException
-     *             If the ID is null.
+     * @return Direct child entity count.
      */
-    Optional<Entity> getEntity(UUID id);
+    int getEntityCount();
+
+    /**
+     * Gets the IDs of all the entities within the container.
+     *
+     * @return Set of all entity identifiers.
+     */
+    Set<UUID> getEntityIDs();
+
+    /**
+     * Gets all the entity listeners.
+     *
+     * @return All the entity listeners.
+     */
+    Set<? extends EntityListener> getEntityListeners();
 
     /**
      * Checks whether the container has any entities.
@@ -127,42 +124,30 @@ public interface EntityContainer {
     }
 
     /**
-     * Gets the IDs of all the entities within the container.
+     * Checks whether the entity is contained.
      *
-     * @return Set of all entity identifiers.
+     * @param id
+     *            Entity ID.
+     * @return Whether the entity was found.
      */
-    Set<UUID> getEntityIDs();
+    default boolean hasEntity(final UUID id) {
 
-    /**
-     * Gets all the entities within the containers.
-     *
-     * @return Gets all entities or an empty set if none were found.
-     */
-    Set<Entity> getEntities();
-
-    /**
-     * Gets all the entities marked with the specified type.
-     *
-     * @param type
-     *            Entity type to check for.
-     * @return Set of entities marked with the type.
-     *
-     * @see Entity#isMarkedAsType(Class)
-     * @see Entity#asType(Class)
-     */
-    <T extends Entity> Set<T> getEntitiesOfType(Class<T> type);
-
-    /**
-     * Gets the direct entity count.
-     *
-     * @return Direct child entity count.
-     */
-    int getEntityCount();
+	return getEntity(id).isPresent();
+    }
 
     /**
      * Kills all entities.
      */
     void killEntities();
+
+    /**
+     * Kills the specified entity.
+     *
+     * @param id
+     *            Entity ID.
+     * @return Whether the entity was alive.
+     */
+    boolean killEntity(UUID id);
 
     /**
      * Creates a new entity with a random ID.
@@ -230,6 +215,21 @@ public interface EntityContainer {
      * @see Entities#asType(Entity, Class)
      */
     <T extends Entity> T newEntity(UUID id, Class<T> type);
+
+    /**
+     * Removes a entity listener.
+     *
+     * @param listener
+     *            Listener to remove.
+     *
+     * @return {@code true} if the listener was removed.
+     * @throws NullPointerException
+     *             if listener is null.
+     *
+     * @see ListenerSet#remove(Object)
+     *
+     */
+    boolean removeEntityListener(EntityListener listener);
 
     /**
      * Provides a stream of entities from the container.

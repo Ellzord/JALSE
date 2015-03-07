@@ -15,7 +15,7 @@ package jalse.entities;
  * <br>
  *
  * Entities can be walked through using
- * {@link Entities#walkEntities(EntityContainer, EntityVisitor)}.
+ * {@link Entities#walkEntityTree(EntityContainer, int, EntityVisitor)}.
  *
  * @author Elliot Ford
  *

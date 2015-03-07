@@ -44,16 +44,6 @@ public class DefaultScheduler<T> implements Scheduler<T> {
     }
 
     /**
-     * Gets the action Actor.
-     *
-     * @return Actor to schedule events against.
-     */
-    public T getActor() {
-
-	return actor;
-    }
-
-    /**
      * Cancel all tasks scheduled to the current engine for the actor by this
      * scheduler.
      */
@@ -68,6 +58,16 @@ public class DefaultScheduler<T> implements Scheduler<T> {
 
 	    tasks.clear();
 	}
+    }
+
+    /**
+     * Gets the action Actor.
+     *
+     * @return Actor to schedule events against.
+     */
+    public T getActor() {
+
+	return actor;
     }
 
     /**

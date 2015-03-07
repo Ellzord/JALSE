@@ -7,19 +7,27 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.Objects;
 
-class EntityWalker {
+class EntityTreeWalker {
 
     private final EntityContainer container;
+    private final int maxDepth;
     private final EntityVisitor visitor;
-    private final Deque<EntityWalker> walkers;
+    private final Deque<EntityTreeWalker> walkers;
     private Iterator<Entity> iterator;
     private boolean ignoreSiblings;
     private boolean exited;
 
-    EntityWalker(final EntityContainer container, final EntityVisitor visitor) {
+    EntityTreeWalker(final EntityContainer container, final int maxDepth, final EntityVisitor visitor) {
 
 	this.container = Objects.requireNonNull(container);
 	this.visitor = Objects.requireNonNull(visitor);
+
+	if (maxDepth <= 0) {
+
+	    throw new IllegalArgumentException();
+	}
+
+	this.maxDepth = maxDepth;
 
 	walkers = new ArrayDeque<>();
 	exited = false;
@@ -27,7 +35,33 @@ class EntityWalker {
 	reset();
     }
 
-    public void walk() {
+    public EntityContainer getContainer() {
+
+	return container;
+    }
+
+    public int getMaxDepth() {
+
+	return maxDepth;
+    }
+
+    public EntityVisitor getVisitor() {
+
+	return visitor;
+    }
+
+    public boolean isWalking() {
+
+	return iterator != null;
+    }
+
+    public void reset() {
+
+	iterator = null;
+	walkers.clear();
+    }
+
+    public Entity walk() {
 
 	/*
 	 * Start walking.
@@ -51,7 +85,7 @@ class EntityWalker {
 
 		exited = true;
 		reset();
-		return;
+		return e;
 	    }
 
 	    /*
@@ -66,33 +100,32 @@ class EntityWalker {
 	    /*
 	     * Do not walk through child descendants.
 	     */
-	    if (result != EntityVisitResult.IGNORE_CHILDREN) {
+	    if (maxDepth > 1 && result != EntityVisitResult.IGNORE_CHILDREN) {
 
-		walkers.addLast(new EntityWalker(e, visitor));
+		walkers.addLast(new EntityTreeWalker(e, maxDepth - 1, visitor));
 	    }
 
-	    return;
+	    return e;
 	}
 
-	final EntityWalker current = walkers.peekFirst();
+	final EntityTreeWalker child = walkers.peekFirst();
+	Entity e = null;
 
 	/*
 	 * Walk already visited child.
 	 */
-	if (current != null) {
+	if (child != null) {
 
-	    current.walk();
+	    e = child.walk();
 
-	    if (current.exited) {
+	    if (child.exited) {
 
 		reset();
-		return;
 	    }
-
 	    /*
 	     * Child has been fully traversed.
 	     */
-	    if (!current.isWalking()) {
+	    else if (!child.isWalking()) {
 
 		walkers.removeFirst();
 
@@ -102,26 +135,7 @@ class EntityWalker {
 		}
 	    }
 	}
-    }
 
-    public boolean isWalking() {
-
-	return iterator != null;
-    }
-
-    public void reset() {
-
-	iterator = null;
-	walkers.clear();
-    }
-
-    public EntityContainer getContainer() {
-
-	return container;
-    }
-
-    public EntityVisitor getVisitor() {
-
-	return visitor;
+	return e;
     }
 }

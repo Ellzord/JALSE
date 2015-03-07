@@ -57,13 +57,11 @@ public interface AttributeContainer {
     <T extends Attribute> boolean fireAttributeChanged(Class<T> attr);
 
     /**
-     * Gets all attribute listeners associated to the supplied attribute type.
+     * Gets the number of total attributes within the container.
      *
-     * @param attr
-     *            Attribute type to check for.
-     * @return Set of attribute listeners or an empty set if none were found.
+     * @return Attribute count.
      */
-    <T extends Attribute> Set<? extends AttributeListener<T>> getAttributeListeners(Class<T> attr);
+    int getAttributeCount();
 
     /**
      * Gets all the attribute listeners.
@@ -71,6 +69,15 @@ public interface AttributeContainer {
      * @return Set of attribute listeners or an empty set if none were found.
      */
     Set<? extends AttributeListener<? extends Attribute>> getAttributeListeners();
+
+    /**
+     * Gets all attribute listeners associated to the supplied attribute type.
+     *
+     * @param attr
+     *            Attribute type to check for.
+     * @return Set of attribute listeners or an empty set if none were found.
+     */
+    <T extends Attribute> Set<? extends AttributeListener<T>> getAttributeListeners(Class<T> attr);
 
     /**
      * Gets all the attribute listener types.
@@ -89,6 +96,21 @@ public interface AttributeContainer {
      *         found.
      */
     <T extends Attribute> Optional<T> getAttributeOfType(Class<T> attr);
+
+    /**
+     * Gets all of the attributes within the container.
+     *
+     * @return All of the attributes or an empty set if none were found.
+     */
+    Set<? extends Attribute> getAttributes();
+
+    /**
+     * Gets all of the attribute types within the container.
+     *
+     * @return All of the types of the attributes or an empty set if none were
+     *         found.
+     */
+    Set<Class<? extends Attribute>> getAttributeTypes();
 
     /**
      * This is a convenience method for getting an attribute (no optional).
@@ -121,49 +143,6 @@ public interface AttributeContainer {
     }
 
     /**
-     * Removes an attribute listener assigned to the supplied attribute type.
-     *
-     * @param listener
-     *            Listener to remove.
-     * @return Whether the listener was assigned.
-     */
-    boolean removeAttributeListener(AttributeListener<? extends Attribute> listener);
-
-    /**
-     * Gets all of the attributes within the container.
-     *
-     * @return All of the attributes or an empty set if none were found.
-     */
-    Set<? extends Attribute> getAttributes();
-
-    /**
-     * Gets the number of total attributes within the container.
-     *
-     * @return Attribute count.
-     */
-    int getAttributeCount();
-
-    /**
-     * Removes all attributes within the container (firing removal events).
-     */
-    void removeAttributes();
-
-    /**
-     * Gets all of the attribute types within the container.
-     *
-     * @return All of the types of the attributes or an empty set if none were
-     *         found.
-     */
-    Set<Class<? extends Attribute>> getAttributeTypes();
-
-    /**
-     * Streams all of the attributes within the container.
-     *
-     * @return Stream of all attributes.
-     */
-    Stream<? extends Attribute> streamAttributes();
-
-    /**
      * Checks whether the container has any attributes.
      *
      * @return Is the container is not empty.
@@ -174,6 +153,15 @@ public interface AttributeContainer {
     }
 
     /**
+     * Removes an attribute listener assigned to the supplied attribute type.
+     *
+     * @param listener
+     *            Listener to remove.
+     * @return Whether the listener was assigned.
+     */
+    boolean removeAttributeListener(AttributeListener<? extends Attribute> listener);
+
+    /**
      * Removes the attribute matching the supplied type.
      *
      * @param attr
@@ -182,4 +170,16 @@ public interface AttributeContainer {
      *         if none found
      */
     <T extends Attribute> Optional<T> removeAttributeOfType(Class<T> attr);
+
+    /**
+     * Removes all attributes within the container (firing removal events).
+     */
+    void removeAttributes();
+
+    /**
+     * Streams all of the attributes within the container.
+     *
+     * @return Stream of all attributes.
+     */
+    Stream<? extends Attribute> streamAttributes();
 }

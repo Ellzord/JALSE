@@ -8,13 +8,17 @@ import jalse.misc.JALSEExceptions;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A utility for {@link Entity} related functionality (specifically wrapping
@@ -75,15 +79,48 @@ import java.util.stream.Stream;
 public final class Entities {
 
     @SuppressWarnings("unchecked")
-    private static void addAncestors(final Set<Class<? extends Entity>> ancestry, final Class<?> type) {
+    private static void addDirectTypeAncestors(final Set<Class<? extends Entity>> ancestry, final Class<?> type) {
 
 	for (final Class<?> t : type.getInterfaces()) {
 
 	    if (!t.equals(Entity.class) && ancestry.add((Class<? extends Entity>) t)) {
 
-		addAncestors(ancestry, t);
+		addDirectTypeAncestors(ancestry, t);
 	    }
 	}
+    }
+
+    /**
+     * Gets any entity within the container.
+     *
+     * @param container
+     *            Entity container.
+     *
+     * @return Gets an Optional of the resulting entity or an empty Optional if
+     *         it was not found.
+     */
+    public static Optional<Entity> anyEntity(final EntityContainer container) {
+
+	return container.streamEntities().findAny();
+    }
+
+    /**
+     * Gets any entity within the container marked with the specified type.
+     *
+     * @param container
+     *            Entity container.
+     *
+     * @param type
+     *            Entity type.
+     *
+     * @return Gets an Optional of the resulting entity or an empty Optional if
+     *         it was not found.
+     *
+     * @see Entity#markAsType(Class)
+     */
+    public static <T extends Entity> Optional<T> anyEntityOfType(final EntityContainer container, final Class<T> type) {
+
+	return container.streamEntitiesOfType(type).findAny();
     }
 
     /**
@@ -143,15 +180,28 @@ public final class Entities {
      *
      * @see JALSEExceptions#INVALID_ENTITY_TYPE
      */
-    public static Set<Class<? extends Entity>> getAncestry(final Class<? extends Entity> type) {
+    public static Set<Class<? extends Entity>> getTypeAncestry(final Class<? extends Entity> type) {
 
 	validateType(type);
 
 	final Set<Class<? extends Entity>> ancestry = new HashSet<>();
 
-	addAncestors(ancestry, type);
+	addDirectTypeAncestors(ancestry, type);
 
 	return ancestry;
+    }
+
+    /**
+     * Checks to see if the entity has been tagged with the type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Predicate of {@code true} if the entity is of the type or
+     *         {@code false} if it is not.
+     */
+    public static Predicate<Entity> isMarkedAsType(final Class<? extends Entity> type) {
+
+	return i -> i.isMarkedAsType(type);
     }
 
     /**
@@ -165,10 +215,23 @@ public final class Entities {
      * @return Whether the descendant is equal or descended from the ancestor
      *         type.
      */
-    public static boolean isOrDescendant(final Class<? extends Entity> descendant,
+    public static boolean isOrTypeDescendant(final Class<? extends Entity> descendant,
 	    final Class<? extends Entity> ancestor) {
 
 	return ancestor.isAssignableFrom(descendant);
+    }
+
+    /**
+     * Checks to see if the entity has not been tagged with the type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Predicate of {@code true} if the entity is not of the type or
+     *         {@code false} if it is.
+     */
+    public static Predicate<Entity> notMarkedAsType(final Class<? extends Entity> type) {
+
+	return isMarkedAsType(type).negate();
     }
 
     /**
@@ -205,8 +268,58 @@ public final class Entities {
     }
 
     /**
-     * Walks through all entities (recursive). Walking can be stopped or
-     * filtered based on the visit result returned.
+     * A lazy-walked stream of entities (recursive and breadth-first). The
+     * entire stream will not be loaded until it is iterated through.
+     *
+     * This is equivalent to {@code walkEntities(container, Integer.MAX_VALUE)}
+     *
+     * @param container
+     *            Entity container.
+     * @return Lazy-walked recursive stream of entities.
+     */
+    public static Stream<Entity> walkEntities(final EntityContainer container) {
+
+	return walkEntities(container, Integer.MAX_VALUE);
+    }
+
+    /**
+     * A lazy-walked stream of entities (recursive and breadth-first). The
+     * entire stream will not be loaded until it is iterated through.
+     *
+     * @param container
+     *            Entity container.
+     * @param maxDepth
+     *            Maximum depth of the walk.
+     * @return Lazy-walked recursive stream of entities.
+     */
+    public static Stream<Entity> walkEntities(final EntityContainer container, final int maxDepth) {
+
+	final EntityTreeWalker walker = new EntityTreeWalker(container, maxDepth, e -> EntityVisitResult.CONTINUE);
+
+	final Iterator<Entity> iterator = new Iterator<Entity>() {
+
+	    @Override
+	    public boolean hasNext() {
+
+		return walker.isWalking();
+	    }
+
+	    @Override
+	    public Entity next() {
+
+		return walker.walk();
+	    }
+	};
+
+	return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.DISTINCT), false);
+    }
+
+    /**
+     * Walks through all entities (recursive and breadth-first). Walking can be
+     * stopped or filtered based on the visit result returned.
+     *
+     * This is equivalent to
+     * {@code walkEntityTree(container, Integer.MAX_VALUE, visitor)}
      *
      * @param container
      *            Entity container.
@@ -215,14 +328,37 @@ public final class Entities {
      *
      * @see EntityVisitor
      */
-    public static void walkEntities(final EntityContainer container, final EntityVisitor visitor) {
+    public static void walkEntityTree(final EntityContainer container, final EntityVisitor visitor) {
 
-	final EntityWalker walker = new EntityWalker(container, visitor);
+	walkEntityTree(container, Integer.MAX_VALUE, visitor);
+    }
+
+    /**
+     * Walks through all entities (recursive and breadth-first). Walking can be
+     * stopped or filtered based on the visit result returned.
+     *
+     * @param container
+     *            Entity container.
+     * @param maxDepth
+     *            Maximum depth of the walk.
+     * @param visitor
+     *            Entity visitor.
+     *
+     * @see EntityVisitor
+     */
+    public static void walkEntityTree(final EntityContainer container, final int maxDepth, final EntityVisitor visitor) {
+
+	final EntityTreeWalker walker = new EntityTreeWalker(container, maxDepth, visitor);
 
 	do {
 
 	    walker.walk();
 	} while (walker.isWalking());
+    }
+
+    private Entities() {
+
+	throw new UnsupportedOperationException();
     }
 
     /**
@@ -237,7 +373,7 @@ public final class Entities {
 
 	final AtomicInteger result = new AtomicInteger();
 
-	walkEntities(container, e -> {
+	walkEntityTree(container, e -> {
 
 	    result.incrementAndGet();
 	    return EntityVisitResult.CONTINUE;
@@ -258,107 +394,11 @@ public final class Entities {
 
 	final Set<UUID> result = new HashSet<>();
 
-	walkEntities(container, e -> {
+	walkEntityTree(container, e -> {
 
-	    result.add(e.getID());
-	    return EntityVisitResult.CONTINUE;
+	    return result.add(e.getID()) ? EntityVisitResult.CONTINUE : EntityVisitResult.IGNORE_CHILDREN;
 	});
 
 	return result;
-    }
-
-    /**
-     * Provides a stream of entities from the container (recursive).
-     *
-     * @param container
-     *            Entity container.
-     *
-     * @return A stream of entities in the container.
-     */
-    public Stream<Entity> streamEntitiesRecursively(final EntityContainer container) {
-
-	return container.streamEntities().flatMap(c -> streamEntitiesRecursively(c));
-    }
-
-    /**
-     * Gets a stream of all entities marked with the specified type (recursive).
-     *
-     * @param container
-     *            Entity container.
-     * @param type
-     *            Entity type.
-     * @return Stream of entities marked with the type.
-     *
-     * @see Entity#isMarkedAsType(Class)
-     * @see Entity#asType(Class)
-     */
-    public <T extends Entity> Stream<T> streamEntitiesOfTypeRecursively(final EntityContainer container,
-	    final Class<T> type) {
-
-	return container.streamEntitiesOfType(type).flatMap(c -> streamEntitiesOfTypeRecursively(c, type));
-    }
-
-    /**
-     * Gets any entity within the container.
-     *
-     * @param container
-     *            Entity container.
-     *
-     * @return Gets an Optional of the resulting entity or an empty Optional if
-     *         it was not found.
-     */
-    public static Optional<Entity> anyEntity(final EntityContainer container) {
-
-	return container.streamEntities().findAny();
-    }
-
-    /**
-     * Gets any entity within the container marked with the specified type.
-     *
-     * @param container
-     *            Entity container.
-     *
-     * @param type
-     *            Entity type.
-     *
-     * @return Gets an Optional of the resulting entity or an empty Optional if
-     *         it was not found.
-     *
-     * @see Entity#markAsType(Class)
-     */
-    public static <T extends Entity> Optional<T> anyEntityOfType(final EntityContainer container, final Class<T> type) {
-
-	return container.streamEntitiesOfType(type).findAny();
-    }
-
-    /**
-     * Checks to see if the entity has been tagged with the type.
-     *
-     * @param type
-     *            Entity type to check for.
-     * @return Predicate of {@code true} if the entity is of the type or
-     *         {@code false} if it is not.
-     */
-    public static Predicate<Entity> isMarkedAsType(final Class<? extends Entity> type) {
-
-	return i -> i.isMarkedAsType(type);
-    }
-
-    /**
-     * Checks to see if the entity has not been tagged with the type.
-     *
-     * @param type
-     *            Entity type to check for.
-     * @return Predicate of {@code true} if the entity is not of the type or
-     *         {@code false} if it is.
-     */
-    public static Predicate<Entity> notMarkedAsType(final Class<? extends Entity> type) {
-
-	return isMarkedAsType(type).negate();
-    }
-
-    private Entities() {
-
-	throw new UnsupportedOperationException();
     }
 }

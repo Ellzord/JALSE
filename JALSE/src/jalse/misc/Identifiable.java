@@ -54,18 +54,6 @@ public interface Identifiable extends Comparable<Identifiable> {
     }
 
     /**
-     * Generates a hashcode for an identifiable.
-     *
-     * @param obj
-     *            Identifiable instance.
-     * @return Hashcode for the identifiable or {@code 0} if null.
-     */
-    public static int hashCode(final Identifiable obj) {
-
-	return obj == null ? 0 : Objects.hashCode(obj.getID());
-    }
-
-    /**
      * Gets the ID of the object if it is an Identifiable.
      *
      * @param obj
@@ -78,22 +66,15 @@ public interface Identifiable extends Comparable<Identifiable> {
     }
 
     /**
-     * Creates a simple to string for the identifiable. This is structured like
-     * {@code <SIMPLE_CLASS_NAME> [id=X]}.
+     * Generates a hashcode for an identifiable.
      *
      * @param obj
-     *            Identifiable to create a string representation for.
-     * @return String representation of the identifiable.
+     *            Identifiable instance.
+     * @return Hashcode for the identifiable or {@code 0} if null.
      */
-    public static String toString(final Identifiable obj) {
+    public static int hashCode(final Identifiable obj) {
 
-	return obj.getClass().getSimpleName() + " [id=" + obj.getID() + "]";
-    }
-
-    @Override
-    default int compareTo(final Identifiable o) {
-
-	return Objects.compare(this, o, COMPARATOR);
+	return obj == null ? 0 : Objects.hashCode(obj.getID());
     }
 
     /**
@@ -124,6 +105,25 @@ public interface Identifiable extends Comparable<Identifiable> {
     public static Predicate<Identifiable> notID(final UUID id) {
 
 	return isID(id).negate();
+    }
+
+    /**
+     * Creates a simple to string for the identifiable. This is structured like
+     * {@code <SIMPLE_CLASS_NAME> [id=X]}.
+     *
+     * @param obj
+     *            Identifiable to create a string representation for.
+     * @return String representation of the identifiable.
+     */
+    public static String toString(final Identifiable obj) {
+
+	return obj.getClass().getSimpleName() + " [id=" + obj.getID() + "]";
+    }
+
+    @Override
+    default int compareTo(final Identifiable o) {
+
+	return Objects.compare(this, o, COMPARATOR);
     }
 
     /**

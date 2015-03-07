@@ -45,6 +45,18 @@ public class EntitySet extends AbstractSet<Entity> {
     private final EntityContainer delegateContainer;
 
     /**
+     * Creates an entity set with the supplied factory and empty delegate
+     * container.
+     *
+     * @param factory
+     *            Entity creation/death factory.
+     */
+    public EntitySet(final EntityFactory factory) {
+
+	this(factory, Entities.emptyEntityContainer());
+    }
+
+    /**
      * Creates an entity set with the supplied factory and delegate container.
      *
      * @param factory
@@ -59,18 +71,6 @@ public class EntitySet extends AbstractSet<Entity> {
 
 	entities = new ConcurrentHashMap<>();
 	entityListeners = Listeners.createEntityListenerSet();
-    }
-
-    /**
-     * Creates an entity set with the supplied factory and empty delegate
-     * container.
-     *
-     * @param factory
-     *            Entity creation/death factory.
-     */
-    public EntitySet(final EntityFactory factory) {
-
-	this(factory, Entities.emptyEntityContainer());
     }
 
     /**
@@ -91,169 +91,6 @@ public class EntitySet extends AbstractSet<Entity> {
 	return entityListeners.add(listener);
     }
 
-    /**
-     * Removes a entity listener.
-     *
-     * @param listener
-     *            Listener to remove.
-     *
-     * @return {@code true} if the listener was removed.
-     * @throws NullPointerException
-     *             if listener is null.
-     *
-     * @see ListenerSet#remove(Object)
-     *
-     */
-    public boolean removeListener(final EntityListener listener) {
-
-	return entityListeners.remove(listener);
-    }
-
-    /**
-     * Gets all the entity listeners.
-     *
-     * @return All the entity listeners.
-     */
-    public Set<? extends EntityListener> getListeners() {
-
-	return Collections.unmodifiableSet(entityListeners);
-    }
-
-    /**
-     * Gets entity factory for this set.
-     *
-     * @return Entity creation / death factory.
-     */
-    public EntityFactory getFactory() {
-
-	return factory;
-    }
-
-    /**
-     * Gets the delegate container for events and entity creation.
-     *
-     * @return Delegate container.
-     */
-    public EntityContainer getDelegateContainer() {
-
-	return delegateContainer;
-    }
-
-    @Override
-    public Iterator<Entity> iterator() {
-
-	return entities.values().iterator();
-    }
-
-    @Override
-    public int size() {
-
-	return entities.size();
-    }
-
-    private Entity newEntity0(final UUID id, final Class<? extends Entity> type) {
-
-	if (entities.containsKey(id)) {
-
-	    throwRE(ENTITY_ALREADY_ASSOCIATED);
-	}
-
-	final Entity e = factory.newEntity(id, delegateContainer);
-	entities.put(e.getID(), e);
-
-	if (type != null) {
-
-	    e.markAsType(type);
-	}
-
-	entityListeners.getProxy().entityCreated(new EntityEvent(delegateContainer, e));
-
-	return e;
-    }
-
-    /**
-     * Creates a new entity with a random ID.
-     *
-     * @return The newly created entity's ID.
-     * @throws IllegalStateException
-     *             If the entity limit has been reached.
-     *
-     * @see UUID#randomUUID()
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
-     * @see EntityFactory#newEntity(UUID, EntityContainer)
-     */
-    public Entity newEntity() {
-
-	return newEntity(UUID.randomUUID());
-    }
-
-    /**
-     * Creates new entity with the specified ID.
-     *
-     * @param id
-     *            Entity ID.
-     * @return The newly created entity.
-     * @throws IllegalStateException
-     *             If the entity limit has been reached.
-     * @throws IllegalArgumentException
-     *             If the entity ID is already assigned.
-     *
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
-     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
-     * @see EntityFactory#newEntity(UUID, EntityContainer)
-     */
-    public Entity newEntity(final UUID id) {
-
-	return newEntity0(Objects.requireNonNull(id), null);
-    }
-
-    /**
-     * Creates a new entity with a random ID. This entity is marked as the
-     * specified entity type and then wrapped to it.
-     *
-     * @param type
-     *            Entity type.
-     * @return The newly created entity.
-     * @throws IllegalStateException
-     *             If the entity limit has been reached.
-     *
-     * @see UUID#randomUUID()
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
-     * @see Entity#markAsType(Class)
-     * @see Entities#asType(Entity, Class)
-     * @see EntityFactory#newEntity(UUID, EntityContainer)
-     */
-    public <T extends Entity> T newEntity(final Class<T> type) {
-
-	return newEntity(UUID.randomUUID(), type);
-    }
-
-    /**
-     * Creates new entity with the specified ID. This entity is marked as the
-     * specified entity type and then wrapped to it.
-     *
-     *
-     * @param id
-     *            Entity ID.
-     * @param type
-     *            Entity type.
-     * @return The newly created entity.
-     * @throws IllegalStateException
-     *             If the entity limit has been reached.
-     * @throws IllegalArgumentException
-     *             If the entity ID is already assigned.
-     *
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
-     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
-     * @see Entity#markAsType(Class)
-     * @see Entities#asType(Entity, Class)
-     * @see EntityFactory#newEntity(UUID, EntityContainer)
-     */
-    public <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
-
-	return asType(newEntity0(Objects.requireNonNull(id), type), type);
-    }
-
     @Override
     public void clear() {
 
@@ -272,6 +109,16 @@ public class EntitySet extends AbstractSet<Entity> {
     }
 
     /**
+     * Gets the delegate container for events and entity creation.
+     *
+     * @return Delegate container.
+     */
+    public EntityContainer getDelegateContainer() {
+
+	return delegateContainer;
+    }
+
+    /**
      * Gets the entity with the specified ID.
      *
      * @param id
@@ -287,30 +134,33 @@ public class EntitySet extends AbstractSet<Entity> {
     }
 
     /**
-     * Checks whether the entity is contained.
+     * Gets the IDs of all the entities within the container.
      *
-     * @param id
-     *            Entity ID.
-     * @return Whether the entity was found.
+     * @return Set of all entity identifiers.
      */
-    public boolean hasEntity(final UUID id) {
+    public Set<UUID> getEntityIDs() {
 
-	return entities.containsKey(Objects.requireNonNull(id));
+	return Collections.unmodifiableSet(entities.keySet());
     }
 
     /**
-     * Gets a stream of entities marked with the specified type.
+     * Gets entity factory for this set.
      *
-     * @param type
-     *            Entity type to check for.
-     * @return Set of entities marked with the type.
-     *
-     * @see Entity#isMarkedAsType(Class)
-     * @see Entity#asType(Class)
+     * @return Entity creation / death factory.
      */
-    public <T extends Entity> Stream<T> streamOfType(final Class<T> type) {
+    public EntityFactory getFactory() {
 
-	return stream().filter(e -> e.isMarkedAsType(type)).map(e -> asType(e, type));
+	return factory;
+    }
+
+    /**
+     * Gets all the entity listeners.
+     *
+     * @return All the entity listeners.
+     */
+    public Set<? extends EntityListener> getListeners() {
+
+	return Collections.unmodifiableSet(entityListeners);
     }
 
     /**
@@ -328,6 +178,18 @@ public class EntitySet extends AbstractSet<Entity> {
 	return streamOfType(type).collect(Collectors.toSet());
     }
 
+    /**
+     * Checks whether the entity is contained.
+     *
+     * @param id
+     *            Entity ID.
+     * @return Whether the entity was found.
+     */
+    public boolean hasEntity(final UUID id) {
+
+	return entities.containsKey(Objects.requireNonNull(id));
+    }
+
     @Override
     public boolean isEmpty() {
 
@@ -335,14 +197,9 @@ public class EntitySet extends AbstractSet<Entity> {
     }
 
     @Override
-    public boolean remove(final Object o) {
+    public Iterator<Entity> iterator() {
 
-	if (!(o instanceof Entity)) {
-
-	    throw new IllegalArgumentException();
-	}
-
-	return killEntity(((Entity) o).getID());
+	return entities.values().iterator();
     }
 
     /**
@@ -375,12 +232,155 @@ public class EntitySet extends AbstractSet<Entity> {
     }
 
     /**
-     * Gets the IDs of all the entities within the container.
+     * Creates a new entity with a random ID.
      *
-     * @return Set of all entity identifiers.
+     * @return The newly created entity's ID.
+     * @throws IllegalStateException
+     *             If the entity limit has been reached.
+     *
+     * @see UUID#randomUUID()
+     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
+     * @see EntityFactory#newEntity(UUID, EntityContainer)
      */
-    public Set<UUID> getEntityIDs() {
+    public Entity newEntity() {
 
-	return Collections.unmodifiableSet(entities.keySet());
+	return newEntity(UUID.randomUUID());
+    }
+
+    /**
+     * Creates a new entity with a random ID. This entity is marked as the
+     * specified entity type and then wrapped to it.
+     *
+     * @param type
+     *            Entity type.
+     * @return The newly created entity.
+     * @throws IllegalStateException
+     *             If the entity limit has been reached.
+     *
+     * @see UUID#randomUUID()
+     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
+     * @see Entity#markAsType(Class)
+     * @see Entities#asType(Entity, Class)
+     * @see EntityFactory#newEntity(UUID, EntityContainer)
+     */
+    public <T extends Entity> T newEntity(final Class<T> type) {
+
+	return newEntity(UUID.randomUUID(), type);
+    }
+
+    /**
+     * Creates new entity with the specified ID.
+     *
+     * @param id
+     *            Entity ID.
+     * @return The newly created entity.
+     * @throws IllegalStateException
+     *             If the entity limit has been reached.
+     * @throws IllegalArgumentException
+     *             If the entity ID is already assigned.
+     *
+     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
+     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
+     * @see EntityFactory#newEntity(UUID, EntityContainer)
+     */
+    public Entity newEntity(final UUID id) {
+
+	return newEntity0(Objects.requireNonNull(id), null);
+    }
+
+    /**
+     * Creates new entity with the specified ID. This entity is marked as the
+     * specified entity type and then wrapped to it.
+     *
+     *
+     * @param id
+     *            Entity ID.
+     * @param type
+     *            Entity type.
+     * @return The newly created entity.
+     * @throws IllegalStateException
+     *             If the entity limit has been reached.
+     * @throws IllegalArgumentException
+     *             If the entity ID is already assigned.
+     *
+     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
+     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
+     * @see Entity#markAsType(Class)
+     * @see Entities#asType(Entity, Class)
+     * @see EntityFactory#newEntity(UUID, EntityContainer)
+     */
+    public <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
+
+	return asType(newEntity0(Objects.requireNonNull(id), type), type);
+    }
+
+    private Entity newEntity0(final UUID id, final Class<? extends Entity> type) {
+
+	if (entities.containsKey(id)) {
+
+	    throwRE(ENTITY_ALREADY_ASSOCIATED);
+	}
+
+	final Entity e = factory.newEntity(id, delegateContainer);
+	entities.put(e.getID(), e);
+
+	if (type != null) {
+
+	    e.markAsType(type);
+	}
+
+	entityListeners.getProxy().entityCreated(new EntityEvent(delegateContainer, e));
+
+	return e;
+    }
+
+    @Override
+    public boolean remove(final Object o) {
+
+	if (!(o instanceof Entity)) {
+
+	    throw new IllegalArgumentException();
+	}
+
+	return killEntity(((Entity) o).getID());
+    }
+
+    /**
+     * Removes a entity listener.
+     *
+     * @param listener
+     *            Listener to remove.
+     *
+     * @return {@code true} if the listener was removed.
+     * @throws NullPointerException
+     *             if listener is null.
+     *
+     * @see ListenerSet#remove(Object)
+     *
+     */
+    public boolean removeListener(final EntityListener listener) {
+
+	return entityListeners.remove(listener);
+    }
+
+    @Override
+    public int size() {
+
+	return entities.size();
+    }
+
+    /**
+     * Gets a stream of entities marked with the specified type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Set of entities marked with the type.
+     *
+     * @see Entity#isMarkedAsType(Class)
+     * @see Entity#asType(Class)
+     */
+    public <T extends Entity> Stream<T> streamOfType(final Class<T> type) {
+
+	return stream().filter(e -> e.isMarkedAsType(type)).map(e -> asType(e, type));
     }
 }

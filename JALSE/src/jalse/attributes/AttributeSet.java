@@ -44,6 +44,14 @@ public class AttributeSet extends AbstractSet<Attribute> {
     private final AttributeContainer delegateContainer;
 
     /**
+     * Creates a new AttributeSet with an empty delegate container.
+     */
+    public AttributeSet() {
+
+	this(Attributes.emptyAttributeContainer());
+    }
+
+    /**
      * Creates a new AttributeSet with the supplied delegate container.
      *
      * @param delegateContainer
@@ -54,14 +62,6 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	this.delegateContainer = Objects.requireNonNull(delegateContainer);
 	attributes = new ConcurrentHashMap<>();
 	attributeListeners = new HashMap<>();
-    }
-
-    /**
-     * Creates a new AttributeSet with an empty delegate container.
-     */
-    public AttributeSet() {
-
-	this(Attributes.emptyAttributeContainer());
     }
 
     @Override
@@ -133,17 +133,6 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	new HashSet<>(attributes.values()).forEach(this::remove);
     }
 
-    /**
-     * Gets all the attribute listener types.
-     *
-     * @return Set of the types attribute listeners are for or an empty set if
-     *         none were found.
-     */
-    public Set<Class<? extends Attribute>> getAttributeTypes() {
-
-	return Collections.unmodifiableSet(attributes.keySet());
-    }
-
     @Override
     public boolean contains(final Object o) {
 
@@ -188,6 +177,48 @@ public class AttributeSet extends AbstractSet<Attribute> {
     }
 
     /**
+     * Gets all the attribute listener types.
+     *
+     * @return Set of the types attribute listeners are for or an empty set if
+     *         none were found.
+     */
+    public Set<Class<? extends Attribute>> getAttributeListenerTypes() {
+
+	return Collections.unmodifiableSet(attributeListeners.keySet());
+    }
+
+    /**
+     * Gets all the attribute listener types.
+     *
+     * @return Set of the types attribute listeners are for or an empty set if
+     *         none were found.
+     */
+    public Set<Class<? extends Attribute>> getAttributeTypes() {
+
+	return Collections.unmodifiableSet(attributes.keySet());
+    }
+
+    /**
+     * Gets the delegate container for the events.
+     *
+     * @return Delegate event container.
+     */
+    public AttributeContainer getDelegateContainer() {
+
+	return delegateContainer;
+    }
+
+    /**
+     * Gets all the attribute listeners.
+     *
+     * @return Set of attribute listeners or an empty set if none were found.
+     */
+    public Set<? extends AttributeListener<? extends Attribute>> getListeners() {
+
+	return attributeListeners.values().stream().flatMap(a -> a.stream()).collect(Collectors.toSet());
+    }
+
+    /**
      * Gets all attribute listeners associated to the supplied attribute type.
      *
      * @param attr
@@ -209,16 +240,6 @@ public class AttributeSet extends AbstractSet<Attribute> {
     }
 
     /**
-     * Gets all the attribute listeners.
-     *
-     * @return Set of attribute listeners or an empty set if none were found.
-     */
-    public Set<? extends AttributeListener<? extends Attribute>> getListeners() {
-
-	return attributeListeners.values().stream().flatMap(a -> a.stream()).collect(Collectors.toSet());
-    }
-
-    /**
      * Gets the attribute matching the supplied type.
      *
      * @param attr
@@ -230,16 +251,6 @@ public class AttributeSet extends AbstractSet<Attribute> {
     public <T extends Attribute> Optional<T> getOfType(final Class<T> attr) {
 
 	return Optional.ofNullable((T) attributes.get(requireNonNullAttrSub(attr)));
-    }
-
-    /**
-     * Gets the delegate container for the events.
-     *
-     * @return Delegate event container.
-     */
-    public AttributeContainer getDelegateContainer() {
-
-	return delegateContainer;
     }
 
     @Override
@@ -337,16 +348,5 @@ public class AttributeSet extends AbstractSet<Attribute> {
     public int size() {
 
 	return attributes.size();
-    }
-
-    /**
-     * Gets all the attribute listener types.
-     *
-     * @return Set of the types attribute listeners are for or an empty set if
-     *         none were found.
-     */
-    public Set<Class<? extends Attribute>> getAttributeListenerTypes() {
-
-	return Collections.unmodifiableSet(attributeListeners.keySet());
     }
 }

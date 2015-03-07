@@ -39,75 +39,6 @@ class EntityTypeHandler implements InvocationHandler {
 	}
     };
 
-    private final Entity entity;
-
-    EntityTypeHandler(final Entity Entity) {
-
-	entity = Entity;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-
-	final Class<?> declaringClazz = method.getDeclaringClass();
-
-	/*
-	 * Not entity type methods!
-	 */
-	if (Entity.class.equals(declaringClazz) || !Entity.class.isAssignableFrom(declaringClazz)) {
-
-	    return method.invoke(entity, args);
-	}
-
-	/*
-	 * Method info.
-	 */
-	final Type[] params = method.getParameterTypes();
-	final boolean hasParams = params != null && params.length > 0;
-	final Type returnType = method.getGenericReturnType();
-	final boolean hasReturnType = !Void.TYPE.equals(returnType);
-
-	/*
-	 * addAttributeOfType(Attribute) / removeAttributeOfType(Class)
-	 */
-	if (hasParams && Attribute.class.isAssignableFrom(toClass(params[0]))) {
-
-	    return args[0] != null ? entity.addAttributeOfType((Attribute) args[0]) : entity
-		    .removeAttributeOfType((Class<? extends Attribute>) params[0]);
-	}
-
-	/*
-	 * getEntitiesOfType(Class) / streamEntitiesOfType(Class)
-	 */
-	if (hasParams && Entity.class.isAssignableFrom(toClass(params[0]))) {
-
-	    final Class<?> clazz = toClass(returnType);
-
-	    if (Set.class.equals(clazz)) {
-
-		return entity.getEntitiesOfType((Class<? extends Entity>) SET_RESOLVER.resolve(returnType));
-	    }
-
-	    if (Stream.class.equals(clazz)) {
-
-		return entity.streamEntitiesOfType((Class<? extends Entity>) STREAM_RESOLVER.resolve(returnType));
-	    }
-
-	    throw new UnsupportedOperationException();
-	}
-
-	/*
-	 * getAttributeOfType(Class)
-	 */
-	if (hasReturnType && Optional.class.equals(toClass(returnType))) {
-
-	    return entity.getAttributeOfType((Class<? extends Attribute>) OPTIONAL_RESOLVER.resolve(returnType));
-	}
-
-	throw new UnsupportedOperationException();
-    }
-
     public static void validateType(final Class<?> clazz) {
 
 	if (!Entity.class.isAssignableFrom(clazz)) {
@@ -278,5 +209,74 @@ class EntityTypeHandler implements InvocationHandler {
 	     */
 	    Stream.of(clazz.getInterfaces()).forEach(EntityTypeHandler::validateType);
 	}
+    }
+
+    private final Entity entity;
+
+    EntityTypeHandler(final Entity Entity) {
+
+	entity = Entity;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+
+	final Class<?> declaringClazz = method.getDeclaringClass();
+
+	/*
+	 * Not entity type methods!
+	 */
+	if (Entity.class.equals(declaringClazz) || !Entity.class.isAssignableFrom(declaringClazz)) {
+
+	    return method.invoke(entity, args);
+	}
+
+	/*
+	 * Method info.
+	 */
+	final Type[] params = method.getParameterTypes();
+	final boolean hasParams = params != null && params.length > 0;
+	final Type returnType = method.getGenericReturnType();
+	final boolean hasReturnType = !Void.TYPE.equals(returnType);
+
+	/*
+	 * addAttributeOfType(Attribute) / removeAttributeOfType(Class)
+	 */
+	if (hasParams && Attribute.class.isAssignableFrom(toClass(params[0]))) {
+
+	    return args[0] != null ? entity.addAttributeOfType((Attribute) args[0]) : entity
+		    .removeAttributeOfType((Class<? extends Attribute>) params[0]);
+	}
+
+	/*
+	 * getEntitiesOfType(Class) / streamEntitiesOfType(Class)
+	 */
+	if (hasParams && Entity.class.isAssignableFrom(toClass(params[0]))) {
+
+	    final Class<?> clazz = toClass(returnType);
+
+	    if (Set.class.equals(clazz)) {
+
+		return entity.getEntitiesOfType((Class<? extends Entity>) SET_RESOLVER.resolve(returnType));
+	    }
+
+	    if (Stream.class.equals(clazz)) {
+
+		return entity.streamEntitiesOfType((Class<? extends Entity>) STREAM_RESOLVER.resolve(returnType));
+	    }
+
+	    throw new UnsupportedOperationException();
+	}
+
+	/*
+	 * getAttributeOfType(Class)
+	 */
+	if (hasReturnType && Optional.class.equals(toClass(returnType))) {
+
+	    return entity.getAttributeOfType((Class<? extends Attribute>) OPTIONAL_RESOLVER.resolve(returnType));
+	}
+
+	throw new UnsupportedOperationException();
     }
 }
