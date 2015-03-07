@@ -146,7 +146,6 @@ public abstract class AbstractEngine {
 
 		    return executor.getActiveCount() + super.size() < executor.getPoolSize() && super.offer(o);
 		}
-
 	    });
 
 	    active = new AtomicInteger();
@@ -246,6 +245,20 @@ public abstract class AbstractEngine {
 	return value;
     }
 
+    private static final Logger logger = Logger.getLogger(AbstractEngine.class.getName());
+
+    private static final long SECOND = TimeUnit.SECONDS.toNanos(1);
+
+    /**
+     * The engine is not ticking and has been shutdown.
+     */
+    public static final int STOPPED = 0;
+
+    /**
+     * The engine is ready to be used.
+     */
+    public static final int INIT = 1;
+
     /**
      * The engine is currently in tick (processing).
      */
@@ -257,35 +270,21 @@ public abstract class AbstractEngine {
     public static final int IN_WAIT = 3;
 
     /**
-     * The engine is ready to be used.
-     */
-    public static final int INIT = 1;
-
-    private static final Logger logger = Logger.getLogger(AbstractEngine.class.getName());
-
-    /**
      * The engine is paused but can be resumed.
      */
     public static final int PAUSED = 4;
 
-    private static final long SECOND = TimeUnit.SECONDS.toNanos(1);
-
     /**
      * When Java sleeps it can sometimes be inaccurate, the engine will sleep up
      * to this threshold then spin yield until the desired wake time (configured
-     * via {@code jalse.engine.termination_timeout} system property).
+     * via {@code jalse.actions.engine.termination_timeout} system property).
      */
     public static final long SPIN_YIELD_THRESHOLD;
 
     /**
-     * The engine is not ticking and has been shutdown.
-     */
-    public static final int STOPPED = 0;
-
-    /**
      * How long the engine will wait until it times out and interrupts running
      * threads on shutdown (configured via
-     * {@code jalse.engine.spin_yield_threshold} system property).
+     * {@code jalse.actions.engine.spin_yield_threshold} system property).
      */
     public static final long TERMINATION_TIMEOUT;
 
@@ -353,26 +352,17 @@ public abstract class AbstractEngine {
 
 	Objects.requireNonNull(action);
 
-	boolean result = false;
-
 	synchronized (work) {
 
 	    final Future<?> f = futures.get(action);
 
-	    if (f != null) {
+	    if (f != null && !f.isDone()) {
 
-		if (!f.isDone()) {
-
-		    result = f.cancel(false);
-		}
+		return f.cancel(false);
 	    }
-	    else {
 
-		result = work.remove(action);
-	    }
+	    return work.remove(action);
 	}
-
-	return result;
     }
 
     private void changeState(final int state) {
@@ -542,6 +532,21 @@ public abstract class AbstractEngine {
     }
 
     /**
+     * This is a convenience method for getting the tick interval converted to
+     * the supplied time unit.
+     * 
+     * @param unit
+     *            Unit to convert to.
+     * @return Tick interval as unit.
+     * 
+     * @see TickInfo#getIntervalAsNanos()
+     */
+    public long getTickIntervalAs(TimeUnit unit) {
+
+	return unit.convert(tick.getIntervalAsNanos(), TimeUnit.NANOSECONDS);
+    }
+
+    /**
      * Whether the action is currently active in the engine.
      *
      * @param action
@@ -550,16 +555,12 @@ public abstract class AbstractEngine {
      */
     public boolean isActive(final UUID action) {
 
-	boolean result = false;
-
 	synchronized (work) {
 
 	    final Future<?> f = futures.get(action);
 
-	    result = f != null ? !f.isDone() : work.contains(action);
+	    return f != null ? !f.isDone() : work.contains(action);
 	}
-
-	return result;
     }
 
     /**

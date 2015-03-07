@@ -10,7 +10,7 @@ import java.util.UUID;
  * @author Elliot Ford
  *
  */
-public class Parent extends AbstractIdentifiable implements Tag {
+public final class Parent extends AbstractIdentifiable implements Tag {
 
     /**
      * @param id

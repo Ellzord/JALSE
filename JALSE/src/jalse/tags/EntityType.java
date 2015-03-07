@@ -9,7 +9,7 @@ import jalse.entities.Entity;
  * @author Elliot Ford
  *
  */
-public class EntityType implements Tag {
+public final class EntityType implements Tag {
 
     private final Class<? extends Entity> type;
 

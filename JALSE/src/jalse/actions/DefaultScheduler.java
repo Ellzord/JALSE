@@ -33,8 +33,8 @@ public class DefaultScheduler<T> implements Scheduler<T> {
 
 	this.actor = Objects.requireNonNull(actor);
 
-	tasks = Collections.newSetFromMap(new WeakHashMap<>());
 	engine = null;
+	tasks = Collections.newSetFromMap(new WeakHashMap<>());
     }
 
     @Override
