@@ -78,33 +78,33 @@ public interface Identifiable extends Comparable<Identifiable> {
     }
 
     /**
-     * Predicate to check if the ID is equal to that supplied.
+     * Predicate to check if the identifiable is equal to that supplied.
      *
-     * @param id
-     *            ID to check for.
-     * @return Predicate of {@code true} if the ID is equal or {@code false} if
-     *         it is not.
+     * @param obj
+     *            Identifiable to check for.
+     * @return Predicate of {@code true} if the identifiable is equal or
+     *         {@code false} if it is not.
      *
-     * @see Identifiable#getID()
+     * @see Identifiable#equals(Identifiable, Object)
      */
-    public static Predicate<Identifiable> isID(final UUID id) {
+    public static Predicate<Identifiable> is(final Identifiable obj) {
 
-	return i -> i.getID().equals(id);
+	return i -> equals(obj, i);
     }
 
     /**
-     * Predicate to check if the ID is not equal to that supplied.
+     * Predicate to check if the identifiable is not equal to that supplied.
      *
-     * @param id
-     *            ID to check for.
-     * @return Predicate of {@code false} if the ID is equal or {@code true} if
-     *         it is.
+     * @param obj
+     *            Identifiable to check against.
+     * @return Predicate of {@code false} if the identifiable is equal or
+     *         {@code true} if it is.
      *
      * @see Identifiable#getID()
      */
-    public static Predicate<Identifiable> notID(final UUID id) {
+    public static Predicate<Identifiable> not(final Identifiable obj) {
 
-	return isID(id).negate();
+	return is(obj).negate();
     }
 
     /**

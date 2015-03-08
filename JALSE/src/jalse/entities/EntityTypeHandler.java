@@ -52,9 +52,9 @@ class EntityTypeHandler implements InvocationHandler {
 	     * Previously validated types.
 	     */
 	    final Set<Type> addRemoves = new HashSet<>();
-	    final Set<Type> streams = new HashSet<>();
-	    final Set<Type> sets = new HashSet<>();
 	    final Set<Type> gets = new HashSet<>();
+	    final Set<Class<?>> streams = new HashSet<>();
+	    final Set<Class<?>> sets = new HashSet<>();
 
 	    for (final Method method : clazz.getDeclaredMethods()) {
 
@@ -119,58 +119,6 @@ class EntityTypeHandler implements InvocationHandler {
 		}
 
 		/*
-		 * getEntitiesOfType(Class) / streamEntitiesOfType(Class)
-		 */
-		if (hasParams && Entity.class.isAssignableFrom(toClass(params[0]))) {
-
-		    /*
-		     * Must be a subclass of Entity.
-		     */
-		    if (Entity.class.equals(params[0])) {
-
-			throwRE(INVALID_ENTITY_TYPE);
-		    }
-
-		    final Class<?> setOrStreamClazz = toClass(returnType);
-		    boolean isSet = false;
-		    Type entityClazz = null;
-
-		    /*
-		     * Must be Set or Stream.
-		     */
-		    if (isSet = Set.class.equals(setOrStreamClazz)) {
-
-			entityClazz = SET_RESOLVER.resolve(returnType);
-		    }
-		    else if (Stream.class.equals(setOrStreamClazz)) {
-
-			entityClazz = STREAM_RESOLVER.resolve(returnType);
-		    }
-		    else {
-
-			throwRE(INVALID_ENTITY_TYPE);
-		    }
-
-		    /*
-		     * Must match parameter.
-		     */
-		    if (!params[0].equals(entityClazz)) {
-
-			throwRE(INVALID_ENTITY_TYPE);
-		    }
-
-		    if (!(isSet ? sets : streams).add(params[0])) {
-
-			logger.warning(String.format(
-				isSet ? "Entity type (%s) has multiple Set definitions for Entity (%s)"
-					: "Entity type (%s) has multiple Stream definitions for Entity (%s)", clazz
-					.getName(), params[0].getTypeName()));
-		    }
-
-		    continue;
-		}
-
-		/*
 		 * getAttributeOfType(Class)
 		 */
 		if (!hasParams && hasReturnType && Optional.class.equals(toClass(returnType))) {
@@ -195,6 +143,55 @@ class EntityTypeHandler implements InvocationHandler {
 		}
 
 		/*
+		 * streamEntitiesOfType(Class)
+		 */
+		if (!hasParams && hasReturnType && Stream.class.equals(toClass(returnType))) {
+
+		    final Class<?> entityClazz = toClass(STREAM_RESOLVER.resolve(returnType));
+
+		    /*
+		     * Must be a subclass of Entity.
+		     */
+		    if (Entity.class.equals(entityClazz) || !Entity.class.isAssignableFrom(entityClazz)) {
+
+			throwRE(INVALID_ENTITY_TYPE);
+		    }
+
+		    if (!streams.add(entityClazz)) {
+
+			logger.warning(String.format(
+				"Entity type (%s) has multiple Stream definitions for Entity (%s)", clazz.getName(),
+				params[0].getTypeName()));
+		    }
+
+		    continue;
+		}
+
+		/*
+		 * getEntitiesOfType(Class)
+		 */
+		if (!hasParams && hasReturnType && Set.class.equals(toClass(returnType))) {
+
+		    final Class<?> entityClazz = toClass(SET_RESOLVER.resolve(returnType));
+
+		    /*
+		     * Must be a subclass of Entity.
+		     */
+		    if (Entity.class.equals(entityClazz) || !Entity.class.isAssignableFrom(entityClazz)) {
+
+			throwRE(INVALID_ENTITY_TYPE);
+		    }
+
+		    if (!sets.add(entityClazz)) {
+
+			logger.warning(String.format("Entity type (%s) has multiple Set definitions for Entity (%s)",
+				clazz.getName(), params[0].getTypeName()));
+		    }
+
+		    continue;
+		}
+
+		/*
 		 * If not found above then it is not a valid Entity type method.
 		 */
 		throwRE(INVALID_ENTITY_TYPE);
@@ -203,6 +200,14 @@ class EntityTypeHandler implements InvocationHandler {
 	    logger.info(String.format("Entity type (%s) is valid", clazz.getName()));
 
 	    VALID_ENTITY_TYPES.add(clazz);
+
+	    /*
+	     * Validate referenced types.
+	     */
+	    Set<Class<?>> referenced = new HashSet<>();
+	    referenced.addAll(streams);
+	    referenced.addAll(sets);
+	    referenced.forEach(EntityTypeHandler::validateType);
 
 	    /*
 	     * Validate all super types.

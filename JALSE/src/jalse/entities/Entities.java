@@ -350,10 +350,10 @@ public final class Entities {
 
 	final EntityTreeWalker walker = new EntityTreeWalker(container, maxDepth, visitor);
 
-	do {
+	while (walker.isWalking()) {
 
 	    walker.walk();
-	} while (walker.isWalking());
+	}
     }
 
     private Entities() {

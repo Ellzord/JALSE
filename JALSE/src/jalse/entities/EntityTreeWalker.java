@@ -30,9 +30,18 @@ class EntityTreeWalker {
 	this.maxDepth = maxDepth;
 
 	walkers = new ArrayDeque<>();
+	iterator = container.streamEntities().iterator();
 	exited = false;
+    }
 
-	reset();
+    private boolean canAddChild() {
+
+	return !ignoreSiblings && iterator.hasNext();
+    }
+
+    private boolean canWalkChild() {
+
+	return !walkers.isEmpty();
     }
 
     public EntityContainer getContainer() {
@@ -50,32 +59,27 @@ class EntityTreeWalker {
 	return visitor;
     }
 
-    public boolean isWalking() {
+    private boolean hasExited() {
 
-	return iterator != null;
+	return exited;
     }
 
-    public void reset() {
+    public boolean isWalking() {
 
-	iterator = null;
-	walkers.clear();
+	return !hasExited() && (canAddChild() || canWalkChild());
     }
 
     public Entity walk() {
 
-	/*
-	 * Start walking.
-	 */
-	if (iterator == null) {
+	if (!isWalking()) {
 
-	    iterator = container.streamEntities().iterator();
-	    exited = false;
+	    throw new IllegalStateException();
 	}
 
 	/*
 	 * Visit direct children.
 	 */
-	if (!ignoreSiblings && iterator.hasNext()) {
+	if (canAddChild()) {
 
 	    final Entity e = iterator.next();
 
@@ -84,7 +88,6 @@ class EntityTreeWalker {
 	    if (result == EntityVisitResult.EXIT) {
 
 		exited = true;
-		reset();
 		return e;
 	    }
 
@@ -102,38 +105,30 @@ class EntityTreeWalker {
 	     */
 	    if (maxDepth > 1 && result != EntityVisitResult.IGNORE_CHILDREN) {
 
-		walkers.addLast(new EntityTreeWalker(e, maxDepth - 1, visitor));
+		EntityTreeWalker child = new EntityTreeWalker(e, maxDepth - 1, visitor);
+
+		if (child.isWalking()) {
+
+		    walkers.addLast(child);
+		}
 	    }
 
 	    return e;
 	}
 
 	final EntityTreeWalker child = walkers.peekFirst();
-	Entity e = null;
 
 	/*
 	 * Walk already visited child.
 	 */
-	if (child != null) {
+	Entity e = child.walk();
 
-	    e = child.walk();
+	/*
+	 * Child has been fully traversed.
+	 */
+	if (!child.isWalking()) {
 
-	    if (child.exited) {
-
-		reset();
-	    }
-	    /*
-	     * Child has been fully traversed.
-	     */
-	    else if (!child.isWalking()) {
-
-		walkers.removeFirst();
-
-		if (walkers.isEmpty()) {
-
-		    reset();
-		}
-	    }
+	    walkers.removeFirst();
 	}
 
 	return e;
