@@ -29,6 +29,7 @@ public interface EntityVisitor {
      *
      */
     enum EntityVisitResult {
+
 	CONTINUE, EXIT, IGNORE_CHILDREN, IGNORE_SIBLINGS
     }
 
