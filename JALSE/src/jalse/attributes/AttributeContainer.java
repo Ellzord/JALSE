@@ -8,13 +8,11 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
- * This is an {@link Attribute} collection. This attribute collections works
- * more like a set but using the attribute type to determine uniqueness (only
- * one of each attribute type can be added). {@link AttributeListener} can be
- * added for an attribute type, trigger code will fire upon add, update or
- * removal of attributes of that type. Each collection manipulation method
- * returns {@code Optional} of the attribute (may be empty if none matching are
- * found).
+ * This is an {@link Attribute} collection. This attribute collections works more like a set but
+ * using the attribute type to determine uniqueness (only one of each attribute type can be added).
+ * {@link AttributeListener} can be added for an attribute type, trigger code will fire upon add,
+ * update or removal of attributes of that type. Each collection manipulation method returns
+ * {@code Optional} of the attribute (may be empty if none matching are found).
  *
  * @author Elliot Ford
  *
@@ -40,19 +38,18 @@ public interface AttributeContainer {
      *
      * @param attr
      *            Attribute to add.
-     * @return Optional containing the replaced attribute if set or else empty
-     *         optional if none found
+     * @return Optional containing the replaced attribute if set or else empty optional if none
+     *         found
      */
     <T extends Attribute> Optional<T> addAttributeOfType(T attr);
 
     /**
-     * Manually fires an attribute change for the supplied attribute type. This
-     * is used for mutable attributes that can change their internal state.
+     * Manually fires an attribute change for the supplied attribute type. This is used for mutable
+     * attributes that can change their internal state.
      *
      * @param attr
      *            Attribute type to fire for.
-     * @return Whether the collection contains an attribute matching the
-     *         supplied type.
+     * @return Whether the collection contains an attribute matching the supplied type.
      */
     <T extends Attribute> boolean fireAttributeChanged(Class<T> attr);
 
@@ -82,8 +79,7 @@ public interface AttributeContainer {
     /**
      * Gets all the attribute listener types.
      *
-     * @return Set of the types attribute listeners are for or an empty set if
-     *         none were found.
+     * @return Set of the types attribute listeners are for or an empty set if none were found.
      */
     Set<Class<? extends Attribute>> getAttributeListenerTypes();
 
@@ -92,8 +88,7 @@ public interface AttributeContainer {
      *
      * @param attr
      *            Attribute type to check for.
-     * @return Optional containing the attribute or else empty optional if none
-     *         found.
+     * @return Optional containing the attribute or else empty optional if none found.
      */
     <T extends Attribute> Optional<T> getAttributeOfType(Class<T> attr);
 
@@ -107,8 +102,7 @@ public interface AttributeContainer {
     /**
      * Gets all of the attribute types within the container.
      *
-     * @return All of the types of the attributes or an empty set if none were
-     *         found.
+     * @return All of the types of the attributes or an empty set if none were found.
      */
     Set<Class<? extends Attribute>> getAttributeTypes();
 
@@ -127,8 +121,7 @@ public interface AttributeContainer {
     }
 
     /**
-     * This is a convenience method for getting an attribute wrapper and
-     * unwrapping the result.
+     * This is a convenience method for getting an attribute wrapper and unwrapping the result.
      *
      * @param attr
      *            Attribute wrapper type.
@@ -138,7 +131,6 @@ public interface AttributeContainer {
      * @see NonAttributeWrapper#unwrap()
      */
     default <T, S extends NonAttributeWrapper<T>> T getUnwrapAttributeOfType(final Class<S> attr) {
-
 	return unwrap(getAttributeOfType(attr));
     }
 
@@ -148,7 +140,6 @@ public interface AttributeContainer {
      * @return Is the container is not empty.
      */
     default boolean hasAttributes() {
-
 	return getAttributeCount() > 0;
     }
 
@@ -166,8 +157,7 @@ public interface AttributeContainer {
      *
      * @param attr
      *            Attribute type to remove.
-     * @return Optional containing the removed attribute or else empty optional
-     *         if none found
+     * @return Optional containing the removed attribute or else empty optional if none found
      */
     <T extends Attribute> Optional<T> removeAttributeOfType(Class<T> attr);
 
@@ -182,4 +172,5 @@ public interface AttributeContainer {
      * @return Stream of all attributes.
      */
     Stream<? extends Attribute> streamAttributes();
+
 }

@@ -25,12 +25,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A task based engine for scheduling {@link Action} at different intervals.
- * This engine will use up to the number of threads specified as workers
- * (depending on number of {@link Action} waiting to be executed per tick). An
- * extra control thread will be added to the engine for action maintenance. The
- * engine will not be active upon creation it must be started with
- * {@link #tick()}.
+ * A task based engine for scheduling {@link Action} at different intervals. This engine will use up
+ * to the number of threads specified as workers (depending on number of {@link Action} waiting to
+ * be executed per tick). An extra control thread will be added to the engine for action
+ * maintenance. The engine will not be active upon creation it must be started with {@link #tick()}.
  *
  * @author Elliot Ford
  *
@@ -48,26 +46,21 @@ public abstract class AbstractEngine {
 	private Object actor;
 
 	private AtomicAction() {
-
 	    action = null;
 	    actor = null;
 	}
 
 	public synchronized Action<?> getAction() {
-
 	    return action;
 	}
 
 	public synchronized void perform() {
-
 	    if (action != null && actor != null) {
-
 		action.perform(actor, tick);
 	    }
 	}
 
 	public synchronized void set(final Action action, final Object actor) {
-
 	    this.action = action;
 	    this.actor = actor;
 	}
@@ -83,49 +76,39 @@ public abstract class AbstractEngine {
 
 	private Worker(final UUID key, final Action action, final Object actor, final long initialDelay,
 		final long period) {
-
 	    this.key = key;
 	    this.period = period;
 	    this.action = action;
 	    this.actor = actor;
-
 	    estimated = System.nanoTime() + initialDelay;
 	}
 
 	@Override
 	public int compareTo(final Worker o) {
-
 	    return estimated < o.estimated ? -1 : estimated == o.estimated ? 0 : 1;
 	}
 
 	@Override
 	public boolean equals(final Object obj) {
-
 	    return key.equals(obj);
 	}
 
 	@Override
 	public int hashCode() {
-
 	    return key.hashCode();
 	}
 
 	@Override
 	public void run() {
-
 	    try {
-
 		action.perform(actor, tick);
 	    } catch (final Exception e) {
-
 		if (e instanceof InterruptedException) {
-
 		    Thread.currentThread().interrupt();
 		}
 
 		logger.log(Level.WARNING, "Error in worker", e);
 	    } finally {
-
 		phaser.arriveAndDeregister();
 	    }
 	}
@@ -135,15 +118,12 @@ public abstract class AbstractEngine {
 
 	private final AtomicInteger active;
 
+	@SuppressWarnings("serial")
 	private WorkExecutor(final int totalThreads) {
-
 	    super(0, totalThreads, 0L, TimeUnit.NANOSECONDS, new LinkedBlockingQueue<Runnable>() {
-
-		private static final long serialVersionUID = 5154857493693362752L;
 
 		@Override
 		public boolean offer(final Runnable o) {
-
 		    return executor.getActiveCount() + super.size() < executor.getPoolSize() && super.offer(o);
 		}
 	    });
@@ -151,12 +131,9 @@ public abstract class AbstractEngine {
 	    active = new AtomicInteger();
 
 	    setRejectedExecutionHandler((r, e) -> {
-
 		try {
-
 		    getQueue().put(r);
 		} catch (final InterruptedException ex) {
-
 		    Thread.currentThread().interrupt();
 		}
 	    });
@@ -164,23 +141,16 @@ public abstract class AbstractEngine {
 
 	@Override
 	protected void afterExecute(final Runnable r, final Throwable t) {
-
 	    active.decrementAndGet();
 
 	    final WorkTask<?> wt = (WorkTask<?>) r;
 
 	    if (wt.runnable instanceof Worker) {
-
 		final Worker w = (Worker) wt.runnable;
-
 		synchronized (work) {
-
 		    futures.remove(w.key);
-
 		    if (!wt.isCancelled() && w.period > 0L) {
-
 			w.estimated = System.nanoTime() + w.period;
-
 			work.add(w);
 		    }
 		}
@@ -189,19 +159,16 @@ public abstract class AbstractEngine {
 
 	@Override
 	protected void beforeExecute(final Thread t, final Runnable r) {
-
 	    active.incrementAndGet();
 	}
 
 	@Override
 	public int getActiveCount() {
-
 	    return active.get();
 	}
 
 	@Override
 	protected <T> RunnableFuture<T> newTaskFor(final Runnable runnable, final T value) {
-
 	    return new WorkTask<>(runnable, value);
 	}
     }
@@ -211,37 +178,26 @@ public abstract class AbstractEngine {
 	private final Runnable runnable;
 
 	public WorkTask(final Runnable runnable, final V result) {
-
 	    super(runnable, result);
-
 	    this.runnable = runnable;
 	}
     }
 
     private static void parkNanos(final long end) {
-
 	long timeLeft;
-
 	while ((timeLeft = end - System.nanoTime()) > 0) {
-
 	    if (timeLeft > SPIN_YIELD_THRESHOLD) {
-
 		LockSupport.parkNanos(timeLeft - SPIN_YIELD_THRESHOLD);
-	    }
-	    else {
-
+	    } else {
 		Thread.yield();
 	    }
 	}
     }
 
     private static long requireNonNegative(final long value) {
-
 	if (value < 0) {
-
 	    throw new IllegalArgumentException();
 	}
-
 	return value;
     }
 
@@ -275,27 +231,23 @@ public abstract class AbstractEngine {
     public static final int PAUSED = 4;
 
     /**
-     * When Java sleeps it can sometimes be inaccurate, the engine will sleep up
-     * to this threshold then spin yield until the desired wake time (configured
-     * via {@code jalse.actions.engine.termination_timeout} system property).
+     * When Java sleeps it can sometimes be inaccurate, the engine will sleep up to this threshold
+     * then spin yield until the desired wake time (configured via
+     * {@code jalse.actions.engine.termination_timeout} system property).
      */
     public static final long SPIN_YIELD_THRESHOLD;
 
     /**
-     * How long the engine will wait until it times out and interrupts running
-     * threads on shutdown (configured via
-     * {@code jalse.actions.engine.spin_yield_threshold} system property).
+     * How long the engine will wait until it times out and interrupts running threads on shutdown
+     * (configured via {@code jalse.actions.engine.spin_yield_threshold} system property).
      */
     public static final long TERMINATION_TIMEOUT;
 
     static {
-
 	final String syt = System.getProperty("jalse.actions.engine.spin_yield_threshold");
-
 	SPIN_YIELD_THRESHOLD = syt != null && syt.length() > 0 ? Long.valueOf(syt) : TimeUnit.MILLISECONDS.toNanos(10);
 
 	final String tt = System.getProperty("jalse.actions.engine.termination_timeout");
-
 	TERMINATION_TIMEOUT = tt != null && tt.length() > 0 ? Long.valueOf(tt) : 2 * SECOND;
     }
 
@@ -311,8 +263,7 @@ public abstract class AbstractEngine {
     private final Queue<Worker> work;
 
     /**
-     * Creates a new instance of Engine. An extra thread is added for a control
-     * thread.
+     * Creates a new instance of Engine. An extra thread is added for a control thread.
      *
      * @param tps
      *            Maximum ticks per second to run at.
@@ -320,9 +271,7 @@ public abstract class AbstractEngine {
      *            Maximum number of threads to use for performing actions.
      */
     protected AbstractEngine(final int tps, final int totalThreads) {
-
 	if (tps <= 0 || totalThreads <= 0 || totalThreads == Integer.MAX_VALUE) {
-
 	    throw new IllegalArgumentException();
 	}
 
@@ -335,7 +284,6 @@ public abstract class AbstractEngine {
 	tick = new TickInfo(tps);
 	first = new AtomicAction();
 	last = new AtomicAction();
-
 	state = INIT;
     }
 
@@ -349,15 +297,11 @@ public abstract class AbstractEngine {
      *             If ID is null.
      */
     public boolean cancel(final UUID action) {
-
 	Objects.requireNonNull(action);
 
 	synchronized (work) {
-
 	    final Future<?> f = futures.get(action);
-
 	    if (f != null && !f.isDone()) {
-
 		return f.cancel(false);
 	    }
 
@@ -366,74 +310,52 @@ public abstract class AbstractEngine {
     }
 
     private void changeState(final int state) {
-
 	final long stamp = lock.writeLock();
 
 	boolean allow = false;
 	RuntimeException e = null;
 
 	switch (this.state) {
-
 	case INIT:
-
 	    allow = state != INIT;
 	    break;
-
 	case IN_TICK:
 	case IN_WAIT:
-
 	    allow = state == IN_TICK || state == IN_WAIT || state == PAUSED || state == STOPPED;
 	    break;
-
 	case PAUSED:
-
 	    allow = state == IN_TICK || state == STOPPED;
 	    break;
-
 	case STOPPED:
-
 	    e = ENGINE_SHUTDOWN.get();
 	    break;
 	}
 
 	if (allow) {
-
 	    this.state = state;
 	}
 
 	lock.unlockWrite(stamp);
 
 	if (e != null) {
-
 	    throw e;
 	}
     }
 
     private Runnable control() {
-
-	/*
-	 * Main work loop.
-	 */
 	return () -> {
-
 	    long lastStart = System.nanoTime(), lastTpsCalc = System.nanoTime();
 	    int currentTps = 0;
-
 	    phaser.register();
 
 	    while (running.get()) {
-
 		changeState(IN_TICK);
-
 		final long start = System.nanoTime(), interval = tick.getIntervalAsNanos(), estimatedEnd = start
 			+ interval;
-
 		tick.setDelta(start - lastStart);
 
 		if (start - lastTpsCalc >= SECOND) {
-
 		    tick.setCurrentTPS(currentTps);
-
 		    lastTpsCalc = start;
 		    currentTps = 0;
 		}
@@ -441,38 +363,25 @@ public abstract class AbstractEngine {
 		first.perform();
 
 		synchronized (work) {
-
 		    for (;;) {
-
-			Worker w;
-
-			w = work.peek();
-
+			final Worker w = work.peek();
 			if (w == null || w.estimated >= estimatedEnd) {
-
 			    break;
 			}
-
 			work.poll();
-
 			phaser.register();
-
 			futures.put(w.key, executor.submit(w));
 		    }
 		}
 
 		phaser.arriveAndAwaitAdvance();
-
 		last.perform();
-
 		tick.incrementTicks();
 		currentTps++;
 
 		parkNanos(estimatedEnd);
-
 		lastStart = start;
 	    }
-
 	    phaser.arriveAndDeregister();
 	};
     }
@@ -483,7 +392,6 @@ public abstract class AbstractEngine {
      * @return First action to be run or null if not set.
      */
     protected Action<?> getFirstAction() {
-
 	return first.getAction();
     }
 
@@ -493,7 +401,6 @@ public abstract class AbstractEngine {
      * @return Last action to be run or null if not set.
      */
     protected Action<?> getLastAction() {
-
 	return last.getAction();
     }
 
@@ -504,20 +411,15 @@ public abstract class AbstractEngine {
      *
      */
     public int getState() {
-
 	long stamp = lock.tryOptimisticRead();
 
 	if (lock.validate(stamp)) {
-
 	    return state;
 	}
 
 	stamp = lock.readLock();
-
 	final int result = state;
-
 	lock.unlockRead(stamp);
-
 	return result;
     }
 
@@ -527,22 +429,20 @@ public abstract class AbstractEngine {
      * @return Current tick information.
      */
     public TickInfo getTickInfo() {
-
 	return tick;
     }
 
     /**
-     * This is a convenience method for getting the tick interval converted to
-     * the supplied time unit.
-     * 
+     * This is a convenience method for getting the tick interval converted to the supplied time
+     * unit.
+     *
      * @param unit
      *            Unit to convert to.
      * @return Tick interval as unit.
-     * 
+     *
      * @see TickInfo#getIntervalAsNanos()
      */
-    public long getTickIntervalAs(TimeUnit unit) {
-
+    public long getTickIntervalAs(final TimeUnit unit) {
 	return unit.convert(tick.getIntervalAsNanos(), TimeUnit.NANOSECONDS);
     }
 
@@ -554,11 +454,8 @@ public abstract class AbstractEngine {
      * @return Whether the action is still being executed or is about to.
      */
     public boolean isActive(final UUID action) {
-
 	synchronized (work) {
-
 	    final Future<?> f = futures.get(action);
-
 	    return f != null ? !f.isDone() : work.contains(action);
 	}
     }
@@ -567,16 +464,14 @@ public abstract class AbstractEngine {
      * Pauses the engine ticking.
      */
     public void pause() {
-
 	if (running.getAndSet(false)) {
-
 	    changeState(PAUSED);
 	}
     }
 
     /**
-     * Schedules an action to be run on a specific actor. This can be run once
-     * actions or recurring. An action may only be executed once per tick.
+     * Schedules an action to be run on a specific actor. This can be run once actions or recurring.
+     * An action may only be executed once per tick.
      *
      * @param action
      *            Action to perform.
@@ -593,11 +488,9 @@ public abstract class AbstractEngine {
      */
     protected UUID scheduleAction(final Action<?> action, final Object actor, final long initialDelay,
 	    final long period, final TimeUnit unit) {
-
 	final UUID key = UUID.randomUUID();
 
 	synchronized (work) {
-
 	    work.add(new Worker(key, Objects.requireNonNull(action), Objects.requireNonNull(actor), unit
 		    .toNanos(requireNonNegative(initialDelay)), unit.toNanos(requireNonNegative(period))));
 	}
@@ -614,7 +507,6 @@ public abstract class AbstractEngine {
      *            Actor to perform action on.
      */
     protected void setFirstAction(final Action<?> action, final Object actor) {
-
 	first.set(action, actor);
     }
 
@@ -627,33 +519,26 @@ public abstract class AbstractEngine {
      *            Actor to perform action on.
      */
     protected void setLastAction(final Action<?> action, final Object actor) {
-
 	last.set(action, actor);
     }
 
     /**
-     * Permanently stops the engine. All work that has not yet been executed
-     * will be cancelled and all work currently executing will be given a
-     * timeout before interruption.
+     * Permanently stops the engine. All work that has not yet been executed will be cancelled and
+     * all work currently executing will be given a timeout before interruption.
      *
      * @return All work to be executed or currently executing.
      *
      * @see #TERMINATION_TIMEOUT
      */
     public List<Action<?>> stop() {
-
 	final List<Action<?>> actions = new ArrayList<>();
 
 	if (running.getAndSet(false)) {
-
 	    changeState(STOPPED);
 
 	    synchronized (work) {
-
 		Worker w;
-
 		while ((w = work.poll()) != null) {
-
 		    actions.add(w.action);
 		}
 	    }
@@ -661,16 +546,12 @@ public abstract class AbstractEngine {
 	    executor.shutdown();
 
 	    try {
-
 		if (executor.awaitTermination(TERMINATION_TIMEOUT, TimeUnit.NANOSECONDS)) {
-
 		    for (final Runnable r : executor.shutdownNow()) {
-
 			actions.add(((Worker) r).action);
 		    }
 		}
 	    } catch (final InterruptedException e) {
-
 		Thread.currentThread().interrupt();
 	    }
 	}
@@ -682,12 +563,10 @@ public abstract class AbstractEngine {
      * Starts ticking the engine.
      */
     public void tick() {
-
 	if (!running.getAndSet(true)) {
-
 	    changeState(IN_TICK);
-
 	    executor.submit(control());
 	}
     }
+
 }

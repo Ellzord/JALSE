@@ -8,9 +8,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Entity change event for {@link EntityListener}. This is a unique event that
- * contains the relevant {@link Entity} and it's parent {@link EntityContainer}
- * (even if the Entity has been killed).
+ * Entity change event for {@link EntityListener}. This is a unique event that contains the relevant
+ * {@link Entity} and it's parent {@link EntityContainer} (even if the Entity has been killed).
  *
  * @author Elliot Ford
  *
@@ -31,9 +30,7 @@ public class EntityEvent extends AbstractIdentifiable {
      *            Entity the event is for.
      */
     public EntityEvent(final EntityContainer container, final Entity entity) {
-
 	super(UUID.randomUUID());
-
 	this.container = Objects.requireNonNull(container);
 	this.entity = Objects.requireNonNull(entity);
     }
@@ -44,7 +41,6 @@ public class EntityEvent extends AbstractIdentifiable {
      * @return Entity's parent container.
      */
     public EntityContainer getContainer() {
-
 	return container;
     }
 
@@ -54,7 +50,7 @@ public class EntityEvent extends AbstractIdentifiable {
      * @return The entity the event was triggered for.
      */
     public Entity getEntity() {
-
 	return entity;
     }
+
 }

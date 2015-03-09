@@ -8,11 +8,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A chain of {@link Action} that share the same actor and are performed one
- * after the other. An action chain should be used when it is required for
- * actions to only be run in a specific order (or in group). This is not
- * intended to replace first or last run actions but to provide an easy way to
- * group logically oriented actions.
+ * A chain of {@link Action} that share the same actor and are performed one after the other. An
+ * action chain should be used when it is required for actions to only be run in a specific order
+ * (or in group). This is not intended to replace first or last run actions but to provide an easy
+ * way to group logically oriented actions.
  *
  * @author Elliot Ford
  *
@@ -25,8 +24,8 @@ import java.util.Objects;
 public final class ActionChain<T> implements Action<T> {
 
     /**
-     * Convenience method for creating action chains with arrays or an
-     * undetermined number of actions.
+     * Convenience method for creating action chains with arrays or an undetermined number of
+     * actions.
      *
      * @param actions
      *            Actions used to create the chain.
@@ -34,7 +33,6 @@ public final class ActionChain<T> implements Action<T> {
      */
     @SafeVarargs
     public static <S extends EntityContainer> ActionChain<S> newChain(final Action<S>... actions) {
-
 	return new ActionChain<>(Arrays.asList(actions));
     }
 
@@ -47,15 +45,12 @@ public final class ActionChain<T> implements Action<T> {
      *            List of actions to use as the chain.
      */
     public ActionChain(final List<Action<T>> chain) {
-
 	this.chain = Objects.requireNonNull(chain);
     }
 
     @Override
     public void perform(final T actor, final TickInfo tick) {
-
 	for (final Action<T> action : chain) {
-
 	    action.perform(actor, tick);
 	}
     }
@@ -66,7 +61,7 @@ public final class ActionChain<T> implements Action<T> {
      * @return Size of the chain.
      */
     public int size() {
-
 	return chain.size();
     }
+
 }

@@ -11,9 +11,9 @@ import jalse.entities.EntityContainer;
 import java.util.function.Supplier;
 
 /**
- * These are the suppliers for all the common specific exceptions JALSE throws.
- * JALSE currently does not provide any custom exception types but instead uses
- * the suitable {@code java.lang} exceptions.
+ * These are the suppliers for all the common specific exceptions JALSE throws. JALSE currently does
+ * not provide any custom exception types but instead uses the suitable {@code java.lang}
+ * exceptions.
  *
  * @author Elliot Ford
  *
@@ -29,8 +29,7 @@ public final class JALSEExceptions {
 	    "Entity is already associated");
 
     /**
-     * Runtime exception supplier for attempting to change the running state of
-     * a stopped engine.
+     * Runtime exception supplier for attempting to change the running state of a stopped engine.
      *
      * @see AbstractEngine
      */
@@ -38,8 +37,7 @@ public final class JALSEExceptions {
 	    "Engine has already been stopped");
 
     /**
-     * Runtime exception supplier for when a entity is created past the total
-     * entity limit set.
+     * Runtime exception supplier for when a entity is created past the total entity limit set.
      *
      * @see JALSE
      */
@@ -47,8 +45,7 @@ public final class JALSEExceptions {
 	    "Entity limit has been reached");
 
     /**
-     * Runtime exception supplier for when a type is used that does not
-     * implement {@link Attribute}.
+     * Runtime exception supplier for when a type is used that does not implement {@link Attribute}.
      *
      * @see AttributeSet
      */
@@ -56,8 +53,8 @@ public final class JALSEExceptions {
 	    "Invalid attribute type");
 
     /**
-     * Runtime exception supplier for when an {@code interface} without
-     * {@link Entity} as a parent is being used as an entity type.
+     * Runtime exception supplier for when an {@code interface} without {@link Entity} as a parent
+     * is being used as an entity type.
      *
      * @see Entities
      */
@@ -65,8 +62,8 @@ public final class JALSEExceptions {
 	    "Entity type is invalid");
 
     /**
-     * Runtime exception supplier for creation operations are done against an
-     * entity that is no longer alive.
+     * Runtime exception supplier for creation operations are done against an entity that is no
+     * longer alive.
      *
      * @see Entity
      */
@@ -79,16 +76,15 @@ public final class JALSEExceptions {
      * @param supplier
      *            Runtime exception supplier.
      * @throws RuntimeException
-     *             Will throw the supplied exception or will null pointer if
-     *             supplied with {@code null}.
+     *             Will throw the supplied exception or will null pointer if supplied with
+     *             {@code null}.
      */
     public static void throwRE(final Supplier<? extends RuntimeException> supplier) throws RuntimeException {
-
 	throw supplier.get();
     }
 
     private JALSEExceptions() {
-
 	throw new UnsupportedOperationException();
     }
+
 }

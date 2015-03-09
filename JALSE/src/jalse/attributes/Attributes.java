@@ -21,7 +21,6 @@ public final class Attributes {
      * @return Empty attribute container.
      */
     public static AttributeContainer emptyAttributeContainer() {
-
 	return new UnmodifiableDelegateAttributeContainer(null);
     }
 
@@ -30,11 +29,9 @@ public final class Attributes {
      *
      * @param attr
      *            Attribute type.
-     * @return Predicate of {@code true} if the attribute is present and
-     *         {@code false} if it is not.
+     * @return Predicate of {@code true} if the attribute is present and {@code false} if it is not.
      */
     public static Predicate<AttributeContainer> isPresent(final Class<? extends Attribute> attr) {
-
 	return a -> a.getAttributeOfType(attr).isPresent();
     }
 
@@ -43,17 +40,15 @@ public final class Attributes {
      *
      * @param attr
      *            Attribute type.
-     * @return Predicate of {@code true} if the attribute is not present and
-     *         {@code false} if it is.
+     * @return Predicate of {@code true} if the attribute is not present and {@code false} if it is.
      */
     public static Predicate<AttributeContainer> notPresent(final Class<? extends Attribute> attr) {
-
 	return isPresent(attr).negate();
     }
 
     /**
-     * Validation method for ensuring the class is a descendant of Attribute
-     * (but also not Attribute itself).
+     * Validation method for ensuring the class is a descendant of Attribute (but also not Attribute
+     * itself).
      *
      * @param clazz
      *            Class to check.
@@ -63,25 +58,20 @@ public final class Attributes {
      *             If the class does not meet the above requirements.
      */
     public static Class<?> requireNonNullAttrSub(final Class<?> clazz) throws RuntimeException {
-
 	if (clazz == null || Attribute.class.equals(clazz) || !Attribute.class.isAssignableFrom(clazz)) {
-
 	    throwRE(INVALID_ATTRIBUTE_TYPE);
 	}
-
 	return clazz;
     }
 
     /**
-     * Creates an immutable read-only delegate attribute container for the
-     * supplied container.
+     * Creates an immutable read-only delegate attribute container for the supplied container.
      *
      * @param container
      *            Container to delegate for.
      * @return Immutable attribute container.
      */
     public static AttributeContainer unmodifiableAttributeContainer(final AttributeContainer container) {
-
 	return new UnmodifiableDelegateAttributeContainer(Objects.requireNonNull(container));
     }
 
@@ -93,12 +83,11 @@ public final class Attributes {
      * @return The unwrapped object or null if not present.
      */
     public static <T> T unwrap(final Optional<? extends NonAttributeWrapper<T>> attr) {
-
 	return attr.isPresent() ? attr.get().unwrap() : null;
     }
 
     private Attributes() {
-
 	throw new UnsupportedOperationException();
     }
+
 }

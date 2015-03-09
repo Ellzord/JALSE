@@ -14,7 +14,6 @@ public final class TickInfo {
 
     private final AtomicInteger currentTps;
     private final AtomicLong delta;
-
     private final long interval;
     private final AtomicInteger ticks;
     private final int tps;
@@ -26,11 +25,8 @@ public final class TickInfo {
      *            Ticks per second.
      */
     protected TickInfo(final int tps) {
-
 	this.tps = tps;
-
 	interval = Math.round(TimeUnit.SECONDS.toNanos(1) / (double) tps);
-
 	ticks = new AtomicInteger();
 	currentTps = new AtomicInteger();
 	delta = new AtomicLong();
@@ -42,7 +38,6 @@ public final class TickInfo {
      * @return Current ticks per second.
      */
     public int getCurrentTPS() {
-
 	return currentTps.get();
     }
 
@@ -52,7 +47,6 @@ public final class TickInfo {
      * @return Time elapsed between the last tick.
      */
     public long getDelta() {
-
 	return delta.get();
     }
 
@@ -62,7 +56,6 @@ public final class TickInfo {
      * @return TPS interval.
      */
     public long getIntervalAsNanos() {
-
 	return interval;
     }
 
@@ -72,7 +65,6 @@ public final class TickInfo {
      * @return Ideal ticks per second.
      */
     public int getTPS() {
-
 	return tps;
     }
 
@@ -80,7 +72,6 @@ public final class TickInfo {
      * Increments the current total ticks of the engine.
      */
     protected void incrementTicks() {
-
 	ticks.incrementAndGet();
     }
 
@@ -91,7 +82,6 @@ public final class TickInfo {
      *            Current ticks per second.
      */
     protected void setCurrentTPS(final int currentTps) {
-
 	this.currentTps.set(currentTps);
     }
 
@@ -102,7 +92,7 @@ public final class TickInfo {
      *            time elapsed between last tick.
      */
     protected void setDelta(final long delta) {
-
 	this.delta.set(delta);
     }
+
 }

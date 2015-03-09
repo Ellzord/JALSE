@@ -40,11 +40,8 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
     private final AtomicBoolean alive;
 
     DefaultEntity(final UUID id, final EntityFactory factory, final EntityContainer container) {
-
 	super(id);
-
 	this.container = container;
-
 	entities = new EntitySet(factory, this);
 	attributes = new AttributeSet(this);
 	tags = new TagSet();
@@ -54,176 +51,146 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public boolean addAttributeListener(final AttributeListener<? extends Attribute> listener) {
-
 	return attributes.addListener(listener);
     }
 
     @Override
     public <S extends Attribute> Optional<S> addAttributeOfType(final S attr) {
-
 	return attributes.addOfType(attr);
     }
 
     @Override
     public boolean addEntityListener(final EntityListener listener) {
-
 	return entities.addListener(listener);
     }
 
     @Override
     public boolean cancel(final UUID action) {
-
 	return scheduler.cancel(action);
     }
 
     @Override
     public void cancelTasks() {
-
 	scheduler.cancelTasks();
     }
 
     @Override
     public <S extends Attribute> boolean fireAttributeChanged(final Class<S> attr) {
-
 	return attributes.fireChanged(attr);
     }
 
     @Override
     public int getAttributeCount() {
-
 	return attributes.size();
     }
 
     @Override
     public Set<? extends AttributeListener<? extends Attribute>> getAttributeListeners() {
-
 	return attributes.getListeners();
     }
 
     @Override
     public <S extends Attribute> Set<? extends AttributeListener<S>> getAttributeListeners(final Class<S> attr) {
-
 	return attributes.getListeners(attr);
     }
 
     @Override
     public Set<Class<? extends Attribute>> getAttributeListenerTypes() {
-
 	return attributes.getAttributeListenerTypes();
     }
 
     @Override
     public <S extends Attribute> Optional<S> getAttributeOfType(final Class<S> attr) {
-
 	return attributes.getOfType(attr);
     }
 
     @Override
     public Set<? extends Attribute> getAttributes() {
-
 	return Collections.unmodifiableSet(attributes);
     }
 
     @Override
     public Set<Class<? extends Attribute>> getAttributeTypes() {
-
 	return attributes.getAttributeTypes();
     }
 
     @Override
     public Optional<EntityContainer> getContainer() {
-
 	return Optional.ofNullable(isAlive() ? container : null);
     }
 
     protected Optional<AbstractEngine> getEngine() {
-
 	return Optional.ofNullable(scheduler.getEngine());
     }
 
     @Override
     public Set<Entity> getEntities() {
-
 	return Collections.unmodifiableSet(entities);
     }
 
     @Override
     public <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
-
 	return entities.getOfType(type);
     }
 
     @Override
     public Optional<Entity> getEntity(final UUID id) {
-
 	return entities.getEntity(id);
     }
 
     @Override
     public int getEntityCount() {
-
 	return entities.size();
     }
 
     @Override
     public Set<UUID> getEntityIDs() {
-
 	return entities.getEntityIDs();
     }
 
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
-
 	return entities.getListeners();
     }
 
     @Override
     public Set<Tag> getTags() {
-
 	return Collections.unmodifiableSet(tags);
     }
 
     @Override
     public boolean isActive(final UUID action) {
-
 	return scheduler.isActive(action);
     }
 
     @Override
     public boolean isAlive() {
-
 	return alive.get();
     }
 
     @Override
     public boolean isMarkedAsType(final Class<? extends Entity> type) {
-
 	return tags.getOfType(EntityType.class).stream()
 		.anyMatch(at -> Entities.isOrTypeDescendant(at.getType(), type));
     }
 
     @Override
     public boolean kill() {
-
 	return container.killEntity(getID());
     }
 
     @Override
     public void killEntities() {
-
 	entities.clear();
     }
 
     @Override
     public boolean killEntity(final UUID id) {
-
 	return entities.killEntity(id);
     }
 
     protected boolean markAsAlive() {
-
 	if (container instanceof Identifiable) {
-
 	    tags.add(new Parent(Identifiable.getID(container)));
 	}
 
@@ -231,7 +198,6 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     protected boolean markAsDead() {
-
 	tags.removeOfType(Parent.class);
 
 	return alive.getAndSet(false);
@@ -239,12 +205,9 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public boolean markAsType(final Class<? extends Entity> type) {
-
 	if (!isMarkedAsType(type)) {
-
 	    tags.add(new EntityType(type));
 	    Entities.getTypeAncestry(type).stream().map(t -> new EntityType(t)).forEach(tags::add);
-
 	    return true;
 	}
 
@@ -253,9 +216,7 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Entity newEntity() {
-
 	if (!isAlive()) {
-
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
 
@@ -264,9 +225,7 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public <T extends Entity> T newEntity(final Class<T> type) {
-
 	if (!isAlive()) {
-
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
 
@@ -275,9 +234,7 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Entity newEntity(final UUID id) {
-
 	if (!isAlive()) {
-
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
 
@@ -286,9 +243,7 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
-
 	if (!isAlive()) {
-
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
 
@@ -297,34 +252,28 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public boolean removeAttributeListener(final AttributeListener<? extends Attribute> listener) {
-
 	return attributes.removeListener(listener);
     }
 
     @Override
     public <S extends Attribute> Optional<S> removeAttributeOfType(final Class<S> attr) {
-
 	return attributes.removeOfType(attr);
     }
 
     @Override
     public void removeAttributes() {
-
 	attributes.clear();
     }
 
     @Override
     public boolean removeEntityListener(final EntityListener listener) {
-
 	return entities.removeListener(listener);
     }
 
     @Override
     public UUID scheduleAction(final Action<Entity> action, final long initialDelay, final long period,
 	    final TimeUnit unit) {
-
 	if (!isAlive()) {
-
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
 
@@ -332,7 +281,6 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     protected Optional<AbstractEngine> setEngine(final AbstractEngine engine) {
-
 	final AbstractEngine previous = scheduler.getEngine();
 
 	scheduler.setEngine(engine);
@@ -342,25 +290,21 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Stream<? extends Attribute> streamAttributes() {
-
 	return attributes.stream();
     }
 
     @Override
     public Stream<Entity> streamEntities() {
-
 	return entities.stream();
     }
 
     @Override
     public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
-
 	return entities.streamOfType(type);
     }
 
     @Override
     public boolean unmarkAsType(final Class<? extends Entity> type) {
-
 	final Set<EntityType> descendants = tags.getOfType(EntityType.class).stream()
 		.filter(at -> Entities.isOrTypeDescendant(at.getType(), type)).collect(Collectors.toSet());
 
@@ -368,4 +312,5 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
 	return !descendants.isEmpty();
     }
+
 }

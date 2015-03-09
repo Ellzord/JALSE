@@ -9,14 +9,13 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * A parameter resolver for resolving actual type arguments for generic type
- * parameters. The resolver will resolve the actual type argument for a supplied
- * type parameter (this resolved type may itself be a generic type). This class
- * also provides easy means to get type parameter instances and transform Type
- * to Class.<br>
+ * A parameter resolver for resolving actual type arguments for generic type parameters. The
+ * resolver will resolve the actual type argument for a supplied type parameter (this resolved type
+ * may itself be a generic type). This class also provides easy means to get type parameter
+ * instances and transform Type to Class.<br>
  * <br>
- * NOTE: Lambda classes do not contain sufficient generic type information and
- * do not work with this resolver.<br>
+ * NOTE: Lambda classes do not contain sufficient generic type information and do not work with this
+ * resolver.<br>
  * <br>
  *
  * An example resolution:
@@ -45,7 +44,6 @@ public class TypeParameterResolver {
 	private final Class<?> rawType;
 
 	public ResolvedParameterizedType(final Class<?> rawType, final Type[] actualTypeArguments, final Type ownerType) {
-
 	    this.rawType = rawType;
 	    this.actualTypeArguments = actualTypeArguments;
 	    this.ownerType = ownerType;
@@ -53,19 +51,15 @@ public class TypeParameterResolver {
 
 	@Override
 	public boolean equals(final Object obj) {
-
 	    if (this == obj) {
-
 		return true;
 	    }
 
 	    if (!(obj instanceof ParameterizedType)) {
-
 		return false;
 	    }
 
 	    final ParameterizedType pt = (ParameterizedType) obj;
-
 	    return Objects.equals(rawType, pt.getRawType())
 		    && Arrays.equals(actualTypeArguments, pt.getActualTypeArguments())
 		    && Objects.equals(ownerType, pt.getOwnerType());
@@ -73,31 +67,25 @@ public class TypeParameterResolver {
 
 	@Override
 	public Type[] getActualTypeArguments() {
-
 	    return actualTypeArguments;
 	}
 
 	@Override
 	public Type getOwnerType() {
-
 	    return ownerType;
 	}
 
 	@Override
 	public Type getRawType() {
-
 	    return rawType;
 	}
 
 	@Override
 	public int hashCode() {
-
 	    int result = 1;
-
 	    result = 31 * result + rawType.hashCode();
 	    result = 31 * result + Arrays.hashCode(actualTypeArguments);
 	    result = 31 * result + (ownerType == null ? 0 : ownerType.hashCode());
-
 	    return result;
 	}
     }
@@ -112,19 +100,12 @@ public class TypeParameterResolver {
      * @return The type parameter instance.
      */
     public static TypeVariable<? extends Class<?>> getTypeParameter(final Class<?> clazz, final String name) {
-
-	TypeVariable<? extends Class<?>> result = null;
-
 	for (final TypeVariable<? extends Class<?>> param : clazz.getTypeParameters()) {
-
 	    if (param.getName().equals(name)) {
-
-		result = param;
-		break;
+		return param;
 	    }
 	}
-
-	return result;
+	return null;
     }
 
     /**
@@ -132,33 +113,24 @@ public class TypeParameterResolver {
      *
      * @param type
      *            Type to transform.
-     * @return Transformed type object or null if no transformation could be
-     *         made.
+     * @return Transformed type object or null if no transformation could be made.
      */
     public static Class<?> toClass(final Type type) {
-
 	Class<?> result = null;
-
 	if (type instanceof Class) {
-
 	    result = (Class<?>) type;
-	}
-	else if (type instanceof ParameterizedType) {
-
+	} else if (type instanceof ParameterizedType) {
 	    result = toClass(((ParameterizedType) type).getRawType());
 	}
-
 	return result;
     }
 
     private final Class<?> declaringClazz;
-
     private final TypeVariable<? extends Class<?>> typeParameter;
 
     /**
-     * Creates a new instance of TypeParameterResolver to resolve the supplied
-     * parameter. This will look up the parameter using the class supplied and
-     * the parameter name.
+     * Creates a new instance of TypeParameterResolver to resolve the supplied parameter. This will
+     * look up the parameter using the class supplied and the parameter name.
      *
      * @param clazz
      *            Defining class.
@@ -168,13 +140,12 @@ public class TypeParameterResolver {
      * @see #getTypeParameter(Class, String)
      */
     public TypeParameterResolver(final Class<?> clazz, final String name) {
-
 	this(getTypeParameter(clazz, name));
     }
 
     /**
-     * Creates a new instance of TypeParameterResolver that will look to resolve
-     * the supplied parameter.
+     * Creates a new instance of TypeParameterResolver that will look to resolve the supplied
+     * parameter.
      *
      * @param param
      *            Parameter to resolve.
@@ -183,7 +154,6 @@ public class TypeParameterResolver {
      *             If the parameter is null.
      */
     public TypeParameterResolver(final TypeVariable<? extends Class<?>> param) {
-
 	typeParameter = Objects.requireNonNull(param);
 	declaringClazz = param.getGenericDeclaration();
     }
@@ -194,7 +164,6 @@ public class TypeParameterResolver {
      * @return Type parameter to resolve.
      */
     public TypeVariable<? extends Class<?>> getTypeParameter() {
-
 	return typeParameter;
     }
 
@@ -206,11 +175,10 @@ public class TypeParameterResolver {
      * @return Actual type arguments for the parameter.
      *
      * @throws IllegalArgumentException
-     *             If the supplied instance does not have the parameter's
-     *             defining class in its class tree.
+     *             If the supplied instance does not have the parameter's defining class in its
+     *             class tree.
      */
     public Type resolve(final Object obj) {
-
 	return resolve(obj.getClass());
     }
 
@@ -222,35 +190,25 @@ public class TypeParameterResolver {
      * @return Actual type arguments for the parameter.
      *
      * @throws IllegalArgumentException
-     *             If the supplied type does not have the parameter's defining
-     *             class in its class tree.
+     *             If the supplied type does not have the parameter's defining class in its class
+     *             tree.
      */
     public Type resolve(final Type type) {
-
 	final Type superType = resolveRelevantSuperType(type);
-
 	if (superType != null) {
-
 	    int index = 0;
-
 	    for (final TypeVariable<?> param : declaringClazz.getTypeParameters()) {
-
 		if (typeParameter.equals(param)) {
-
 		    return ((ParameterizedType) superType).getActualTypeArguments()[index];
 		}
-
 		index++;
 	    }
 	}
-
 	throw new IllegalArgumentException(String.format("Type does not have %s in its class tree", declaringClazz));
     }
 
     private Type resolveActualTypeParameter(final Type toMap, final Type type) {
-
 	if (toMap instanceof Class) {
-
 	    return toMap;
 	}
 
@@ -258,28 +216,21 @@ public class TypeParameterResolver {
 	Type currentOwner = type;
 
 	while (currentOwner instanceof ParameterizedType) {
-
 	    final ParameterizedType pt = (ParameterizedType) currentOwner;
 	    final Type[] args = pt.getActualTypeArguments();
 	    int index = 0;
-
 	    for (final TypeVariable<?> param : ((Class<?>) pt.getRawType()).getTypeParameters()) {
-
 		paramsToArgs.put(param, args[index++]);
 	    }
-
 	    currentOwner = pt.getOwnerType();
 	}
 
 	final ParameterizedType pt = (ParameterizedType) toMap;
-
 	final Type[] args = pt.getActualTypeArguments();
 	final Type[] resolvedArgs = new Type[args.length];
 
 	for (int i = 0; i < args.length; i++) {
-
 	    final Type arg = args[i];
-
 	    resolvedArgs[i] = arg instanceof Class ? arg : paramsToArgs.get(arg);
 	}
 
@@ -287,11 +238,8 @@ public class TypeParameterResolver {
     }
 
     private Type[] resolveDirectSuperTypes(final Type type) {
-
 	final Class<?> clazz = toClass(type);
-
 	if (clazz.isSynthetic()) {
-
 	    throw new UnsupportedOperationException("Lambda classes do not store full generic type information");
 	}
 
@@ -303,12 +251,10 @@ public class TypeParameterResolver {
 	int index = 0;
 
 	if (!noSuperClazz) {
-
 	    result[index++] = resolveActualTypeParameter(superClazz, type);
 	}
 
 	for (final Type superInterface : superInterfaces) {
-
 	    result[index++] = resolveActualTypeParameter(superInterface, type);
 	}
 
@@ -316,24 +262,18 @@ public class TypeParameterResolver {
     }
 
     private Type resolveRelevantSuperType(final Type type) {
-
 	if (declaringClazz.equals(toClass(type))) {
-
 	    return type;
 	}
 
-	Type result = null;
-
 	for (final Type superType : resolveDirectSuperTypes(type)) {
-
-	    result = resolveRelevantSuperType(superType);
-
+	    final Type result = resolveRelevantSuperType(superType);
 	    if (result != null) {
-
-		break;
+		return result;
 	    }
 	}
 
-	return result;
+	return null;
     }
+
 }

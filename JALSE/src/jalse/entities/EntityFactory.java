@@ -3,8 +3,8 @@ package jalse.entities;
 import java.util.UUID;
 
 /**
- * An entity factory is used to give a level of control over the creation and
- * killing of {@link Entity}.
+ * An entity factory is used to give a level of control over the creation and killing of
+ * {@link Entity}.
  *
  * @author Elliot Ford
  *
@@ -32,4 +32,5 @@ public interface EntityFactory {
      * @return Newly created entity.
      */
     Entity newEntity(UUID id, EntityContainer container);
+
 }

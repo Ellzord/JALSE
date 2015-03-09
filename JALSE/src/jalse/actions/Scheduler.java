@@ -5,10 +5,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is the JALSE equivalent to {@link Executor}. {@link Action} can be
- * scheduled to be run once now, in the future or periodically at an interval.
- * When an action is run work is performed using a supplied actor, scheduler
- * defines the actor type as well as a means to maintain previously
+ * This is the JALSE equivalent to {@link Executor}. {@link Action} can be scheduled to be run once
+ * now, in the future or periodically at an interval. When an action is run work is performed using
+ * a supplied actor, scheduler defines the actor type as well as a means to maintain previously
  * scheduled/running actions.
  *
  * @author Elliot Ford
@@ -46,14 +45,12 @@ public interface Scheduler<T> {
      * @return Actions work ID.
      */
     default UUID scheduleAction(final Action<T> action) {
-
 	return scheduleAction(action, 0L, TimeUnit.NANOSECONDS);
     }
 
     /**
-     * Schedules an action to performed next tick with the specified delay. If
-     * period is non-zero then this will be done at recurring intervals once per
-     * tick.
+     * Schedules an action to performed next tick with the specified delay. If period is non-zero
+     * then this will be done at recurring intervals once per tick.
      *
      * @param action
      *            Action to schedule.
@@ -79,7 +76,7 @@ public interface Scheduler<T> {
      * @return Actions work ID.
      */
     default UUID scheduleAction(final Action<T> action, final long initialDelay, final TimeUnit unit) {
-
 	return scheduleAction(action, initialDelay, 0L, unit);
     }
+
 }

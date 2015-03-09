@@ -23,15 +23,11 @@ public final class EntityType implements Tag {
      * @see Entities#validateType(Class)
      */
     public EntityType(final Class<? extends Entity> type) {
-
-	Entities.validateType(type);
-
-	this.type = type;
+	Entities.validateType(this.type = type);
     }
 
     @Override
     public boolean equals(final Object obj) {
-
 	return obj instanceof EntityType && type.equals(((EntityType) obj).type);
     }
 
@@ -41,19 +37,17 @@ public final class EntityType implements Tag {
      * @return Type belonging to an entity.
      */
     public Class<? extends Entity> getType() {
-
 	return type;
     }
 
     @Override
     public int hashCode() {
-
 	return type.hashCode();
     }
 
     @Override
     public String toString() {
-
 	return "EntityType [type=" + type.getName() + "]";
     }
+
 }

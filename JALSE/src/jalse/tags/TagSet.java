@@ -10,10 +10,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A tag set is a thread-safe {@link Set} implementation for {@link Tag}. A tag
- * set will allow multiple tags of the same type as long as none of them are
- * considered equal. It is possible to query and remove tags by type as well as
- * by instance.
+ * A tag set is a thread-safe {@link Set} implementation for {@link Tag}. A tag set will allow
+ * multiple tags of the same type as long as none of them are considered equal. It is possible to
+ * query and remove tags by type as well as by instance.
  *
  * @author Elliot Ford
  *
@@ -31,17 +30,14 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
      * Creates a new instance of tag set.
      */
     public TagSet() {
-
 	tags = new HashMap<>();
     }
 
     @Override
     public synchronized boolean add(final Tag e) {
-
 	Set<Tag> tagsOfType = tags.get(e.getClass());
 
 	if (tagsOfType == null) {
-
 	    tags.put(e.getClass(), tagsOfType = new HashSet<>());
 	}
 
@@ -50,15 +46,12 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 
     @Override
     public synchronized void clear() {
-
 	tags.clear();
     }
 
     @Override
     public synchronized boolean contains(final Object o) {
-
 	final Set<Tag> tagsOfType = tags.get(o.getClass());
-
 	return tagsOfType != null && tagsOfType.contains(o);
     }
 
@@ -67,11 +60,10 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
      *
      * @param type
      *            Type of tag.
-     * @return {@code true} if the set contains any tags of the specified type
-     *         or {@code false} if it does not.
+     * @return {@code true} if the set contains any tags of the specified type or {@code false} if
+     *         it does not.
      */
     public synchronized boolean containsOfType(final Class<? extends Tag> type) {
-
 	return tags.containsKey(type);
     }
 
@@ -84,37 +76,28 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public synchronized <T extends Tag> Set<T> getOfType(final Class<T> type) {
-
 	final Set<T> tagsOfType = (Set<T>) tags.get(type);
-
 	return tagsOfType != null ? Collections.unmodifiableSet(tagsOfType) : Collections.emptySet();
     }
 
     @Override
     public synchronized boolean isEmpty() {
-
 	return tags.isEmpty();
     }
 
     @Override
     public synchronized Iterator<Tag> iterator() {
-
 	return tags.values().stream().flatMap(s -> s.stream()).iterator();
     }
 
     @Override
     public synchronized boolean remove(final Object o) {
-
+	final Set<Tag> tagsOfType = tags.get(o.getClass());
 	boolean removed = false;
 
-	final Set<Tag> tagsOfType = tags.get(o.getClass());
-
 	if (tagsOfType != null) {
-
 	    removed = tagsOfType.remove(o);
-
 	    if (tagsOfType.isEmpty()) {
-
 		tags.remove(o.getClass());
 	    }
 	}
@@ -130,13 +113,12 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
      * @return Whether any tags were removed.
      */
     public synchronized boolean removeOfType(final Class<? extends Tag> type) {
-
 	return tags.remove(type) != null;
     }
 
     @Override
     public synchronized int size() {
-
 	return tags.values().stream().mapToInt(s -> s.size()).sum();
     }
+
 }

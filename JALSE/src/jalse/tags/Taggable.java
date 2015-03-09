@@ -16,4 +16,5 @@ public interface Taggable {
      * @return All tags or an empty set if none are found.
      */
     Set<Tag> getTags();
+
 }

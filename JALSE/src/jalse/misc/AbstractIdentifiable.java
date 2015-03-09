@@ -4,9 +4,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * This is an abstract implementation of {@link Identifiable}. This class simply
- * takes in a {@link UUID} as an ID and provides equality and string
- * representation methods.
+ * This is an abstract implementation of {@link Identifiable}. This class simply takes in a
+ * {@link UUID} as an ID and provides equality and string representation methods.
  *
  * @author Elliot Ford
  *
@@ -29,31 +28,27 @@ public abstract class AbstractIdentifiable implements Identifiable {
      *            Unique ID of the Identifiable.
      */
     protected AbstractIdentifiable(final UUID id) {
-
 	this.id = Objects.requireNonNull(id);
     }
 
     @Override
     public boolean equals(final Object obj) {
-
 	return Identifiable.equals(this, obj);
     }
 
     @Override
     public UUID getID() {
-
 	return id;
     }
 
     @Override
     public int hashCode() {
-
 	return Identifiable.hashCode(this);
     }
 
     @Override
     public String toString() {
-
 	return Identifiable.toString(this);
     }
+
 }

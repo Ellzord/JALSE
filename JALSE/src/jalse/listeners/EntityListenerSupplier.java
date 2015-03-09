@@ -11,21 +11,17 @@ class EntityListenerSupplier extends EntityAdapter {
     private final boolean deep;
 
     EntityListenerSupplier(final Supplier<EntityListener> supplier, final boolean deep) {
-
 	this.supplier = Objects.requireNonNull(supplier);
 	this.deep = deep;
     }
 
     @Override
     public void entityCreated(final EntityEvent event) {
-
 	final Entity e = event.getEntity();
-
 	if (deep) {
-
 	    e.addEntityListener(this);
 	}
-
 	e.addEntityListener(supplier.get());
     }
+
 }

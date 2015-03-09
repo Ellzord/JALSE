@@ -8,10 +8,10 @@ import jalse.attributes.AttributeSet;
 import java.lang.reflect.TypeVariable;
 
 /**
- * Listener for {@link Attribute} manipulation. When attributes are added,
- * updated or removed the suitable defined method will be triggered. A change is
- * a manual fire of the trigger to denote a internal state change of the
- * attribute. Unique {@link AttributeEvent} will be supplied for each trigger.
+ * Listener for {@link Attribute} manipulation. When attributes are added, updated or removed the
+ * suitable defined method will be triggered. A change is a manual fire of the trigger to denote a
+ * internal state change of the attribute. Unique {@link AttributeEvent} will be supplied for each
+ * trigger.
  *
  * @author Elliot Ford
  * @param <T>
@@ -29,8 +29,8 @@ public interface AttributeListener<T extends Attribute> {
     TypeVariable<? extends Class<?>> TYPE_PARAMETER = getTypeParameter(AttributeListener.class, "T");
 
     /**
-     * Triggered when an attribute has been added. If the attribute was replaced
-     * this will be reflected in the event.
+     * Triggered when an attribute has been added. If the attribute was replaced this will be
+     * reflected in the event.
      *
      * @param event
      *            The attribute event for this trigger.
@@ -38,8 +38,8 @@ public interface AttributeListener<T extends Attribute> {
     void attributeAdded(AttributeEvent<T> event);
 
     /**
-     * Triggered when an attribute has been changed (either replacement by
-     * another attribute or an internal state change).
+     * Triggered when an attribute has been changed (either replacement by another attribute or an
+     * internal state change).
      *
      * @param event
      *            The attribute event for this trigger.
@@ -53,4 +53,5 @@ public interface AttributeListener<T extends Attribute> {
      *            The attribute event for this trigger.
      */
     void attributeRemoved(AttributeEvent<T> event);
+
 }

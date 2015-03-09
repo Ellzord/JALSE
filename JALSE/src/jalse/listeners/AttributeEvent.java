@@ -8,10 +8,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Attribute change event for {@link AttributeListener}. This is a unique event
- * that contains the relevant {@link Attribute} and it's parent
- * {@link AttributeContainer} (even if the Attribute has been removed). When an
- * Attribute is replaced the previous Attribute is also contained within the
+ * Attribute change event for {@link AttributeListener}. This is a unique event that contains the
+ * relevant {@link Attribute} and it's parent {@link AttributeContainer} (even if the Attribute has
+ * been removed). When an Attribute is replaced the previous Attribute is also contained within the
  * event.
  *
  * @author Elliot Ford
@@ -28,8 +27,7 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
     private final T previousAttr;
 
     /**
-     * Creates a new AttributeEvent with a random ID (with no previous
-     * Attribute).
+     * Creates a new AttributeEvent with a random ID (with no previous Attribute).
      *
      * @param container
      *            Parent container for the Attribute.
@@ -37,7 +35,6 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      *            Attribute the event is for.
      */
     public AttributeEvent(final AttributeContainer container, final T attr) {
-
 	this(container, attr, null);
     }
 
@@ -52,9 +49,7 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      *            The previous attribute that has been replaced (can be null).
      */
     public AttributeEvent(final AttributeContainer container, final T attr, final T previousAttr) {
-
 	super(UUID.randomUUID());
-
 	this.container = Objects.requireNonNull(container);
 	this.attr = Objects.requireNonNull(attr);
 	this.previousAttr = previousAttr;
@@ -66,7 +61,6 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      * @return The relevant Attribute.
      */
     public T getAttribute() {
-
 	return attr;
     }
 
@@ -76,7 +70,6 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      * @return Parent container.
      */
     public AttributeContainer getContainer() {
-
 	return container;
     }
 
@@ -86,7 +79,6 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      * @return Replaced Attribute.
      */
     public T getPreviousAttribute() {
-
 	return previousAttr;
     }
 
@@ -96,7 +88,7 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      * @return Whether the previous Attribute was replaced.
      */
     public boolean isReplacement() {
-
 	return previousAttr != null;
     }
+
 }

@@ -12,10 +12,9 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
- * This is an {@link Entity} collection. Entities can only be added to a
- * container by creating them and remove them by killing them. Entity creation
- * and death can be listened for using {@link EntityListener} and
- * {@link EntityEvent}.
+ * This is an {@link Entity} collection. Entities can only be added to a container by creating them
+ * and remove them by killing them. Entity creation and death can be listened for using
+ * {@link EntityListener} and {@link EntityEvent}.
  *
  * @author Elliot Ford
  *
@@ -65,30 +64,26 @@ public interface EntityContainer {
      *
      * @param id
      *            Unique ID of the entity.
-     * @return Gets an Optional of the resulting entity or an empty Optional if
-     *         it was not found.
+     * @return Gets an Optional of the resulting entity or an empty Optional if it was not found.
      * @throws NullPointerException
      *             If the ID is null.
      */
     Optional<Entity> getEntity(UUID id);
 
     /**
-     * Gets the entity with the specified ID. The entity is wrapped with the
-     * supplied entity type.
+     * Gets the entity with the specified ID. The entity is wrapped with the supplied entity type.
      *
      * @param id
      *            Unique ID of the entity.
      * @param type
      *            Entity type to wrap to.
-     * @return Gets an Optional of the resulting entity or an empty Optional if
-     *         it was not found.
+     * @return Gets an Optional of the resulting entity or an empty Optional if it was not found.
      * @throws NullPointerException
      *             If the ID or type are null.
      *
      * @see Entities#asType(Entity, Class)
      */
     default <T extends Entity> Optional<T> getEntityAsType(final UUID id, final Class<T> type) {
-
 	return getEntity(id).map(e -> asType(e, type));
     }
 
@@ -119,7 +114,6 @@ public interface EntityContainer {
      * @return Whether the container is not empty.
      */
     default boolean hasEntities() {
-
 	return getEntityCount() > 0;
     }
 
@@ -131,7 +125,6 @@ public interface EntityContainer {
      * @return Whether the entity was found.
      */
     default boolean hasEntity(final UUID id) {
-
 	return getEntity(id).isPresent();
     }
 
@@ -162,8 +155,8 @@ public interface EntityContainer {
     Entity newEntity();
 
     /**
-     * Creates a new entity with a random ID. This entity is marked as the
-     * specified entity type and then wrapped to it.
+     * Creates a new entity with a random ID. This entity is marked as the specified entity type and
+     * then wrapped to it.
      *
      * @param type
      *            Entity type.
@@ -195,8 +188,8 @@ public interface EntityContainer {
     Entity newEntity(UUID id);
 
     /**
-     * Creates new entity with the specified ID. This entity is marked as the
-     * specified entity type and then wrapped to it.
+     * Creates new entity with the specified ID. This entity is marked as the specified entity type
+     * and then wrapped to it.
      *
      *
      * @param id
@@ -249,4 +242,5 @@ public interface EntityContainer {
      * @see Entity#asType(Class)
      */
     <T extends Entity> Stream<T> streamEntitiesOfType(Class<T> type);
+
 }

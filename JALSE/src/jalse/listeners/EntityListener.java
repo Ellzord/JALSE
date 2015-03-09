@@ -4,8 +4,8 @@ import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
 
 /**
- * Listener for {@link Entity} creation and death. Unique {@link EntityEvent}
- * will be supplied for each trigger.
+ * Listener for {@link Entity} creation and death. Unique {@link EntityEvent} will be supplied for
+ * each trigger.
  *
  * @author Elliot Ford
  *
@@ -29,4 +29,5 @@ public interface EntityListener {
      *            The cluster event for this trigger.
      */
     void entityKilled(EntityEvent event);
+
 }

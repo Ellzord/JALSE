@@ -25,10 +25,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * JALSE is the overall container and engine for each simulation. It provides
- * the ability to create a number of {@link Entity} and execute {@link Action}
- * at given intervals. Although {@link Entity} can be created/killed no
- * {@link Action} will run until {@link AbstractEngine#tick()} is called.
+ * JALSE is the overall container and engine for each simulation. It provides the ability to create
+ * a number of {@link Entity} and execute {@link Action} at given intervals. Although {@link Entity}
+ * can be created/killed no {@link Action} will run until {@link AbstractEngine#tick()} is called.
  *
  * @author Elliot Ford
  *
@@ -40,22 +39,18 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
 	private final Set<UUID> entityIDs;
 
 	private LimitingEntityFactory() {
-
 	    entityIDs = new HashSet<>();
 	}
 
 	@Override
 	public synchronized boolean killEntity(final Entity e) {
-
 	    if (!(e instanceof DefaultEntity)) {
-
 		return false;
 	    }
 
 	    final DefaultEntity de = (DefaultEntity) e;
 
 	    if (!de.isAlive() || !entityIDs.remove(de.getID())) {
-
 		return false;
 	    }
 
@@ -72,14 +67,11 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
 
 	@Override
 	public synchronized Entity newEntity(final UUID id, final EntityContainer container) {
-
 	    if (totalEntityCount >= totalEntityLimit) {
-
 		throwRE(ENTITY_LIMIT_REACHED);
 	    }
 
 	    if (!entityIDs.add(id)) {
-
 		throwRE(ENTITY_ALREADY_ASSOCIATED);
 	    }
 
@@ -119,60 +111,49 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
      *             All parameters must be above zero.
      */
     public JALSE(final int tps, final int totalThreads, final int totalEntityLimit) {
-
 	super(tps, totalThreads);
 
 	if (totalEntityLimit <= 0) {
-
 	    throw new IllegalArgumentException();
 	}
 
 	this.totalEntityLimit = totalEntityLimit;
-
 	entities = new EntitySet(new LimitingEntityFactory(), this);
-
 	tags = new TagSet();
     }
 
     @Override
     public boolean addEntityListener(final EntityListener listener) {
-
 	return entities.addListener(listener);
     }
 
     @Override
     public Set<Entity> getEntities() {
-
 	return streamEntities().collect(Collectors.toSet());
     }
 
     @Override
     public <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
-
 	return entities.getOfType(type);
     }
 
     @Override
     public Optional<Entity> getEntity(final UUID id) {
-
 	return entities.getEntity(id);
     }
 
     @Override
     public int getEntityCount() {
-
 	return entities.size();
     }
 
     @Override
     public Set<UUID> getEntityIDs() {
-
 	return entities.getEntityIDs();
     }
 
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
-
 	return entities.getListeners();
     }
 
@@ -184,7 +165,6 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
     @Override
     @SuppressWarnings("unchecked")
     public Action<JALSE> getFirstAction() {
-
 	return (Action<JALSE>) super.getFirstAction();
     }
 
@@ -196,13 +176,11 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
     @Override
     @SuppressWarnings("unchecked")
     public Action<JALSE> getLastAction() {
-
 	return (Action<JALSE>) super.getLastAction();
     }
 
     @Override
     public Set<Tag> getTags() {
-
 	return Collections.unmodifiableSet(tags);
     }
 
@@ -212,7 +190,6 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
      * @return Total number of entities within the simulation.
      */
     public int getTotalEntityCount() {
-
 	return totalEntityCount;
     }
 
@@ -222,7 +199,6 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
      * @return Total entity limit JALSE was initialised with.
      */
     public int getTotalEntityLimit() {
-
 	return totalEntityLimit;
     }
 
@@ -235,7 +211,6 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
      * @see #setFirstAction(Action)
      */
     public boolean hasFirstAction() {
-
 	return super.getFirstAction() != null;
     }
 
@@ -248,56 +223,47 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
      * @see #setLastAction(Action)
      */
     public boolean hasLastAction() {
-
 	return super.getLastAction() != null;
     }
 
     @Override
     public void killEntities() {
-
 	entities.clear();
     }
 
     @Override
     public boolean killEntity(final UUID id) {
-
 	return entities.killEntity(id);
     }
 
     @Override
     public Entity newEntity() {
-
 	return entities.newEntity();
     }
 
     @Override
     public <T extends Entity> T newEntity(final Class<T> type) {
-
 	return entities.newEntity(type);
     }
 
     @Override
     public Entity newEntity(final UUID id) {
-
 	return entities.newEntity(id);
     }
 
     @Override
     public <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
-
 	return entities.newEntity(id, type);
     }
 
     @Override
     public boolean removeEntityListener(final EntityListener listener) {
-
 	return entities.removeListener(listener);
     }
 
     @Override
     public UUID scheduleAction(final Action<JALSE> action, final long initialDelay, final long period,
 	    final TimeUnit unit) {
-
 	return scheduleAction(action, this, initialDelay, period, unit);
     }
 
@@ -309,7 +275,6 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
      *
      */
     public void setFirstAction(final Action<JALSE> action) {
-
 	setFirstAction(action, this);
     }
 
@@ -321,19 +286,17 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
      *
      */
     public void setLastAction(final Action<JALSE> action) {
-
 	setLastAction(action, this);
     }
 
     @Override
     public Stream<Entity> streamEntities() {
-
 	return entities.stream();
     }
 
     @Override
     public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
-
 	return entities.streamOfType(type);
     }
+
 }

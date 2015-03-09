@@ -23,16 +23,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * An EntitySet is a thread-safe {@link Set} implementation for {@link Entity}.
- * An EntitySet follows the same pattern defined in {@link EntityContainer} but
- * offers a collections based implementation (so it may be used more
- * generically).<br>
+ * An EntitySet is a thread-safe {@link Set} implementation for {@link Entity}. An EntitySet follows
+ * the same pattern defined in {@link EntityContainer} but offers a collections based implementation
+ * (so it may be used more generically).<br>
  * <br>
  *
- * EntitySet can take a delegate EntityContainer to supply to
- * {@link EntityEvent}. Entity updates will trigger these events using
- * {@link EntityListener}. Newly created entities will be supplied this delegate
- * container.
+ * EntitySet can take a delegate EntityContainer to supply to {@link EntityEvent}. Entity updates
+ * will trigger these events using {@link EntityListener}. Newly created entities will be supplied
+ * this delegate container.
  *
  * @author Elliot Ford
  *
@@ -45,14 +43,12 @@ public class EntitySet extends AbstractSet<Entity> {
     private final EntityContainer delegateContainer;
 
     /**
-     * Creates an entity set with the supplied factory and empty delegate
-     * container.
+     * Creates an entity set with the supplied factory and empty delegate container.
      *
      * @param factory
      *            Entity creation/death factory.
      */
     public EntitySet(final EntityFactory factory) {
-
 	this(factory, Entities.emptyEntityContainer());
     }
 
@@ -65,10 +61,8 @@ public class EntitySet extends AbstractSet<Entity> {
      *            Delegate container for events and entity creation.
      */
     public EntitySet(final EntityFactory factory, final EntityContainer delegateContainer) {
-
 	this.factory = Objects.requireNonNull(factory);
 	this.delegateContainer = Objects.requireNonNull(delegateContainer);
-
 	entities = new ConcurrentHashMap<>();
 	entityListeners = Listeners.createEntityListenerSet();
     }
@@ -87,24 +81,19 @@ public class EntitySet extends AbstractSet<Entity> {
      *
      */
     public boolean addListener(final EntityListener listener) {
-
 	return entityListeners.add(listener);
     }
 
     @Override
     public void clear() {
-
 	new HashSet<>(entities.keySet()).forEach(this::killEntity);
     }
 
     @Override
     public boolean contains(final Object o) {
-
 	if (!(o instanceof Entity)) {
-
 	    throw new IllegalArgumentException();
 	}
-
 	return hasEntity(((Entity) o).getID());
     }
 
@@ -114,7 +103,6 @@ public class EntitySet extends AbstractSet<Entity> {
      * @return Delegate container.
      */
     public EntityContainer getDelegateContainer() {
-
 	return delegateContainer;
     }
 
@@ -123,13 +111,11 @@ public class EntitySet extends AbstractSet<Entity> {
      *
      * @param id
      *            Unique ID of the entity.
-     * @return Gets an Optional of the resulting entity or an empty Optional if
-     *         it was not found.
+     * @return Gets an Optional of the resulting entity or an empty Optional if it was not found.
      * @throws NullPointerException
      *             If the ID is null.
      */
     public Optional<Entity> getEntity(final UUID id) {
-
 	return Optional.ofNullable(entities.get(Objects.requireNonNull(id)));
     }
 
@@ -139,7 +125,6 @@ public class EntitySet extends AbstractSet<Entity> {
      * @return Set of all entity identifiers.
      */
     public Set<UUID> getEntityIDs() {
-
 	return Collections.unmodifiableSet(entities.keySet());
     }
 
@@ -149,7 +134,6 @@ public class EntitySet extends AbstractSet<Entity> {
      * @return Entity creation / death factory.
      */
     public EntityFactory getFactory() {
-
 	return factory;
     }
 
@@ -159,7 +143,6 @@ public class EntitySet extends AbstractSet<Entity> {
      * @return All the entity listeners.
      */
     public Set<? extends EntityListener> getListeners() {
-
 	return Collections.unmodifiableSet(entityListeners);
     }
 
@@ -174,7 +157,6 @@ public class EntitySet extends AbstractSet<Entity> {
      * @see Entity#asType(Class)
      */
     public <T extends Entity> Set<T> getOfType(final Class<T> type) {
-
 	return streamOfType(type).collect(Collectors.toSet());
     }
 
@@ -186,19 +168,16 @@ public class EntitySet extends AbstractSet<Entity> {
      * @return Whether the entity was found.
      */
     public boolean hasEntity(final UUID id) {
-
 	return entities.containsKey(Objects.requireNonNull(id));
     }
 
     @Override
     public boolean isEmpty() {
-
 	return entities.isEmpty();
     }
 
     @Override
     public Iterator<Entity> iterator() {
-
 	return entities.values().iterator();
     }
 
@@ -211,23 +190,16 @@ public class EntitySet extends AbstractSet<Entity> {
      * @see EntityFactory#killEntity(Entity)
      */
     public boolean killEntity(final UUID id) {
-
 	final Entity e = entities.get(Objects.requireNonNull(id));
-
 	if (e == null) {
-
 	    return false;
 	}
 
 	boolean result;
-
 	if (result = factory.killEntity(e)) {
-
 	    entities.remove(id);
-
 	    entityListeners.getProxy().entityKilled(new EntityEvent(delegateContainer, e));
 	}
-
 	return result;
     }
 
@@ -243,13 +215,12 @@ public class EntitySet extends AbstractSet<Entity> {
      * @see EntityFactory#newEntity(UUID, EntityContainer)
      */
     public Entity newEntity() {
-
 	return newEntity(UUID.randomUUID());
     }
 
     /**
-     * Creates a new entity with a random ID. This entity is marked as the
-     * specified entity type and then wrapped to it.
+     * Creates a new entity with a random ID. This entity is marked as the specified entity type and
+     * then wrapped to it.
      *
      * @param type
      *            Entity type.
@@ -264,7 +235,6 @@ public class EntitySet extends AbstractSet<Entity> {
      * @see EntityFactory#newEntity(UUID, EntityContainer)
      */
     public <T extends Entity> T newEntity(final Class<T> type) {
-
 	return newEntity(UUID.randomUUID(), type);
     }
 
@@ -284,13 +254,12 @@ public class EntitySet extends AbstractSet<Entity> {
      * @see EntityFactory#newEntity(UUID, EntityContainer)
      */
     public Entity newEntity(final UUID id) {
-
 	return newEntity0(Objects.requireNonNull(id), null);
     }
 
     /**
-     * Creates new entity with the specified ID. This entity is marked as the
-     * specified entity type and then wrapped to it.
+     * Creates new entity with the specified ID. This entity is marked as the specified entity type
+     * and then wrapped to it.
      *
      *
      * @param id
@@ -310,14 +279,11 @@ public class EntitySet extends AbstractSet<Entity> {
      * @see EntityFactory#newEntity(UUID, EntityContainer)
      */
     public <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
-
 	return asType(newEntity0(Objects.requireNonNull(id), type), type);
     }
 
     private Entity newEntity0(final UUID id, final Class<? extends Entity> type) {
-
 	if (entities.containsKey(id)) {
-
 	    throwRE(ENTITY_ALREADY_ASSOCIATED);
 	}
 
@@ -325,7 +291,6 @@ public class EntitySet extends AbstractSet<Entity> {
 	entities.put(e.getID(), e);
 
 	if (type != null) {
-
 	    e.markAsType(type);
 	}
 
@@ -336,12 +301,9 @@ public class EntitySet extends AbstractSet<Entity> {
 
     @Override
     public boolean remove(final Object o) {
-
 	if (!(o instanceof Entity)) {
-
 	    throw new IllegalArgumentException();
 	}
-
 	return killEntity(((Entity) o).getID());
     }
 
@@ -359,13 +321,11 @@ public class EntitySet extends AbstractSet<Entity> {
      *
      */
     public boolean removeListener(final EntityListener listener) {
-
 	return entityListeners.remove(listener);
     }
 
     @Override
     public int size() {
-
 	return entities.size();
     }
 
@@ -380,7 +340,7 @@ public class EntitySet extends AbstractSet<Entity> {
      * @see Entity#asType(Class)
      */
     public <T extends Entity> Stream<T> streamOfType(final Class<T> type) {
-
 	return stream().filter(e -> e.isMarkedAsType(type)).map(e -> asType(e, type));
     }
+
 }

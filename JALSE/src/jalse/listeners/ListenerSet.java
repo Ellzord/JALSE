@@ -7,10 +7,9 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * Provides a thread-safe way to store and process listeners. Listener set takes
- * in the defining listener {@code interface} and allows you to invoke the
- * defined method upon the whole group via a proxy
- * {@link ListenerSet#getProxy()}.
+ * Provides a thread-safe way to store and process listeners. Listener set takes in the defining
+ * listener {@code interface} and allows you to invoke the defined method upon the whole group via a
+ * proxy {@link ListenerSet#getProxy()}.
  *
  * @author Elliot Ford
  *
@@ -31,13 +30,11 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
      */
     @SuppressWarnings("unchecked")
     public ListenerSet(final Class<T> clazz) {
-
 	proxy = (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, this);
     }
 
     @Override
     public boolean add(final T e) {
-
 	return super.add(Objects.requireNonNull(e));
     }
 
@@ -47,24 +44,20 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
      * @return Listener group proxy.
      */
     public T getProxy() {
-
 	return proxy;
     }
 
     @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-
 	for (final T t : this) {
-
 	    method.invoke(t, args);
 	}
-
 	return null;
     }
 
     @Override
     public boolean remove(final Object o) {
-
 	return super.remove(Objects.requireNonNull(o));
     }
+
 }
