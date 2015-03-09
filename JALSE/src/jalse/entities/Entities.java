@@ -265,13 +265,11 @@ public final class Entities {
 
 	    @Override
 	    public boolean hasNext() {
-
 		return walker.isWalking();
 	    }
 
 	    @Override
 	    public Entity next() {
-
 		return walker.walk();
 	    }
 	};
