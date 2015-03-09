@@ -15,18 +15,18 @@ import jalse.entities.EntityContainer;
 public interface EntityListener {
 
     /**
-     * Triggered on cluster creation.
+     * Triggered on entity creation.
      *
      * @param event
-     *            The cluster event for this trigger.
+     *            The entity event for this trigger.
      */
     void entityCreated(EntityEvent event);
 
     /**
-     * Triggered on cluster death.
+     * Triggered on entity death.
      *
      * @param event
-     *            The cluster event for this trigger.
+     *            The entity event for this trigger.
      */
     void entityKilled(EntityEvent event);
 

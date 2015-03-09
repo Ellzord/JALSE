@@ -19,7 +19,7 @@ import java.util.Optional;
  * <br>
  * Entities can be wrapped and marked as specific entity types as long as the inheriting interface
  * follows what is outlined in {@link Entities}. Entity have can have a number of types (subclasses
- * of {@link Entity}) which can be used to identify a collection of agents with similar state or
+ * of {@link Entity}) which can be used to identify a collection of entities with similar state or
  * function.<br>
  * <br>
  * An example of how the type marking works:
