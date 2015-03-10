@@ -22,7 +22,7 @@ JALSE is a lightweight framework for simple simulation written in Java 8.
   * Can schedule its own work.
 * Useful utilities
   * Can "cast" any Entity as any Entity Type.
-  * Can add recursive listener suppliers.
+  * Can add recursive trigger listener suppliers.
   * Can recursively walk through entity tree.
 
 ### How to use
