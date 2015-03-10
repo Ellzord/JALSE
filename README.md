@@ -20,11 +20,10 @@ JALSE is a lightweight framework for simple simulation written in Java 8.
     * Can be used to mark or group entities for processing.
   * Create/Kill events can have trigger listeners.
   * Can schedule its own work.
-* Useful utilities and interfaces
+* Useful utilities
   * Can "cast" any Entity as any Entity Type.
   * Can add recursive listener suppliers.
   * Can recursively walk through entity tree.
-  * Can create empty and delegate Entity and Attribute containers.
 
 ### How to use
 Check out the [Wiki](https://github.com/Ellzord/JALSE/wiki) for more information or have a look at [HappyCows](https://github.com/Ellzord/JALSE-HappyCows) for an example project.
