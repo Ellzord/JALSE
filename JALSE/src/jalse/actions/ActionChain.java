@@ -22,7 +22,7 @@ import java.util.Objects;
  * @see JALSE#setFirstAction(Action)
  * @see JALSE#setLastAction(Action)
  */
-public final class ActionChain<T> implements Action<T> {
+public class ActionChain<T> implements Action<T> {
 
     /**
      * Convenience method for creating action chains with arrays or an undetermined number of
