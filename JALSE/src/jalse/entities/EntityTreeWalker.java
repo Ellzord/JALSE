@@ -2,17 +2,17 @@ package jalse.entities;
 
 import jalse.entities.EntityVisitor.EntityVisitResult;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Queue;
 
 class EntityTreeWalker {
 
     private final EntityContainer container;
     private final int maxDepth;
     private final EntityVisitor visitor;
-    private final Deque<EntityTreeWalker> walkers;
+    private final Queue<EntityTreeWalker> walkers;
     private final Iterator<Entity> iterator;
     private boolean ignoreSiblings;
     private boolean exited;
@@ -26,7 +26,7 @@ class EntityTreeWalker {
 	}
 	this.maxDepth = maxDepth;
 
-	walkers = new ArrayDeque<>();
+	walkers = new LinkedList<>();
 	iterator = container.streamEntities().iterator();
 	exited = false;
     }
@@ -90,7 +90,7 @@ class EntityTreeWalker {
 	    if (maxDepth > 1 && result != EntityVisitResult.IGNORE_CHILDREN) {
 		final EntityTreeWalker child = new EntityTreeWalker(e, maxDepth - 1, visitor);
 		if (child.isWalking()) {
-		    walkers.addLast(child);
+		    walkers.add(child);
 		}
 	    }
 
@@ -100,17 +100,16 @@ class EntityTreeWalker {
 	/*
 	 * Walk already visited child.
 	 */
-	final EntityTreeWalker child = walkers.peekFirst();
+	final EntityTreeWalker child = walkers.element();
 	final Entity e = child.walk();
 
 	/*
 	 * Child has been fully traversed.
 	 */
 	if (!child.isWalking()) {
-	    walkers.removeFirst();
+	    walkers.remove();
 	}
 
 	return e;
     }
-
 }

@@ -242,5 +242,4 @@ public interface EntityContainer {
      * @see Entity#asType(Class)
      */
     <T extends Entity> Stream<T> streamEntitiesOfType(Class<T> type);
-
 }

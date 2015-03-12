@@ -43,6 +43,14 @@ public class EntitySet extends AbstractSet<Entity> {
     private final EntityContainer delegateContainer;
 
     /**
+     * Creates an entity set with the default entity factory and empty delegate container.
+     *
+     */
+    public EntitySet() {
+	this(new DefaultEntityFactory());
+    }
+
+    /**
      * Creates an entity set with the supplied factory and empty delegate container.
      *
      * @param factory
@@ -342,5 +350,4 @@ public class EntitySet extends AbstractSet<Entity> {
     public <T extends Entity> Stream<T> streamOfType(final Class<T> type) {
 	return stream().filter(e -> e.isMarkedAsType(type)).map(e -> asType(e, type));
     }
-
 }

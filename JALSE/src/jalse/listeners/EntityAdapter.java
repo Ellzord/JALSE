@@ -15,5 +15,4 @@ public abstract class EntityAdapter implements EntityListener {
 
     @Override
     public void entityKilled(final EntityEvent event) {}
-
 }

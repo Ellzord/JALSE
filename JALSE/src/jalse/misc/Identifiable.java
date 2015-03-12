@@ -1,6 +1,5 @@
 package jalse.misc;
 
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -12,28 +11,13 @@ import java.util.function.Predicate;
  * @author Elliot Ford
  *
  */
-public interface Identifiable extends Comparable<Identifiable> {
+public interface Identifiable {
 
     /**
      * A hard-coded dummy ID that can be used to identify an Identifiable that does not need to be
      * unique (not advised). ID = {@code 00000000-0000-0000-0000-000000000000}.
      */
     UUID DUMMY_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
-    /**
-     * Identifiable object comparator.
-     */
-    Comparator<Identifiable> COMPARATOR = (a, b) -> a.compareTo(b);
-
-    /**
-     * Convenience method for creating a comparator of the correct type.
-     *
-     * @return Identifiable comparator.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T extends Identifiable> Comparator<T> comparator() {
-	return (Comparator<T>) COMPARATOR;
-    }
 
     /**
      * Checks if the two identifiable objects are equals using their unique identifiers.
@@ -109,16 +93,10 @@ public interface Identifiable extends Comparable<Identifiable> {
 	return obj.getClass().getSimpleName() + " [id=" + obj.getID() + "]";
     }
 
-    @Override
-    default int compareTo(final Identifiable o) {
-	return Objects.compare(this, o, COMPARATOR);
-    }
-
     /**
      * Gets the unique identifier.
      *
      * @return This objects identifier.
      */
     UUID getID();
-
 }

@@ -41,5 +41,4 @@ public interface EntityVisitor {
      * @return Result of the visit.
      */
     EntityVisitResult visit(Entity e);
-
 }

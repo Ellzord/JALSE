@@ -52,5 +52,4 @@ public class EntityEvent extends AbstractIdentifiable {
     public Entity getEntity() {
 	return entity;
     }
-
 }

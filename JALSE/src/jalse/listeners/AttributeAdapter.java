@@ -22,5 +22,4 @@ public abstract class AttributeAdapter<T extends Attribute> implements Attribute
 
     @Override
     public void attributeRemoved(final AttributeEvent<T> event) {}
-
 }

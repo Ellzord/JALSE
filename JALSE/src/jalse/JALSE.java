@@ -1,22 +1,21 @@
 package jalse;
 
-import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
-import static jalse.misc.JALSEExceptions.ENTITY_LIMIT_REACHED;
-import static jalse.misc.JALSEExceptions.throwRE;
-import jalse.actions.AbstractEngine;
 import jalse.actions.Action;
-import jalse.actions.Scheduler;
+import jalse.actions.ActionEngine;
+import jalse.actions.ActionScheduler;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
 import jalse.entities.EntityFactory;
 import jalse.entities.EntitySet;
+import jalse.listeners.EngineListener;
 import jalse.listeners.EntityListener;
+import jalse.misc.Engine;
 import jalse.tags.Tag;
 import jalse.tags.TagSet;
 import jalse.tags.Taggable;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -27,66 +26,14 @@ import java.util.stream.Stream;
 /**
  * JALSE is the overall container and engine for each simulation. It provides the ability to create
  * a number of {@link Entity} and execute {@link Action} at given intervals. Although {@link Entity}
- * can be created/killed no {@link Action} will run until {@link AbstractEngine#tick()} is called.
+ * can be created/killed no {@link Action} will run until {@link Engine#tick()} is called.
  *
  * @author Elliot Ford
  *
  */
-public class JALSE extends AbstractEngine implements EntityContainer, Taggable, Scheduler<JALSE> {
-
-    private class LimitingEntityFactory implements EntityFactory {
-
-	private final Set<UUID> entityIDs;
-
-	private LimitingEntityFactory() {
-	    entityIDs = new HashSet<>();
-	}
-
-	@Override
-	public synchronized boolean killEntity(final Entity e) {
-	    if (!(e instanceof DefaultEntity)) {
-		return false;
-	    }
-
-	    final DefaultEntity de = (DefaultEntity) e;
-
-	    if (!de.isAlive() || !entityIDs.remove(de.getID())) {
-		return false;
-	    }
-
-	    de.markAsDead();
-	    de.cancelTasks();
-	    de.setEngine(null);
-
-	    totalEntityCount--;
-
-	    de.killEntities();
-
-	    return true;
-	}
-
-	@Override
-	public synchronized Entity newEntity(final UUID id, final EntityContainer container) {
-	    if (totalEntityCount >= totalEntityLimit) {
-		throwRE(ENTITY_LIMIT_REACHED);
-	    }
-
-	    if (!entityIDs.add(id)) {
-		throwRE(ENTITY_ALREADY_ASSOCIATED);
-	    }
-
-	    final DefaultEntity e = new DefaultEntity(id, LimitingEntityFactory.this, container);
-	    e.setEngine(JALSE.this);
-	    e.markAsAlive();
-
-	    totalEntityCount++;
-
-	    return e;
-	}
-    }
+public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler<JALSE> {
 
     private volatile int totalEntityCount;
-    private final int totalEntityLimit;
 
     /**
      * Backing entity set for top level entities.
@@ -99,32 +46,50 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
     protected final TagSet tags;
 
     /**
-     * Creates a new instance of JALSE with the given qualities.
-     *
-     * @param tps
-     *            Number of ticks per second the engine should tick at.
-     * @param totalThreads
-     *            Total number of threads the engine should use.
-     * @param totalEntityLimit
-     *            Maximum number of entities.
-     * @throws IllegalArgumentException
-     *             All parameters must be above zero.
+     * Action engine to be supplied to entities.
      */
-    public JALSE(final int tps, final int totalThreads, final int totalEntityLimit) {
-	super(tps, totalThreads);
+    protected final ActionEngine engine;
 
-	if (totalEntityLimit <= 0) {
-	    throw new IllegalArgumentException();
-	}
+    /**
+     * Entity factory for creating/killing entities.
+     */
+    protected final EntityFactory factory;
 
-	this.totalEntityLimit = totalEntityLimit;
-	entities = new EntitySet(new LimitingEntityFactory(), this);
+    /**
+     * Creates a new instance of JALSE with the supplied engine and factory.
+     * 
+     * @param engine
+     *            Action engine to associate to factory and schedule actions.
+     * @param factory
+     *            Entity factory to create/kill child entities.
+     *
+     */
+    public JALSE(final ActionEngine engine, final EntityFactory factory) {
+	this.engine = Objects.requireNonNull(engine);
+	this.factory = Objects.requireNonNull(factory);
+	factory.setEngine(engine);
+	entities = new EntitySet(factory, this);
 	tags = new TagSet();
+    }
+
+    @Override
+    public boolean addEngineListener(final EngineListener listener) {
+	return engine.addEngineListener(listener);
     }
 
     @Override
     public boolean addEntityListener(final EntityListener listener) {
 	return entities.addListener(listener);
+    }
+
+    @Override
+    public boolean cancel(final UUID action) {
+	return engine.cancel(action);
+    }
+
+    @Override
+    public Set<? extends EngineListener> getEngineListeners() {
+	return engine.getEngineListeners();
     }
 
     @Override
@@ -157,31 +122,19 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
 	return entities.getListeners();
     }
 
-    /**
-     * Gets the first action run each tick.
-     *
-     * @return First action to be run or null if none set.
-     */
     @Override
-    @SuppressWarnings("unchecked")
-    public Action<JALSE> getFirstAction() {
-	return (Action<JALSE>) super.getFirstAction();
-    }
-
-    /**
-     * Gets the last action run each tick.
-     *
-     * @return Last action to be run or null if none set.
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Action<JALSE> getLastAction() {
-	return (Action<JALSE>) super.getLastAction();
+    public int getState() {
+	return engine.getState();
     }
 
     @Override
     public Set<Tag> getTags() {
 	return Collections.unmodifiableSet(tags);
+    }
+
+    @Override
+    public TickInfo getTickInfo() {
+	return engine.getTickInfo();
     }
 
     /**
@@ -193,37 +146,9 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
 	return totalEntityCount;
     }
 
-    /**
-     * Gets the total entity limit.
-     *
-     * @return Total entity limit JALSE was initialised with.
-     */
-    public int getTotalEntityLimit() {
-	return totalEntityLimit;
-    }
-
-    /**
-     * Gets whether the first action of tick a has been set.
-     *
-     * @return Whether first action has been set.
-     *
-     * @see #getFirstAction()
-     * @see #setFirstAction(Action)
-     */
-    public boolean hasFirstAction() {
-	return super.getFirstAction() != null;
-    }
-
-    /**
-     * Gets whether the last action of a tick has been set.
-     *
-     * @return Whether last action has been set.
-     *
-     * @see #getLastAction()
-     * @see #setLastAction(Action)
-     */
-    public boolean hasLastAction() {
-	return super.getLastAction() != null;
+    @Override
+    public boolean isActive(final UUID action) {
+	return engine.isActive(action);
     }
 
     @Override
@@ -257,6 +182,16 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
     }
 
     @Override
+    public void pause() {
+	engine.pause();
+    }
+
+    @Override
+    public boolean removeEngineListener(final EngineListener listener) {
+	return engine.removeEngineListener(listener);
+    }
+
+    @Override
     public boolean removeEntityListener(final EntityListener listener) {
 	return entities.removeListener(listener);
     }
@@ -264,7 +199,7 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
     @Override
     public UUID scheduleAction(final Action<JALSE> action, final long initialDelay, final long period,
 	    final TimeUnit unit) {
-	return scheduleAction(action, this, initialDelay, period, unit);
+	return engine.scheduleAction(action, this, initialDelay, period, unit);
     }
 
     /**
@@ -275,7 +210,7 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
      *
      */
     public void setFirstAction(final Action<JALSE> action) {
-	setFirstAction(action, this);
+	engine.setFirstAction(action, this);
     }
 
     /**
@@ -286,7 +221,12 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
      *
      */
     public void setLastAction(final Action<JALSE> action) {
-	setLastAction(action, this);
+	engine.setLastAction(action, this);
+    }
+
+    @Override
+    public void stop() {
+	engine.stop();
     }
 
     @Override
@@ -299,4 +239,8 @@ public class JALSE extends AbstractEngine implements EntityContainer, Taggable, 
 	return entities.streamOfType(type);
     }
 
+    @Override
+    public void tick() {
+	engine.tick();
+    }
 }

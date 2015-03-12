@@ -1,17 +1,12 @@
-package jalse;
+package jalse.entities;
 
 import static jalse.misc.JALSEExceptions.ENTITY_NOT_ALIVE;
 import static jalse.misc.JALSEExceptions.throwRE;
-import jalse.actions.AbstractEngine;
 import jalse.actions.Action;
-import jalse.actions.DefaultScheduler;
+import jalse.actions.ActionEngine;
+import jalse.actions.DefaultActionScheduler;
 import jalse.attributes.Attribute;
 import jalse.attributes.AttributeSet;
-import jalse.entities.Entities;
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
-import jalse.entities.EntityFactory;
-import jalse.entities.EntitySet;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.EntityListener;
 import jalse.misc.AbstractIdentifiable;
@@ -30,22 +25,60 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class DefaultEntity extends AbstractIdentifiable implements Entity {
+/**
+ * A simple yet fully featured {@link Entity} implementation.
+ * 
+ * @author Elliot Ford
+ * 
+ * @see DefaultEntityFactory
+ *
+ */
+public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
+    /**
+     * Parent entity container.
+     */
     protected final EntityContainer container;
+
+    /**
+     * Child entities.
+     */
     protected final EntitySet entities;
+
+    /**
+     * Associated attributes.
+     */
     protected final AttributeSet attributes;
-    protected final DefaultScheduler<Entity> scheduler;
+
+    /**
+     * Self action scheduler.
+     */
+    protected final DefaultActionScheduler<Entity> scheduler;
+
+    /**
+     * Current state information.
+     */
     protected final TagSet tags;
+
     private final AtomicBoolean alive;
 
-    DefaultEntity(final UUID id, final EntityFactory factory, final EntityContainer container) {
+    /**
+     * Creates a new default entity instance.
+     * 
+     * @param id
+     *            Entity ID.
+     * @param factory
+     *            Entity factory for creating/killing child entities.
+     * @param container
+     *            Parent entity container.
+     */
+    protected DefaultEntity(final UUID id, final EntityFactory factory, final EntityContainer container) {
 	super(id);
 	this.container = container;
 	entities = new EntitySet(factory, this);
 	attributes = new AttributeSet(this);
 	tags = new TagSet();
-	scheduler = new DefaultScheduler<>(this);
+	scheduler = new DefaultActionScheduler<>(this);
 	alive = new AtomicBoolean();
     }
 
@@ -119,7 +152,13 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 	return Optional.ofNullable(isAlive() ? container : null);
     }
 
-    protected Optional<AbstractEngine> getEngine() {
+    /**
+     * Gets the associated action engine.
+     *
+     * @return Optional containing the engine or else empty optional if there is no engine
+     *         associated.
+     */
+    protected Optional<ActionEngine> getEngine() {
 	return Optional.ofNullable(scheduler.getEngine());
     }
 
@@ -189,6 +228,11 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 	return entities.killEntity(id);
     }
 
+    /**
+     * Marks the entity as alive.
+     * 
+     * @return Whether the core was alive.
+     */
     protected boolean markAsAlive() {
 	if (container instanceof Identifiable) {
 	    tags.add(new Parent(Identifiable.getID(container)));
@@ -197,6 +241,11 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 	return alive.getAndSet(true);
     }
 
+    /**
+     * Marks the entity as dead.
+     * 
+     * @return Whether the core was alive.
+     */
     protected boolean markAsDead() {
 	tags.removeOfType(Parent.class);
 
@@ -280,8 +329,15 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 	return scheduler.scheduleAction(action, initialDelay, period, unit);
     }
 
-    protected Optional<AbstractEngine> setEngine(final AbstractEngine engine) {
-	final AbstractEngine previous = scheduler.getEngine();
+    /**
+     * Associates an engine to the entity for scheduling actions.
+     * 
+     * @param engine
+     *            Engine to set.
+     * @return Previously associated engine or empty optional if none was associated.
+     */
+    protected Optional<ActionEngine> setEngine(final ActionEngine engine) {
+	final ActionEngine previous = scheduler.getEngine();
 
 	scheduler.setEngine(engine);
 
@@ -312,5 +368,4 @@ class DefaultEntity extends AbstractIdentifiable implements Entity {
 
 	return !descendants.isEmpty();
     }
-
 }

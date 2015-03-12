@@ -53,5 +53,4 @@ public interface AttributeListener<T extends Attribute> {
      *            The attribute event for this trigger.
      */
     void attributeRemoved(AttributeEvent<T> event);
-
 }

@@ -95,5 +95,4 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
 	return delegate != null ? delegate.streamEntitiesOfType(type) : Stream.empty();
     }
-
 }

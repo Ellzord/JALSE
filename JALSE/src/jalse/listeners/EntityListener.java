@@ -29,5 +29,4 @@ public interface EntityListener {
      *            The entity event for this trigger.
      */
     void entityKilled(EntityEvent event);
-
 }

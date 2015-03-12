@@ -120,5 +120,4 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
     public synchronized int size() {
 	return tags.values().stream().mapToInt(s -> s.size()).sum();
     }
-
 }

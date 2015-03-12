@@ -1,29 +1,26 @@
 package jalse;
 
+import jalse.actions.ActionEngine;
+import jalse.actions.ContinuousActionEngine;
+import jalse.actions.ManualActionEngine;
+import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
 
 /**
- * A JALSE instance builder. Each method in this builder can be chained. Any parameter not supplied
- * will be defaulted.
+ * A {@link JALSE} instance builder where each method in this builder can be chained. This builder
+ * constructs a JALSE instance using the supplied parameters. It does this by creating the
+ * appropriate {@link ActionEngine} along with a {@link DefaultEntityFactory}. JALSE can still be
+ * created without this builder. Any parameter not supplied will be defaulted.
  *
  * @author Elliot Ford
  *
  * @see #DEFAULT_TOTAL_THREADS
  * @see #DEFAULT_TOTAL_ENTITY_LIMIT
+ * @see ContinuousActionEngine
+ * @see ManualActionEngine
  *
  */
 public class JALSEBuilder {
-
-    /**
-     * Creates a single threaded JALSE instance with default values.
-     *
-     * @param tps
-     *            Ticks per second.
-     * @return Single threaded JALSE with supplied TPS.
-     */
-    public static JALSE createSingleThreadedJALSE(final int tps) {
-	return new JALSE(tps, 1, DEFAULT_TOTAL_ENTITY_LIMIT);
-    }
 
     /**
      * The default total threads to be used by the engine for performing actions ({@code 10}).
@@ -35,9 +32,30 @@ public class JALSEBuilder {
      */
     public static final int DEFAULT_TOTAL_ENTITY_LIMIT = Integer.MAX_VALUE;
 
+    private static final int MANUAL_TPS = 0;
+
+    /**
+     * Builds a single threaded JALSE instance with default values.
+     *
+     * @param tps
+     *            Ticks per second.
+     * @return Single threaded JALSE with supplied TPS.
+     */
+    public static JALSE buildSingleThreadedJALSE(final int tps) {
+	return new JALSE(new ContinuousActionEngine(tps, DEFAULT_TOTAL_THREADS), new DefaultEntityFactory(
+		DEFAULT_TOTAL_ENTITY_LIMIT));
+    }
+
+    private int tps;
     private int totalEntityLimit;
     private int totalThreads;
-    private int tps;
+
+    /**
+     * Creates a new builder set to manual tick.
+     */
+    public JALSEBuilder() {
+	this(MANUAL_TPS);
+    }
 
     /**
      * Creates a new builder with the given ticks per second and default values.
@@ -52,12 +70,23 @@ public class JALSEBuilder {
     }
 
     /**
-     * Creates an instance of JALSE with the specified parameters.
+     * Builds an instance of JALSE with the supplied parameters.
      *
      * @return Newly created JALSE.
      */
-    public JALSE create() {
-	return new JALSE(tps, totalThreads, totalEntityLimit);
+    public JALSE build() {
+	final ActionEngine engine = tps > MANUAL_TPS ? new ContinuousActionEngine(tps, totalThreads)
+		: new ManualActionEngine();
+	return new JALSE(engine, new DefaultEntityFactory(totalEntityLimit));
+    }
+
+    /**
+     * Sets the engine to be a manual tick engine.
+     * 
+     * @return This builder.
+     */
+    public JALSEBuilder setManualTick() {
+	return setTPS(MANUAL_TPS);
     }
 
     /**
@@ -96,5 +125,4 @@ public class JALSEBuilder {
 	this.tps = tps;
 	return this;
     }
-
 }

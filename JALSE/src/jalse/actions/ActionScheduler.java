@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T>
  *            Actor type to schedule work against.
  */
-public interface Scheduler<T> {
+public interface ActionScheduler<T> {
 
     /**
      * Cancels the action with the given ID.
@@ -78,5 +78,4 @@ public interface Scheduler<T> {
     default UUID scheduleAction(final Action<T> action, final long initialDelay, final TimeUnit unit) {
 	return scheduleAction(action, initialDelay, 0L, unit);
     }
-
 }

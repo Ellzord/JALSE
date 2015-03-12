@@ -24,5 +24,4 @@ class AttributeListenerSupplier extends EntityAdapter {
 	}
 	e.addAttributeListener(supplier.get());
     }
-
 }

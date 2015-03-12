@@ -353,5 +353,4 @@ public final class Entities {
 
 	return result;
     }
-
 }

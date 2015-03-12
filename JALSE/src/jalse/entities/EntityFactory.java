@@ -1,14 +1,17 @@
 package jalse.entities;
 
+import jalse.actions.ActionEngine;
+
 import java.util.UUID;
 
 /**
- * An entity factory is used to give a level of control over the creation and killing of
- * {@link Entity}.
+ * An entity factory is used to control the creation and killing of {@link Entity} within the entire
+ * tree.
  *
  * @author Elliot Ford
  *
  * @see EntitySet
+ * @see DefaultEntityFactory
  *
  */
 public interface EntityFactory {
@@ -33,4 +36,11 @@ public interface EntityFactory {
      */
     Entity newEntity(UUID id, EntityContainer container);
 
+    /**
+     * Sets the engine to supply to new entities.
+     *
+     * @param engine
+     *            Action engine.
+     */
+    void setEngine(ActionEngine engine);
 }

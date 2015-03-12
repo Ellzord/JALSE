@@ -34,7 +34,7 @@ public interface AttributeContainer {
     boolean addAttributeListener(AttributeListener<? extends Attribute> listener);
 
     /**
-     * Adds the specified attribute to the collection.
+     * Adds the supplied attribute to the collection.
      *
      * @param attr
      *            Attribute to add.
@@ -172,5 +172,4 @@ public interface AttributeContainer {
      * @return Stream of all attributes.
      */
     Stream<? extends Attribute> streamAttributes();
-
 }

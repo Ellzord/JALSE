@@ -50,5 +50,4 @@ public abstract class AbstractIdentifiable implements Identifiable {
     public String toString() {
 	return Identifiable.toString(this);
     }
-
 }

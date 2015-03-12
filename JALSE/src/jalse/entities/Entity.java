@@ -1,6 +1,6 @@
 package jalse.entities;
 
-import jalse.actions.Scheduler;
+import jalse.actions.ActionScheduler;
 import jalse.attributes.Attribute;
 import jalse.attributes.AttributeContainer;
 import jalse.listeners.AttributeListener;
@@ -49,7 +49,7 @@ import java.util.Optional;
  * @see Entities#asType(Entity, Class)
  *
  */
-public interface Entity extends EntityContainer, Identifiable, AttributeContainer, Taggable, Scheduler<Entity> {
+public interface Entity extends EntityContainer, Identifiable, AttributeContainer, Taggable, ActionScheduler<Entity> {
 
     /**
      * Convenience method for wrapping the entity to a different type.
@@ -119,5 +119,4 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      *         children).
      */
     boolean unmarkAsType(Class<? extends Entity> type);
-
 }

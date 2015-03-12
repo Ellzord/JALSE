@@ -38,7 +38,7 @@ public abstract class NonAttributeWrapper<T> implements Attribute {
     private final T obj;
 
     /**
-     * Creates a new instance of non-attribute wrapper with the specified object.
+     * Creates a new instance of non-attribute wrapper with the supplied object.
      *
      * @param obj
      *            Object to wrap.

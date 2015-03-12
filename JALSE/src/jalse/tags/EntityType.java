@@ -49,5 +49,4 @@ public final class EntityType implements Tag {
     public String toString() {
 	return "EntityType [type=" + type.getName() + "]";
     }
-
 }

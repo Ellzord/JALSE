@@ -8,19 +8,19 @@ import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A {@link Scheduler} implementation that schedules all actions against the supplied actor. Weak
- * references are kept against all task IDs so they can be bulk cancelled (these are also cleared on
- * {@link AbstractEngine} change).
+ * A {@link ActionScheduler} implementation that schedules all actions against the supplied actor.
+ * Weak references are kept against all task IDs so they can be bulk cancelled (these are also
+ * cleared on {@link ActionEngine} change).
  *
  * @author Elliot Ford
  *
  * @param <T>
  *            Actor type.
  */
-public class DefaultScheduler<T> implements Scheduler<T> {
+public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 
     private final T actor;
-    private AbstractEngine engine;
+    private ActionEngine engine;
     private final Set<UUID> tasks;
 
     /**
@@ -29,7 +29,7 @@ public class DefaultScheduler<T> implements Scheduler<T> {
      * @param actor
      *            Actor to schedule actions against.
      */
-    public DefaultScheduler(final T actor) {
+    public DefaultActionScheduler(final T actor) {
 	this.actor = Objects.requireNonNull(actor);
 	engine = null;
 	tasks = Collections.newSetFromMap(new WeakHashMap<>());
@@ -66,7 +66,7 @@ public class DefaultScheduler<T> implements Scheduler<T> {
      *
      * @return Associated engine or null if it has not been set.
      */
-    public AbstractEngine getEngine() {
+    public ActionEngine getEngine() {
 	return engine;
     }
 
@@ -90,7 +90,7 @@ public class DefaultScheduler<T> implements Scheduler<T> {
      * @param engine
      *            Engine to schedule actions against.
      */
-    public void setEngine(final AbstractEngine engine) {
+    public void setEngine(final ActionEngine engine) {
 	if (!Objects.equals(this.engine, engine)) {
 	    synchronized (tasks) {
 		tasks.clear();
@@ -98,5 +98,4 @@ public class DefaultScheduler<T> implements Scheduler<T> {
 	}
 	this.engine = engine;
     }
-
 }

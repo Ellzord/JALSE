@@ -1,7 +1,7 @@
 package jalse.misc;
 
 import jalse.JALSE;
-import jalse.actions.AbstractEngine;
+import jalse.actions.ContinuousActionEngine;
 import jalse.attributes.Attribute;
 import jalse.attributes.AttributeSet;
 import jalse.entities.Entities;
@@ -31,7 +31,7 @@ public final class JALSEExceptions {
     /**
      * Runtime exception supplier for attempting to change the running state of a stopped engine.
      *
-     * @see AbstractEngine
+     * @see ContinuousActionEngine
      */
     public static final Supplier<RuntimeException> ENGINE_SHUTDOWN = () -> new IllegalStateException(
 	    "Engine has already been stopped");
@@ -86,5 +86,4 @@ public final class JALSEExceptions {
     private JALSEExceptions() {
 	throw new UnsupportedOperationException();
     }
-
 }

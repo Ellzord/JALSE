@@ -59,5 +59,4 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
     public boolean remove(final Object o) {
 	return super.remove(Objects.requireNonNull(o));
     }
-
 }

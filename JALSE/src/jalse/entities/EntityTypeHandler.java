@@ -19,6 +19,25 @@ import java.util.stream.Stream;
 
 class EntityTypeHandler implements InvocationHandler {
 
+    private static final Logger logger = Logger.getLogger(EntityTypeHandler.class.getName());
+
+    private static final TypeParameterResolver OPTIONAL_RESOLVER = new TypeParameterResolver(getTypeParameter(
+	    Optional.class, "T"));
+
+    private static final TypeParameterResolver SET_RESOLVER = new TypeParameterResolver(
+	    getTypeParameter(Set.class, "E"));
+
+    private static final TypeParameterResolver STREAM_RESOLVER = new TypeParameterResolver(getTypeParameter(
+	    Stream.class, "T"));
+
+    @SuppressWarnings("serial")
+    private static Set<Class<?>> VALID_ENTITY_TYPES = new CopyOnWriteArraySet<Class<?>>() {
+
+	{
+	    add(Entity.class);
+	}
+    };
+
     public static void validateType(final Class<?> clazz) {
 	if (!Entity.class.isAssignableFrom(clazz)) {
 	    throwRE(INVALID_ENTITY_TYPE);
@@ -176,25 +195,6 @@ class EntityTypeHandler implements InvocationHandler {
 	}
     }
 
-    private static final Logger logger = Logger.getLogger(EntityTypeHandler.class.getName());
-
-    private static final TypeParameterResolver OPTIONAL_RESOLVER = new TypeParameterResolver(getTypeParameter(
-	    Optional.class, "T"));
-
-    private static final TypeParameterResolver SET_RESOLVER = new TypeParameterResolver(
-	    getTypeParameter(Set.class, "E"));
-
-    private static final TypeParameterResolver STREAM_RESOLVER = new TypeParameterResolver(getTypeParameter(
-	    Stream.class, "T"));
-
-    @SuppressWarnings("serial")
-    private static Set<Class<?>> VALID_ENTITY_TYPES = new CopyOnWriteArraySet<Class<?>>() {
-
-	{
-	    add(Entity.class);
-	}
-    };
-
     private final Entity entity;
 
     EntityTypeHandler(final Entity Entity) {
@@ -255,5 +255,4 @@ class EntityTypeHandler implements InvocationHandler {
 
 	throw new UnsupportedOperationException();
     }
-
 }

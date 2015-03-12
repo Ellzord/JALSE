@@ -88,7 +88,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
     }
 
     /**
-     * Adds the specified attribute to the collection.
+     * Adds the supplied attribute to the collection.
      *
      * @param attr
      *            Attribute to add.
@@ -292,5 +292,4 @@ public class AttributeSet extends AbstractSet<Attribute> {
     public int size() {
 	return attributes.size();
     }
-
 }

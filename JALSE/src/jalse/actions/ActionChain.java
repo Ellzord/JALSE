@@ -2,6 +2,7 @@ package jalse.actions;
 
 import jalse.JALSE;
 import jalse.entities.EntityContainer;
+import jalse.misc.Engine.TickInfo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +40,7 @@ public final class ActionChain<T> implements Action<T> {
     private final List<Action<T>> chain;
 
     /**
-     * Creates a new action chain with the specified actions.
+     * Creates a new action chain with the supplied actions.
      *
      * @param chain
      *            List of actions to use as the chain.
@@ -63,5 +64,4 @@ public final class ActionChain<T> implements Action<T> {
     public int size() {
 	return chain.size();
     }
-
 }

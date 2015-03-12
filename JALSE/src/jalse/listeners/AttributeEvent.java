@@ -90,5 +90,4 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
     public boolean isReplacement() {
 	return previousAttr != null;
     }
-
 }

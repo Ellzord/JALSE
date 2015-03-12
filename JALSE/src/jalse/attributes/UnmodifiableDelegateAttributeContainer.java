@@ -84,5 +84,4 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     public Stream<? extends Attribute> streamAttributes() {
 	return delegate != null ? delegate.streamAttributes() : Stream.empty();
     }
-
 }

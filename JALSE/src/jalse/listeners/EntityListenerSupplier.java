@@ -23,5 +23,4 @@ class EntityListenerSupplier extends EntityAdapter {
 	}
 	e.addEntityListener(supplier.get());
     }
-
 }

@@ -19,5 +19,4 @@ public final class Parent extends AbstractIdentifiable implements Tag {
     public Parent(final UUID id) {
 	super(id);
     }
-
 }
