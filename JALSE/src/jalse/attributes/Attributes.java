@@ -65,6 +65,17 @@ public final class Attributes {
     }
 
     /**
+     * Wraps the attribute set as an attribute container.
+     *
+     * @param attributes
+     *            Attribute set.
+     * @return Attribute container.
+     */
+    public static AttributeContainer toAttributeContainer(final AttributeSet attributes) {
+	return new AttributeSetContainer(attributes);
+    }
+
+    /**
      * Creates an immutable read-only delegate attribute container for the supplied container.
      *
      * @param container

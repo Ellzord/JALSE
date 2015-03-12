@@ -208,6 +208,17 @@ public final class Entities {
     }
 
     /**
+     * Wraps the entity set as an entity container.
+     *
+     * @param entities
+     *            Entity set.
+     * @return Entity container.
+     */
+    public static EntityContainer toEntityContainer(final EntitySet entities) {
+	return new EntitySetContainer(entities);
+    }
+
+    /**
      * Creates an immutable read-only delegate entity container for the supplied container.
      *
      * @param container

@@ -14,7 +14,7 @@ import java.util.UUID;
  * A {@link EntityFactory} implementation that creates/kills {@link DefaultEntity}. Default entity
  * factory can have a total entity limit set. When this factory kills an entity it will kill the
  * entity tree under it (can only kill entities his factory has created).
- * 
+ *
  * @author Elliot Ford
  *
  */
@@ -26,8 +26,15 @@ public class DefaultEntityFactory implements EntityFactory {
     private volatile int entityCount;
 
     /**
+     * Creates a default entity factory with no entity limit.
+     */
+    public DefaultEntityFactory() {
+	this(Integer.MAX_VALUE);
+    }
+
+    /**
      * Creates a default entity factory with the supplied entity limit.
-     * 
+     *
      * @param entityLimit
      *            Maximum entity limit.
      */
@@ -42,15 +49,8 @@ public class DefaultEntityFactory implements EntityFactory {
     }
 
     /**
-     * Creates a default entity factory with no entity limit.
-     */
-    public DefaultEntityFactory() {
-	this(Integer.MAX_VALUE);
-    }
-
-    /**
      * Gets the associated engine.
-     * 
+     *
      * @return Action engine.
      */
     public synchronized ActionEngine getEngine() {
@@ -59,7 +59,7 @@ public class DefaultEntityFactory implements EntityFactory {
 
     /**
      * Gets the current total entity count.
-     * 
+     *
      * @return Entity count.
      */
     public int getEntityCount() {
@@ -68,7 +68,7 @@ public class DefaultEntityFactory implements EntityFactory {
 
     /**
      * Gets the total entity limit.
-     * 
+     *
      * @return Entity limit.
      */
     public int getEntityLimit() {

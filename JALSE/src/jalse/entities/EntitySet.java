@@ -43,21 +43,11 @@ public class EntitySet extends AbstractSet<Entity> {
     private final EntityContainer delegateContainer;
 
     /**
-     * Creates an entity set with the default entity factory and empty delegate container.
+     * Creates an entity set with the default entity factory and no delegate container.
      *
      */
     public EntitySet() {
-	this(new DefaultEntityFactory());
-    }
-
-    /**
-     * Creates an entity set with the supplied factory and empty delegate container.
-     *
-     * @param factory
-     *            Entity creation/death factory.
-     */
-    public EntitySet(final EntityFactory factory) {
-	this(factory, Entities.emptyEntityContainer());
+	this(null, null);
     }
 
     /**
@@ -69,8 +59,8 @@ public class EntitySet extends AbstractSet<Entity> {
      *            Delegate container for events and entity creation.
      */
     public EntitySet(final EntityFactory factory, final EntityContainer delegateContainer) {
-	this.factory = Objects.requireNonNull(factory);
-	this.delegateContainer = Objects.requireNonNull(delegateContainer);
+	this.factory = factory != null ? factory : new DefaultEntityFactory();
+	this.delegateContainer = delegateContainer != null ? delegateContainer : Entities.toEntityContainer(this);
 	entities = new ConcurrentHashMap<>();
 	entityListeners = Listeners.createEntityListenerSet();
     }

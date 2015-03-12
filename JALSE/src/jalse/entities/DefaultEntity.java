@@ -27,9 +27,9 @@ import java.util.stream.Stream;
 
 /**
  * A simple yet fully featured {@link Entity} implementation.
- * 
+ *
  * @author Elliot Ford
- * 
+ *
  * @see DefaultEntityFactory
  *
  */
@@ -64,7 +64,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     /**
      * Creates a new default entity instance.
-     * 
+     *
      * @param id
      *            Entity ID.
      * @param factory
@@ -230,7 +230,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     /**
      * Marks the entity as alive.
-     * 
+     *
      * @return Whether the core was alive.
      */
     protected boolean markAsAlive() {
@@ -243,7 +243,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     /**
      * Marks the entity as dead.
-     * 
+     *
      * @return Whether the core was alive.
      */
     protected boolean markAsDead() {
@@ -331,7 +331,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     /**
      * Associates an engine to the entity for scheduling actions.
-     * 
+     *
      * @param engine
      *            Engine to set.
      * @return Previously associated engine or empty optional if none was associated.

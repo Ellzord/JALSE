@@ -42,10 +42,10 @@ public class AttributeSet extends AbstractSet<Attribute> {
     private final AttributeContainer delegateContainer;
 
     /**
-     * Creates a new AttributeSet with an empty delegate container.
+     * Creates a new AttributeSet with no delegate container.
      */
     public AttributeSet() {
-	this(Attributes.emptyAttributeContainer());
+	this(null);
     }
 
     /**
@@ -55,7 +55,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *            Delegate container for events.
      */
     public AttributeSet(final AttributeContainer delegateContainer) {
-	this.delegateContainer = Objects.requireNonNull(delegateContainer);
+	this.delegateContainer = delegateContainer != null ? delegateContainer : Attributes.toAttributeContainer(this);
 	attributes = new ConcurrentHashMap<>();
 	attributeListeners = new HashMap<>();
     }
