@@ -1,10 +1,13 @@
 package jalse.listeners;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Provides a thread-safe way to store and process listeners. Listener set takes in the defining
@@ -17,6 +20,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
  *            Listener {@code interface}.
  */
 public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements InvocationHandler {
+
+    private static final Logger logger = Logger.getLogger(ListenerSet.class.getName());
 
     private static final long serialVersionUID = 1437345792255852480L;
 
@@ -50,7 +55,11 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
     @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
 	for (final T t : this) {
-	    method.invoke(t, args);
+	    try {
+		method.invoke(t, args);
+	    } catch (InvocationTargetException e) {
+		logger.log(Level.WARNING, "Error in listener", e.getCause());
+	    }
 	}
 	return null;
     }
