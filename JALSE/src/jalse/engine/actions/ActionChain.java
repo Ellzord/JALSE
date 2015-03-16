@@ -1,7 +1,6 @@
 package jalse.engine.actions;
 
 import jalse.JALSE;
-import jalse.entities.EntityContainer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +31,7 @@ public class ActionChain<T> implements Action<T> {
      * @return The newly created action chain.
      */
     @SafeVarargs
-    public static <S extends EntityContainer> ActionChain<S> newChain(final Action<S>... actions) {
+    public static <S> ActionChain<S> newChain(final Action<S>... actions) {
 	return new ActionChain<>(Arrays.asList(actions));
     }
 
