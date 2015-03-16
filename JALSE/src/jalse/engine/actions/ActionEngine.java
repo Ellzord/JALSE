@@ -1,6 +1,6 @@
-package jalse.actions;
+package jalse.engine.actions;
 
-import jalse.misc.Engine;
+import jalse.engine.Engine;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Elliot Ford
  *
- * @see Action#perform(Object, TickInfo)
+ * @see Action#perform(ActionContext)
+ *
  * @see ContinuousActionEngine
  * @see ManualActionEngine
  *

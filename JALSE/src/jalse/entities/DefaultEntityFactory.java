@@ -3,7 +3,7 @@ package jalse.entities;
 import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
 import static jalse.misc.JALSEExceptions.ENTITY_LIMIT_REACHED;
 import static jalse.misc.JALSEExceptions.throwRE;
-import jalse.actions.ActionEngine;
+import jalse.engine.actions.ActionEngine;
 
 import java.util.HashSet;
 import java.util.Objects;

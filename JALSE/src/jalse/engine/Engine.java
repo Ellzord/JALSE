@@ -1,87 +1,21 @@
-package jalse.misc;
+package jalse.engine;
 
 import jalse.listeners.EngineListener;
+import jalse.misc.JALSEExceptions;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
  * A abstract engine and tick state definition. This outlines the different operational states and
- * controls available for managing an engine. {@link TickInfo} defines tick state information for
- * each cycle. Once an engine has been stopped it cannot be used after.
+ * controls available for managing an engine. Once an engine has been stopped it cannot be used
+ * after.
  *
  * @author Elliot Ford
  *
- * @see #PAUSED
- * @see #IN_TICK
- * @see #IN_WAIT
- * @see #STOPPED
+ * @see EngineState
  */
 public interface Engine {
-
-    /**
-     * This represents the current tick state of the engine.
-     *
-     * @author Elliot Ford
-     *
-     */
-    public interface TickInfo {
-
-	/**
-	 * Gets the current ticks per second the engine is achieving.
-	 *
-	 * @return Current ticks per second.
-	 */
-	int getCurrentTPS();
-
-	/**
-	 * Gets the delta between the previous tick.
-	 *
-	 * @return Time elapsed between the last tick.
-	 */
-	long getDelta();
-
-	/**
-	 * Gets the ticks per second interval in nanoseconds.
-	 *
-	 * @return TPS interval.
-	 */
-	long getIntervalAsNanos();
-
-	/**
-	 * Gets the current tick.
-	 *
-	 * @return Current tick.
-	 */
-	int getTick();
-
-	/**
-	 * Gets ticks per second.
-	 *
-	 * @return Ideal ticks per second.
-	 */
-	int getTPS();
-    }
-
-    /**
-     * The engine is not ticking and has been shutdown.
-     */
-    int STOPPED = 0;
-
-    /**
-     * The engine is ready to be ticked.
-     */
-    int PAUSED = 1;
-
-    /**
-     * The engine is currently in tick (processing).
-     */
-    int IN_TICK = 2;
-
-    /**
-     * The engine is currently waiting.
-     */
-    int IN_WAIT = 3;
 
     /**
      * Adds an engine listener.
@@ -91,6 +25,13 @@ public interface Engine {
      * @return Whether the engine did not already contain this listener.
      */
     boolean addEngineListener(EngineListener listener);
+
+    /**
+     * Bindings for this engine.
+     *
+     * @return Engine bindings.
+     */
+    EngineBindings getBindings();
 
     /**
      * Gets all the listeners for the engine.
@@ -105,7 +46,7 @@ public interface Engine {
      * @return Current state.
      *
      */
-    int getState();
+    EngineState getState();
 
     /**
      * Gets the current TickInfo.
@@ -136,6 +77,21 @@ public interface Engine {
     void pause();
 
     /**
+     * Puts a key-value pair in the engine bindings.
+     *
+     * @param key
+     *            Key.
+     * @param value
+     *            Value.
+     * @return Previously assigned value for the key.
+     *
+     * @see EngineBindings#put(String, Object)
+     */
+    default <T> T putInBindings(final String key, final T value) {
+	return getBindings().put(key, value);
+    }
+
+    /**
      * Removes an engine listener.
      *
      * @param listener
@@ -143,6 +99,19 @@ public interface Engine {
      * @return Whether the engine contained this listener.
      */
     boolean removeEngineListener(EngineListener listener);
+
+    /**
+     * Removes a key-value pair from the engine bindings.
+     *
+     * @param key
+     *            Key.
+     * @return The previously assigned value for this key.
+     *
+     * @see EngineBindings#remove(String)
+     */
+    default <T> T removeFromBindings(final String key) {
+	return getBindings().remove(key);
+    }
 
     /**
      * Permanently stops the engine. All work that has not yet been executed will be cancelled and

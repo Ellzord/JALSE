@@ -1,4 +1,4 @@
-package jalse.actions;
+package jalse.engine.actions;
 
 import java.util.UUID;
 import java.util.concurrent.Executor;

@@ -1,15 +1,18 @@
 package jalse;
 
-import jalse.actions.Action;
-import jalse.actions.ActionEngine;
-import jalse.actions.ActionScheduler;
+import jalse.engine.Engine;
+import jalse.engine.EngineBindings;
+import jalse.engine.EngineState;
+import jalse.engine.TickInfo;
+import jalse.engine.actions.Action;
+import jalse.engine.actions.ActionEngine;
+import jalse.engine.actions.ActionScheduler;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
 import jalse.entities.EntityFactory;
 import jalse.entities.EntitySet;
 import jalse.listeners.EngineListener;
 import jalse.listeners.EntityListener;
-import jalse.misc.Engine;
 import jalse.tags.Tag;
 import jalse.tags.TagSet;
 import jalse.tags.Taggable;
@@ -57,7 +60,7 @@ public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler
 
     /**
      * Creates a new instance of JALSE with the supplied engine and factory.
-     * 
+     *
      * @param engine
      *            Action engine to associate to factory and schedule actions.
      * @param factory
@@ -85,6 +88,11 @@ public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler
     @Override
     public boolean cancel(final UUID action) {
 	return engine.cancel(action);
+    }
+
+    @Override
+    public EngineBindings getBindings() {
+	return engine.getBindings();
     }
 
     @Override
@@ -123,7 +131,7 @@ public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler
     }
 
     @Override
-    public int getState() {
+    public EngineState getState() {
 	return engine.getState();
     }
 

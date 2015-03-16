@@ -1,8 +1,7 @@
-package jalse.actions;
+package jalse.engine.actions;
 
 import jalse.JALSE;
 import jalse.entities.EntityContainer;
-import jalse.misc.Engine.TickInfo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -50,9 +49,9 @@ public class ActionChain<T> implements Action<T> {
     }
 
     @Override
-    public void perform(final T actor, final TickInfo tick) {
+    public void perform(final ActionContext<T> context) {
 	for (final Action<T> action : chain) {
-	    action.perform(actor, tick);
+	    action.perform(context);
 	}
     }
 

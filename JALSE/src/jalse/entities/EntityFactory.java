@@ -1,6 +1,6 @@
 package jalse.entities;
 
-import jalse.actions.ActionEngine;
+import jalse.engine.actions.ActionEngine;
 
 import java.util.UUID;
 

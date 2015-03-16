@@ -2,11 +2,11 @@ package jalse.entities;
 
 import static jalse.misc.JALSEExceptions.ENTITY_NOT_ALIVE;
 import static jalse.misc.JALSEExceptions.throwRE;
-import jalse.actions.Action;
-import jalse.actions.ActionEngine;
-import jalse.actions.DefaultActionScheduler;
 import jalse.attributes.Attribute;
 import jalse.attributes.AttributeSet;
+import jalse.engine.actions.Action;
+import jalse.engine.actions.ActionEngine;
+import jalse.engine.actions.DefaultActionScheduler;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.EntityListener;
 import jalse.misc.AbstractIdentifiable;

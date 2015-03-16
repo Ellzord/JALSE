@@ -1,4 +1,4 @@
-package jalse.actions;
+package jalse.engine.actions;
 
 import java.util.Collections;
 import java.util.Objects;

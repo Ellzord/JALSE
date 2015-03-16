@@ -1,8 +1,8 @@
 package jalse;
 
-import jalse.actions.ActionEngine;
-import jalse.actions.ContinuousActionEngine;
-import jalse.actions.ManualActionEngine;
+import jalse.engine.actions.ActionEngine;
+import jalse.engine.actions.ContinuousActionEngine;
+import jalse.engine.actions.ManualActionEngine;
 import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
 

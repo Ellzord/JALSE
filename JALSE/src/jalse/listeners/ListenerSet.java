@@ -57,7 +57,7 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
 	for (final T t : this) {
 	    try {
 		method.invoke(t, args);
-	    } catch (InvocationTargetException e) {
+	    } catch (final InvocationTargetException e) {
 		logger.log(Level.WARNING, "Error in listener", e.getCause());
 	    }
 	}

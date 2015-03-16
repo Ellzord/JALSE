@@ -1,17 +1,12 @@
 package jalse.listeners;
 
-import jalse.actions.ContinuousActionEngine;
-import jalse.actions.ManualActionEngine;
-import jalse.misc.Engine;
+import jalse.engine.Engine;
+import jalse.engine.EngineState;
+import jalse.engine.actions.ContinuousActionEngine;
+import jalse.engine.actions.ManualActionEngine;
 
 /**
- * Listener for {@link Engine} operational state changes.<br>
- * <br>
- * States include:<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;{@link Engine#PAUSED}<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;{@link Engine#IN_TICK}<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;{@link Engine#IN_WAIT}<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;{@link Engine#STOPPED}<br>
+ * Listener for {@link Engine} operational state changes ({@link EngineState}).
  *
  * @author Elliot Ford
  *
@@ -30,5 +25,5 @@ public interface EngineListener {
      * @param oldState
      *            Previous state.
      */
-    void stateChanged(int newState, int oldState);
+    void stateChanged(EngineState newState, EngineState oldState);
 }

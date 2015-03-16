@@ -1,9 +1,9 @@
 package jalse.misc;
 
 import jalse.JALSE;
-import jalse.actions.ContinuousActionEngine;
 import jalse.attributes.Attribute;
 import jalse.attributes.AttributeSet;
+import jalse.engine.actions.ContinuousActionEngine;
 import jalse.entities.Entities;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;

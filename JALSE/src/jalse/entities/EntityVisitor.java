@@ -18,19 +18,40 @@ package jalse.entities;
  *
  * @author Elliot Ford
  *
+ * @see Entities
+ *
  */
 @FunctionalInterface
 public interface EntityVisitor {
 
     /**
-     * Different results for visiting an {@link Entity} (will affect entity walking).
+     * Result to be returned when visiting an {@link Entity}. The result may alter how the walker
+     * processes the rest of the tree.
      *
      * @author Elliot Ford
      *
      */
-    enum EntityVisitResult {
+    public enum EntityVisitResult {
 
-	CONTINUE, EXIT, IGNORE_CHILDREN, IGNORE_SIBLINGS
+	/**
+	 * Continue to process this sub-tree.
+	 */
+	CONTINUE,
+
+	/**
+	 * Exit all sub-trees.
+	 */
+	EXIT,
+
+	/**
+	 * Make this member a leaf.
+	 */
+	IGNORE_CHILDREN,
+
+	/**
+	 * Only continue this sub-tree.
+	 */
+	IGNORE_SIBLINGS
     }
 
     /**
