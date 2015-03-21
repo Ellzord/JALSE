@@ -128,6 +128,25 @@ class EntityTypeHandler implements InvocationHandler {
 		}
 
 		/*
+		 * getOrNullAttributeOfType(Class)
+		 */
+		if (!hasParams && hasReturnType && Attribute.class.isAssignableFrom(toClass(returnType))) {
+		    /*
+		     * Must be subclass of Attribute.
+		     */
+		    if (Attribute.class.equals(returnType)) {
+			throwRE(INVALID_ENTITY_TYPE);
+		    }
+
+		    if (!gets.add(returnType)) {
+			logger.warning(String.format("Entity type (%s) has multiple get definitions for Atribute (%s)",
+				clazz.getTypeName(), returnType.getTypeName()));
+		    }
+
+		    continue;
+		}
+
+		/*
 		 * streamEntitiesOfType(Class)
 		 */
 		if (!hasParams && hasReturnType && Stream.class.equals(toClass(returnType))) {
@@ -251,6 +270,13 @@ class EntityTypeHandler implements InvocationHandler {
 	 */
 	if (hasReturnType && Optional.class.equals(toClass(returnType))) {
 	    return entity.getAttributeOfType((Class<? extends Attribute>) OPTIONAL_RESOLVER.resolve(returnType));
+	}
+
+	/*
+	 * getOrNullAttributeOfType(Class)
+	 */
+	if (hasReturnType && Attribute.class.isAssignableFrom(toClass(returnType))) {
+	    return entity.getOrNullAttributeOfType((Class<? extends Attribute>) returnType);
 	}
 
 	throw new UnsupportedOperationException();
