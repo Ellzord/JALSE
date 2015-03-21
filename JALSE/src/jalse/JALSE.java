@@ -3,6 +3,8 @@ package jalse;
 import static jalse.actions.Actions.requireNotStopped;
 import jalse.actions.Action;
 import jalse.actions.ActionEngine;
+import jalse.actions.ActionScheduler;
+import jalse.actions.DefaultActionScheduler;
 import jalse.actions.MutableActionBindings;
 import jalse.actions.MutableActionContext;
 import jalse.entities.Entities;
@@ -20,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,7 +39,7 @@ import java.util.stream.Stream;
  * @see EntityFactory
  *
  */
-public class JALSE implements ActionEngine, EntityContainer, Taggable {
+public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContainer, Taggable {
 
     /**
      * Backing entity set for top level entities.
@@ -52,6 +55,11 @@ public class JALSE implements ActionEngine, EntityContainer, Taggable {
      * Action engine to be supplied to entities.
      */
     protected final ActionEngine engine;
+
+    /**
+     * Self action scheduler.
+     */
+    protected final DefaultActionScheduler<JALSE> scheduler;
 
     /**
      * Entity factory for creating/killing entities.
@@ -71,6 +79,8 @@ public class JALSE implements ActionEngine, EntityContainer, Taggable {
 	this.engine = requireNotStopped(engine);
 	this.factory = Objects.requireNonNull(factory);
 	factory.setEngine(engine);
+	scheduler = new DefaultActionScheduler<>(this);
+	scheduler.setEngine(engine);
 	entities = new EntitySet(factory, this);
 	tags = new TagSet();
     }
@@ -78,6 +88,11 @@ public class JALSE implements ActionEngine, EntityContainer, Taggable {
     @Override
     public boolean addEntityListener(final EntityListener listener) {
 	return entities.addListener(listener);
+    }
+
+    @Override
+    public void cancelAllScheduledForActor() {
+	scheduler.cancelAllScheduledForActor();
     }
 
     @Override
@@ -187,6 +202,12 @@ public class JALSE implements ActionEngine, EntityContainer, Taggable {
     @Override
     public void resume() {
 	engine.resume();
+    }
+
+    @Override
+    public MutableActionContext<JALSE> scheduleForActor(final Action<JALSE> action, final long initialDelay,
+	    final long period, final TimeUnit unit) {
+	return scheduler.scheduleForActor(action, initialDelay, period, unit);
     }
 
     @Override

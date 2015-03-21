@@ -42,7 +42,8 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     /**
      * Cancel all tasks scheduled to the current engine for the actor by this scheduler.
      */
-    public void cancelActions() {
+    @Override
+    public void cancelAllScheduledForActor() {
 	synchronized (contexts) {
 	    contexts.forEach(c -> c.cancel());
 	    contexts.clear();
@@ -68,7 +69,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     }
 
     @Override
-    public MutableActionContext<T> scheduleAction(final Action<T> action, final long initialDelay, final long period,
+    public MutableActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
 	    final TimeUnit unit) {
 	if (engine.isStopped()) {
 	    return Actions.emptyActionContext();

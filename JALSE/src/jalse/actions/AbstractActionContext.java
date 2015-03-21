@@ -1,5 +1,6 @@
 package jalse.actions;
 
+import static jalse.actions.Actions.emptyActionBindings;
 import static jalse.actions.Actions.requireNotStopped;
 
 import java.util.Map;
@@ -34,7 +35,7 @@ public abstract class AbstractActionContext<T> implements MutableActionContext<T
      *            Action this context is for.
      */
     protected AbstractActionContext(final ActionEngine engine, final Action<T> action) {
-	this(engine, action, null);
+	this(engine, action, emptyActionBindings());
     }
 
     /**
@@ -91,6 +92,11 @@ public abstract class AbstractActionContext<T> implements MutableActionContext<T
     @Override
     public <S> S put(final String key, final S value) {
 	return bindings.put(key, value);
+    }
+
+    @Override
+    public void putAll(final Map<String, ?> map) {
+	bindings.putAll(map);
     }
 
     @Override

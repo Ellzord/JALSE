@@ -9,11 +9,11 @@ package jalse.actions;
  * @author Elliot Ford
  *
  * @param <T>
- *            Type of actor to be supplied (can be {@code ?} for no actors).
+ *            Type of actor to be supplied (can be {@code ?} for no actor).
  *
  * @see ActionEngine#createContext(Action)
  * @see ActionEngine#schedule(Action, Object)
- * @see ActionScheduler#scheduleAction(Action, long, long, java.util.concurrent.TimeUnit)
+ * @see ActionScheduler#scheduleForActor(Action, long, long, java.util.concurrent.TimeUnit)
  */
 @FunctionalInterface
 public interface Action<T> {
@@ -23,8 +23,10 @@ public interface Action<T> {
      *
      * @param context
      *            Current action context.
+     * @throws InterruptedException
+     *             Can throw interrupted when awaiting other actions.
      *
      * @see Runnable#run()
      */
-    void perform(ActionContext<T> context);
+    void perform(ActionContext<T> context) throws InterruptedException;
 }

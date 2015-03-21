@@ -25,10 +25,10 @@ public class DefaultActionBindings implements MutableActionBindings {
     private final Map<String, Object> bindings;
 
     /**
-     * Creates a new instance of DefaultActionBindings with no bound values.
+     * Creates a new instance of DefaultActionBindings.
      */
     public DefaultActionBindings() {
-	this((Map<String, ?>) null);
+	bindings = new ConcurrentHashMap<>();
     }
 
     /**
@@ -42,16 +42,15 @@ public class DefaultActionBindings implements MutableActionBindings {
     }
 
     /**
-     * Creates a new instance of AbstractEngineBindings with the supplied key-value pairs.
+     * Creates a new instance of DefaultActionBindings with the supplied key-value pairs.
      *
-     * @param bindings
-     *            Key-value pairs to bind (can be {@code null}).
+     * @param map
+     *            Key-value pairs to add.
+     *
      */
-    protected DefaultActionBindings(final Map<String, ?> bindings) {
-	this.bindings = new ConcurrentHashMap<>();
-	if (bindings != null) {
-	    this.bindings.putAll(bindings);
-	}
+    public DefaultActionBindings(final Map<String, ?> map) {
+	this();
+	putAll(map);
     }
 
     @Override
@@ -64,6 +63,13 @@ public class DefaultActionBindings implements MutableActionBindings {
     public <T> T put(final String key, final T value) {
 	validateKey(key);
 	return (T) bindings.put(key, Objects.requireNonNull(value));
+    }
+
+    @Override
+    public void putAll(final Map<String, ?> map) {
+	map.entrySet().forEach(e -> {
+	    put(e.getKey(), e.getValue());
+	});
     }
 
     @Override

@@ -114,7 +114,6 @@ public interface AttributeContainer {
      * @return The attribute matching the supplied type or null if none found.
      */
     default <T extends Attribute> T getOrNullAttributeOfType(final Class<T> attr) {
-
 	return getAttributeOfType(attr).orElse(null);
     }
 
@@ -130,6 +129,17 @@ public interface AttributeContainer {
      */
     default <T, S extends NonAttributeWrapper<T>> T getUnwrapAttributeOfType(final Class<S> attr) {
 	return unwrap(getAttributeOfType(attr));
+    }
+
+    /**
+     * Checks whether the container has a value associated to the supplied attribute type.
+     *
+     * @param attr
+     *            Attribute type.
+     * @return Whether the attribute was found.
+     */
+    default <T extends Attribute> boolean hasAttributeOfType(final Class<T> attr) {
+	return getAttributeOfType(attr).isPresent();
     }
 
     /**

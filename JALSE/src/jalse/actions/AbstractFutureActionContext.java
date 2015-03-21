@@ -1,5 +1,7 @@
 package jalse.actions;
 
+import static jalse.actions.Actions.emptyActionBindings;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -28,7 +30,7 @@ public abstract class AbstractFutureActionContext<T> extends AbstractActionConte
      *            Action this context is for.
      */
     protected AbstractFutureActionContext(final ActionEngine engine, final Action<T> action) {
-	this(engine, action, null);
+	this(engine, action, emptyActionBindings());
     }
 
     /**

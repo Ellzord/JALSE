@@ -1,5 +1,7 @@
 package jalse.actions;
 
+import java.util.Map;
+
 /**
  * A mutable extension of {@link ActionBindings}. This can be supplied at the appropriate level for
  * editable bindings.
@@ -19,6 +21,14 @@ public interface MutableActionBindings extends ActionBindings {
      * @return Previously associated value or null if none were.
      */
     <T> T put(String key, T value);
+
+    /**
+     * Binds all of the key-value pairs in the supplied map.
+     *
+     * @param map
+     *            Key-value pairs to bind.
+     */
+    void putAll(Map<String, ?> map);
 
     /**
      * Removes the value bound to the supplied key.

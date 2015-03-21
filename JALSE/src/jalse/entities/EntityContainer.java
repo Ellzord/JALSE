@@ -109,6 +109,33 @@ public interface EntityContainer {
     Set<? extends EntityListener> getEntityListeners();
 
     /**
+     * This is a convenience method for getting an entity (no optional).
+     *
+     * @param id
+     *            Unique ID of the entity.
+     * @return The entity matching the supplied id or null if none found.
+     */
+    default Entity getOrNullEntity(final UUID id) {
+	return getEntity(id).orElse(null);
+    }
+
+    /**
+     * This is a convenience method for getting an entity (no optional). The entity is wrapped with
+     * the supplied entity type.
+     *
+     * @param id
+     *            Unique ID of the entity.
+     * @param type
+     *            Entity type to wrap to.
+     * @return The entity matching the supplied id or null if none found.
+     *
+     * @see Entities#asType(Entity, Class)
+     */
+    default <T extends Entity> T getOrNullEntityAsType(final UUID id, final Class<T> type) {
+	return getEntityAsType(id, type).orElse(null);
+    }
+
+    /**
      * Checks whether the container has any entities.
      *
      * @return Whether the container is not empty.

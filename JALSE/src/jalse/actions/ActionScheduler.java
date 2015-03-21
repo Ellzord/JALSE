@@ -17,14 +17,19 @@ import java.util.concurrent.TimeUnit;
 public interface ActionScheduler<T> {
 
     /**
+     * Cancels all tasks currently running/scheduled (scheduled by this).
+     */
+    void cancelAllScheduledForActor();
+
+    /**
      * Schedules an action for immediate execution.
      *
      * @param action
      *            Action to schedule.
      * @return Context associated with the action (immutable).
      */
-    default MutableActionContext<T> scheduleAction(final Action<T> action) {
-	return scheduleAction(action, 0L, TimeUnit.NANOSECONDS);
+    default MutableActionContext<T> scheduleForActor(final Action<T> action) {
+	return scheduleForActor(action, 0L, TimeUnit.NANOSECONDS);
     }
 
     /**
@@ -40,7 +45,7 @@ public interface ActionScheduler<T> {
      *            Time unit of initial delay and period.
      * @return Context associated with the action (immutable).
      */
-    MutableActionContext<T> scheduleAction(final Action<T> action, final long initialDelay, final long period,
+    MutableActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
 	    final TimeUnit unit);
 
     /**
@@ -54,7 +59,8 @@ public interface ActionScheduler<T> {
      *            TimeUnit of the delay.
      * @return Context associated with the action (immutable).
      */
-    default MutableActionContext<T> scheduleAction(final Action<T> action, final long initialDelay, final TimeUnit unit) {
-	return scheduleAction(action, initialDelay, 0L, unit);
+    default MutableActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay,
+	    final TimeUnit unit) {
+	return scheduleForActor(action, initialDelay, 0L, unit);
     }
 }

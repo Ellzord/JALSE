@@ -4,7 +4,9 @@ import static jalse.misc.JALSEExceptions.ENGINE_SHUTDOWN;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.misc.JALSEExceptions;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A utility for {@link Action} related functionality.
@@ -15,7 +17,31 @@ import java.util.concurrent.ExecutorService;
 public final class Actions {
 
     /**
-     * Creates an empty {@link ActionContext}.
+     * Copies context information to a target context (actor, bindings, initial delay & period).
+     *
+     * @param source
+     *            Source context.
+     * @param target
+     *            Target context.
+     */
+    public static <T> void copy(final ActionContext<T> source, final MutableActionContext<T> target) {
+	target.setActor(source.getOrNullActor());
+	target.putAll(source.toMap());
+	target.setInitialDelay(target.getInitialDelay(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
+	target.setPeriod(source.getPeriod(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
+    }
+
+    /**
+     * Creates an immutable empty {@link MutableActionBindings}.
+     *
+     * @return Empty bindings.
+     */
+    public static <T> MutableActionContext<T> emptyActionBindings() {
+	return new UnmodifiableDelegateActionContext<>(null);
+    }
+
+    /**
+     * Creates an immutable empty {@link MutableActionContext}.
      *
      * @return Empty context.
      */
@@ -55,7 +81,18 @@ public final class Actions {
     }
 
     /**
-     * Creates an immutable {@ActionContext} that {@link ActionContext#cancel()} and
+     * Creates an immutable {MutableActionBindings}.
+     *
+     * @param bindings
+     *            Bindings to wrap.
+     * @return Immutable bindings.
+     */
+    public static MutableActionBindings unmodifiableActionBindings(final MutableActionBindings bindings) {
+	return new UnmodifiableDelegateActionBindings(Objects.requireNonNull(bindings));
+    }
+
+    /**
+     * Creates an immutable {@link MutableActionContext} that {@link ActionContext#cancel()} and
      * {@link MutableActionContext#await()} can still be called.
      *
      * @param context
@@ -63,7 +100,7 @@ public final class Actions {
      * @return Immutable context.
      */
     public static <T> MutableActionContext<T> unmodifiableActionContext(final MutableActionContext<T> context) {
-	return new UnmodifiableDelegateActionContext<>(context);
+	return new UnmodifiableDelegateActionContext<>(Objects.requireNonNull(context));
     }
 
     private Actions() {

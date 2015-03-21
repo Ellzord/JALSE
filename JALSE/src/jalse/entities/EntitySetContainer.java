@@ -18,7 +18,7 @@ class EntitySetContainer implements EntityContainer {
 
     @Override
     public boolean addEntityListener(final EntityListener listener) {
-	return addEntityListener(listener);
+	return delegate.addListener(listener);
     }
 
     @Override

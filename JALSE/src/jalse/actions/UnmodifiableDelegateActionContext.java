@@ -1,15 +1,15 @@
 package jalse.actions;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-class UnmodifiableDelegateActionContext<T> implements MutableActionContext<T> {
+class UnmodifiableDelegateActionContext<T> extends UnmodifiableDelegateActionBindings implements
+	MutableActionContext<T> {
 
     private final MutableActionContext<T> delegate;
 
     UnmodifiableDelegateActionContext(final MutableActionContext<T> delegate) {
+	super(delegate);
 	this.delegate = delegate;
     }
 
@@ -23,11 +23,6 @@ class UnmodifiableDelegateActionContext<T> implements MutableActionContext<T> {
     @Override
     public boolean cancel() {
 	return delegate != null ? delegate.cancel() : false;
-    }
-
-    @Override
-    public <S> S get(final String key) {
-	return delegate != null ? delegate.get(key) : null;
     }
 
     @Override
@@ -66,16 +61,6 @@ class UnmodifiableDelegateActionContext<T> implements MutableActionContext<T> {
     }
 
     @Override
-    public <S> S put(final String key, final S value) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <S> S remove(final String key) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void schedule() {
 	throw new UnsupportedOperationException();
     }
@@ -98,10 +83,5 @@ class UnmodifiableDelegateActionContext<T> implements MutableActionContext<T> {
     @Override
     public void setPeriod(final long period, final TimeUnit unit) {
 	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Map<String, ?> toMap() {
-	return delegate != null ? delegate.toMap() : new HashMap<>();
     }
 }

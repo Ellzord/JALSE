@@ -105,8 +105,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public void cancelActions() {
-	scheduler.cancelActions();
+    public void cancelAllScheduledForActor() {
+	scheduler.cancelAllScheduledForActor();
     }
 
     @Override
@@ -317,13 +317,13 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public MutableActionContext<Entity> scheduleAction(final Action<Entity> action, final long initialDelay,
+    public MutableActionContext<Entity> scheduleForActor(final Action<Entity> action, final long initialDelay,
 	    final long period, final TimeUnit unit) {
 	if (!isAlive()) {
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
 
-	return scheduler.scheduleAction(action, initialDelay, period, unit);
+	return scheduler.scheduleForActor(action, initialDelay, period, unit);
     }
 
     /**

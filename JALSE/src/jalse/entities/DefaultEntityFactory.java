@@ -93,7 +93,7 @@ public class DefaultEntityFactory implements EntityFactory {
 	    }
 
 	    de.markAsDead();
-	    de.cancelActions();
+	    de.cancelAllScheduledForActor();
 	    de.setEngine(null);
 
 	    entityCount--;

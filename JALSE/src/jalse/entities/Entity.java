@@ -65,16 +65,29 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
     }
 
     /**
-     * Cancels all tasks currently running/scheduled against this entity.
-     */
-    void cancelActions();
-
-    /**
      * Gets the parent container.
      *
      * @return Optional containing the container or else empty optional if the entity is not alive.
      */
     Optional<EntityContainer> getContainer();
+
+    /**
+     * This is a convenience method for getting the container (no optional).
+     *
+     * @return The parent container or null if not found.
+     */
+    default EntityContainer getOrNullContainer() {
+	return getContainer().orElse(null);
+    }
+
+    /**
+     * Checks whether there is an associated container.
+     *
+     * @return Whether there was a container.
+     */
+    default boolean hasContainer() {
+	return getContainer().isPresent();
+    }
 
     /**
      * Checks if the entity is alive.

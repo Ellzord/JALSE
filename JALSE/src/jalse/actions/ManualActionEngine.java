@@ -109,6 +109,11 @@ public class ManualActionEngine implements ActionEngine {
 	    try {
 		getAction().perform(this);
 	    } catch (final Exception e) {
+		if (e instanceof InterruptedException) {
+		    Thread.currentThread().interrupt();
+		    cancelled = true;
+		}
+
 		logger.log(Level.WARNING, "Error performing action", e);
 	    }
 
