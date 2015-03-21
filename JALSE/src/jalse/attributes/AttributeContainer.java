@@ -44,6 +44,17 @@ public interface AttributeContainer {
     <T extends Attribute> Optional<T> addAttributeOfType(T attr);
 
     /**
+     * This is a convenience method for adding an attribute (no optional).
+     *
+     * @param attr
+     *            Attribute to add.
+     * @return The replaced attribute or null if none was replaced.
+     */
+    default <T extends Attribute> T addOrNullAttributeOfType(final T attr) {
+	return addAttributeOfType(attr).orElse(null);
+    }
+
+    /**
      * Manually fires an attribute change for the supplied attribute type. This is used for mutable
      * attributes that can change their internal state.
      *
@@ -173,6 +184,17 @@ public interface AttributeContainer {
      * Removes all attributes within the container (firing removal events).
      */
     void removeAttributes();
+
+    /**
+     * This is a convenience method for removing an attribute (no optional).
+     *
+     * @param attr
+     *            Attribute type to remove.
+     * @return The removed attribute or null if none was removed.
+     */
+    default <T extends Attribute> T removeOrNullAttributeOfType(final Class<T> attr) {
+	return removeAttributeOfType(attr).orElse(null);
+    }
 
     /**
      * Streams all of the attributes within the container.

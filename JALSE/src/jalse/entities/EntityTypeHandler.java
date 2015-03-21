@@ -69,7 +69,8 @@ class EntityTypeHandler implements InvocationHandler {
 		}
 
 		/*
-		 * addAttributeOfType(Attribute) / removeAttributeOfType(Class)
+		 * addAttributeOfType(Attribute) / removeAttributeOfType(Class) /
+		 * addOrNullAttributeOfType(Attribute) / removeOrNullAttributeOfType(Class)
 		 */
 		if (hasParams && Attribute.class.isAssignableFrom(toClass(params[0]))) {
 		    /*
@@ -83,11 +84,12 @@ class EntityTypeHandler implements InvocationHandler {
 		     * Must be void or Optional<Attribute>.
 		     */
 		    if (hasReturnType) {
-			if (!Optional.class.equals(toClass(returnType))) {
-			    throwRE(INVALID_ENTITY_TYPE);
-			}
+			final Class<?> returnTypeClazz = toClass(returnType);
+			Type attributeClazz = returnTypeClazz;
 
-			final Type attributeClazz = OPTIONAL_RESOLVER.resolve(returnType);
+			if (Optional.class.equals(returnTypeClazz)) {
+			    attributeClazz = OPTIONAL_RESOLVER.resolve(returnType);
+			}
 
 			/*
 			 * Must match parameter.
@@ -244,8 +246,15 @@ class EntityTypeHandler implements InvocationHandler {
 	 * addAttributeOfType(Attribute) / removeAttributeOfType(Class)
 	 */
 	if (hasParams && Attribute.class.isAssignableFrom(toClass(params[0]))) {
-	    return args[0] != null ? entity.addAttributeOfType((Attribute) args[0]) : entity
-		    .removeAttributeOfType((Class<? extends Attribute>) params[0]);
+	    final boolean orNull = hasReturnType && params[0].equals(returnType);
+
+	    if (args[0] != null) {
+		return orNull ? entity.addOrNullAttributeOfType((Attribute) args[0]) : entity
+			.addAttributeOfType((Attribute) args[0]);
+	    } else {
+		return orNull ? entity.removeOrNullAttributeOfType((Class<? extends Attribute>) params[0]) : entity
+			.removeAttributeOfType((Class<? extends Attribute>) params[0]);
+	    }
 	}
 
 	/*
