@@ -12,9 +12,11 @@ import java.util.logging.Logger;
 /**
  * Provides a thread-safe way to store and process listeners. Listener set takes in the defining
  * listener {@code interface} and allows you to invoke the defined method upon the whole group via a
- * proxy {@link ListenerSet#getProxy()}.
+ * {@link ListenerSet#getProxy()}.
  *
  * @author Elliot Ford
+ *
+ * @see Proxy#newProxyInstance(ClassLoader, Class[], InvocationHandler)
  *
  * @param <T>
  *            Listener {@code interface}.

@@ -152,6 +152,43 @@ public final class Entities {
     }
 
     /**
+     * Gets the total entity count (recursive).
+     *
+     * @param container
+     *            Entity container.
+     *
+     * @return Direct child entity count.
+     */
+    public static int getEntityCountRecursively(final EntityContainer container) {
+	final AtomicInteger result = new AtomicInteger();
+
+	walkEntityTree(container, e -> {
+	    result.incrementAndGet();
+	    return EntityVisitResult.CONTINUE;
+	});
+
+	return result.get();
+    }
+
+    /**
+     * Gets the IDs of all the entities (recursive).
+     *
+     * @param container
+     *            Entity container.
+     *
+     * @return Set of all entity identifiers.
+     */
+    public static Set<UUID> getEntityIDsRecursively(final EntityContainer container) {
+	final Set<UUID> result = new HashSet<>();
+
+	walkEntityTree(container, e -> {
+	    return result.add(e.getID()) ? EntityVisitResult.CONTINUE : EntityVisitResult.IGNORE_CHILDREN;
+	});
+
+	return result;
+    }
+
+    /**
      * Gets all ancestors for the specified descendant type (not including {@link Entity}).
      *
      * @param type
@@ -326,42 +363,5 @@ public final class Entities {
 
     private Entities() {
 	throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Gets the total entity count (recursive).
-     *
-     * @param container
-     *            Entity container.
-     *
-     * @return Direct child entity count.
-     */
-    public int getEntityCountRecursively(final EntityContainer container) {
-	final AtomicInteger result = new AtomicInteger();
-
-	walkEntityTree(container, e -> {
-	    result.incrementAndGet();
-	    return EntityVisitResult.CONTINUE;
-	});
-
-	return result.get();
-    }
-
-    /**
-     * Gets the IDs of all the entities (recursive).
-     *
-     * @param container
-     *            Entity container.
-     *
-     * @return Set of all entity identifiers.
-     */
-    public Set<UUID> getEntityIDsRecursively(final EntityContainer container) {
-	final Set<UUID> result = new HashSet<>();
-
-	walkEntityTree(container, e -> {
-	    return result.add(e.getID()) ? EntityVisitResult.CONTINUE : EntityVisitResult.IGNORE_CHILDREN;
-	});
-
-	return result;
     }
 }

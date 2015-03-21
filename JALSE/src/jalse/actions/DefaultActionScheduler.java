@@ -1,16 +1,20 @@
-package jalse.engine.actions;
+package jalse.actions;
+
+import static jalse.actions.Actions.unmodifiableActionContext;
 
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link ActionScheduler} implementation that schedules all actions against the supplied actor.
- * Weak references are kept against all task IDs so they can be bulk cancelled (these are also
- * cleared on {@link ActionEngine} change).
+ * Weak references are kept against all scheduled tasks so they can be bulk cancelled (these are
+ * also cleared on {@link ActionEngine} change).<br>
+ * <br>
+ * By default if no {@link ActionEngine} is supplied {@link ForkJoinActionEngine#commonPoolEngine()}
+ * will be used.
  *
  * @author Elliot Ford
  *
@@ -21,7 +25,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 
     private final T actor;
     private ActionEngine engine;
-    private final Set<UUID> tasks;
+    private final Set<ActionContext<T>> contexts;
 
     /**
      * Creates a DefaultScheduler for the supplied actor.
@@ -31,24 +35,17 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
      */
     public DefaultActionScheduler(final T actor) {
 	this.actor = Objects.requireNonNull(actor);
-	engine = null;
-	tasks = Collections.newSetFromMap(new WeakHashMap<>());
-    }
-
-    @Override
-    public boolean cancel(final UUID action) {
-	return engine.cancel(action);
+	engine = ForkJoinActionEngine.commonPoolEngine();
+	contexts = Collections.newSetFromMap(new WeakHashMap<>());
     }
 
     /**
      * Cancel all tasks scheduled to the current engine for the actor by this scheduler.
      */
-    public void cancelTasks() {
-	synchronized (tasks) {
-	    for (final UUID id : tasks) {
-		cancel(id);
-	    }
-	    tasks.clear();
+    public void cancelActions() {
+	synchronized (contexts) {
+	    contexts.forEach(c -> c.cancel());
+	    contexts.clear();
 	}
     }
 
@@ -71,17 +68,25 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     }
 
     @Override
-    public boolean isActive(final UUID action) {
-	return engine.isActive(action);
-    }
-
-    @Override
-    public UUID scheduleAction(final Action<T> action, final long initialDelay, final long period, final TimeUnit unit) {
-	UUID task;
-	synchronized (tasks) {
-	    tasks.add(task = engine.scheduleAction(action, actor, initialDelay, period, unit));
+    public MutableActionContext<T> scheduleAction(final Action<T> action, final long initialDelay, final long period,
+	    final TimeUnit unit) {
+	if (engine.isStopped()) {
+	    return Actions.emptyActionContext();
 	}
-	return task;
+
+	final MutableActionContext<T> context = engine.createContext(action);
+
+	context.setActor(actor);
+	context.setInitialDelay(initialDelay, unit);
+	context.setPeriod(period, unit);
+
+	synchronized (contexts) {
+	    contexts.add(context);
+	}
+
+	context.schedule();
+
+	return unmodifiableActionContext(context);
     }
 
     /**
@@ -92,8 +97,8 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
      */
     public void setEngine(final ActionEngine engine) {
 	if (!Objects.equals(this.engine, engine)) {
-	    synchronized (tasks) {
-		tasks.clear();
+	    synchronized (contexts) {
+		contexts.clear();
 	    }
 	}
 	this.engine = engine;

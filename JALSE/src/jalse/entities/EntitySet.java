@@ -29,8 +29,10 @@ import java.util.stream.Stream;
  * <br>
  *
  * EntitySet can take a delegate EntityContainer to supply to {@link EntityEvent}. Entity updates
- * will trigger these events using {@link EntityListener}. Newly created entities will be supplied
- * this delegate container.
+ * will trigger these events using {@link EntityListener}.<br>
+ * <br>
+ *
+ * By default EntitySet will use {@link DefaultEntityFactory} with no delegate container.
  *
  * @author Elliot Ford
  *

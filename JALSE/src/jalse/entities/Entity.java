@@ -1,8 +1,8 @@
 package jalse.entities;
 
+import jalse.actions.ActionScheduler;
 import jalse.attributes.Attribute;
 import jalse.attributes.AttributeContainer;
-import jalse.engine.actions.ActionScheduler;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.EntityListener;
 import jalse.misc.Identifiable;
@@ -67,7 +67,7 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
     /**
      * Cancels all tasks currently running/scheduled against this entity.
      */
-    void cancelTasks();
+    void cancelActions();
 
     /**
      * Gets the parent container.

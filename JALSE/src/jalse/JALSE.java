@@ -1,17 +1,15 @@
 package jalse;
 
-import jalse.engine.Engine;
-import jalse.engine.EngineBindings;
-import jalse.engine.EngineState;
-import jalse.engine.TickInfo;
-import jalse.engine.actions.Action;
-import jalse.engine.actions.ActionEngine;
-import jalse.engine.actions.ActionScheduler;
+import static jalse.actions.Actions.requireNotStopped;
+import jalse.actions.Action;
+import jalse.actions.ActionEngine;
+import jalse.actions.MutableActionBindings;
+import jalse.actions.MutableActionContext;
+import jalse.entities.Entities;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
 import jalse.entities.EntityFactory;
 import jalse.entities.EntitySet;
-import jalse.listeners.EngineListener;
 import jalse.listeners.EntityListener;
 import jalse.tags.Tag;
 import jalse.tags.TagSet;
@@ -22,21 +20,23 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * JALSE is the overall container and engine for each simulation. It provides the ability to create
- * a number of {@link Entity} and execute {@link Action} at given intervals. Although {@link Entity}
- * can be created/killed no {@link Action} will run until {@link Engine#tick()} is called.
+ * JALSE is the overall parent container and engine for each simulation. It provides the ability to
+ * create a number of {@link Entity} and execute {@link Action} at given intervals.
+ *
  *
  * @author Elliot Ford
  *
+ * @see ActionEngine
+ * @see EntitySet
+ * @see TagSet
+ * @see EntityFactory
+ *
  */
-public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler<JALSE> {
-
-    private volatile int totalEntityCount;
+public class JALSE implements ActionEngine, EntityContainer, Taggable {
 
     /**
      * Backing entity set for top level entities.
@@ -68,16 +68,11 @@ public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler
      *
      */
     public JALSE(final ActionEngine engine, final EntityFactory factory) {
-	this.engine = Objects.requireNonNull(engine);
+	this.engine = requireNotStopped(engine);
 	this.factory = Objects.requireNonNull(factory);
 	factory.setEngine(engine);
 	entities = new EntitySet(factory, this);
 	tags = new TagSet();
-    }
-
-    @Override
-    public boolean addEngineListener(final EngineListener listener) {
-	return engine.addEngineListener(listener);
     }
 
     @Override
@@ -86,18 +81,13 @@ public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler
     }
 
     @Override
-    public boolean cancel(final UUID action) {
-	return engine.cancel(action);
+    public <T> MutableActionContext<T> createContext(final Action<T> action) {
+	return engine.createContext(action);
     }
 
     @Override
-    public EngineBindings getBindings() {
+    public MutableActionBindings getBindings() {
 	return engine.getBindings();
-    }
-
-    @Override
-    public Set<? extends EngineListener> getEngineListeners() {
-	return engine.getEngineListeners();
     }
 
     @Override
@@ -131,18 +121,8 @@ public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler
     }
 
     @Override
-    public EngineState getState() {
-	return engine.getState();
-    }
-
-    @Override
     public Set<Tag> getTags() {
 	return Collections.unmodifiableSet(tags);
-    }
-
-    @Override
-    public TickInfo getTickInfo() {
-	return engine.getTickInfo();
     }
 
     /**
@@ -151,12 +131,17 @@ public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler
      * @return Total number of entities within the simulation.
      */
     public int getTotalEntityCount() {
-	return totalEntityCount;
+	return Entities.getEntityCountRecursively(this);
     }
 
     @Override
-    public boolean isActive(final UUID action) {
-	return engine.isActive(action);
+    public boolean isPaused() {
+	return engine.isPaused();
+    }
+
+    @Override
+    public boolean isStopped() {
+	return engine.isStopped();
     }
 
     @Override
@@ -195,41 +180,13 @@ public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler
     }
 
     @Override
-    public boolean removeEngineListener(final EngineListener listener) {
-	return engine.removeEngineListener(listener);
-    }
-
-    @Override
     public boolean removeEntityListener(final EntityListener listener) {
 	return entities.removeListener(listener);
     }
 
     @Override
-    public UUID scheduleAction(final Action<JALSE> action, final long initialDelay, final long period,
-	    final TimeUnit unit) {
-	return engine.scheduleAction(action, this, initialDelay, period, unit);
-    }
-
-    /**
-     * Sets the first action of a tick to be run.
-     *
-     * @param action
-     *            Action to set.
-     *
-     */
-    public void setFirstAction(final Action<JALSE> action) {
-	engine.setFirstAction(action, this);
-    }
-
-    /**
-     * Sets the last action of a tick to be run.
-     *
-     * @param action
-     *            Action to set.
-     *
-     */
-    public void setLastAction(final Action<JALSE> action) {
-	engine.setLastAction(action, this);
+    public void resume() {
+	engine.resume();
     }
 
     @Override
@@ -245,10 +202,5 @@ public class JALSE implements Engine, EntityContainer, Taggable, ActionScheduler
     @Override
     public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
 	return entities.streamOfType(type);
-    }
-
-    @Override
-    public void tick() {
-	engine.tick();
     }
 }

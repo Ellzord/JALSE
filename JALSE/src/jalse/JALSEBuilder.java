@@ -1,39 +1,40 @@
 package jalse;
 
-import jalse.engine.actions.ActionEngine;
-import jalse.engine.actions.ContinuousActionEngine;
-import jalse.engine.actions.ManualActionEngine;
+import jalse.actions.ActionEngine;
+import jalse.actions.ForkJoinActionEngine;
+import jalse.actions.ManualActionEngine;
+import jalse.actions.ThreadPoolActionEngine;
 import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
 
 /**
  * A {@link JALSE} instance builder where each method in this builder can be chained. This builder
  * constructs a JALSE instance using the supplied parameters. It does this by creating the
- * appropriate {@link ActionEngine} along with a {@link DefaultEntityFactory}. JALSE can still be
- * created without this builder. Any parameter not supplied will be defaulted and setting {@code 0}
- * TPS is equivalent to setting manual tick.
+ * appropriate {@link ActionEngine} implementation along with a {@link DefaultEntityFactory}. JALSE
+ * can still be created without this builder.<br>
+ * <br>
+ * Parallelism:<br>
+ * If {@code parallelism <= 0}(or {@link #setManual()}) then {@link ManualActionEngine} is used.<br>
+ * If {@code parallelism == 1} then {@link ThreadPoolActionEngine} will be used (
+ * {@code corePoolSize = 1}).<br>
+ * If {@code parallelism > 1} then {@link ForkJoinActionEngine} will be used.
  *
  * @author Elliot Ford
  *
- * @see #DEFAULT_TPS
- * @see #DEFAULT_TOTAL_THREADS
  * @see #DEFAULT_TOTAL_ENTITY_LIMIT
  *
- * @see ContinuousActionEngine
+ * @see ForkJoinActionEngine
+ * @see ThreadPoolActionEngine
  * @see ManualActionEngine
  *
  */
 public class JALSEBuilder {
 
     /**
-     * The default maximum ticks per second to be achieved by the engine ({@code 30}).
+     * The default parallelism to be utilised by the engine for performing actions (
+     * {@code Runtime.getRuntime().availableProcessors()}).
      */
-    public static final int DEFAULT_TPS = 30;
-
-    /**
-     * The default total threads to be used by the engine for performing actions ({@code 10}).
-     */
-    public static final int DEFAULT_TOTAL_THREADS = 10;
+    public static final int DEFAULT_PARALLELISM = Runtime.getRuntime().availableProcessors();
 
     /**
      * The default {@link Entity} limit ({@code Integer.MAX_VALUE}).
@@ -41,27 +42,41 @@ public class JALSEBuilder {
     public static final int DEFAULT_TOTAL_ENTITY_LIMIT = Integer.MAX_VALUE;
 
     /**
-     * Builds a manually ticked JALSE instance with default values.
+     * Creates a JALSE instance with default parallelism.
+     *
+     * @return Default parallelism JALSE instance.
+     *
+     * @see #DEFAULT_PARALLELISM
+     * @see #DEFAULT_TOTAL_ENTITY_LIMIT
+     */
+    public static JALSE buildDefaultJALSE() {
+	return newBuilder().build();
+    }
+
+    /**
+     * Builds a manually ticked JALSE instance ({@code parallelism == 0}).
      *
      * @return Manual tick JALSE.
-     */
-    public static JALSE buildManualTickJALSE() {
-	return newBuilder().setManualTick().build();
-    }
-
-    /**
-     * Builds a single threaded JALSE instance with default values.
      *
-     * @param tps
-     *            Ticks per second.
-     * @return Single threaded JALSE with supplied TPS.
+     * @see #DEFAULT_TOTAL_ENTITY_LIMIT
      */
-    public static JALSE buildSingleThreadedJALSE(final int tps) {
-	return newBuilder().setTPS(tps).setTotalThreads(1).build();
+    public static JALSE buildManualJALSE() {
+	return newBuilder().setManual().build();
     }
 
     /**
-     * Creates a new builder set to manual tick with defaults.
+     * Builds a single threaded JALSE instance ({@code parallelism == 1}).
+     *
+     * @return Single threaded JALSE instance.
+     *
+     * @see #DEFAULT_TOTAL_ENTITY_LIMIT
+     */
+    public static JALSE buildSingleThreadedJALSE() {
+	return newBuilder().setParallelism(1).build();
+    }
+
+    /**
+     * Creates a new builder with defaults.
      *
      * @return New builder.
      */
@@ -69,8 +84,7 @@ public class JALSEBuilder {
 	return new JALSEBuilder();
     }
 
-    private int tps = DEFAULT_TPS;
-    private int totalThreads = DEFAULT_TOTAL_THREADS;
+    private int parallelism = DEFAULT_PARALLELISM;
     private int totalEntityLimit = DEFAULT_TOTAL_ENTITY_LIMIT;
 
     private JALSEBuilder() {}
@@ -81,7 +95,16 @@ public class JALSEBuilder {
      * @return Newly created JALSE.
      */
     public JALSE build() {
-	final ActionEngine engine = tps > 0 ? new ContinuousActionEngine(tps, totalThreads) : new ManualActionEngine();
+	final ActionEngine engine;
+
+	if (parallelism <= 0) {
+	    engine = new ManualActionEngine();
+	} else if (parallelism == 1) {
+	    engine = new ThreadPoolActionEngine(1);
+	} else {
+	    engine = new ForkJoinActionEngine(parallelism);
+	}
+
 	return new JALSE(engine, new DefaultEntityFactory(totalEntityLimit));
     }
 
@@ -90,8 +113,20 @@ public class JALSEBuilder {
      *
      * @return This builder.
      */
-    public JALSEBuilder setManualTick() {
-	return setTPS(0);
+    public JALSEBuilder setManual() {
+	return setParallelism(0);
+    }
+
+    /**
+     * Sets the parallelism to be utilised by the engine.
+     *
+     * @param parallelism
+     *            Thread parallelism.
+     * @return This builder.
+     */
+    public JALSEBuilder setParallelism(final int parallelism) {
+	this.parallelism = parallelism;
+	return this;
     }
 
     /**
@@ -103,31 +138,6 @@ public class JALSEBuilder {
      */
     public JALSEBuilder setTotalEntityLimit(final int totalEntityLimit) {
 	this.totalEntityLimit = totalEntityLimit;
-	return this;
-    }
-
-    /**
-     * Sets the total threads that can be used.
-     *
-     * @param totalThreads
-     *            Total threads used by the engine.
-     * @return This builder.
-     *
-     */
-    public JALSEBuilder setTotalThreads(final int totalThreads) {
-	this.totalThreads = totalThreads;
-	return this;
-    }
-
-    /**
-     * Sets the ticks per second.
-     *
-     * @param tps
-     *            Ticks per second.
-     * @return This builder.
-     */
-    public JALSEBuilder setTPS(final int tps) {
-	this.tps = tps;
 	return this;
     }
 }

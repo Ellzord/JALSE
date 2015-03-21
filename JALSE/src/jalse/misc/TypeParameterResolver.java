@@ -35,7 +35,7 @@ import java.util.Objects;
  * @see #toClass(Type)
  *
  */
-public class TypeParameterResolver {
+public final class TypeParameterResolver {
 
     private class ResolvedParameterizedType implements ParameterizedType {
 

@@ -28,7 +28,7 @@ public interface Identifiable {
      *            Second object.
      * @return Whether the unique identifiers are equal.
      */
-    public static boolean equals(final Identifiable a, final Object b) {
+    static boolean equals(final Identifiable a, final Object b) {
 	return a == b || a != null && b instanceof Identifiable
 		&& Objects.equals(a.getID(), ((Identifiable) b).getID());
     }
@@ -40,7 +40,7 @@ public interface Identifiable {
      *            Object to get ID for.
      * @return ID of object if Identifiable instance otherwise return null.
      */
-    public static UUID getID(final Object obj) {
+    static UUID getID(final Object obj) {
 	return obj instanceof Identifiable ? ((Identifiable) obj).getID() : null;
     }
 
@@ -51,7 +51,7 @@ public interface Identifiable {
      *            Identifiable instance.
      * @return Hashcode for the identifiable or {@code 0} if null.
      */
-    public static int hashCode(final Identifiable obj) {
+    static int hashCode(final Identifiable obj) {
 	return obj == null ? 0 : Objects.hashCode(obj.getID());
     }
 
@@ -64,7 +64,7 @@ public interface Identifiable {
      *
      * @see Identifiable#equals(Identifiable, Object)
      */
-    public static Predicate<Identifiable> is(final Identifiable obj) {
+    static Predicate<Identifiable> is(final Identifiable obj) {
 	return i -> equals(obj, i);
     }
 
@@ -77,7 +77,7 @@ public interface Identifiable {
      *
      * @see Identifiable#getID()
      */
-    public static Predicate<Identifiable> not(final Identifiable obj) {
+    static Predicate<Identifiable> not(final Identifiable obj) {
 	return is(obj).negate();
     }
 
@@ -89,7 +89,7 @@ public interface Identifiable {
      *            Identifiable to create a string representation for.
      * @return String representation of the identifiable.
      */
-    public static String toString(final Identifiable obj) {
+    static String toString(final Identifiable obj) {
 	return obj.getClass().getSimpleName() + " [id=" + obj.getID() + "]";
     }
 

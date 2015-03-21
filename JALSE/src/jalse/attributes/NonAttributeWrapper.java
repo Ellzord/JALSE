@@ -30,6 +30,9 @@ import java.util.Objects;
  * @param <T>
  *            Existing or final class to wrap.
  *
+ * @see AttributeContainer#getUnwrapAttributeOfType(Class)
+ * @see Attributes#unwrap(java.util.Optional)
+ *
  * @see Object#equals(Object)
  * @see Object#hashCode()
  */

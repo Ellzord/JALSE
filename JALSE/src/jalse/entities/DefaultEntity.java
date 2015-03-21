@@ -2,11 +2,12 @@ package jalse.entities;
 
 import static jalse.misc.JALSEExceptions.ENTITY_NOT_ALIVE;
 import static jalse.misc.JALSEExceptions.throwRE;
+import jalse.actions.Action;
+import jalse.actions.ActionEngine;
+import jalse.actions.DefaultActionScheduler;
+import jalse.actions.MutableActionContext;
 import jalse.attributes.Attribute;
 import jalse.attributes.AttributeSet;
-import jalse.engine.actions.Action;
-import jalse.engine.actions.ActionEngine;
-import jalse.engine.actions.DefaultActionScheduler;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.EntityListener;
 import jalse.misc.AbstractIdentifiable;
@@ -26,11 +27,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A simple yet fully featured {@link Entity} implementation.
+ * A simple yet fully featured {@link Entity} implementation.<br>
+ * <br>
+ * This entity can be marked as alive ({@link #markAsAlive()}) or dead ({@link #markAsDead()}).
  *
  * @author Elliot Ford
  *
  * @see DefaultEntityFactory
+ * @see EntitySet
+ * @see AttributeSet
+ * @see DefaultActionScheduler
+ * @see TagSet
  *
  */
 public class DefaultEntity extends AbstractIdentifiable implements Entity {
@@ -98,13 +105,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public boolean cancel(final UUID action) {
-	return scheduler.cancel(action);
-    }
-
-    @Override
-    public void cancelTasks() {
-	scheduler.cancelTasks();
+    public void cancelActions() {
+	scheduler.cancelActions();
     }
 
     @Override
@@ -158,8 +160,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      * @return Optional containing the engine or else empty optional if there is no engine
      *         associated.
      */
-    protected Optional<ActionEngine> getEngine() {
-	return Optional.ofNullable(scheduler.getEngine());
+    protected ActionEngine getEngine() {
+	return scheduler.getEngine();
     }
 
     @Override
@@ -195,11 +197,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public Set<Tag> getTags() {
 	return Collections.unmodifiableSet(tags);
-    }
-
-    @Override
-    public boolean isActive(final UUID action) {
-	return scheduler.isActive(action);
     }
 
     @Override
@@ -320,8 +317,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public UUID scheduleAction(final Action<Entity> action, final long initialDelay, final long period,
-	    final TimeUnit unit) {
+    public MutableActionContext<Entity> scheduleAction(final Action<Entity> action, final long initialDelay,
+	    final long period, final TimeUnit unit) {
 	if (!isAlive()) {
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
@@ -334,14 +331,9 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      *
      * @param engine
      *            Engine to set.
-     * @return Previously associated engine or empty optional if none was associated.
      */
-    protected Optional<ActionEngine> setEngine(final ActionEngine engine) {
-	final ActionEngine previous = scheduler.getEngine();
-
+    protected void setEngine(final ActionEngine engine) {
 	scheduler.setEngine(engine);
-
-	return Optional.ofNullable(previous);
     }
 
     @Override

@@ -5,6 +5,7 @@ import jalse.attributes.AttributeContainer;
 import jalse.misc.AbstractIdentifiable;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -24,7 +25,7 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
 
     private final AttributeContainer container;
     private final T attr;
-    private final T previousAttr;
+    private final T replacedAttr;
 
     /**
      * Creates a new AttributeEvent with a random ID (with no previous Attribute).
@@ -45,14 +46,14 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      *            Parent container for the Attribute.
      * @param attr
      *            Attribute the event is for.
-     * @param previousAttr
-     *            The previous attribute that has been replaced (can be null).
+     * @param replacedAttr
+     *            The previous attribute that has been replaced by this Attribute (can be null).
      */
-    public AttributeEvent(final AttributeContainer container, final T attr, final T previousAttr) {
+    public AttributeEvent(final AttributeContainer container, final T attr, final T replacedAttr) {
 	super(UUID.randomUUID());
 	this.container = Objects.requireNonNull(container);
 	this.attr = Objects.requireNonNull(attr);
-	this.previousAttr = previousAttr;
+	this.replacedAttr = replacedAttr;
     }
 
     /**
@@ -74,20 +75,20 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
     }
 
     /**
-     * Get the Attribute that was replaced.
+     * Get the Attribute that was replaced by this Attribute.
      *
      * @return Replaced Attribute.
      */
-    public T getPreviousAttribute() {
-	return previousAttr;
+    public Optional<T> getReplacedAttribute() {
+	return Optional.ofNullable(replacedAttr);
     }
 
     /**
-     * Checks whether the previous Attribute was replaced.
+     * Checks whether the previous Attribute was replaced by this Attribute.
      *
      * @return Whether the previous Attribute was replaced.
      */
     public boolean isReplacement() {
-	return previousAttr != null;
+	return replacedAttr != null;
     }
 }

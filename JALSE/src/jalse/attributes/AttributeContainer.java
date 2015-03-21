@@ -115,9 +115,7 @@ public interface AttributeContainer {
      */
     default <T extends Attribute> T getOrNullAttributeOfType(final Class<T> attr) {
 
-	final Optional<T> a = getAttributeOfType(attr);
-
-	return a.isPresent() ? a.get() : null;
+	return getAttributeOfType(attr).orElse(null);
     }
 
     /**
