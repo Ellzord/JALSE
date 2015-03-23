@@ -171,7 +171,7 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 
 	final boolean result = workQueue.addWaitingWork(context);
 
-	if (freeRunners.compareAndSet(0, 1)) {
+	if (result && freeRunners.compareAndSet(0, 1)) {
 	    executorService.submit(new ForkJoinContextRunner());
 	}
 
