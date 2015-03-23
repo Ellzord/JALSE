@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An abstract {@link MutableActionContext} implementation that supplies all of the non-scheduling
@@ -22,9 +24,9 @@ public abstract class AbstractActionContext<T> implements MutableActionContext<T
     private final ActionEngine engine;
     private final Action<T> action;
     private final MutableActionBindings bindings;
-    private T actor;
-    private long period;
-    private long initialDelay;
+    private AtomicReference<T> actor;
+    private AtomicLong period;
+    private AtomicLong initialDelay;
 
     /**
      * Creates a new AbstractActionContext instance with the supplied engine and action.
@@ -54,9 +56,9 @@ public abstract class AbstractActionContext<T> implements MutableActionContext<T
 	this.engine = requireNotStopped(engine);
 	this.action = Objects.requireNonNull(action);
 	bindings = new DefaultActionBindings(sourceBindings);
-	actor = null;
-	period = 0L;
-	initialDelay = 0L;
+	actor = new AtomicReference<>();
+	period = new AtomicLong();
+	initialDelay = new AtomicLong();
     }
 
     @Override
@@ -71,7 +73,7 @@ public abstract class AbstractActionContext<T> implements MutableActionContext<T
 
     @Override
     public Optional<T> getActor() {
-	return Optional.ofNullable(actor);
+	return Optional.ofNullable(actor.get());
     }
 
     @Override
@@ -81,12 +83,12 @@ public abstract class AbstractActionContext<T> implements MutableActionContext<T
 
     @Override
     public long getInitialDelay(final TimeUnit unit) {
-	return unit.convert(initialDelay, TimeUnit.NANOSECONDS);
+	return unit.convert(initialDelay.get(), TimeUnit.NANOSECONDS);
     }
 
     @Override
     public long getPeriod(final TimeUnit unit) {
-	return unit.convert(period, TimeUnit.NANOSECONDS);
+	return unit.convert(period.get(), TimeUnit.NANOSECONDS);
     }
 
     @Override
@@ -106,17 +108,17 @@ public abstract class AbstractActionContext<T> implements MutableActionContext<T
 
     @Override
     public void setActor(final T actor) {
-	this.actor = actor;
+	this.actor.set(actor);
     }
 
     @Override
     public void setInitialDelay(final long initialDelay, final TimeUnit unit) {
-	this.initialDelay = unit.toNanos(initialDelay);
+	this.initialDelay.set(unit.toNanos(initialDelay));
     }
 
     @Override
     public void setPeriod(final long period, final TimeUnit unit) {
-	this.period = unit.toNanos(period);
+	this.period.set(unit.toNanos(period));
     }
 
     @Override

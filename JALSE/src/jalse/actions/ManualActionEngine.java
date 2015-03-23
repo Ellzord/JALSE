@@ -2,16 +2,7 @@ package jalse.actions;
 
 import static jalse.actions.Actions.requireNotStopped;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A manual-tick implementation of {@link ActionEngine}. ManualActionEngine uses no additional
@@ -31,13 +22,7 @@ public class ManualActionEngine implements ActionEngine {
      * @param <T>
      *            Actor type.
      */
-    protected class ManualContext<T> extends AbstractActionContext<T> implements Runnable {
-
-	private final Lock lock;
-	private final Condition ran;
-	private volatile boolean cancelled;
-	private volatile boolean done;
-	private volatile long estimated;
+    protected class ManualContext<T> extends AbstractManualActionContext<T> {
 
 	/**
 	 * Creates a new ManualActionContext instance.
@@ -47,137 +32,32 @@ public class ManualActionEngine implements ActionEngine {
 	 */
 	protected ManualContext(final Action<T> action) {
 	    super(ManualActionEngine.this, action, bindings);
-	    lock = new ReentrantLock();
-	    ran = lock.newCondition();
-	    reset();
 	}
 
 	@Override
-	public void await() throws InterruptedException {
-	    lock.lockInterruptibly();
-	    try {
-		while (!done) {
-		    ran.await();
-		}
-	    } finally {
-		lock.unlock();
-	    }
-	}
-
-	@Override
-	public boolean cancel() {
-	    if (cancelled) {
-		return false;
-	    }
-
-	    cancelled = true;
-	    final boolean result = removeWork(this);
-	    signalRan();
-
-	    return result;
-	}
-
-	/**
-	 * Gets the ideal estimated execution time (nanos).
-	 *
-	 * @return gets the estimated time of execution.
-	 *
-	 * @see System#nanoTime()
-	 */
-	protected long getEstimated() {
-	    return estimated;
-	}
-
-	@Override
-	public boolean isCancelled() {
-	    return cancelled;
-	}
-
-	@Override
-	public boolean isDone() {
-	    return done;
-	}
-
-	private void reset() {
-	    done = false;
-	    cancelled = false;
-	    estimated = 0L;
-	}
-
-	@Override
-	public void run() {
-	    try {
-		getAction().perform(this);
-	    } catch (final Exception e) {
-		if (e instanceof InterruptedException) {
-		    Thread.currentThread().interrupt();
-		    cancelled = true;
-		}
-
-		logger.log(Level.WARNING, "Error performing action", e);
-	    }
-
-	    signalRan();
-
-	    if (isPeriodic() && !isCancelled()) {
-		schedule(getPeriod(TimeUnit.NANOSECONDS));
-	    }
-	}
-
-	@Override
-	public void schedule() {
-	    if (!done) {
-		schedule(getInitialDelay(TimeUnit.NANOSECONDS));
-	    }
-	}
-
-	/**
-	 * Schedules the action for execution (nanos).
-	 *
-	 * @param delay
-	 *            Delay before schedule.
-	 */
-	protected void schedule(final long delay) {
-	    if (done) {
-		reset();
-	    }
-
-	    estimated = System.nanoTime() + delay;
+	protected void addAsWork() {
 	    addWork(this);
 	}
 
 	@Override
-	public void scheduleAndAwait() throws InterruptedException {
-	    schedule();
-	    await();
-	}
-
-	private void signalRan() {
-	    done = true;
-	    lock.lock();
-	    try {
-		ran.signalAll();
-	    } finally {
-		lock.unlock();
-	    }
+	protected void removeAsWork() {
+	    removeWork(this);
 	}
     }
 
-    private static final Logger logger = Logger.getLogger(ManualActionEngine.class.getName());
-
-    private final Queue<ManualContext<?>> workQueue;
+    private final ManualWorkQueue<ManualContext<?>> workQueue;
     private final MutableActionBindings bindings;
-    private volatile boolean ticking;
-    private volatile boolean stopped;
+    private final AtomicBoolean ticking;
+    private final AtomicBoolean stopped;
 
     /**
      * Creates a new instance of ManualActionEngine.
      */
     public ManualActionEngine() {
-	workQueue = new PriorityQueue<>();
+	workQueue = new ManualWorkQueue<>();
 	bindings = new DefaultActionBindings();
-	ticking = false;
-	stopped = false;
+	ticking = new AtomicBoolean();
+	stopped = new AtomicBoolean();
     }
 
     /**
@@ -186,16 +66,14 @@ public class ManualActionEngine implements ActionEngine {
      * @param context
      *            Work to add.
      *
+     * @return Whether the work was not already in the queue.
+     *
      * @see Actions#requireNotStopped(ActionEngine)
      */
-    protected void addWork(final ManualContext<?> context) {
+    protected boolean addWork(final ManualContext<?> context) {
 	requireNotStopped(this);
 
-	synchronized (workQueue) {
-	    if (!workQueue.contains(context)) {
-		workQueue.add(context);
-	    }
-	}
+	return workQueue.addWaitingWork(context);
     }
 
     @Override
@@ -208,14 +86,23 @@ public class ManualActionEngine implements ActionEngine {
 	return bindings;
     }
 
+    /**
+     * Gets the engine's work queue.
+     *
+     * @return Manual work queue.
+     */
+    protected ManualWorkQueue<ManualContext<?>> getWorkQueue() {
+	return workQueue;
+    }
+
     @Override
     public boolean isPaused() {
-	return !ticking;
+	return !ticking.get();
     }
 
     @Override
     public boolean isStopped() {
-	return stopped;
+	return stopped.get();
     }
 
     @Override
@@ -226,60 +113,43 @@ public class ManualActionEngine implements ActionEngine {
      *
      * @param context
      *            Work to remove.
-     * @return Whether the work was waiting to be executed.
+     * @return Whether the work was added before.
      */
     protected boolean removeWork(final ManualContext<?> context) {
-	synchronized (workQueue) {
-	    return workQueue.remove(context);
-	}
+	return workQueue.removeWaitingWork(context);
     }
 
     @Override
     public void resume() {
 	requireNotStopped(this);
-	if (ticking) {
+	if (!ticking.getAndSet(true)) {
 	    return;
 	}
 
-	final List<ManualContext<?>> worked = new ArrayList<>();
+	for (;;) {
+	    final ManualContext<?> work = workQueue.pollReadyWork();
+	    if (work == null) {
+		break;
+	    }
 
-	synchronized (workQueue) {
-	    ticking = true;
-
-	    final long now = System.nanoTime();
-	    for (;;) {
-		final ManualContext<?> work = workQueue.peek();
-		if (work == null || now >= work.getEstimated()) {
-		    break;
-		}
-		workQueue.remove();
-		worked.add(work);
+	    try {
+		work.performAction();
+	    } catch (final InterruptedException e) {
+		ticking.set(false);
+		Thread.currentThread().interrupt();
+		throw new IllegalStateException(e);
 	    }
 	}
 
-	worked.forEach(ManualContext::run);
-
-	synchronized (workQueue) {
-	    ticking = false;
-	}
+	ticking.set(false);
     }
 
     @Override
     public void stop() {
 	requireNotStopped(this);
 
-	synchronized (workQueue) {
-	    ticking = false;
-
-	    for (;;) {
-		final ManualContext<?> work = workQueue.poll();
-		if (work == null) {
-		    break;
-		}
-		work.cancel();
-	    }
-
-	    stopped = false;
-	}
+	ticking.set(false);
+	workQueue.getWaitingWork().forEach(AbstractManualActionContext::cancel);
+	stopped.set(true);
     }
 }

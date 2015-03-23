@@ -37,11 +37,10 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
 	public void run() {
 	    try {
 		getAction().perform(this);
+	    } catch (final InterruptedException e) {
+		Thread.currentThread().interrupt();
+		cancel();
 	    } catch (final Exception e) {
-		if (e instanceof InterruptedException) {
-		    Thread.currentThread().interrupt();
-		}
-
 		logger.log(Level.WARNING, "Error performing action", e);
 	    }
 	}

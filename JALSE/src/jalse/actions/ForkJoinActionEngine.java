@@ -1,13 +1,11 @@
 package jalse.actions;
 
+import static jalse.actions.Actions.requireNotShutdown;
+import static jalse.actions.Actions.requireNotStopped;
+
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinPool.ManagedBlocker;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * An implementation of {@link ActionEngine} based on {@link ForkJoinPool}. Scheduling is achieved
@@ -30,12 +28,7 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
      * @param <T>
      *            Actor type.
      */
-    protected class ForkJoinContext<T> extends AbstractFutureActionContext<T> implements Runnable {
-
-	private final Lock lock;
-	private final Condition cancelled;
-	private final ManagedBlocker blocker;
-	private volatile long blockUntil;
+    protected class ForkJoinContext<T> extends AbstractManualActionContext<T> {
 
 	/**
 	 * Creates a new ForkJoinContext.
@@ -45,104 +38,76 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 	 */
 	protected ForkJoinContext(final Action<T> action) {
 	    super(ForkJoinActionEngine.this, action, getBindings());
-	    lock = new ReentrantLock();
-	    cancelled = lock.newCondition();
+	}
+
+	@Override
+	protected void addAsWork() {
+	    addWork(this);
+	}
+
+	@Override
+	public void removeAsWork() {
+	    removeWork(this);
+	}
+    }
+
+    private class ForkJoinContextRunner implements Runnable {
+
+	private final ManagedBlocker blocker;
+
+	private ForkJoinContextRunner() {
 	    blocker = new ManagedBlocker() {
 
 		@Override
 		public boolean block() throws InterruptedException {
-		    awaitDelay();
+		    workQueue.awaitNextReadyWork();
 		    return true;
 		}
 
 		@Override
 		public boolean isReleasable() {
-		    return delayReached() || isCancelled();
+		    return workQueue.isWorkReady() || !workQueue.isWorkWaiting();
 		}
 	    };
 	}
 
-	private void awaitDelay() throws InterruptedException {
-	    lock.lockInterruptibly();
-	    try {
-		long wait = blockUntil - System.nanoTime();
-		while (wait > 0 && !isCancelled()) {
-		    wait = cancelled.awaitNanos(wait);
-		}
-	    } finally {
-		lock.unlock();
-	    }
-	}
-
-	@Override
-	public boolean cancel() {
-	    signalCancelled();
-	    return super.cancel();
-	}
-
-	private boolean delayReached() {
-	    return System.nanoTime() >= blockUntil;
-	}
-
 	@Override
 	public void run() {
-	    /*
-	     * ForkJoinPool doesn't use interrupted state to manage threads.
-	     */
-	    try {
-		awaitResumed();
-	    } catch (final InterruptedException e) {
-		return;
+	    while (workQueue.isWorkWaiting()) {
+		try {
+		    awaitResumed();
+		} catch (final InterruptedException e) {
+		    break;
+		}
+
+		try {
+		    ForkJoinPool.managedBlock(blocker);
+		} catch (final InterruptedException e) {}
+
+		if (!workQueue.isWorkWaiting()) {
+		    break;
+		}
+
+		final ForkJoinContext<?> work = workQueue.pollReadyWork();
+		if (work != null) {
+		    freeRunners.decrementAndGet();
+
+		    try {
+			work.performAction();
+		    } catch (final InterruptedException e) {
+			break;
+		    } finally {
+			freeRunners.incrementAndGet();
+		    }
+		}
+
+		if (freeRunners.get() > 1) {
+		    break;
+		}
 	    }
-
-	    try {
-		ForkJoinPool.managedBlock(blocker);
-	    } catch (final InterruptedException e) {}
-
-	    if (isCancelled()) {
-		return;
-	    }
-
-	    try {
-		getAction().perform(this);
-	    } catch (final Exception e) {
-		logger.log(Level.WARNING, "Error performing action", e);
-	    }
-
-	    if (isPeriodic() && !isCancelled()) {
-		schedule(getPeriod(TimeUnit.NANOSECONDS));
-	    }
-	}
-
-	@Override
-	public void schedule() {
-	    if (!isDone()) {
-		schedule(getInitialDelay(TimeUnit.NANOSECONDS));
-	    }
-	}
-
-	/**
-	 * Schedules this action for execution after a specified delay (nanos).
-	 *
-	 * @param delay
-	 *            Delay before scheduling.
-	 */
-	protected void schedule(final long delay) {
-	    blockUntil = System.nanoTime() + delay;
-	    setFuture(executorService.submit(this));
-	}
-
-	private void signalCancelled() {
-	    lock.lock();
-	    try {
-		cancelled.signal();
-	    } finally {
-		lock.unlock();
-	    }
+	    freeRunners.decrementAndGet();
 	}
     }
-
-    private static final Logger logger = Logger.getLogger(ForkJoinActionEngine.class.getName());
 
     private static final ForkJoinActionEngine commonPoolEngine = new ForkJoinActionEngine(ForkJoinPool.commonPool()) {
 
@@ -163,6 +128,9 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 	return commonPoolEngine;
     }
 
+    private final ManualWorkQueue<ForkJoinContext<?>> workQueue;
+    private final AtomicInteger freeRunners;
+
     /**
      * Creates a new ForkJoinActionEngine instance with the default parallelism.
      *
@@ -174,6 +142,8 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 
     private ForkJoinActionEngine(final ForkJoinPool pool) {
 	super(pool);
+	workQueue = new ManualWorkQueue<>();
+	freeRunners = new AtomicInteger();
     }
 
     /**
@@ -186,8 +156,57 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 	this(new ForkJoinPool(parallelism));
     }
 
+    /**
+     * Adds work to the engine.
+     *
+     * @param context
+     *            Work to add.
+     *
+     * @return Whether the work was not already in the queue.
+     *
+     * @see Actions#requireNotStopped(ActionEngine)
+     */
+    protected boolean addWork(final ForkJoinContext<?> context) {
+	requireNotStopped(this);
+
+	final boolean result = workQueue.addWaitingWork(context);
+
+	if (freeRunners.compareAndSet(0, 1)) {
+	    executorService.submit(new ForkJoinContextRunner());
+	}
+
+	return result;
+    }
+
     @Override
     public <T> MutableActionContext<T> createContext(final Action<T> action) {
 	return new ForkJoinContext<>(action);
+    }
+
+    /**
+     * Gets the engine's work queue.
+     *
+     * @return Manual work queue.
+     */
+    protected ManualWorkQueue<ForkJoinContext<?>> getWorkQueue() {
+	return workQueue;
+    }
+
+    /**
+     * Removes work from the engine.
+     *
+     * @param context
+     *            Work to remove.
+     * @return Whether the work was added before.
+     */
+    protected boolean removeWork(final ForkJoinContext<?> context) {
+	return workQueue.removeWaitingWork(context);
+    }
+
+    @Override
+    public void stop() {
+	requireNotShutdown(executorService);
+	super.stop();
+	workQueue.getWaitingWork().forEach(ForkJoinContext::cancel);
     }
 }

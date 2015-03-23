@@ -4,6 +4,7 @@ import static jalse.actions.Actions.requireNotShutdown;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -41,7 +42,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
     private final MutableActionBindings bindings;
     private final Lock lock;
     private final Condition resumed;
-    private volatile boolean paused;
+    private final AtomicBoolean paused;
 
     /**
      * Creates a new instance of AbstractActionEngine with the supplied executor service.
@@ -56,7 +57,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
 	bindings = new DefaultActionBindings();
 	lock = new ReentrantLock();
 	resumed = lock.newCondition();
-	paused = false;
+	paused = new AtomicBoolean();
     }
 
     /**
@@ -68,7 +69,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
     protected void awaitResumed() throws InterruptedException {
 	lock.lockInterruptibly();
 	try {
-	    while (paused) {
+	    while (isPaused()) {
 		resumed.await();
 	    }
 	} finally {
@@ -83,7 +84,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
 
     @Override
     public boolean isPaused() {
-	return paused && !isStopped();
+	return paused.get() && !isStopped();
     }
 
     @Override
@@ -95,27 +96,24 @@ public abstract class AbstractActionEngine implements ActionEngine {
     public void pause() {
 	requireNotShutdown(executorService);
 
-	lock.lock();
-	try {
-	    paused = true;
-	} finally {
-	    lock.unlock();
+	if (!paused.getAndSet(true)) {
+	    logger.info("Engine paused");
 	}
-	logger.info("Engine paused");
     }
 
     @Override
     public void resume() {
 	requireNotShutdown(executorService);
 
-	lock.lock();
-	try {
-	    paused = false;
-	    resumed.signalAll();
-	} finally {
-	    lock.unlock();
+	if (paused.getAndSet(false)) {
+	    lock.lock();
+	    try {
+		resumed.signalAll();
+	    } finally {
+		lock.unlock();
+	    }
+	    logger.info("Engine resumed");
 	}
-	logger.info("Engine resumed");
     }
 
     @Override
