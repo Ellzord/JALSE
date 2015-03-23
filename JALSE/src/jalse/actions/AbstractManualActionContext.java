@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * @see ManualActionEngine
  * @see ForkJoinActionEngine
  */
-public abstract class AbstractManualActionContext<T> extends AbstractActionContext<T> implements
+public abstract class AbstractManualActionContext<T> extends BaseActionContext<T> implements
 	Comparable<AbstractManualActionContext<?>> {
 
     private static final Logger logger = Logger.getLogger(AbstractManualActionContext.class.getName());

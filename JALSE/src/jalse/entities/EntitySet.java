@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -111,12 +110,10 @@ public class EntitySet extends AbstractSet<Entity> {
      *
      * @param id
      *            Unique ID of the entity.
-     * @return Gets an Optional of the resulting entity or an empty Optional if it was not found.
-     * @throws NullPointerException
-     *             If the ID is null.
+     * @return The entity matching the supplied id or null if none found.
      */
-    public Optional<Entity> getEntity(final UUID id) {
-	return Optional.ofNullable(entities.get(Objects.requireNonNull(id)));
+    public Entity getEntity(final UUID id) {
+	return entities.get(Objects.requireNonNull(id));
     }
 
     /**

@@ -60,7 +60,7 @@ public interface EntityContainer {
     <T extends Entity> Set<T> getEntitiesOfType(Class<T> type);
 
     /**
-     * Gets the entity with the specified ID.
+     * This is a convenience method for getting an entity (optional).
      *
      * @param id
      *            Unique ID of the entity.
@@ -68,10 +68,13 @@ public interface EntityContainer {
      * @throws NullPointerException
      *             If the ID is null.
      */
-    Optional<Entity> getEntity(UUID id);
+    default Optional<Entity> getEntity(final UUID id) {
+	return Optional.ofNullable(getOrNullEntity(id));
+    }
 
     /**
-     * Gets the entity with the specified ID. The entity is wrapped with the supplied entity type.
+     * This is a convenience method for getting an entity (optional).The entity is wrapped with the
+     * supplied entity type.
      *
      * @param id
      *            Unique ID of the entity.
@@ -79,7 +82,7 @@ public interface EntityContainer {
      *            Entity type to wrap to.
      * @return Gets an Optional of the resulting entity or an empty Optional if it was not found.
      * @throws NullPointerException
-     *             If the ID or type are null.
+     *             If type is null.
      *
      * @see Entities#asType(Entity, Class)
      */
@@ -109,15 +112,13 @@ public interface EntityContainer {
     Set<? extends EntityListener> getEntityListeners();
 
     /**
-     * This is a convenience method for getting an entity (no optional).
+     * Gets the entity with the specified ID.
      *
      * @param id
      *            Unique ID of the entity.
      * @return The entity matching the supplied id or null if none found.
      */
-    default Entity getOrNullEntity(final UUID id) {
-	return getEntity(id).orElse(null);
-    }
+    Entity getOrNullEntity(final UUID id);
 
     /**
      * This is a convenience method for getting an entity (no optional). The entity is wrapped with
@@ -132,7 +133,8 @@ public interface EntityContainer {
      * @see Entities#asType(Entity, Class)
      */
     default <T extends Entity> T getOrNullEntityAsType(final UUID id, final Class<T> type) {
-	return getEntityAsType(id, type).orElse(null);
+	final Entity e = getOrNullEntity(id);
+	return e != null ? asType(e, type) : null;
     }
 
     /**

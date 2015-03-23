@@ -16,7 +16,7 @@ import java.util.concurrent.locks.StampedLock;
  * @param <T>
  *            Actor type.
  */
-public abstract class AbstractFutureActionContext<T> extends AbstractActionContext<T> {
+public abstract class AbstractFutureActionContext<T> extends BaseActionContext<T> {
 
     private final StampedLock lock;
     private Future<?> future;
@@ -80,14 +80,16 @@ public abstract class AbstractFutureActionContext<T> extends AbstractActionConte
      */
     protected Future<?> getFuture() {
 	long stamp = lock.tryOptimisticRead();
-	if (lock.validate(stamp)) {
-	    return future;
+	Future<?> future = this.future;
+	if (!lock.validate(stamp)) {
+	    stamp = lock.readLock();
+	    try {
+		future = this.future;
+	    } finally {
+		lock.unlockRead(stamp);
+	    }
 	}
-
-	stamp = lock.readLock();
-	final Future<?> result = future;
-	lock.unlockRead(stamp);
-	return result;
+	return future;
     }
 
     @Override
@@ -110,7 +112,10 @@ public abstract class AbstractFutureActionContext<T> extends AbstractActionConte
      */
     protected void setFuture(final Future<?> future) {
 	final long stamp = lock.writeLock();
-	this.future = future;
-	lock.unlockWrite(stamp);
+	try {
+	    this.future = future;
+	} finally {
+	    lock.unlockWrite(stamp);
+	}
     }
 }

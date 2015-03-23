@@ -15,9 +15,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +40,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
     private final Map<Class<? extends Attribute>, ListenerSet<AttributeListener>> attributeListeners;
     private final Map<Class<? extends Attribute>, Attribute> attributes;
     private final AttributeContainer delegateContainer;
+    private final StampedLock lock;
 
     /**
      * Creates a new AttributeSet with no delegate container.
@@ -58,11 +59,12 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	this.delegateContainer = delegateContainer != null ? delegateContainer : Attributes.toAttributeContainer(this);
 	attributes = new ConcurrentHashMap<>();
 	attributeListeners = new HashMap<>();
+	lock = new StampedLock();
     }
 
     @Override
     public boolean add(final Attribute e) {
-	return addOfType(e).isPresent();
+	return addOfType(e) != null;
     }
 
     /**
@@ -74,17 +76,18 @@ public class AttributeSet extends AbstractSet<Attribute> {
      */
     @SuppressWarnings("unchecked")
     public boolean addListener(final AttributeListener<? extends Attribute> listener) {
-	final Class<?> attr = toClass(RESOLVER.resolve(listener));
+	final Class<?> attr = requireNonNullAttrSub(toClass(RESOLVER.resolve(listener)));
 
-	ListenerSet<AttributeListener> ls;
-	synchronized (attributeListeners) {
-	    ls = attributeListeners.get(requireNonNullAttrSub(attr));
+	final long stamp = lock.writeLock();
+	try {
+	    ListenerSet<AttributeListener> ls = attributeListeners.get(attr);
 	    if (ls == null) {
 		attributeListeners.put((Class<? extends Attribute>) attr, ls = Listeners.createAttributeListenerSet());
 	    }
+	    return ls.add(listener);
+	} finally {
+	    lock.unlockWrite(stamp);
 	}
-
-	return ls.add(listener);
     }
 
     /**
@@ -92,25 +95,27 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *
      * @param attr
      *            Attribute to add.
-     * @return Optional containing the replaced attribute if set or else empty optional if none
-     *         found
+     * @return The replaced attribute or null if none was replaced.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Attribute> Optional<T> addOfType(final T attr) {
+    public <T extends Attribute> T addOfType(final T attr) {
 	final Class<? extends Attribute> type = attr.getClass();
 
 	final T previous = (T) attributes.put(type, attr);
 
 	ListenerSet<? extends AttributeListener<T>> ls;
-	synchronized (attributeListeners) {
+	final long stamp = lock.readLock();
+	try {
 	    ls = (ListenerSet<? extends AttributeListener<T>>) attributeListeners.get(type);
+	} finally {
+	    lock.unlockRead(stamp);
 	}
 
 	if (ls != null) {
 	    ls.getProxy().attributeAdded(new AttributeEvent<>(delegateContainer, attr, previous));
 	}
 
-	return Optional.ofNullable(previous);
+	return previous;
     }
 
     @Override
@@ -136,19 +141,24 @@ public class AttributeSet extends AbstractSet<Attribute> {
      */
     @SuppressWarnings("unchecked")
     public <T extends Attribute> boolean fireChanged(final Class<T> attr) {
-	final Optional<T> op = getOfType(attr);
+	final T associated = getOfType(attr);
+	if (associated == null) {
+	    return false;
+	}
 
-	op.ifPresent(a -> {
-	    ListenerSet<? extends AttributeListener<T>> ls;
-	    synchronized (attributeListeners) {
-		ls = (ListenerSet<? extends AttributeListener<T>>) attributeListeners.get(attr);
-	    }
-	    if (ls != null) {
-		ls.getProxy().attributeChanged(new AttributeEvent<>(delegateContainer, a));
-	    }
-	});
+	ListenerSet<? extends AttributeListener<T>> ls;
+	final long stamp = lock.readLock();
+	try {
+	    ls = (ListenerSet<? extends AttributeListener<T>>) attributeListeners.get(attr);
+	} finally {
+	    lock.unlockRead(stamp);
+	}
 
-	return op.isPresent();
+	if (ls != null) {
+	    ls.getProxy().attributeChanged(new AttributeEvent<>(delegateContainer, associated));
+	}
+
+	return true;
     }
 
     /**
@@ -196,12 +206,14 @@ public class AttributeSet extends AbstractSet<Attribute> {
      */
     @SuppressWarnings("unchecked")
     public <T extends Attribute> Set<? extends AttributeListener<T>> getListeners(final Class<T> attr) {
-	Set<AttributeListener> ls;
-	synchronized (attributeListeners) {
-	    ls = attributeListeners.get(requireNonNullAttrSub(attr));
+	final long stamp = lock.readLock();
+	try {
+	    final Set<AttributeListener> ls = attributeListeners.get(requireNonNullAttrSub(attr));
+	    return ls != null ? Collections.unmodifiableSet((Set<? extends AttributeListener<T>>) ls) : Collections
+		    .emptySet();
+	} finally {
+	    lock.unlockRead(stamp);
 	}
-	return ls != null ? Collections.unmodifiableSet((Set<? extends AttributeListener<T>>) ls) : Collections
-		.emptySet();
     }
 
     /**
@@ -209,11 +221,11 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *
      * @param attr
      *            Attribute type to check for.
-     * @return Optional containing the attribute or else empty optional if none found.
+     * @return The attribute matching the supplied type or null if none found.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Attribute> Optional<T> getOfType(final Class<T> attr) {
-	return Optional.ofNullable((T) attributes.get(requireNonNullAttrSub(attr)));
+    public <T extends Attribute> T getOfType(final Class<T> attr) {
+	return (T) attributes.get(requireNonNullAttrSub(attr));
     }
 
     @Override
@@ -232,7 +244,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	if (!(o instanceof Attribute)) {
 	    throw new IllegalArgumentException();
 	}
-	return removeOfType((Class<? extends Attribute>) o.getClass()).isPresent();
+	return removeOfType((Class<? extends Attribute>) o.getClass()) != null;
     }
 
     /**
@@ -243,25 +255,23 @@ public class AttributeSet extends AbstractSet<Attribute> {
      * @return Whether the listener was assigned.
      */
     public <T extends Attribute> boolean removeListener(final AttributeListener<T> listener) {
-	final Class<?> attr = toClass(RESOLVER.resolve(listener));
+	final Class<?> attr = requireNonNullAttrSub(toClass(RESOLVER.resolve(listener)));
 
-	Set<AttributeListener> ls;
-	synchronized (attributeListeners) {
-	    ls = attributeListeners.get(requireNonNullAttrSub(attr));
-	}
-
-	boolean removed = false;
-
-	if (ls != null) {
-	    removed = ls.remove(listener);
-	    if (ls.isEmpty()) {
-		synchronized (attributeListeners) {
+	final long stamp = lock.writeLock();
+	try {
+	    final Set<AttributeListener> ls = attributeListeners.get(attr);
+	    if (ls != null) {
+		boolean removed;
+		if (removed = ls.remove(listener) && ls.isEmpty()) {
 		    attributeListeners.remove(attr);
 		}
+		return removed;
 	    }
+	} finally {
+	    lock.unlockWrite(stamp);
 	}
 
-	return removed;
+	return false;
     }
 
     /**
@@ -269,23 +279,28 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *
      * @param attr
      *            Attribute type to remove.
-     * @return Optional containing the removed attribute or else empty optional if none found
+     * @return The removed attribute or null if none was removed.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Attribute> Optional<T> removeOfType(final Class<T> attr) {
+    public <T extends Attribute> T removeOfType(final Class<T> attr) {
 	final T previous = (T) attributes.remove(requireNonNullAttrSub(attr));
 
 	if (previous != null) {
 	    ListenerSet<? extends AttributeListener<T>> ls;
-	    synchronized (attributeListeners) {
+
+	    final long stamp = lock.readLock();
+	    try {
 		ls = (ListenerSet<? extends AttributeListener<T>>) attributeListeners.get(attr);
+	    } finally {
+		lock.unlockRead(stamp);
 	    }
+
 	    if (ls != null) {
 		ls.getProxy().attributeRemoved(new AttributeEvent<>(delegateContainer, previous));
 	    }
 	}
 
-	return Optional.ofNullable(previous);
+	return previous;
     }
 
     @Override

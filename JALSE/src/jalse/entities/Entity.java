@@ -65,20 +65,20 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
     }
 
     /**
-     * Gets the parent container.
+     * This is a convenience method for getting the container (optional).
      *
      * @return Optional containing the container or else empty optional if the entity is not alive.
      */
-    Optional<EntityContainer> getContainer();
+    default Optional<EntityContainer> getContainer() {
+	return Optional.ofNullable(getOrNullContainer());
+    }
 
     /**
-     * This is a convenience method for getting the container (no optional).
+     * Gets the parent container.
      *
      * @return The parent container or null if not found.
      */
-    default EntityContainer getOrNullContainer() {
-	return getContainer().orElse(null);
-    }
+    EntityContainer getOrNullContainer();
 
     /**
      * Checks whether there is an associated container.

@@ -6,7 +6,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A thread-safe queue for {@link AbstractManualActionContext} using the estimated perform time (
@@ -24,7 +24,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
 
     private final Queue<T> waitingWork;
-    private final Lock lock;
+    private final Lock read;
+    private final Lock write;
     private final Condition workChanged;
 
     /**
@@ -32,8 +33,10 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      */
     public ManualWorkQueue() {
 	waitingWork = new PriorityQueue<>();
-	lock = new ReentrantLock();
-	workChanged = lock.newCondition();
+	final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+	read = rwLock.readLock();
+	write = rwLock.writeLock();
+	workChanged = write.newCondition();
     }
 
     /**
@@ -44,19 +47,17 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      * @return Whether the work was not previously within the queue.
      */
     public boolean addWaitingWork(final T context) {
-	boolean result;
-	synchronized (waitingWork) {
-	    result = !waitingWork.contains(context);
-	    if (result) {
+	write.lock();
+	try {
+	    boolean result;
+	    if (result = !waitingWork.contains(context)) {
 		waitingWork.add(context);
+		workChanged.signalAll();
 	    }
+	    return result;
+	} finally {
+	    write.unlock();
 	}
-
-	if (result) {
-	    signalWorkChanged();
-	}
-
-	return result;
     }
 
     /**
@@ -66,17 +67,17 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      *             Whether the wait is interrupted.
      */
     public void awaitNextReadyWork() throws InterruptedException {
-	lock.lockInterruptibly();
+	write.lockInterruptibly();
 	try {
 	    long next = getEarliestReadyEstimate();
-	    while (!isWorkReady() && isWorkWaiting()) {
+	    while (!workAvailable() && !waitingWork.isEmpty()) {
 		if (next > 0L) {
 		    workChanged.awaitNanos(next - System.nanoTime());
 		    next = getEarliestReadyEstimate();
 		}
 	    }
 	} finally {
-	    lock.unlock();
+	    write.unlock();
 	}
     }
 
@@ -84,16 +85,18 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      * Clears waiting work.
      */
     public void clearWaitingWork() {
-	synchronized (waitingWork) {
+	write.lock();
+	try {
 	    waitingWork.clear();
+	    workChanged.signalAll();
+	} finally {
+	    write.unlock();
 	}
     }
 
     private long getEarliestReadyEstimate() {
-	synchronized (waitingWork) {
-	    final T context = waitingWork.peek();
-	    return context != null ? context.getEstimated() : 0L;
-	}
+	final T context = waitingWork.peek();
+	return context != null ? context.getEstimated() : 0L;
     }
 
     /**
@@ -102,8 +105,11 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      * @return All waiting work.
      */
     public List<? extends T> getWaitingWork() {
-	synchronized (waitingWork) {
+	read.lock();
+	try {
 	    return new ArrayList<>(waitingWork);
+	} finally {
+	    read.unlock();
 	}
     }
 
@@ -115,8 +121,11 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      * @return Whether the work was already waiting.
      */
     public boolean isWaitingWork(final T context) {
-	synchronized (waitingWork) {
+	read.lock();
+	try {
 	    return waitingWork.contains(context);
+	} finally {
+	    read.unlock();
 	}
     }
 
@@ -126,8 +135,11 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      * @return Whether work is ready.
      */
     public boolean isWorkReady() {
-	synchronized (waitingWork) {
+	read.lock();
+	try {
 	    return workAvailable();
+	} finally {
+	    read.unlock();
 	}
     }
 
@@ -146,8 +158,11 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      * @return Work if available (or else null).
      */
     public T pollReadyWork() {
-	synchronized (waitingWork) {
+	write.lock();
+	try {
 	    return workAvailable() ? waitingWork.poll() : null;
+	} finally {
+	    write.unlock();
 	}
     }
 
@@ -159,24 +174,15 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      * @return Whether the work was already in the queue.
      */
     public boolean removeWaitingWork(final T context) {
-	boolean result;
-	synchronized (waitingWork) {
-	    result = waitingWork.remove(context);
-	}
-
-	if (result) {
-	    signalWorkChanged();
-	}
-
-	return result;
-    }
-
-    private void signalWorkChanged() {
-	lock.lock();
+	write.lock();
 	try {
-	    workChanged.signalAll();
+	    boolean result;
+	    if (result = waitingWork.remove(context)) {
+		workChanged.signalAll();
+	    }
+	    return result;
 	} finally {
-	    lock.unlock();
+	    write.unlock();
 	}
     }
 
@@ -186,8 +192,11 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      * @return Work count.
      */
     public int waitingWorkSize() {
-	synchronized (waitingWork) {
+	read.lock();
+	try {
 	    return waitingWork.size();
+	} finally {
+	    read.unlock();
 	}
     }
 

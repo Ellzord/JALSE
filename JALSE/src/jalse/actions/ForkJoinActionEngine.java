@@ -51,11 +51,11 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 	}
     }
 
-    private class ForkJoinContextRunner implements Runnable {
+    private class ForkJoinContextWorker implements Runnable {
 
 	private final ManagedBlocker blocker;
 
-	private ForkJoinContextRunner() {
+	private ForkJoinContextWorker() {
 	    blocker = new ManagedBlocker() {
 
 		@Override
@@ -90,22 +90,22 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 
 		final ForkJoinContext<?> work = workQueue.pollReadyWork();
 		if (work != null) {
-		    freeRunners.decrementAndGet();
+		    freeWorkers.decrementAndGet();
 
 		    try {
 			work.performAction();
 		    } catch (final InterruptedException e) {
 			break;
 		    } finally {
-			freeRunners.incrementAndGet();
+			freeWorkers.incrementAndGet();
 		    }
 		}
 
-		if (freeRunners.get() > 1) {
+		if (freeWorkers.get() > 1) {
 		    break;
 		}
 	    }
-	    freeRunners.decrementAndGet();
+	    freeWorkers.decrementAndGet();
 	}
     }
 
@@ -129,7 +129,7 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
     }
 
     private final ManualWorkQueue<ForkJoinContext<?>> workQueue;
-    private final AtomicInteger freeRunners;
+    private final AtomicInteger freeWorkers;
 
     /**
      * Creates a new ForkJoinActionEngine instance with the default parallelism.
@@ -143,7 +143,7 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
     private ForkJoinActionEngine(final ForkJoinPool pool) {
 	super(pool);
 	workQueue = new ManualWorkQueue<>();
-	freeRunners = new AtomicInteger();
+	freeWorkers = new AtomicInteger();
     }
 
     /**
@@ -169,13 +169,21 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
     protected boolean addWork(final ForkJoinContext<?> context) {
 	requireNotStopped(this);
 
-	final boolean result = workQueue.addWaitingWork(context);
-
-	if (result && freeRunners.compareAndSet(0, 1)) {
-	    executorService.submit(new ForkJoinContextRunner());
+	final boolean result;
+	if (result = workQueue.addWaitingWork(context)) {
+	    addWorkerIfNeeded();
 	}
 
 	return result;
+    }
+
+    /**
+     * Starts a worker if needed (waiting work and no free workers).
+     */
+    protected void addWorkerIfNeeded() {
+	if (workQueue.isWorkWaiting() && freeWorkers.compareAndSet(0, 1)) {
+	    executorService.submit(new ForkJoinContextWorker());
+	}
     }
 
     @Override

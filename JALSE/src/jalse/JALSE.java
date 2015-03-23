@@ -19,7 +19,6 @@ import jalse.tags.Taggable;
 
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -116,11 +115,6 @@ public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContai
     }
 
     @Override
-    public Optional<Entity> getEntity(final UUID id) {
-	return entities.getEntity(id);
-    }
-
-    @Override
     public int getEntityCount() {
 	return entities.size();
     }
@@ -133,6 +127,11 @@ public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContai
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
 	return entities.getListeners();
+    }
+
+    @Override
+    public Entity getOrNullEntity(final UUID id) {
+	return entities.getEntity(id);
     }
 
     @Override

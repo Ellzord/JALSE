@@ -18,7 +18,6 @@ import jalse.tags.Tag;
 import jalse.tags.TagSet;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -95,13 +94,13 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <S extends Attribute> Optional<S> addAttributeOfType(final S attr) {
-	return attributes.addOfType(attr);
+    public boolean addEntityListener(final EntityListener listener) {
+	return entities.addListener(listener);
     }
 
     @Override
-    public boolean addEntityListener(final EntityListener listener) {
-	return entities.addListener(listener);
+    public <S extends Attribute> S addOrNullAttributeOfType(final S attr) {
+	return attributes.addOfType(attr);
     }
 
     @Override
@@ -135,11 +134,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <S extends Attribute> Optional<S> getAttributeOfType(final Class<S> attr) {
-	return attributes.getOfType(attr);
-    }
-
-    @Override
     public Set<? extends Attribute> getAttributes() {
 	return Collections.unmodifiableSet(attributes);
     }
@@ -147,11 +141,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public Set<Class<? extends Attribute>> getAttributeTypes() {
 	return attributes.getAttributeTypes();
-    }
-
-    @Override
-    public Optional<EntityContainer> getContainer() {
-	return Optional.ofNullable(isAlive() ? container : null);
     }
 
     /**
@@ -175,11 +164,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Optional<Entity> getEntity(final UUID id) {
-	return entities.getEntity(id);
-    }
-
-    @Override
     public int getEntityCount() {
 	return entities.size();
     }
@@ -192,6 +176,21 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
 	return entities.getListeners();
+    }
+
+    @Override
+    public <S extends Attribute> S getOrNullAttributeOfType(final Class<S> attr) {
+	return attributes.getOfType(attr);
+    }
+
+    @Override
+    public EntityContainer getOrNullContainer() {
+	return isAlive() ? container : null;
+    }
+
+    @Override
+    public Entity getOrNullEntity(final UUID id) {
+	return entities.getEntity(id);
     }
 
     @Override
@@ -302,11 +301,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <S extends Attribute> Optional<S> removeAttributeOfType(final Class<S> attr) {
-	return attributes.removeOfType(attr);
-    }
-
-    @Override
     public void removeAttributes() {
 	attributes.clear();
     }
@@ -314,6 +308,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public boolean removeEntityListener(final EntityListener listener) {
 	return entities.removeListener(listener);
+    }
+
+    @Override
+    public <S extends Attribute> S removeOrNullAttributeOfType(final Class<S> attr) {
+	return attributes.removeOfType(attr);
     }
 
     @Override

@@ -110,6 +110,10 @@ public interface ActionEngine {
      * @return Context associated to action (immutable).
      */
     default <T> MutableActionContext<T> schedule(final Action<T> action, final T actor) {
+	if (isStopped()) {
+	    return Actions.emptyActionContext();
+	}
+
 	final MutableActionContext<T> context = createContext(action);
 	context.setActor(actor);
 	context.schedule();

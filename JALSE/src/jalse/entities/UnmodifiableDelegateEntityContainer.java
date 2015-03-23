@@ -3,7 +3,6 @@ package jalse.entities;
 import jalse.listeners.EntityListener;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -32,11 +31,6 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     }
 
     @Override
-    public Optional<Entity> getEntity(final UUID id) {
-	return delegate != null ? delegate.getEntity(id) : Optional.empty();
-    }
-
-    @Override
     public int getEntityCount() {
 	return delegate != null ? delegate.getEntityCount() : 0;
     }
@@ -49,6 +43,11 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
 	return delegate != null ? delegate.getEntityListeners() : Collections.emptySet();
+    }
+
+    @Override
+    public Entity getOrNullEntity(final UUID id) {
+	return delegate != null ? delegate.getOrNullEntity(id) : null;
     }
 
     @Override

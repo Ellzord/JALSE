@@ -24,11 +24,13 @@ public interface ActionContext<T> extends ActionBindings {
     boolean cancel();
 
     /**
-     * Gets the associated actor.
+     * This is a convenience method for getting an actor (optional).
      *
      * @return Optional containing the referenced actor or else empty optional if not found.
      */
-    Optional<T> getActor();
+    default Optional<T> getActor() {
+	return Optional.ofNullable(getOrNullActor());
+    }
 
     /**
      * Gets the associated engine.
@@ -38,13 +40,11 @@ public interface ActionContext<T> extends ActionBindings {
     ActionEngine getEngine();
 
     /**
-     * This is a convenience method for getting an actor (no optional).
+     * Gets the associated actor.
      *
      * @return The referenced actor or null if not found.
      */
-    default T getOrNullActor() {
-	return getActor().orElse(null);
-    }
+    T getOrNullActor();
 
     /**
      * Gets the actions repeat period.
@@ -62,7 +62,7 @@ public interface ActionContext<T> extends ActionBindings {
      * @return Whether an actor was found.
      */
     default boolean hasActor() {
-	return getActor().isPresent();
+	return getOrNullActor() != null;
     }
 
     /**

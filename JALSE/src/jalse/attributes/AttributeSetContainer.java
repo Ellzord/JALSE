@@ -3,7 +3,6 @@ package jalse.attributes;
 import jalse.listeners.AttributeListener;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -21,7 +20,7 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
-    public <T extends Attribute> Optional<T> addAttributeOfType(final T attr) {
+    public <T extends Attribute> T addOrNullAttributeOfType(final T attr) {
 	return delegate.addOfType(attr);
     }
 
@@ -51,11 +50,6 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
-    public <T extends Attribute> Optional<T> getAttributeOfType(final Class<T> attr) {
-	return delegate.getOfType(attr);
-    }
-
-    @Override
     public Set<? extends Attribute> getAttributes() {
 	return Collections.unmodifiableSet(delegate);
     }
@@ -66,18 +60,23 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
+    public <T extends Attribute> T getOrNullAttributeOfType(final Class<T> attr) {
+	return delegate.getOfType(attr);
+    }
+
+    @Override
     public boolean removeAttributeListener(final AttributeListener<? extends Attribute> listener) {
 	return delegate.removeListener(listener);
     }
 
     @Override
-    public <T extends Attribute> Optional<T> removeAttributeOfType(final Class<T> attr) {
-	return delegate.removeOfType(attr);
+    public void removeAttributes() {
+	delegate.clear();
     }
 
     @Override
-    public void removeAttributes() {
-	delegate.clear();
+    public <T extends Attribute> T removeOrNullAttributeOfType(final Class<T> attr) {
+	return delegate.removeOfType(attr);
     }
 
     @Override

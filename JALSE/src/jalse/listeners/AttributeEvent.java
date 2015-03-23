@@ -77,7 +77,16 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
     /**
      * Get the Attribute that was replaced by this Attribute.
      *
-     * @return Replaced Attribute.
+     * @return Replaced Attribute or null if nothing was replaced.
+     */
+    public T getOrNullReplacedAttribite() {
+	return replacedAttr;
+    }
+
+    /**
+     * Get the Attribute that was replaced by this Attribute.
+     *
+     * @return Optional containing replaced attribute or empty optional if nothing was replaced.
      */
     public Optional<T> getReplacedAttribute() {
 	return Optional.ofNullable(replacedAttr);
