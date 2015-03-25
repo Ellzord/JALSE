@@ -37,7 +37,7 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
      */
     @SuppressWarnings("unchecked")
     public ListenerSet(final Class<T> clazz) {
-	proxy = (T) Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, this);
+	proxy = (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { clazz }, this);
     }
 
     @Override

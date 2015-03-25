@@ -250,6 +250,11 @@ public interface EntityContainer {
     <T extends Entity> T newEntity(UUID id, Class<T> type);
 
     /**
+     * Removes all listeners for entities.
+     */
+    void removeAllEntityListeners();
+
+    /**
      * Removes a entity listener.
      *
      * @param listener

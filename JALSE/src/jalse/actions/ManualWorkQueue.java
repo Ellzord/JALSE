@@ -53,7 +53,7 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
 	    boolean result;
 	    if (result = !waitingWork.contains(context)) {
 		waitingWork.add(context);
-		workChanged.signalAll();
+		workChanged.signalAll(); // Wake up!
 	    }
 	    return result;
 	} finally {
@@ -73,8 +73,8 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
 	    long next = getEarliestReadyEstimate();
 	    while (!workAvailable() && !waitingWork.isEmpty()) {
 		if (next > 0L) {
-		    workChanged.awaitNanos(next - System.nanoTime());
-		    next = getEarliestReadyEstimate();
+		    workChanged.awaitNanos(next - System.nanoTime()); // Or signal
+		    next = getEarliestReadyEstimate(); // Might be new work added?
 		}
 	    }
 	} finally {
@@ -89,7 +89,7 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
 	write.lock();
 	try {
 	    waitingWork.clear();
-	    workChanged.signalAll();
+	    workChanged.signalAll(); // Wake up!
 	} finally {
 	    write.unlock();
 	}

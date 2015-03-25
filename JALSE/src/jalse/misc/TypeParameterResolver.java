@@ -3,7 +3,6 @@ package jalse.misc;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -50,22 +49,6 @@ public final class TypeParameterResolver {
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
-	    if (this == obj) {
-		return true;
-	    }
-
-	    if (!(obj instanceof ParameterizedType)) {
-		return false;
-	    }
-
-	    final ParameterizedType pt = (ParameterizedType) obj;
-	    return Objects.equals(rawType, pt.getRawType())
-		    && Arrays.equals(actualTypeArguments, pt.getActualTypeArguments())
-		    && Objects.equals(ownerType, pt.getOwnerType());
-	}
-
-	@Override
 	public Type[] getActualTypeArguments() {
 	    return actualTypeArguments;
 	}
@@ -78,15 +61,6 @@ public final class TypeParameterResolver {
 	@Override
 	public Type getRawType() {
 	    return rawType;
-	}
-
-	@Override
-	public int hashCode() {
-	    int result = 1;
-	    result = 31 * result + rawType.hashCode();
-	    result = 31 * result + Arrays.hashCode(actualTypeArguments);
-	    result = 31 * result + (ownerType == null ? 0 : ownerType.hashCode());
-	    return result;
 	}
     }
 
@@ -101,7 +75,7 @@ public final class TypeParameterResolver {
      */
     public static TypeVariable<? extends Class<?>> getTypeParameter(final Class<?> clazz, final String name) {
 	for (final TypeVariable<? extends Class<?>> param : clazz.getTypeParameters()) {
-	    if (param.getName().equals(name)) {
+	    if (param.getName().equals(name)) { // Like "T", "S", "U", etc
 		return param;
 	    }
 	}
@@ -119,7 +93,7 @@ public final class TypeParameterResolver {
 	Class<?> result = null;
 	if (type instanceof Class) {
 	    result = (Class<?>) type;
-	} else if (type instanceof ParameterizedType) {
+	} else if (type instanceof ParameterizedType) { // Could be our resolved
 	    result = toClass(((ParameterizedType) type).getRawType());
 	}
 	return result;
@@ -201,7 +175,7 @@ public final class TypeParameterResolver {
 		if (typeParameter.equals(param)) {
 		    return ((ParameterizedType) superType).getActualTypeArguments()[index];
 		}
-		index++;
+		index++; // Indexes match
 	    }
 	}
 	throw new IllegalArgumentException(String.format("Type does not have %s in its class tree", declaringClazz));
@@ -220,7 +194,7 @@ public final class TypeParameterResolver {
 	    final Type[] args = pt.getActualTypeArguments();
 	    int index = 0;
 	    for (final TypeVariable<?> param : ((Class<?>) pt.getRawType()).getTypeParameters()) {
-		paramsToArgs.put(param, args[index++]);
+		paramsToArgs.put(param, args[index++]); // Map
 	    }
 	    currentOwner = pt.getOwnerType();
 	}
@@ -231,7 +205,7 @@ public final class TypeParameterResolver {
 
 	for (int i = 0; i < args.length; i++) {
 	    final Type arg = args[i];
-	    resolvedArgs[i] = arg instanceof Class ? arg : paramsToArgs.get(arg);
+	    resolvedArgs[i] = arg instanceof Class ? arg : paramsToArgs.get(arg); // Resolve
 	}
 
 	return new ResolvedParameterizedType((Class<?>) pt.getRawType(), resolvedArgs, pt.getOwnerType());
@@ -268,7 +242,7 @@ public final class TypeParameterResolver {
 
 	for (final Type superType : resolveDirectSuperTypes(type)) {
 	    final Type result = resolveRelevantSuperType(superType);
-	    if (result != null) {
+	    if (result != null) { // Resolved!
 		return result;
 	    }
 	}

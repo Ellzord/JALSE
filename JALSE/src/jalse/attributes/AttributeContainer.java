@@ -164,6 +164,11 @@ public interface AttributeContainer {
     }
 
     /**
+     * Removes all listeners for all attribute types.
+     */
+    void removeAllAttributeListeners();
+
+    /**
      * Removes an attribute listener assigned to the supplied attribute type.
      *
      * @param listener
@@ -171,6 +176,14 @@ public interface AttributeContainer {
      * @return Whether the listener was assigned.
      */
     boolean removeAttributeListener(AttributeListener<? extends Attribute> listener);
+
+    /**
+     * Removes all listeners for the supplied attribute types.
+     *
+     * @param attr
+     *            Attribute type.
+     */
+    <T extends Attribute> void removeAttributeListeners(Class<T> attr);
 
     /**
      * This is a convenience method for removing an attribute (no optional).

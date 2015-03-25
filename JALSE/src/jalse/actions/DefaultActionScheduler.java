@@ -35,7 +35,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
      */
     public DefaultActionScheduler(final T actor) {
 	this.actor = Objects.requireNonNull(actor);
-	engine = ForkJoinActionEngine.commonPoolEngine();
+	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
 	contexts = Collections.newSetFromMap(new WeakHashMap<>());
     }
 
@@ -45,7 +45,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     @Override
     public void cancelAllScheduledForActor() {
 	synchronized (contexts) {
-	    contexts.forEach(c -> c.cancel());
+	    contexts.forEach(ActionContext<T>::cancel);
 	    contexts.clear();
 	}
     }
@@ -72,7 +72,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     public MutableActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
 	    final TimeUnit unit) {
 	if (engine.isStopped()) {
-	    return Actions.emptyActionContext();
+	    return Actions.emptyActionContext(); // Case of post cancel scheduling
 	}
 
 	final MutableActionContext<T> context;
@@ -87,7 +87,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 
 	context.schedule();
 
-	return unmodifiableActionContext(context);
+	return unmodifiableActionContext(context); // Don't allow for mutation (it's running)
     }
 
     /**
@@ -97,7 +97,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
      *            Engine to schedule actions against.
      */
     public void setEngine(final ActionEngine engine) {
-	if (!Objects.equals(this.engine, engine)) {
+	if (!Objects.equals(this.engine, engine)) { // Only if changed
 	    synchronized (contexts) {
 		contexts.clear();
 	    }

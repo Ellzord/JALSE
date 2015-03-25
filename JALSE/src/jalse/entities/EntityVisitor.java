@@ -31,7 +31,7 @@ public interface EntityVisitor {
      * @author Elliot Ford
      *
      */
-    enum EntityVisitResult {
+    public enum EntityVisitResult {
 
 	/**
 	 * Continue to process this sub-tree.

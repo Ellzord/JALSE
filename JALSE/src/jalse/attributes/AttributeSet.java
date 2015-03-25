@@ -1,11 +1,11 @@
 package jalse.attributes;
 
 import static jalse.attributes.Attributes.requireNonNullAttrSub;
+import static jalse.listeners.Listeners.createAttributeListenerSet;
 import static jalse.misc.TypeParameterResolver.toClass;
 import jalse.listeners.AttributeEvent;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.ListenerSet;
-import jalse.listeners.Listeners;
 import jalse.misc.TypeParameterResolver;
 
 import java.util.AbstractSet;
@@ -82,7 +82,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	try {
 	    ListenerSet<AttributeListener> ls = attributeListeners.get(attr);
 	    if (ls == null) {
-		attributeListeners.put((Class<? extends Attribute>) attr, ls = Listeners.createAttributeListenerSet());
+		attributeListeners.put((Class<? extends Attribute>) attr, ls = createAttributeListenerSet());
 	    }
 	    return ls.add(listener);
 	} finally {
@@ -166,15 +166,6 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *
      * @return Set of the types attribute listeners are for or an empty set if none were found.
      */
-    public Set<Class<? extends Attribute>> getAttributeListenerTypes() {
-	return Collections.unmodifiableSet(attributeListeners.keySet());
-    }
-
-    /**
-     * Gets all the attribute listener types.
-     *
-     * @return Set of the types attribute listeners are for or an empty set if none were found.
-     */
     public Set<Class<? extends Attribute>> getAttributeTypes() {
 	return Collections.unmodifiableSet(attributes.keySet());
     }
@@ -194,7 +185,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
      * @return Set of attribute listeners or an empty set if none were found.
      */
     public Set<? extends AttributeListener<? extends Attribute>> getListeners() {
-	return attributeListeners.values().stream().flatMap(a -> a.stream()).collect(Collectors.toSet());
+	return attributeListeners.values().stream().flatMap(ListenerSet::stream).collect(Collectors.toSet());
     }
 
     /**
@@ -214,6 +205,15 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	} finally {
 	    lock.unlockRead(stamp);
 	}
+    }
+
+    /**
+     * Gets all the attribute listener types.
+     *
+     * @return Set of the types attribute listeners are for or an empty set if none were found.
+     */
+    public Set<Class<? extends Attribute>> getListenerTypes() {
+	return Collections.unmodifiableSet(attributeListeners.keySet());
     }
 
     /**
@@ -248,6 +248,18 @@ public class AttributeSet extends AbstractSet<Attribute> {
     }
 
     /**
+     * Removes all listeners for all attribute types.
+     */
+    public void removeAllListeners() {
+	final long stamp = lock.writeLock();
+	try {
+	    attributeListeners.clear();
+	} finally {
+	    lock.unlockWrite(stamp);
+	}
+    }
+
+    /**
      * Removes an attribute listener assigned to the supplied attribute type.
      *
      * @param listener
@@ -262,7 +274,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	    final Set<AttributeListener> ls = attributeListeners.get(attr);
 	    if (ls != null) {
 		boolean removed;
-		if (removed = ls.remove(listener) && ls.isEmpty()) {
+		if (removed = ls.remove(listener) && ls.isEmpty()) { // No more listeners of type
 		    attributeListeners.remove(attr);
 		}
 		return removed;
@@ -272,6 +284,21 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	}
 
 	return false;
+    }
+
+    /**
+     * Removes all listeners for the supplied attribute types.
+     *
+     * @param attr
+     *            Attribute type.
+     */
+    public <T extends Attribute> void removeListeners(final Class<T> attr) {
+	final long stamp = lock.writeLock();
+	try {
+	    attributeListeners.remove(requireNonNullAttrSub(attr));
+	} finally {
+	    lock.unlockWrite(stamp);
+	}
     }
 
     /**

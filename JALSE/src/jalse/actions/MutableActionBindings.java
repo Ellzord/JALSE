@@ -38,4 +38,9 @@ public interface MutableActionBindings extends ActionBindings {
      * @return Value that was bound to the key or else null if none were.
      */
     <T> T remove(String key);
+
+    /**
+     * Removes all key-value pairs.
+     */
+    void removeAll();
 }

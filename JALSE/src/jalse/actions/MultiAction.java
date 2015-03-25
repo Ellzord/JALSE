@@ -61,7 +61,7 @@ class MultiAction<T> implements Action<T> {
     private void performAll(final ActionContext<T> context, final Collection<? extends Action<T>> actions)
 	    throws InterruptedException {
 	for (final Action<T> action : actions) {
-	    action.perform(context);
+	    action.perform(context); // Execute action
 	}
     }
 
@@ -74,8 +74,8 @@ class MultiAction<T> implements Action<T> {
 
 	for (final Action<T> action : actions) {
 	    final MutableActionContext<T> newContext = engine.createContext(action);
-	    newContext.setActor(actor);
-	    newContext.putAll(context.toMap());
+	    newContext.setActor(actor); // Same actor
+	    newContext.putAll(context.toMap()); // Copy bindings (current)
 	    newContext.schedule();
 
 	    newContexts.add(newContext);
@@ -87,7 +87,7 @@ class MultiAction<T> implements Action<T> {
     private void scheduleAwaitAll(final ActionContext<T> context, final Collection<? extends Action<T>> actions)
 	    throws InterruptedException {
 	for (final MutableActionContext<T> newContext : scheduleAll(context, actions)) {
-	    if (!newContext.isDone()) {
+	    if (!newContext.isDone()) { // Stops us for waiting forever
 		newContext.await();
 	    }
 	}

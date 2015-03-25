@@ -120,7 +120,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
     public Iterator<Tag> iterator() {
 	final long stamp = lock.readLock();
 	try {
-	    return tags.values().stream().flatMap(s -> s.stream()).iterator();
+	    return tags.values().stream().flatMap(Set::stream).iterator();
 	} finally {
 	    lock.unlockRead(stamp);
 	}
@@ -165,7 +165,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
     public int size() {
 	final long stamp = lock.readLock();
 	try {
-	    return tags.values().stream().mapToInt(s -> s.size()).sum();
+	    return tags.values().stream().mapToInt(Set::size).sum();
 	} finally {
 	    lock.unlockRead(stamp);
 	}

@@ -46,7 +46,7 @@ class AttributeSetContainer implements AttributeContainer {
 
     @Override
     public Set<Class<? extends Attribute>> getAttributeListenerTypes() {
-	return delegate.getAttributeListenerTypes();
+	return delegate.getListenerTypes();
     }
 
     @Override
@@ -65,8 +65,18 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
+    public void removeAllAttributeListeners() {
+	delegate.removeAllListeners();
+    }
+
+    @Override
     public boolean removeAttributeListener(final AttributeListener<? extends Attribute> listener) {
 	return delegate.removeListener(listener);
+    }
+
+    @Override
+    public <T extends Attribute> void removeAttributeListeners(final Class<T> attr) {
+	delegate.removeListeners(attr);
     }
 
     @Override

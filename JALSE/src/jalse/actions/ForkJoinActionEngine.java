@@ -75,13 +75,13 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 	public void run() {
 	    while (workQueue.isWorkWaiting()) {
 		try {
-		    awaitResumed();
+		    awaitResumed(); // Paused
 		} catch (final InterruptedException e) {
 		    break;
 		}
 
 		try {
-		    ForkJoinPool.managedBlock(blocker);
+		    ForkJoinPool.managedBlock(blocker); // Allows other ForkJoinThreads to run
 		} catch (final InterruptedException e) {}
 
 		if (!workQueue.isWorkWaiting()) {
@@ -90,22 +90,25 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 
 		final ForkJoinContext<?> work = workQueue.pollReadyWork();
 		if (work != null) {
-		    freeWorkers.decrementAndGet();
+		    freeWorkers.decrementAndGet(); // Will be busy working
 
 		    try {
 			work.performAction();
 		    } catch (final InterruptedException e) {
-			break;
+			break; // Cancellation
 		    } finally {
-			freeWorkers.incrementAndGet();
+			freeWorkers.incrementAndGet(); // Ready again
 		    }
 		}
 
+		/*
+		 * Only one worker needed to wait for scheduled tasks to arrive.
+		 */
 		if (freeWorkers.get() > 1) {
 		    break;
 		}
 	    }
-	    freeWorkers.decrementAndGet();
+	    freeWorkers.decrementAndGet(); // Finished.
 	}
     }
 
@@ -181,7 +184,7 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
      * Starts a worker if needed (waiting work and no free workers).
      */
     protected void addWorkerIfNeeded() {
-	if (workQueue.isWorkWaiting() && freeWorkers.compareAndSet(0, 1)) {
+	if (workQueue.isWorkWaiting() && freeWorkers.compareAndSet(0, 1)) { // Only needs one worker
 	    executorService.submit(new ForkJoinContextWorker());
 	}
     }
@@ -214,7 +217,7 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
     @Override
     public void stop() {
 	requireNotShutdown(executorService);
-	super.stop();
+	super.stop(); // Shutdown pool first
 	workQueue.getWaitingWork().forEach(ForkJoinContext::cancel);
     }
 }

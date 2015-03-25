@@ -1,5 +1,7 @@
 package jalse.entities;
 
+import static jalse.misc.JALSEExceptions.INVALID_ENTITY_TYPE;
+import static jalse.misc.JALSEExceptions.throwRE;
 import static jalse.misc.TypeParameterResolver.getTypeParameter;
 import static jalse.misc.TypeParameterResolver.toClass;
 import jalse.attributes.Attribute;
@@ -15,8 +17,11 @@ import jalse.misc.ProxyCache.ProxyFactory;
 import jalse.misc.TypeParameterResolver;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +34,59 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-class EntityProxies {
+/**
+ * A utility for validating {@link Entity} subclasses and creating proxies of these. The proxies are
+ * cached for performance reasons but can be managed using this utility. It is possible to create a
+ * new uncached proxy instance with {@link #uncachedProxyOfEntity(Entity, Class)}.<br>
+ * <br>
+ * An entity subclass can have the following method definitions: <br>
+ * 1) Setting an Attribute of type (will remove if argument passed is null).<br>
+ * 2) Getting an Attribute of type. <br>
+ * 3) Getting an Entity as type. <br>
+ * 4) Creating a new Entity of type. <br>
+ * 5) Getting a Set of all of the child entities of or as type.<br>
+ * 6) Getting a Stream of all of the child entities of or as type.<br>
+ * <br>
+ * For an Entity proxy to be created the type be validated: <br>
+ * 1. Must be a subclass of Entity (can be indirect). <br>
+ * 2. Can only have super types that are also subclasses of Entity. <br>
+ * 3. Must only contain default or annotated methods:<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;a) {@link SetAttribute} <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;b) {@link GetAttribute} <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;c) {@link GetEntity} <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;d) {@link NewEntity}<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;e) {@link GetEntities}<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;f) {@link StreamEntities}<br>
+ * <br>
+ * NOTE: The javadoc for the annotations provide more information about how to define the method.<br>
+ * <br>
+ * An example entity type:
+ *
+ * <pre>
+ * <code>
+ * public interface Car extends Entity {
+ * 
+ * 	{@code @GetAttribute}
+ * 	Optional{@code<Load>} getLoad();
+ * 
+ * 	{@code @SetAttribute}
+ * 	void setLoad(Load load);
+ * }
+ * 
+ * Entity e; // Previously created entity
+ * 
+ * Car car = Entities.asType(e, Car.class);
+ * Load load = car.getLoad();
+ * </code>
+ * </pre>
+ *
+ * @author Elliot Ford
+ *
+ * @see #proxyOfEntity(Entity, Class)
+ * @see ProxyCache
+ *
+ */
+public final class EntityProxies {
 
     private static class EntityTypeFactory implements ProxyFactory {
 
@@ -40,7 +97,7 @@ class EntityProxies {
 
 	@Override
 	public boolean validate(final Class<?> type) {
-	    return validateType(type, new HashSet<>());
+	    return validateTree(type, new HashSet<>());
 	}
     }
 
@@ -59,32 +116,34 @@ class EntityProxies {
 	    }
 
 	    /*
+	     * Not Entity subclass.
+	     */
+	    final Class<?> declaringClazz = method.getDeclaringClass();
+	    if (Entity.class.equals(declaringClazz) || !Entity.class.isAssignableFrom(declaringClazz)) {
+		return method.invoke(entity, args);
+	    }
+
+	    /*
 	     * Default methods.
 	     */
 	    if (method.isDefault()) {
-		return method.invoke(entity, args);
+		return lookups.get(declaringClazz).unreflectSpecial(method, declaringClazz).bindTo(proxy)
+			.invokeWithArguments(args);
 	    }
 
 	    /*
-	     * Resolved class from validation.
+	     * Entity type method info.
 	     */
-	    final EntityTypeMethod etm = getTypeMethod(method);
-
-	    /*
-	     * Not entity type methods!
-	     */
-	    if (etm == null) {
-		return method.invoke(entity, args);
-	    }
+	    final EntityTypeMethodInfo etmi = methodInfos.get(method);
 
 	    /*
 	     * getAttributeOfType(Class) / getOrNullAttributeOfType(Class)
 	     */
-	    if (etm.forAnnotationType(GetAttribute.class)) {
-		if (etm.isOrNull()) {
-		    return entity.getOrNullAttributeOfType((Class<? extends Attribute>) etm.getResolved());
+	    if (etmi.forAnnotationType(GetAttribute.class)) {
+		if (etmi.isOrNull()) {
+		    return entity.getOrNullAttributeOfType((Class<? extends Attribute>) etmi.getResolved());
 		} else {
-		    return entity.getAttributeOfType((Class<? extends Attribute>) etm.getResolved());
+		    return entity.getAttributeOfType((Class<? extends Attribute>) etmi.getResolved());
 		}
 	    }
 
@@ -92,20 +151,20 @@ class EntityProxies {
 	     * addAttributeOfType(Attribute) / addOrNullAttributeOfType(Attribute) /
 	     * removeAttributeOfType(Class) / removeOrNullAttributeOfType(Class)
 	     */
-	    if (etm.forAnnotationType(SetAttribute.class)) {
+	    if (etmi.forAnnotationType(SetAttribute.class)) {
 		final Attribute attr = (Attribute) args[0];
 
-		if (etm.isOrNull()) {
+		if (etmi.isOrNull()) {
 		    if (attr != null) {
 			return entity.addOrNullAttributeOfType((Attribute) args[0]);
 		    } else {
-			return entity.removeOrNullAttributeOfType((Class<? extends Attribute>) etm.getResolved());
+			return entity.removeOrNullAttributeOfType((Class<? extends Attribute>) etmi.getResolved());
 		    }
 		} else {
 		    if (attr != null) {
 			return entity.addAttributeOfType((Attribute) args[0]);
 		    } else {
-			return entity.removeAttributeOfType((Class<? extends Attribute>) etm.getResolved());
+			return entity.removeAttributeOfType((Class<? extends Attribute>) etmi.getResolved());
 		    }
 		}
 	    }
@@ -113,45 +172,45 @@ class EntityProxies {
 	    /*
 	     * newEntity(Class) / newEntity(UUID, Class)
 	     */
-	    if (etm.forAnnotationType(NewEntity.class)) {
+	    if (etmi.forAnnotationType(NewEntity.class)) {
 		if (args != null && args.length == 1) {
-		    return entity.newEntity((UUID) args[0], (Class<? extends Entity>) etm.getResolved());
+		    return entity.newEntity((UUID) args[0], (Class<? extends Entity>) etmi.getResolved());
 
 		} else {
-		    return entity.newEntity((Class<? extends Entity>) etm.getResolved());
+		    return entity.newEntity((Class<? extends Entity>) etmi.getResolved());
 		}
 	    }
 
 	    /*
 	     * getEntityAsType(Class)
 	     */
-	    if (etm.forAnnotationType(GetEntity.class)) {
-		if (etm.isOrNull()) {
-		    return entity.getOrNullEntityAsType((UUID) args[0], (Class<? extends Entity>) etm.getResolved());
+	    if (etmi.forAnnotationType(GetEntity.class)) {
+		if (etmi.isOrNull()) {
+		    return entity.getOrNullEntityAsType((UUID) args[0], (Class<? extends Entity>) etmi.getResolved());
 		} else {
-		    return entity.getEntityAsType((UUID) args[0], (Class<? extends Entity>) etm.getResolved());
+		    return entity.getEntityAsType((UUID) args[0], (Class<? extends Entity>) etmi.getResolved());
 		}
 	    }
 
 	    /*
 	     * streamEntitiesOfType(Class) / streamEntitiesAsType(Class)
 	     */
-	    if (etm.forAnnotationType(StreamEntities.class)) {
-		if (((StreamEntities) etm.getAnnotation()).ofType()) {
-		    return entity.streamEntitiesOfType((Class<? extends Entity>) etm.getResolved());
+	    if (etmi.forAnnotationType(StreamEntities.class)) {
+		if (((StreamEntities) etmi.getAnnotation()).ofType()) {
+		    return entity.streamEntitiesOfType((Class<? extends Entity>) etmi.getResolved());
 		} else {
-		    return entity.streamEntitiesAsType((Class<? extends Entity>) etm.getResolved());
+		    return entity.streamEntitiesAsType((Class<? extends Entity>) etmi.getResolved());
 		}
 	    }
 
 	    /*
 	     * getEntitiesOfType(Class) / getEntitiesAsType(Class)
 	     */
-	    if (etm.forAnnotationType(GetEntities.class)) {
-		if (((GetEntities) etm.getAnnotation()).ofType()) {
-		    return entity.getEntitiesOfType((Class<? extends Entity>) etm.getResolved());
+	    if (etmi.forAnnotationType(GetEntities.class)) {
+		if (((GetEntities) etmi.getAnnotation()).ofType()) {
+		    return entity.getEntitiesOfType((Class<? extends Entity>) etmi.getResolved());
 		} else {
-		    return entity.getEntitiesAsType((Class<? extends Entity>) etm.getResolved());
+		    return entity.getEntitiesAsType((Class<? extends Entity>) etmi.getResolved());
 		}
 	    }
 
@@ -159,13 +218,13 @@ class EntityProxies {
 	}
     }
 
-    private static class EntityTypeMethod {
+    private static class EntityTypeMethodInfo {
 
 	private final Annotation annotation;
-	private final Class<?> resolved;
 	private final boolean orNull;
+	private final Class<?> resolved;
 
-	public EntityTypeMethod(final Annotation annotation, final Class<?> resolved, final boolean orNull) {
+	public EntityTypeMethodInfo(final Annotation annotation, final Class<?> resolved, final boolean orNull) {
 	    this.annotation = annotation;
 	    this.resolved = resolved;
 	    this.orNull = orNull;
@@ -202,44 +261,130 @@ class EntityProxies {
 
     private static final ProxyCache typeCache = new ProxyCache(new EntityTypeFactory());
 
-    private static final Map<Class<?>, Map<Method, EntityTypeMethod>> typesToMethods = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Lookup> lookups = new ConcurrentHashMap<>();
 
-    private static EntityTypeMethod getTypeMethod(final Method method) {
-	final Map<Method, EntityTypeMethod> methods = typesToMethods.get(method.getDeclaringClass());
-	return methods != null ? methods.get(method) : null;
+    private static final Map<Method, EntityTypeMethodInfo> methodInfos = new ConcurrentHashMap<>();
+
+    /**
+     * Checks to see if the supplied entity is a proxy.
+     *
+     * @param e
+     *            Possible proxy to check.
+     * @return Whether the entity is a proxy.
+     */
+    public static boolean isProxyEntity(final Entity e) {
+	return Proxy.isProxyClass(e.getClass()) && Proxy.getInvocationHandler(e) instanceof EntityTypeHandler;
     }
 
+    private static Lookup newLookupInstance(final Class<?> type) {
+	try {
+	    final Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class, int.class);
+	    constructor.setAccessible(true);
+	    return constructor.newInstance(type, Lookup.PRIVATE);
+	} catch (final Exception e) {
+	    throw new RuntimeException(String.format("Private lookup needed of %s for default method access", type), e);
+	}
+    }
+
+    /**
+     * Gets or creates a proxy of the supplied entity as the suppied type.
+     *
+     * @param e
+     *            Entity to wrap.
+     * @param type
+     *            Entity type.
+     * @return Entity proxy of type.
+     *
+     * @see #validateEntityType(Class)
+     */
     public static <T extends Entity> T proxyOfEntity(final Entity e, final Class<T> type) {
+	validateEntityType(type);
 	return typeCache.getOrCreate(e, type);
     }
 
+    /**
+     * Removes all proxies in the cache.
+     */
+    public static void removeAllProxies() {
+	typeCache.removeAll();
+    }
+
+    /**
+     * Removes all proxies of the supplied type.
+     *
+     * @param type
+     *            Entity type.
+     */
+    public static void removeAllProxiesOfType(final Class<? extends Entity> type) {
+	typeCache.invalidateType(type);
+    }
+
+    /**
+     * Removes all proxies of a supplied entity.
+     *
+     * @param e
+     *            Entity to remove proxies for.
+     */
     public static void removeProxiesOfEntity(final Entity e) {
 	typeCache.removeAll(e);
     }
 
+    /**
+     * Removes a specific proxy of an entity.
+     *
+     * @param e
+     *            Entity remove for.
+     * @param type
+     *            Entity type.
+     */
     public static void removeProxyOfEntity(final Entity e, final Class<? extends Entity> type) {
 	typeCache.remove(e, type);
     }
 
-    private static boolean validateType(final Class<?> type, final Set<Class<?>> validated) {
+    /**
+     * Creates a new uncached proxy of an entity as the supplied type.
+     *
+     * @param e
+     *            Entity to wrap.
+     * @param type
+     *            Entity type.
+     * @return New uncached proxy instance of entity.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Entity> T uncachedProxyOfEntity(final Entity e, final Class<T> type) {
+	if (!validateTree(type, new HashSet<>())) {
+	    throwRE(INVALID_ENTITY_TYPE);
+	}
+	return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { type },
+		new EntityTypeHandler(e, type));
+    }
+
+    /**
+     * Validates a specified Entity type according the criteria defined above. The ancestor
+     * {@code interface} {@link Entities} is considered to be invalid.
+     *
+     * @param type
+     *            Entity type to validate.
+     * @throws IllegalArgumentException
+     *             If the Entity type fails validation.
+     */
+    public static void validateEntityType(final Class<? extends Entity> type) {
+	if (Entity.class.equals(type) || !typeCache.validateType(type)) {
+	    throwRE(INVALID_ENTITY_TYPE);
+	}
+    }
+
+    private static boolean validateTree(final Class<?> type, final Set<Class<?>> validated) {
 	if (!Entity.class.isAssignableFrom(type)) { // Not Entity or subclass.
 	    return false;
 	} else if (Entity.class.equals(type)) { // Can stop here.
 	    return true;
 	}
 
-	final Map<Method, EntityTypeMethod> resolvedMethods = new HashMap<>();
+	final Map<Method, EntityTypeMethodInfo> resolvedMethods = new HashMap<>();
 	final Set<Class<?>> referencedtypes = new HashSet<>();
 
 	for (final Method method : type.getDeclaredMethods()) {
-
-	    /*
-	     * Skip default methods.
-	     */
-	    if (method.isDefault()) {
-		continue;
-	    }
-
 	    /*
 	     * Handler annotation.
 	     */
@@ -252,7 +397,13 @@ class EntityProxies {
 		    annotation = a;
 		}
 	    }
-	    if (annotation == null) { // Needs annotation..
+
+	    /*
+	     * Skip un-annotated default methods.
+	     */
+	    if (annotation == null && method.isDefault()) {
+		continue;
+	    } else if (annotation == null || method.isDefault()) {
 		return false;
 	    }
 
@@ -285,7 +436,7 @@ class EntityProxies {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethod(annotation, resolved, orNull));
+		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, orNull));
 		continue;
 	    }
 
@@ -319,7 +470,7 @@ class EntityProxies {
 		    }
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethod(annotation, resolved, orNull));
+		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, orNull));
 		continue;
 	    }
 
@@ -336,7 +487,7 @@ class EntityProxies {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethod(annotation, resolved, false));
+		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, false));
 		referencedtypes.add(resolved);
 		continue;
 	    }
@@ -361,7 +512,7 @@ class EntityProxies {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethod(annotation, resolved, orNull));
+		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, orNull));
 		referencedtypes.add(resolved);
 		continue;
 	    }
@@ -387,7 +538,7 @@ class EntityProxies {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethod(annotation, resolved, false));
+		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, false));
 		referencedtypes.add(resolved);
 		continue;
 	    }
@@ -413,7 +564,7 @@ class EntityProxies {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethod(annotation, resolved, false));
+		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, false));
 		referencedtypes.add(resolved);
 		continue;
 	    }
@@ -436,18 +587,15 @@ class EntityProxies {
 		continue;
 	    }
 
-	    if (!validateType(ref, validated)) {
+	    if (!validateTree(ref, validated)) {
 		return false;
 	    }
 	}
 
-	typesToMethods.put(type, resolvedMethods);
+	lookups.put(type, newLookupInstance(type));
+	methodInfos.putAll(resolvedMethods);
 
 	return true;
-    }
-
-    public static boolean validEntityType(final Class<?> type) {
-	return !Entity.class.equals(type) && typeCache.isValidType(type);
     }
 
     private EntityProxies() {

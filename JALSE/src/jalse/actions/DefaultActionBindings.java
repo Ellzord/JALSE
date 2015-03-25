@@ -79,6 +79,11 @@ public class DefaultActionBindings implements MutableActionBindings {
     }
 
     @Override
+    public void removeAll() {
+	bindings.clear();
+    }
+
+    @Override
     public Map<String, ?> toMap() {
 	return new HashMap<>(bindings);
     }

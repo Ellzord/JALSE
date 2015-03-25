@@ -28,7 +28,7 @@ import jalse.entities.Entity;
  * @see ManualActionEngine
  *
  */
-public class JALSEBuilder {
+public final class JALSEBuilder {
 
     /**
      * The default parallelism to be utilised by the engine for performing actions (

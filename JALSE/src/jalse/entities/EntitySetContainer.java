@@ -86,6 +86,11 @@ class EntitySetContainer implements EntityContainer {
     }
 
     @Override
+    public void removeAllEntityListeners() {
+	delegate.removeAllListeners();
+    }
+
+    @Override
     public boolean removeEntityListener(final EntityListener listener) {
 	return delegate.removeListener(listener);
     }

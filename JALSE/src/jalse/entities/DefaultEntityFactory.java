@@ -48,7 +48,7 @@ public class DefaultEntityFactory implements EntityFactory {
 	}
 	this.entityLimit = entityLimit;
 	entityIDs = new HashSet<>();
-	engine = ForkJoinActionEngine.commonPoolEngine();
+	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
 	entityCount = 0;
     }
 
@@ -88,7 +88,7 @@ public class DefaultEntityFactory implements EntityFactory {
 	synchronized (entityIDs) {
 	    final DefaultEntity de = (DefaultEntity) e;
 
-	    if (!entityIDs.remove(de.getID()) || !de.isAlive()) {
+	    if (!entityIDs.remove(de.getID()) || !de.isAlive()) { // Kill only those in need
 		return false;
 	    }
 
@@ -98,9 +98,9 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	    entityCount--;
 
-	    de.killEntities();
+	    de.killEntities(); // Kill tree
 
-	    EntityProxies.removeProxiesOfEntity(de);
+	    EntityProxies.removeProxiesOfEntity(de); // Force clean-up
 	}
 
 	return true;
@@ -113,7 +113,7 @@ public class DefaultEntityFactory implements EntityFactory {
 	}
 
 	synchronized (entityIDs) {
-	    if (!entityIDs.add(id)) {
+	    if (!entityIDs.add(id)) { // Unique only
 		throwRE(ENTITY_ALREADY_ASSOCIATED);
 	    }
 

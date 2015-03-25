@@ -22,7 +22,9 @@ import java.util.concurrent.locks.StampedLock;
  * {@link ProxyFactory}. This class should make {@link CacheHandler} instances to be used as
  * {@link InvocationHandler} for the newly created proxy instances.<br>
  * <br>
- * ProxyCache keeps track of validated types so will not revalidate unless
+ * ProxyCache will validate types based on {@link ProxyFactory#validate(Class)} and this can be done
+ * by {@link #validateType(Class)} or the type will be validated when a proxy is accessed.
+ * ProxyCache keeps track of validated types so will not re-validate unless
  * {@link #invalidateType(Class)} is called (this also drops the proxies matching this type from the
  * cache).
  *
@@ -135,6 +137,28 @@ public class ProxyCache {
 	lock = new StampedLock();
     }
 
+    private long ensureEntryForObj(final Object obj, final long stamp, final boolean forceWrite) {
+	long newStamp = stamp;
+
+	if (lock.isReadLocked()) {
+	    if (forceWrite || !proxies.containsKey(obj)) {
+		final long ws = lock.tryConvertToWriteLock(stamp);
+		if (ws != 0L) { // Could not convert
+		    newStamp = ws;
+		} else {
+		    lock.unlockRead(stamp);
+		    newStamp = lock.writeLock();
+		}
+	    }
+	}
+
+	if (!proxies.containsKey(obj)) { // Re-check may have lost lock
+	    proxies.put(obj, new HashMap<>());
+	}
+
+	return newStamp;
+    }
+
     /**
      * Gets the proxy factory.
      *
@@ -171,18 +195,21 @@ public class ProxyCache {
 	    }
 	}
 
-	validateType(type);
-
 	long stamp = lock.readLock();
 	try {
-	    stamp = lockAndEnsureEntryForObj(unwrapped, stamp, false);
+	    stamp = validateTypeStartRead(stamp, type); // Validate and keep lock
+	    if (!validTypes.contains(type)) { // Failed
+		throw new IllegalArgumentException("Supplied type did not pass validation");
+	    }
+
+	    stamp = ensureEntryForObj(unwrapped, stamp, false); // Ensure can get objProxies
 	    Map<Class<?>, Object> objProxies = proxies.get(unwrapped);
 
 	    Object proxy = objProxies.get(type);
 	    if (proxy != null) { // Read-only already exists
 		return (T) proxy;
-	    } else if (lock.isReadLocked()) { // Read-only but didn't exist
-		stamp = lockAndEnsureEntryForObj(unwrapped, stamp, true);
+	    } else { // Entry doesn't exist (maybe write lock).
+		stamp = ensureEntryForObj(unwrapped, stamp, true);
 		objProxies = proxies.get(unwrapped);
 		proxy = objProxies.get(type);
 
@@ -194,7 +221,7 @@ public class ProxyCache {
 	    /*
 	     * New proxy handler of object.
 	     */
-	    proxy = Proxy.newProxyInstance(type.getClassLoader(), new Class[] { type },
+	    proxy = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { type },
 		    factory.createHandler(unwrapped, type));
 	    objProxies.put(type, proxy);
 
@@ -212,7 +239,7 @@ public class ProxyCache {
     public int getProxyCount() {
 	final long stamp = lock.readLock();
 	try {
-	    return proxies.values().stream().mapToInt(m -> m.size()).sum();
+	    return proxies.values().stream().mapToInt(Map::size).sum();
 	} finally {
 	    lock.unlockRead(stamp);
 	}
@@ -324,43 +351,20 @@ public class ProxyCache {
     }
 
     /**
-     * Checks whether the supplied type is valid (will be added to valid types if it is).
+     * Checks whether the supplied type has been validated successfully.
      *
      * @param type
      *            Proxy type.
-     * @return Whether the proxy type is valid.
+     * @return Whether the proxy type has been validated successfully.
      *
-     * @see ProxyFactory#validate(Class)
      */
-    public boolean isValidType(final Class<?> type) {
-	validateType(type);
-
+    public boolean isValidatedType(final Class<?> type) {
 	final long stamp = lock.readLock();
 	try {
 	    return validTypes.contains(type);
 	} finally {
 	    lock.unlockRead(stamp);
 	}
-    }
-
-    private long lockAndEnsureEntryForObj(final Object obj, final long stamp, final boolean forceWrite) {
-	long newStamp = stamp;
-
-	if (forceWrite || !proxies.containsKey(obj)) {
-	    final long ws = lock.tryConvertToWriteLock(stamp);
-	    if (ws != 0L) { // Could not convert
-		newStamp = ws;
-	    } else {
-		lock.unlockRead(stamp);
-		newStamp = lock.writeLock();
-	    }
-	}
-
-	if (!proxies.containsKey(obj)) { // Re-check may have lost lock
-	    proxies.put(obj, new HashMap<>());
-	}
-
-	return newStamp;
     }
 
     /**
@@ -443,34 +447,40 @@ public class ProxyCache {
      *
      * @param type
      *            Proxy type to validate.
-     * @throws IllegalArgumentException
-     *             If the type is not valid.
+     * @return Whether the type is valid.
      */
-    public void validateType(final Class<?> type) {
+    public boolean validateType(final Class<?> type) {
 	long stamp = lock.readLock();
 	try {
-	    if (validTypes.contains(type)) { // Already valid
-		return;
-	    }
-
-	    final long ws = lock.tryConvertToWriteLock(stamp);
-	    if (ws != 0L) { // Could not convert
-		stamp = ws;
-	    } else {
-		lock.unlockRead(stamp);
-		stamp = lock.writeLock();
-		if (validTypes.contains(type)) { // Re-check may have lost lock
-		    return;
-		}
-	    }
-
-	    if (!factory.validate(type)) {
-		throw new IllegalArgumentException("Supplied type is not valid");
-	    }
-
-	    validTypes.add(type);
+	    stamp = validateTypeStartRead(stamp, type);
+	    return validTypes.contains(type);
 	} finally {
 	    lock.unlock(stamp);
 	}
+    }
+
+    private long validateTypeStartRead(final long stamp, final Class<?> type) {
+	if (validTypes.contains(type)) { // Already valid
+	    return stamp;
+	}
+
+	final long ws = lock.tryConvertToWriteLock(stamp);
+	long newStamp;
+
+	if (ws != 0L) { // Could not convert
+	    newStamp = ws;
+	} else {
+	    lock.unlockRead(stamp);
+	    newStamp = lock.writeLock();
+	    if (validTypes.contains(type)) { // Re-check may have lost lock
+		return newStamp;
+	    }
+	}
+
+	if (factory.validate(type)) {
+	    validTypes.add(type);
+	}
+
+	return newStamp;
     }
 }

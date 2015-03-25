@@ -1,7 +1,7 @@
 package jalse.tags;
 
-import jalse.entities.Entities;
 import jalse.entities.Entity;
+import jalse.entities.EntityProxies;
 
 /**
  * Tag used to help identify an {@link Entity} marked by type.
@@ -20,10 +20,10 @@ public final class EntityType implements Tag {
      *            Entity type
      * @throws IllegalArgumentException
      *
-     * @see Entities#validateType(Class)
+     * @see EntityProxies#validateEntityType(Class)
      */
     public EntityType(final Class<? extends Entity> type) {
-	Entities.validateType(this.type = type);
+	EntityProxies.validateEntityType(this.type = type);
     }
 
     @Override

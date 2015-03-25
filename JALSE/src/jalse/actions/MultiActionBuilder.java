@@ -21,7 +21,7 @@ import java.util.List;
  * @see ForkJoinActionEngine
  * @see ThreadPoolActionEngine
  */
-public class MultiActionBuilder<T> {
+public final class MultiActionBuilder<T> {
 
     /**
      * Builds an action that processes a chain of actions.

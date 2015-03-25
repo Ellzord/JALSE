@@ -1,5 +1,6 @@
 package jalse.entities;
 
+import static jalse.entities.Entities.isOrTypeDescendant;
 import static jalse.misc.JALSEExceptions.ENTITY_NOT_ALIVE;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
@@ -130,7 +131,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Set<Class<? extends Attribute>> getAttributeListenerTypes() {
-	return attributes.getAttributeListenerTypes();
+	return attributes.getListenerTypes();
     }
 
     @Override
@@ -210,8 +211,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public boolean isMarkedAsType(final Class<? extends Entity> type) {
-	return tags.getOfType(EntityType.class).stream()
-		.anyMatch(at -> Entities.isOrTypeDescendant(at.getType(), type));
+	return tags.getOfType(EntityType.class).stream().anyMatch(at -> isOrTypeDescendant(at.getType(), type));
     }
 
     @Override
@@ -257,7 +257,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     public boolean markAsType(final Class<? extends Entity> type) {
 	if (!isMarkedAsType(type)) {
 	    tags.add(new EntityType(type));
-	    Entities.getTypeAncestry(type).stream().map(t -> new EntityType(t)).forEach(tags::add);
+
+	    /*
+	     * Add entire tree
+	     */
+	    Entities.getTypeAncestry(type).stream().map(EntityType::new).forEach(tags::add);
 	    return true;
 	}
 
@@ -301,8 +305,23 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public void removeAllAttributeListeners() {
+	attributes.removeAllListeners();
+    }
+
+    @Override
+    public void removeAllEntityListeners() {
+	entities.removeAllListeners();
+    }
+
+    @Override
     public boolean removeAttributeListener(final AttributeListener<? extends Attribute> listener) {
 	return attributes.removeListener(listener);
+    }
+
+    @Override
+    public <T extends Attribute> void removeAttributeListeners(final Class<T> attr) {
+	attributes.removeListeners(attr);
     }
 
     @Override
@@ -363,8 +382,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public boolean unmarkAsType(final Class<? extends Entity> type) {
 	final Set<EntityType> descendants = tags.getOfType(EntityType.class).stream()
-		.filter(at -> Entities.isOrTypeDescendant(at.getType(), type)).collect(Collectors.toSet());
+		.filter(at -> isOrTypeDescendant(at.getType(), type)).collect(Collectors.toSet());
 
+	/*
+	 * Remove subclasses of the type (up tree)
+	 */
 	descendants.forEach(tags::remove);
 
 	return !descendants.isEmpty();

@@ -128,12 +128,12 @@ public class ManualActionEngine implements ActionEngine {
 
 	for (;;) {
 	    final ManualContext<?> work = workQueue.pollReadyWork();
-	    if (work == null) {
+	    if (work == null) { // No more ready work
 		break;
 	    }
 
 	    try {
-		work.performAction();
+		work.performAction(); // Execution action
 	    } catch (final InterruptedException e) {
 		ticking.set(false);
 		Thread.currentThread().interrupt();

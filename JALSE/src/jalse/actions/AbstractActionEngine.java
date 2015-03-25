@@ -108,7 +108,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
 	if (paused.getAndSet(false)) {
 	    lock.lock();
 	    try {
-		resumed.signalAll();
+		resumed.signalAll(); // Wake up and work!
 	    } finally {
 		lock.unlock();
 	    }
@@ -123,7 +123,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
 	executorService.shutdown();
 	try {
 	    if (!executorService.awaitTermination(TERMINATION_TIMEOUT, TimeUnit.MILLISECONDS)) {
-		executorService.shutdownNow();
+		executorService.shutdownNow(); // Uh-oh
 	    }
 	} catch (final InterruptedException e) {
 	    logger.log(Level.WARNING, "Error terminating executor", e);

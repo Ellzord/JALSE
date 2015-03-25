@@ -27,7 +27,7 @@ class EntityTreeWalker {
 	this.maxDepth = maxDepth;
 
 	walkers = new LinkedList<>();
-	iterator = container.streamEntities().iterator();
+	iterator = container.streamEntities().iterator(); // Lazy
 	exited = false;
     }
 

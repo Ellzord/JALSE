@@ -86,7 +86,7 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
 	lock.lockInterruptibly();
 	try {
 	    while (!isDone()) {
-		ran.await();
+		ran.await(); // Await signal
 	    }
 	} finally {
 	    lock.unlock();
@@ -102,9 +102,9 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
 	cancelled.set(true);
 	done.set(true);
 
-	removeAsWork();
+	removeAsWork(); // Remove from engines work queue
 
-	if (!performing.get()) {
+	if (!performing.get()) { // Wait if currently executing
 	    signalRan();
 	}
 
@@ -162,16 +162,16 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
 	performing.set(true);
 
 	try {
-	    getAction().perform(this);
+	    getAction().perform(this); // Execute action
 	} catch (final InterruptedException e) {
 	    cancelled.set(true);
 	    throw e;
-	} catch (final Exception e) {
+	} catch (final Exception e) { // Continue
 	    logger.log(Level.WARNING, "Error performing action", e);
 	} finally {
 	    performing.set(false);
 	    done.set(true);
-	    signalRan();
+	    signalRan(); // Wake up awaiting
 	}
 
 	if (isCancelled()) {
@@ -181,7 +181,7 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
 	if (isPeriodic()) {
 	    estimated.set(System.nanoTime() + getPeriod(TimeUnit.NANOSECONDS));
 	    done.set(false);
-	    addAsWork();
+	    addAsWork(); // Add to engines work queue
 	}
     }
 
@@ -204,7 +204,7 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
     public void schedule() {
 	if (!isDone()) {
 	    estimated.set(System.nanoTime() + getInitialDelay(TimeUnit.NANOSECONDS));
-	    addAsWork();
+	    addAsWork(); // Add to engines work queue
 	}
     }
 

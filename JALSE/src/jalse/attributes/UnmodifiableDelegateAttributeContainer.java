@@ -65,7 +65,17 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
+    public void removeAllAttributeListeners() {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean removeAttributeListener(final AttributeListener<? extends Attribute> listener) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T extends Attribute> void removeAttributeListeners(final Class<T> attr) {
 	throw new UnsupportedOperationException();
     }
 

@@ -1,12 +1,12 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.asType;
+import static jalse.listeners.Listeners.createEntityListenerSet;
 import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.listeners.EntityEvent;
 import jalse.listeners.EntityListener;
 import jalse.listeners.ListenerSet;
-import jalse.listeners.Listeners;
 import jalse.misc.JALSEExceptions;
 
 import java.util.AbstractSet;
@@ -63,7 +63,7 @@ public class EntitySet extends AbstractSet<Entity> {
 	this.factory = factory != null ? factory : new DefaultEntityFactory();
 	this.delegateContainer = delegateContainer != null ? delegateContainer : Entities.toEntityContainer(this);
 	entities = new ConcurrentHashMap<>();
-	entityListeners = Listeners.createEntityListenerSet();
+	entityListeners = createEntityListenerSet();
     }
 
     /**
@@ -206,7 +206,7 @@ public class EntitySet extends AbstractSet<Entity> {
 	}
 
 	boolean result;
-	if (result = factory.killEntity(e)) {
+	if (result = factory.killEntity(e)) { // Only kill if allowed
 	    entities.remove(id);
 	    entityListeners.getProxy().entityKilled(new EntityEvent(delegateContainer, e));
 	}
@@ -301,7 +301,7 @@ public class EntitySet extends AbstractSet<Entity> {
 	entities.put(e.getID(), e);
 
 	if (type != null) {
-	    e.markAsType(type);
+	    e.markAsType(type); // Must be done before listeners
 	}
 
 	entityListeners.getProxy().entityCreated(new EntityEvent(delegateContainer, e));
@@ -315,6 +315,13 @@ public class EntitySet extends AbstractSet<Entity> {
 	    throw new IllegalArgumentException();
 	}
 	return killEntity(((Entity) o).getID());
+    }
+
+    /**
+     * Removes all listeners for entities.
+     */
+    public void removeAllListeners() {
+	entityListeners.clear();
     }
 
     /**

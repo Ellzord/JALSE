@@ -58,12 +58,12 @@ public abstract class AbstractFutureActionContext<T> extends BaseActionContext<T
 	}
 
 	final Future<?> f = getFuture();
-	if (f == null || f.isDone()) {
+	if (f == null || f.isDone()) { // No need to wait
 	    return;
 	}
 
 	try {
-	    f.get();
+	    f.get(); // Await execution completion or cancel
 	} catch (final ExecutionException e) {}
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractFutureActionContext<T> extends BaseActionContext<T
     protected Future<?> getFuture() {
 	long stamp = lock.tryOptimisticRead();
 	Future<?> future = this.future;
-	if (!lock.validate(stamp)) {
+	if (!lock.validate(stamp)) { // Not valid so wait for read lock
 	    stamp = lock.readLock();
 	    try {
 		future = this.future;

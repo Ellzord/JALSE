@@ -32,6 +32,11 @@ class UnmodifiableDelegateActionBindings implements MutableActionBindings {
     }
 
     @Override
+    public void removeAll() {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Map<String, ?> toMap() {
 	return delegate != null ? delegate.toMap() : new HashMap<>();
     }

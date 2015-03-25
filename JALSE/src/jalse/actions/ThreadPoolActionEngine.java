@@ -36,10 +36,10 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
 	@Override
 	public void run() {
 	    try {
-		getAction().perform(this);
+		getAction().perform(this); // Execute action
 	    } catch (final InterruptedException e) {
 		Thread.currentThread().interrupt();
-		cancel();
+		cancel(); // Just to be sure
 	    } catch (final Exception e) {
 		logger.log(Level.WARNING, "Error performing action", e);
 	    }
@@ -53,7 +53,7 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
 
 		if (isPeriodic()) {
 		    setFuture(stpe.scheduleAtFixedRate(this, initialDelay, getPeriod(TimeUnit.NANOSECONDS),
-			    TimeUnit.NANOSECONDS));
+			    TimeUnit.NANOSECONDS)); // At rate
 		} else {
 		    setFuture(stpe.schedule(this, initialDelay, TimeUnit.NANOSECONDS));
 		}

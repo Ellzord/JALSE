@@ -19,7 +19,7 @@ class AttributeListenerSupplier extends EntityAdapter {
     @Override
     public void entityCreated(final EntityEvent event) {
 	final Entity e = event.getEntity();
-	if (deep) {
+	if (deep) { // Recursive
 	    e.addEntityListener(this);
 	}
 	e.addAttributeListener(supplier.get());

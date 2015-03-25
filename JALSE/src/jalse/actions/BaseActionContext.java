@@ -17,7 +17,7 @@ abstract class BaseActionContext<T> implements MutableActionContext<T> {
     private final AtomicLong period;
     private final AtomicLong initialDelay;
 
-    protected BaseActionContext(final ActionEngine engine, final Action<T> action, final ActionBindings sourceBindings) {
+    BaseActionContext(final ActionEngine engine, final Action<T> action, final ActionBindings sourceBindings) {
 	this.engine = requireNotStopped(engine);
 	this.action = Objects.requireNonNull(action);
 	bindings = new DefaultActionBindings(sourceBindings);
@@ -69,6 +69,11 @@ abstract class BaseActionContext<T> implements MutableActionContext<T> {
     @Override
     public <S> S remove(final String key) {
 	return bindings.remove(key);
+    }
+
+    @Override
+    public void removeAll() {
+	bindings.removeAll();
     }
 
     @Override

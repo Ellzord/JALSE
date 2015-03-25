@@ -14,10 +14,9 @@ import java.util.Objects;
  * <code>
  * public class LoadPercentage extends NonAttributeWrapper{@code <Float>} {
  * 
- * public LoadPercentage(Float percentage) {
- * 
- * 	super(percentage);
- * }
+ * 	public LoadPercentage(Float percentage) {
+ * 		super(percentage);
+ * 	}
  * }
  * 
  * LoadPercentage lp; // Previously created attribute.

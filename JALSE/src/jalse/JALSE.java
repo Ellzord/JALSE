@@ -199,6 +199,11 @@ public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContai
     }
 
     @Override
+    public void removeAllEntityListeners() {
+	entities.removeAllListeners();
+    }
+
+    @Override
     public boolean removeEntityListener(final EntityListener listener) {
 	return entities.removeListener(listener);
     }

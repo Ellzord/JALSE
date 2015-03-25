@@ -111,14 +111,14 @@ public interface ActionEngine {
      */
     default <T> MutableActionContext<T> schedule(final Action<T> action, final T actor) {
 	if (isStopped()) {
-	    return Actions.emptyActionContext();
+	    return Actions.emptyActionContext(); // Case of post cancel scheduling
 	}
 
 	final MutableActionContext<T> context = createContext(action);
 	context.setActor(actor);
 	context.schedule();
 
-	return unmodifiableActionContext(context);
+	return unmodifiableActionContext(context); // Don't allow for mutation (it's running)
     }
 
     /**
