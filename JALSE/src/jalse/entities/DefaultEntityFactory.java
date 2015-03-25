@@ -99,6 +99,8 @@ public class DefaultEntityFactory implements EntityFactory {
 	    entityCount--;
 
 	    de.killEntities();
+
+	    EntityProxies.removeProxiesOfEntity(de);
 	}
 
 	return true;

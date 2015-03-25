@@ -26,6 +26,11 @@ class EntitySetContainer implements EntityContainer {
     }
 
     @Override
+    public <T extends Entity> Set<T> getEntitiesAsType(final Class<T> type) {
+	return delegate.getAsType(type);
+    }
+
+    @Override
     public <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
 	return delegate.getOfType(type);
     }
@@ -88,6 +93,11 @@ class EntitySetContainer implements EntityContainer {
     @Override
     public Stream<Entity> streamEntities() {
 	return delegate.stream();
+    }
+
+    @Override
+    public <T extends Entity> Stream<T> streamEntitiesAsType(final Class<T> type) {
+	return delegate.streamAsType(type);
     }
 
     @Override

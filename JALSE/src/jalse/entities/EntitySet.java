@@ -97,6 +97,19 @@ public class EntitySet extends AbstractSet<Entity> {
     }
 
     /**
+     * Gets all the entities as the specified type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Set of entities as the type.
+     *
+     * @see Entity#asType(Class)
+     */
+    public <T extends Entity> Set<T> getAsType(final Class<T> type) {
+	return streamAsType(type).collect(Collectors.toSet());
+    }
+
+    /**
      * Gets the delegate container for events and entity creation.
      *
      * @return Delegate container.
@@ -324,6 +337,19 @@ public class EntitySet extends AbstractSet<Entity> {
     @Override
     public int size() {
 	return entities.size();
+    }
+
+    /**
+     * Gets a stream of as the specified type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Stream of entities as the type.
+     *
+     * @see Entity#asType(Class)
+     */
+    public <T extends Entity> Stream<T> streamAsType(final Class<T> type) {
+	return stream().map(e -> asType(e, type));
     }
 
     /**

@@ -159,6 +159,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public <T extends Entity> Set<T> getEntitiesAsType(final Class<T> type) {
+	return entities.getAsType(type);
+    }
+
+    @Override
     public <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
 	return entities.getOfType(type);
     }
@@ -343,6 +348,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public Stream<Entity> streamEntities() {
 	return entities.stream();
+    }
+
+    @Override
+    public <T extends Entity> Stream<T> streamEntitiesAsType(final Class<T> type) {
+	return entities.streamAsType(type);
     }
 
     @Override

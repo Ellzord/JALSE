@@ -3,10 +3,15 @@ package jalse.entities;
 import static jalse.misc.JALSEExceptions.INVALID_ENTITY_TYPE;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.entities.EntityVisitor.EntityVisitResult;
+import jalse.entities.annotations.GetAttribute;
+import jalse.entities.annotations.GetEntities;
+import jalse.entities.annotations.GetEntity;
+import jalse.entities.annotations.NewEntity;
+import jalse.entities.annotations.SetAttribute;
+import jalse.entities.annotations.StreamEntities;
 import jalse.misc.JALSEExceptions;
+import jalse.misc.ProxyCache;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Objects;
@@ -21,32 +26,40 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * A utility for {@link Entity} related functionality (specifically wrapping entities as other
- * entity types). An Entity type allows entities to be used like beans (get/set) and can be used to
- * process entities of similar state or function.<br>
+ * A utility for {@link Entity} related functionality (specifically proxy entities as other entity
+ * types). An Entity type allows entities to be used in an Object-Oriented way (get/set). It does
+ * this by providing a number of annotations that specify to the proxy its behaviour. Entity types
+ * also support default methods allowing some logic to be defined.<br>
  * <br>
- * An entity type has 4 types of method definitions: <br>
- * 1) Adding and removing Attribute of type (to remove call method with null Attribute).<br>
+ * Entity types are soft types - any entity can be 'cast' ({@link #asType(Entity, Class)}) to
+ * another entity type even if it does not have the defining data. This does not set the entity as
+ * this type but entities can be marked as a type manually for easy filtering/processing (
+ * {@link Entity#markAsType(Class)}). When creating an entity and supplying an entity type (like
+ * {@link EntityContainer#newEntity(Class)}) this automatically marks the entity as the supplied
+ * type - in fact all of the types in the entity type inheritance tree are added too (removable). An
+ * entity can be marked as multiple entity types so filtering this way can become very useful for
+ * processing similar entities. <br>
+ * <br>
+ * An entity type can have the following method definitions: <br>
+ * 1) Setting an Attribute of type (will remove if argument passed is null).<br>
  * 2) Getting an Attribute of type. <br>
- * 3) Getting a Set of all of the child entities marked as type.<br>
- * 4) Getting a Stream of all of the child entities marked as type.<br>
+ * 3) Getting an Entity as type. <br>
+ * 4) Creating a new Entity of type. <br>
+ * 5) Getting a Set of all of the child entities of or as type.<br>
+ * 6) Getting a Stream of all of the child entities of or as type.<br>
  * <br>
- * For an Entity type to be used it must be validated against the below criteria: <br>
+ * For an Entity type to be used it must be validated. <br>
  * 1. Must be a subclass of Entity (can be indirect). <br>
  * 2. Can only have super types that are also subclasses of Entity. <br>
- * 3. The add/remove Attribute method: <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;a) Must return either {@code void} or {@code Optional<Attribute_Type>}.<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;b) Must have only one parameter {@code Attribute_Type} (matching the
- * return type if not {@code void}). <br>
- * 4. The get Attribute method: <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;a) Must return {@code Optional<Attribute_Type>}.<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;b) Must have no parameters.<br>
- * 5. The Set Entity method: <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;a) Must return {@code Set<Entity_Type>}. <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;b) Must have no parameters.<br>
- * 6. The Stream Entity method: <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;a) Must return {@code Stream<Entity_Type>}. <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;b) Must have no parameters. <br>
+ * 3. Must only contain default or annotated methods:<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;a) {@link SetAttribute} <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;b) {@link GetAttribute} <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;c) {@link GetEntity} <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;d) {@link NewEntity}<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;e) {@link GetEntities}<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;f) {@link StreamEntities}<br>
+ * <br>
+ * NOTE: The javadoc for the annotations provide more information about how to define the method.<br>
  * <br>
  * An example entity type:
  *
@@ -54,8 +67,10 @@ import java.util.stream.StreamSupport;
  * <code>
  * public interface Car extends Entity {
  * 
+ * 	{@code @GetAttribute}
  * 	Optional{@code<Load>} getLoad();
  * 
+ * 	{@code @SetAttribute}
  * 	void setLoad(Load load);
  * }
  * 
@@ -70,6 +85,7 @@ import java.util.stream.StreamSupport;
  *
  * @see Entity#markAsType(Class)
  * @see Entity#asType(Class)
+ * @see ProxyCache
  *
  */
 public final class Entities {
@@ -113,9 +129,9 @@ public final class Entities {
     }
 
     /**
-     * Wraps an Entity as the supplied Entity type.
+     * Wraps an Entity as the supplied Entity type (cached).
      *
-     * @param Entity
+     * @param entity
      *            Entity to wrap.
      * @param type
      *            Entity type to wrap to.
@@ -129,17 +145,8 @@ public final class Entities {
      * @see Entities
      * @see JALSEExceptions#INVALID_ENTITY_TYPE
      */
-    @SuppressWarnings("unchecked")
-    public static <T extends Entity> T asType(final Entity Entity, final Class<T> type) {
-	validateType(type);
-
-	InvocationHandler handler = null;
-	if (Proxy.isProxyClass(Entity.getClass())) {
-	    handler = Proxy.getInvocationHandler(Entity);
-	}
-
-	return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[] { type },
-		handler instanceof EntityTypeHandler ? handler : new EntityTypeHandler(Entity));
+    public static <T extends Entity> T asType(final Entity entity, final Class<T> type) {
+	return EntityProxies.proxyOfEntity(entity, type);
     }
 
     /**
@@ -276,11 +283,9 @@ public final class Entities {
      *             If the Entity type fails validation.
      */
     public static void validateType(final Class<? extends Entity> type) {
-	if (type.equals(Entity.class)) {
+	if (!EntityProxies.validEntityType(type)) {
 	    throwRE(INVALID_ENTITY_TYPE);
 	}
-
-	EntityTypeHandler.validateType(type);
     }
 
     /**

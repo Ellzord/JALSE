@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -33,7 +34,7 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
      */
     public ManualWorkQueue() {
 	waitingWork = new PriorityQueue<>();
-	final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
 	write = rwLock.writeLock();
 	workChanged = write.newCondition();

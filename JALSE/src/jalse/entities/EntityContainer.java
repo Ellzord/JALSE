@@ -48,6 +48,17 @@ public interface EntityContainer {
     Set<Entity> getEntities();
 
     /**
+     * Gets all the entities as the specified type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Set of entities as the type.
+     *
+     * @see Entity#asType(Class)
+     */
+    <T extends Entity> Set<T> getEntitiesAsType(Class<T> type);
+
+    /**
      * Gets all the entities marked with the specified type.
      *
      * @param type
@@ -259,6 +270,17 @@ public interface EntityContainer {
      * @return A stream of entities in the container.
      */
     Stream<Entity> streamEntities();
+
+    /**
+     * Gets a stream of as the specified type.
+     *
+     * @param type
+     *            Entity type to check for.
+     * @return Stream of entities as the type.
+     *
+     * @see Entity#asType(Class)
+     */
+    <T extends Entity> Stream<T> streamEntitiesAsType(Class<T> type);
 
     /**
      * Gets a stream of entities marked with the specified type.

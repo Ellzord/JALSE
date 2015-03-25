@@ -26,6 +26,11 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     }
 
     @Override
+    public <T extends Entity> Set<T> getEntitiesAsType(final Class<T> type) {
+	return delegate != null ? delegate.getEntitiesAsType(type) : Collections.emptySet();
+    }
+
+    @Override
     public <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
 	return delegate != null ? delegate.getEntitiesOfType(type) : Collections.emptySet();
     }
@@ -88,6 +93,11 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     @Override
     public Stream<Entity> streamEntities() {
 	return delegate != null ? delegate.streamEntities() : Stream.empty();
+    }
+
+    @Override
+    public <T extends Entity> Stream<T> streamEntitiesAsType(final Class<T> type) {
+	return delegate != null ? delegate.streamEntitiesAsType(type) : Stream.empty();
     }
 
     @Override
