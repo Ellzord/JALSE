@@ -43,16 +43,31 @@ public final class MultiActionBuilder<T> {
      * @return Chain action.
      */
     public static <S> Action<S> buildChain(final List<? extends Action<S>> actions) {
-	return MultiActionBuilder.<S> newBuilder().then(actions).build();
+	return newBuilder(actions).build();
     }
 
     /**
      * Creates a new builder instance.
      *
+     * @param action
+     *            Starting action.
+     *
      * @return New builder.
      */
-    public static <T> MultiActionBuilder<T> newBuilder() {
-	return new MultiActionBuilder<>();
+    public static <S> MultiActionBuilder<S> newBuilder(final Action<S> action) {
+	return new MultiActionBuilder<S>().then(action);
+    }
+
+    /**
+     * Creates a new builder instance.
+     *
+     * @param actions
+     *            Starting actions.
+     *
+     * @return New builder.
+     */
+    public static <S> MultiActionBuilder<S> newBuilder(final List<? extends Action<S>> actions) {
+	return new MultiActionBuilder<S>().then(actions);
     }
 
     private final MultiAction<T> multiAction;
@@ -99,54 +114,6 @@ public final class MultiActionBuilder<T> {
     }
 
     /**
-     * Adds an action to be scheduled.
-     *
-     * @param action
-     *            Action to schedule.
-     * @return This builder.
-     */
-    public MultiActionBuilder<T> schedule(final Action<T> action) {
-	multiAction.addOperation(action, MultiActionOperation.SCHEDULE);
-	return this;
-    }
-
-    /**
-     * Adds a number of actions to be scheduled.
-     *
-     * @param actions
-     *            Actions to schedule.
-     * @return This builder.
-     */
-    public MultiActionBuilder<T> scheduleAll(final Collection<? extends Action<T>> actions) {
-	multiAction.addOperation(actions, MultiActionOperation.SCHEDULE);
-	return this;
-    }
-
-    /**
-     * Adds an action to be scheduled then awaited.
-     *
-     * @param action
-     *            Action to schedule and await.
-     * @return This builder.
-     */
-    public MultiActionBuilder<T> scheduleAndAwait(final Action<T> action) {
-	multiAction.addOperation(action, MultiActionOperation.SCHEDULE_AWAIT);
-	return this;
-    }
-
-    /**
-     * Adds a number of actions to be scheduled then awaited.
-     *
-     * @param actions
-     *            Actions to schedule and await.
-     * @return This builder.
-     */
-    public MultiActionBuilder<T> scheduleAndAwaitAll(final Collection<? extends Action<T>> actions) {
-	multiAction.addOperation(actions, MultiActionOperation.SCHEDULE_AWAIT);
-	return this;
-    }
-
-    /**
      * Adds an action to be performed next.
      *
      * @param action
@@ -167,6 +134,54 @@ public final class MultiActionBuilder<T> {
      */
     public MultiActionBuilder<T> then(final List<? extends Action<T>> actions) {
 	multiAction.addOperation(actions, MultiActionOperation.PERFORM);
+	return this;
+    }
+
+    /**
+     * Adds an action to be scheduled.
+     *
+     * @param action
+     *            Action to schedule.
+     * @return This builder.
+     */
+    public MultiActionBuilder<T> thenSchedule(final Action<T> action) {
+	multiAction.addOperation(action, MultiActionOperation.SCHEDULE);
+	return this;
+    }
+
+    /**
+     * Adds a number of actions to be scheduled.
+     *
+     * @param actions
+     *            Actions to schedule.
+     * @return This builder.
+     */
+    public MultiActionBuilder<T> thenSchedule(final Collection<? extends Action<T>> actions) {
+	multiAction.addOperation(actions, MultiActionOperation.SCHEDULE);
+	return this;
+    }
+
+    /**
+     * Adds an action to be scheduled then awaited.
+     *
+     * @param action
+     *            Action to schedule and await.
+     * @return This builder.
+     */
+    public MultiActionBuilder<T> thenScheduleAndAwait(final Action<T> action) {
+	multiAction.addOperation(action, MultiActionOperation.SCHEDULE_AWAIT);
+	return this;
+    }
+
+    /**
+     * Adds a number of actions to be scheduled then awaited.
+     *
+     * @param actions
+     *            Actions to schedule and await.
+     * @return This builder.
+     */
+    public MultiActionBuilder<T> thenScheduleAndAwait(final Collection<? extends Action<T>> actions) {
+	multiAction.addOperation(actions, MultiActionOperation.SCHEDULE_AWAIT);
 	return this;
     }
 }

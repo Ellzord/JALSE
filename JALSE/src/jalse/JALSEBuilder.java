@@ -7,6 +7,8 @@ import jalse.actions.ThreadPoolActionEngine;
 import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
 
+import java.util.concurrent.ForkJoinPool;
+
 /**
  * A {@link JALSE} instance builder where each method in this builder can be chained. This builder
  * constructs a JALSE instance using the supplied parameters. It does this by creating the
@@ -97,7 +99,9 @@ public final class JALSEBuilder {
     public JALSE build() {
 	final ActionEngine engine;
 
-	if (parallelism <= 0) {
+	if (parallelism < 0) {
+	    engine = ForkJoinActionEngine.commonPoolEngine();
+	} else if (parallelism == 0) {
 	    engine = new ManualActionEngine();
 	} else if (parallelism == 1) {
 	    engine = new ThreadPoolActionEngine(1);
@@ -138,6 +142,19 @@ public final class JALSEBuilder {
      */
     public JALSEBuilder setTotalEntityLimit(final int totalEntityLimit) {
 	this.totalEntityLimit = totalEntityLimit;
+	return this;
+    }
+
+    /**
+     * Users the common engine based on the common pool.
+     *
+     * @return This builder.
+     *
+     * @see ForkJoinPool#commonPool()
+     * @see ForkJoinActionEngine#commonPoolEngine()
+     */
+    public JALSEBuilder useCommonPoolEngine() {
+	setParallelism(-1);
 	return this;
     }
 }

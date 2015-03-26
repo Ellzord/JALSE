@@ -82,19 +82,6 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
 	}
     }
 
-    /**
-     * Clears waiting work.
-     */
-    public void clearWaitingWork() {
-	write.lock();
-	try {
-	    waitingWork.clear();
-	    workChanged.signalAll(); // Wake up!
-	} finally {
-	    write.unlock();
-	}
-    }
-
     private long getEarliestReadyEstimate() {
 	final T context = waitingWork.peek();
 	return context != null ? context.getEstimated() : 0L;
@@ -162,6 +149,19 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
 	write.lock();
 	try {
 	    return workAvailable() ? waitingWork.poll() : null;
+	} finally {
+	    write.unlock();
+	}
+    }
+
+    /**
+     * Clears waiting work.
+     */
+    public void removeAllWaitingWork() {
+	write.lock();
+	try {
+	    waitingWork.clear();
+	    workChanged.signalAll(); // Wake up!
 	} finally {
 	    write.unlock();
 	}

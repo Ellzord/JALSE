@@ -97,15 +97,10 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 		    } catch (final InterruptedException e) {
 			break; // Cancellation
 		    } finally {
-			freeWorkers.incrementAndGet(); // Ready again
+			if (!freeWorkers.compareAndSet(0, 1)) { // Ready again
+			    return;
+			}
 		    }
-		}
-
-		/*
-		 * Only one worker needed to wait for scheduled tasks to arrive.
-		 */
-		if (freeWorkers.get() > 1) {
-		    break;
 		}
 	    }
 	    freeWorkers.decrementAndGet(); // Finished.
