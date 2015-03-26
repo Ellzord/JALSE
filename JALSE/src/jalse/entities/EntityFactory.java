@@ -17,6 +17,26 @@ import java.util.UUID;
 public interface EntityFactory {
 
     /**
+     * Exports an entity (removing all references).
+     *
+     * @param e
+     *            Entity to detach.
+     * @return Whether the entity was exported.
+     */
+    boolean exportEntity(Entity e);
+
+    /**
+     * Imports the entity into the container.
+     *
+     * @param e
+     *            Entity to import.
+     * @param container
+     *            Target container.
+     * @return Whether the entity can be imported.
+     */
+    boolean importEntity(Entity e, EntityContainer container);
+
+    /**
      * Kills the specified entity.
      *
      * @param e

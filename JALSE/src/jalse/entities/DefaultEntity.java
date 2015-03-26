@@ -19,6 +19,7 @@ import jalse.tags.Tag;
 import jalse.tags.TagSet;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +46,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     /**
      * Parent entity container.
      */
-    protected final EntityContainer container;
+    protected EntityContainer container;
 
     /**
      * Child entities.
@@ -102,6 +103,12 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public <S extends Attribute> S addOrNullAttributeOfType(final S attr) {
 	return attributes.addOfType(attr);
+    }
+
+    private void addParentTag() {
+	if (container instanceof Identifiable) {
+	    tags.add(new Parent(Identifiable.getID(container)));
+	}
     }
 
     @Override
@@ -216,7 +223,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public boolean kill() {
-	return container.killEntity(getID());
+	return container.killEntity(id);
     }
 
     @Override
@@ -235,10 +242,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      * @return Whether the core was alive.
      */
     protected boolean markAsAlive() {
-	if (container instanceof Identifiable) {
-	    tags.add(new Parent(Identifiable.getID(container)));
-	}
-
+	addParentTag();
 	return alive.getAndSet(true);
     }
 
@@ -305,6 +309,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public boolean receiveEntity(final Entity e) {
+	return entities.receive(e);
+    }
+
+    @Override
     public void removeAllAttributeListeners() {
 	attributes.removeAllListeners();
     }
@@ -350,6 +359,21 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     /**
+     * Sets the parent container for the entity.
+     *
+     * @param container
+     *            New parent container (can be null);
+     */
+    protected void setContainer(final EntityContainer container) {
+	if (!Objects.equals(this.container, container)) {
+	    this.container = container;
+	    if (container != null && isAlive()) {
+		addParentTag();
+	    }
+	}
+    }
+
+    /**
      * Associates an engine to the entity for scheduling actions.
      *
      * @param engine
@@ -377,6 +401,16 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
 	return entities.streamOfType(type);
+    }
+
+    @Override
+    public boolean transfer(final EntityContainer destination) {
+	return container.transferEntity(id, destination);
+    }
+
+    @Override
+    public boolean transferEntity(final UUID id, final EntityContainer destination) {
+	return entities.transfer(id, destination);
     }
 
     @Override

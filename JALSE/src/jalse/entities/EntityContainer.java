@@ -165,7 +165,7 @@ public interface EntityContainer {
      * @return Whether the entity was found.
      */
     default boolean hasEntity(final UUID id) {
-	return getEntity(id).isPresent();
+	return getOrNullEntity(id) != null;
     }
 
     /**
@@ -250,6 +250,17 @@ public interface EntityContainer {
     <T extends Entity> T newEntity(UUID id, Class<T> type);
 
     /**
+     * Receives an entity (from a transfer).
+     *
+     * @param e
+     *            Entity to receive.
+     * @return Whether the entity was received.
+     *
+     * @see #transferEntity(UUID, EntityContainer)
+     */
+    boolean receiveEntity(Entity e);
+
+    /**
      * Removes all listeners for entities.
      */
     void removeAllEntityListeners();
@@ -298,4 +309,17 @@ public interface EntityContainer {
      * @see Entity#asType(Class)
      */
     <T extends Entity> Stream<T> streamEntitiesOfType(Class<T> type);
+
+    /**
+     * Transfers the entity to the supplied destination container.
+     *
+     * @param id
+     *            Entity ID.
+     * @param destination
+     *            Target container.
+     * @return Whether the entity was transfered.
+     *
+     * @see #receiveEntity(Entity)
+     */
+    boolean transferEntity(UUID id, EntityContainer destination);
 }

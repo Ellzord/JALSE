@@ -99,6 +99,15 @@ public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContai
 	return engine.createContext(action);
     }
 
+    /**
+     * Gets the current set of IDs for the entire tree.
+     *
+     * @return All entity IDs.
+     */
+    public Set<UUID> getAllEntityIDs() {
+	return Entities.getEntityIDsRecursively(this);
+    }
+
     @Override
     public MutableActionBindings getBindings() {
 	return engine.getBindings();
@@ -199,6 +208,11 @@ public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContai
     }
 
     @Override
+    public boolean receiveEntity(final Entity e) {
+	return entities.receive(e);
+    }
+
+    @Override
     public void removeAllEntityListeners() {
 	entities.removeAllListeners();
     }
@@ -237,5 +251,10 @@ public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContai
     @Override
     public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
 	return entities.streamOfType(type);
+    }
+
+    @Override
+    public boolean transferEntity(final UUID id, final EntityContainer destination) {
+	return entities.transfer(id, destination);
     }
 }

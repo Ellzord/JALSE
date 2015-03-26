@@ -29,4 +29,20 @@ public interface EntityListener {
      *            The entity event for this trigger.
      */
     void entityKilled(EntityEvent event);
+
+    /**
+     * Triggered on entity being received.
+     *
+     * @param event
+     *            The entity event for this trigger.
+     */
+    void entityReceived(EntityEvent event);
+
+    /**
+     * Triggered on entity transfer.
+     *
+     * @param event
+     *            The entity event for this trigger.
+     */
+    void entityTransferred(EntityEvent event);
 }

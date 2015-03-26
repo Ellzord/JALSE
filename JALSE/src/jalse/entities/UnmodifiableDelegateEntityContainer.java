@@ -86,6 +86,11 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     }
 
     @Override
+    public boolean receiveEntity(final Entity e) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void removeAllEntityListeners() {
 	throw new UnsupportedOperationException();
     }
@@ -108,5 +113,10 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     @Override
     public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
 	return delegate != null ? delegate.streamEntitiesOfType(type) : Stream.empty();
+    }
+
+    @Override
+    public boolean transferEntity(final UUID id, final EntityContainer destination) {
+	throw new UnsupportedOperationException();
     }
 }

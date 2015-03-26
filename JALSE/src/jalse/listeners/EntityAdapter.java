@@ -15,4 +15,10 @@ public abstract class EntityAdapter implements EntityListener {
 
     @Override
     public void entityKilled(final EntityEvent event) {}
+
+    @Override
+    public void entityReceived(final EntityEvent event) {}
+
+    @Override
+    public void entityTransferred(final EntityEvent event) {}
 }

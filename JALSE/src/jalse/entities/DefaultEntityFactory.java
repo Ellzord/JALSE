@@ -5,7 +5,9 @@ import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
 import static jalse.misc.JALSEExceptions.ENTITY_LIMIT_REACHED;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.ActionEngine;
+import jalse.actions.Actions;
 import jalse.actions.ForkJoinActionEngine;
+import jalse.entities.EntityVisitor.EntityVisitResult;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,8 +28,8 @@ public class DefaultEntityFactory implements EntityFactory {
 
     private final int entityLimit;
     private final Set<UUID> entityIDs;
-    private volatile ActionEngine engine;
-    private volatile int entityCount;
+    private ActionEngine engine;
+    private int entityCount;
 
     /**
      * Creates a default entity factory with no entity limit.
@@ -50,6 +52,30 @@ public class DefaultEntityFactory implements EntityFactory {
 	entityIDs = new HashSet<>();
 	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
 	entityCount = 0;
+    }
+
+    @Override
+    public boolean exportEntity(final Entity e) {
+	if (!entityIDs.remove(e.getID())) {
+	    return false;
+	}
+
+	final ActionEngine emptyEngine = Actions.emptyActionEngine();
+
+	final DefaultEntity de = (DefaultEntity) e;
+	de.cancelAllScheduledForActor();
+	de.setEngine(emptyEngine);
+	de.setContainer(null); // Remove parent reference.
+
+	Entities.walkEntityTree(e, vi -> {
+	    final DefaultEntity dvi = (DefaultEntity) vi;
+	    dvi.cancelAllScheduledForActor();
+	    dvi.setEngine(emptyEngine);
+
+	    return EntityVisitResult.CONTINUE;
+	});
+
+	return true;
     }
 
     /**
@@ -80,28 +106,40 @@ public class DefaultEntityFactory implements EntityFactory {
     }
 
     @Override
-    public boolean killEntity(final Entity e) {
-	if (!(e instanceof DefaultEntity)) {
+    public boolean importEntity(final Entity e, final EntityContainer container) {
+	if (!entityIDs.add(e.getID())) {
 	    return false;
 	}
 
-	synchronized (entityIDs) {
-	    final DefaultEntity de = (DefaultEntity) e;
+	final DefaultEntity de = (DefaultEntity) e;
+	de.setEngine(engine);
+	de.setContainer(container);
 
-	    if (!entityIDs.remove(de.getID()) || !de.isAlive()) { // Kill only those in need
-		return false;
-	    }
+	Entities.walkEntityTree(de, vi -> {
+	    ((DefaultEntity) vi).setEngine(engine);
+	    return EntityVisitResult.CONTINUE;
+	});
 
-	    de.markAsDead();
-	    de.cancelAllScheduledForActor();
-	    de.setEngine(null);
+	return false;
+    }
 
-	    entityCount--;
+    @Override
+    public boolean killEntity(final Entity e) {
+	final DefaultEntity de = (DefaultEntity) e;
 
-	    de.killEntities(); // Kill tree
-
-	    EntityProxies.removeProxiesOfEntity(de); // Force clean-up
+	if (!entityIDs.remove(de.getID()) || !de.isAlive()) { // Kill only those in need
+	    return false;
 	}
+
+	de.markAsDead();
+	de.cancelAllScheduledForActor();
+	de.setEngine(null);
+
+	entityCount--;
+
+	de.killEntities(); // Kill tree
+
+	EntityProxies.removeProxiesOfEntity(de); // Force clean-up
 
 	return true;
     }
@@ -112,25 +150,21 @@ public class DefaultEntityFactory implements EntityFactory {
 	    throwRE(ENTITY_LIMIT_REACHED);
 	}
 
-	synchronized (entityIDs) {
-	    if (!entityIDs.add(id)) { // Unique only
-		throwRE(ENTITY_ALREADY_ASSOCIATED);
-	    }
-
-	    final DefaultEntity e = new DefaultEntity(id, this, container);
-	    e.setEngine(engine);
-	    e.markAsAlive();
-
-	    entityCount++;
-
-	    return e;
+	if (!entityIDs.add(id)) { // Unique only
+	    throwRE(ENTITY_ALREADY_ASSOCIATED);
 	}
+
+	final DefaultEntity e = new DefaultEntity(id, this, container);
+	e.setEngine(engine);
+	e.markAsAlive();
+
+	entityCount++;
+
+	return e;
     }
 
     @Override
     public void setEngine(final ActionEngine engine) {
-	synchronized (entityIDs) {
-	    this.engine = requireNotStopped(engine);
-	}
+	this.engine = requireNotStopped(engine);
     }
 }

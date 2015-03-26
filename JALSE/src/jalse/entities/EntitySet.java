@@ -1,8 +1,10 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.asType;
+import static jalse.entities.Entities.toEntityContainer;
 import static jalse.listeners.Listeners.createEntityListenerSet;
 import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
+import static jalse.misc.JALSEExceptions.ENTITY_EXPORT_NO_TRANSFER;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.listeners.EntityEvent;
 import jalse.listeners.EntityListener;
@@ -18,6 +20,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,6 +45,7 @@ public class EntitySet extends AbstractSet<Entity> {
     private final ListenerSet<EntityListener> entityListeners;
     private final EntityFactory factory;
     private final EntityContainer delegateContainer;
+    private final StampedLock lock;
 
     /**
      * Creates an entity set with the default entity factory and no delegate container.
@@ -64,6 +68,7 @@ public class EntitySet extends AbstractSet<Entity> {
 	this.delegateContainer = delegateContainer != null ? delegateContainer : Entities.toEntityContainer(this);
 	entities = new ConcurrentHashMap<>();
 	entityListeners = createEntityListenerSet();
+	lock = new StampedLock();
     }
 
     /**
@@ -85,7 +90,16 @@ public class EntitySet extends AbstractSet<Entity> {
 
     @Override
     public void clear() {
-	new HashSet<>(entities.keySet()).forEach(this::killEntity);
+	final Set<UUID> toKill = new HashSet<>();
+
+	final long stamp = lock.readLock();
+	try {
+	    toKill.addAll(entities.keySet());
+	} finally {
+	    lock.unlockRead(stamp);
+	}
+
+	toKill.forEach(this::killEntity);
     }
 
     @Override
@@ -126,7 +140,12 @@ public class EntitySet extends AbstractSet<Entity> {
      * @return The entity matching the supplied id or null if none found.
      */
     public Entity getEntity(final UUID id) {
-	return entities.get(Objects.requireNonNull(id));
+	final long stamp = lock.readLock();
+	try {
+	    return entities.get(Objects.requireNonNull(id));
+	} finally {
+	    lock.unlockRead(stamp);
+	}
     }
 
     /**
@@ -135,7 +154,12 @@ public class EntitySet extends AbstractSet<Entity> {
      * @return Set of all entity identifiers.
      */
     public Set<UUID> getEntityIDs() {
-	return Collections.unmodifiableSet(entities.keySet());
+	final long stamp = lock.readLock();
+	try {
+	    return Collections.unmodifiableSet(new HashSet<>(entities.keySet()));
+	} finally {
+	    lock.unlockRead(stamp);
+	}
     }
 
     /**
@@ -178,17 +202,32 @@ public class EntitySet extends AbstractSet<Entity> {
      * @return Whether the entity was found.
      */
     public boolean hasEntity(final UUID id) {
-	return entities.containsKey(Objects.requireNonNull(id));
+	final long stamp = lock.readLock();
+	try {
+	    return entities.containsKey(Objects.requireNonNull(id));
+	} finally {
+	    lock.unlockRead(stamp);
+	}
     }
 
     @Override
     public boolean isEmpty() {
-	return entities.isEmpty();
+	final long stamp = lock.readLock();
+	try {
+	    return entities.isEmpty();
+	} finally {
+	    lock.unlockRead(stamp);
+	}
     }
 
     @Override
     public Iterator<Entity> iterator() {
-	return entities.values().iterator();
+	final long stamp = lock.readLock();
+	try {
+	    return entities.values().iterator();
+	} finally {
+	    lock.unlockRead(stamp);
+	}
     }
 
     /**
@@ -200,17 +239,24 @@ public class EntitySet extends AbstractSet<Entity> {
      * @see EntityFactory#killEntity(Entity)
      */
     public boolean killEntity(final UUID id) {
-	final Entity e = entities.get(Objects.requireNonNull(id));
-	if (e == null) {
-	    return false;
+	Objects.requireNonNull(id);
+
+	Entity e;
+	final long stamp = lock.writeLock();
+	try {
+	    e = entities.get(id);
+	    if (e == null || !factory.killEntity(e)) { // Only kill if allowed
+		return false;
+	    }
+
+	    entities.remove(id);
+	} finally {
+	    lock.unlockWrite(stamp);
 	}
 
-	boolean result;
-	if (result = factory.killEntity(e)) { // Only kill if allowed
-	    entities.remove(id);
-	    entityListeners.getProxy().entityKilled(new EntityEvent(delegateContainer, e));
-	}
-	return result;
+	entityListeners.getProxy().entityKilled(new EntityEvent(delegateContainer, e));
+
+	return true;
     }
 
     /**
@@ -293,20 +339,52 @@ public class EntitySet extends AbstractSet<Entity> {
     }
 
     private Entity newEntity0(final UUID id, final Class<? extends Entity> type) {
-	if (entities.containsKey(id)) {
-	    throwRE(ENTITY_ALREADY_ASSOCIATED);
-	}
+	Entity e;
+	final long stamp = lock.writeLock();
+	try {
+	    if (entities.containsKey(id)) {
+		throwRE(ENTITY_ALREADY_ASSOCIATED);
+	    }
 
-	final Entity e = factory.newEntity(id, delegateContainer);
-	entities.put(e.getID(), e);
+	    e = factory.newEntity(id, delegateContainer);
+	    entities.put(e.getID(), e);
 
-	if (type != null) {
-	    e.markAsType(type); // Must be done before listeners
+	    if (type != null) {
+		e.markAsType(type); // Must be done before listeners
+	    }
+	} finally {
+	    lock.unlockWrite(stamp);
 	}
 
 	entityListeners.getProxy().entityCreated(new EntityEvent(delegateContainer, e));
 
 	return e;
+    }
+
+    /**
+     * Receives an entity (from a transfer).
+     *
+     * @param e
+     *            Entity to receive.
+     * @return Whether the entity was received.
+     *
+     * @see #transfer(UUID, EntityContainer)
+     */
+    public boolean receive(final Entity e) {
+	final long stamp = lock.writeLock();
+	try {
+	    if (entities.containsKey(e.getID()) || !factory.importEntity(e, delegateContainer)) {
+		return false;
+	    }
+
+	    entities.put(e.getID(), e);
+	} finally {
+	    lock.unlockWrite(stamp);
+	}
+
+	entityListeners.getProxy().entityReceived(new EntityEvent(delegateContainer, e));
+
+	return true;
     }
 
     @Override
@@ -343,7 +421,12 @@ public class EntitySet extends AbstractSet<Entity> {
 
     @Override
     public int size() {
-	return entities.size();
+	final long stamp = lock.readLock();
+	try {
+	    return entities.size();
+	} finally {
+	    lock.unlockRead(stamp);
+	}
     }
 
     /**
@@ -371,5 +454,60 @@ public class EntitySet extends AbstractSet<Entity> {
      */
     public <T extends Entity> Stream<T> streamOfType(final Class<T> type) {
 	return stream().filter(e -> e.isMarkedAsType(type)).map(e -> asType(e, type));
+    }
+
+    /**
+     * Transfers the entity to the supplied destination container.
+     *
+     * @param id
+     *            Entity ID.
+     * @param destination
+     *            Target container.
+     * @return Whether the entity was transfered.
+     *
+     * @see #receive(Entity)
+     */
+    public boolean transfer(final UUID id, final EntityContainer destination) {
+	Objects.requireNonNull(id);
+	if (Objects.equals(delegateContainer, Objects.requireNonNull(destination))) {
+	    throw new IllegalArgumentException("Cannot transfer to the same container");
+	}
+
+	Entity e;
+
+	final long stamp = lock.writeLock();
+	try {
+	    e = entities.get(id);
+	    if (e == null || !factory.exportEntity(e)) {
+		return false;
+	    }
+
+	    entities.remove(e.getID());
+	} finally {
+	    lock.unlockWrite(stamp);
+	}
+
+	if (!destination.receiveEntity(e)) {
+	    throwRE(ENTITY_EXPORT_NO_TRANSFER);
+	}
+
+	entityListeners.getProxy().entityTransferred(new EntityEvent(delegateContainer, e, destination));
+
+	return true;
+    }
+
+    /**
+     * Transfers the entity to the supplied destination set.
+     *
+     * @param id
+     *            Entity ID.
+     * @param destination
+     *            Target set.
+     * @return Whether the entity was transfered.
+     *
+     * @see #receive(Entity)
+     */
+    public boolean transfer(final UUID id, final EntitySet destination) {
+	return transfer(id, toEntityContainer(destination));
     }
 }

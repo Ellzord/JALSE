@@ -86,7 +86,7 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      * @return Whether there was a container.
      */
     default boolean hasContainer() {
-	return getContainer().isPresent();
+	return getOrNullContainer() != null;
     }
 
     /**
@@ -121,6 +121,16 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      * @return Whether the type was not associated to the entity.
      */
     boolean markAsType(Class<? extends Entity> type);
+
+    /**
+     * Transfers this entity to the specified destination container.
+     *
+     * @param destination
+     *            Target container.
+     * @return Whether the entity was transfered.
+     *
+     */
+    boolean transfer(EntityContainer destination);
 
     /**
      * Removes the specified type from the entity. If this type is the ancestor of any other types

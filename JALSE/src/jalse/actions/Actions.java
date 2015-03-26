@@ -50,6 +50,15 @@ public final class Actions {
     }
 
     /**
+     * Creates an immutable empty {@link ActionEngine}.
+     *
+     * @return Empty action engine.
+     */
+    public static ActionEngine emptyActionEngine() {
+	return new UnmodifiableDelegateActionEngine(null);
+    }
+
+    /**
      * Validates the supplied service is not shutdown.
      *
      * @param executorService
@@ -81,7 +90,7 @@ public final class Actions {
     }
 
     /**
-     * Creates an immutable {MutableActionBindings}.
+     * Creates an immutable {@link MutableActionBindings}.
      *
      * @param bindings
      *            Bindings to wrap.
@@ -101,6 +110,17 @@ public final class Actions {
      */
     public static <T> MutableActionContext<T> unmodifiableActionContext(final MutableActionContext<T> context) {
 	return new UnmodifiableDelegateActionContext<>(Objects.requireNonNull(context));
+    }
+
+    /**
+     * Creates an immutable {@link ActionEngine}.
+     *
+     * @param engine
+     *            engine to wrap.
+     * @return Immutable bindings.
+     */
+    public static ActionEngine unmodifiableActionEngine(final ActionEngine engine) {
+	return new UnmodifiableDelegateActionEngine(Objects.requireNonNull(engine));
     }
 
     private Actions() {

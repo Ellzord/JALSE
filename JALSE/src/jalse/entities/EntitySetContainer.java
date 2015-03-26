@@ -86,6 +86,11 @@ class EntitySetContainer implements EntityContainer {
     }
 
     @Override
+    public boolean receiveEntity(final Entity e) {
+	return delegate.receive(e);
+    }
+
+    @Override
     public void removeAllEntityListeners() {
 	delegate.removeAllListeners();
     }
@@ -108,5 +113,10 @@ class EntitySetContainer implements EntityContainer {
     @Override
     public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
 	return delegate.streamOfType(type);
+    }
+
+    @Override
+    public boolean transferEntity(final UUID id, final EntityContainer destination) {
+	return delegate.transfer(id, destination);
     }
 }

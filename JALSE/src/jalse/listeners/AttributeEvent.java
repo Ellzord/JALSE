@@ -79,7 +79,7 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      *
      * @return Replaced Attribute or null if nothing was replaced.
      */
-    public T getOrNullReplacedAttribite() {
+    public T getOrNullReplacedAttribute() {
 	return replacedAttr;
     }
 
