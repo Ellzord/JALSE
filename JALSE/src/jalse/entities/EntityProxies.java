@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 
 /**
@@ -261,9 +262,9 @@ public final class EntityProxies {
 
     private static final ProxyCache typeCache = new ProxyCache(new EntityTypeFactory());
 
-    private static final Map<Class<?>, Lookup> lookups = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>, Lookup> lookups = new ConcurrentHashMap<>();
 
-    private static final Map<Method, EntityTypeMethodInfo> methodInfos = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Method, EntityTypeMethodInfo> methodInfos = new ConcurrentHashMap<>();
 
     /**
      * Checks to see if the supplied entity is a proxy.
@@ -592,7 +593,7 @@ public final class EntityProxies {
 	    }
 	}
 
-	lookups.put(type, newLookupInstance(type));
+	lookups.computeIfAbsent(type, EntityProxies::newLookupInstance);
 	methodInfos.putAll(resolvedMethods);
 
 	return true;

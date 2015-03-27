@@ -250,7 +250,8 @@ public interface EntityContainer {
     <T extends Entity> T newEntity(UUID id, Class<T> type);
 
     /**
-     * Receives an entity (from a transfer).
+     * Receives an entity (from a transfer). This method may receive an entity from within or
+     * outside the tree.
      *
      * @param e
      *            Entity to receive.

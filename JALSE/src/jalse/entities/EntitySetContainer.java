@@ -87,6 +87,9 @@ class EntitySetContainer implements EntityContainer {
 
     @Override
     public boolean receiveEntity(final Entity e) {
+	if (Entities.withinSameTree(e, this)) {
+	    return delegate.receiveFromTree(e); // Wont import.
+	}
 	return delegate.receive(e);
     }
 
@@ -117,6 +120,6 @@ class EntitySetContainer implements EntityContainer {
 
     @Override
     public boolean transferEntity(final UUID id, final EntityContainer destination) {
-	return delegate.transfer(id, destination);
+	return delegate.transferOrExport(id, destination);
     }
 }

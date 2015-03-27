@@ -150,6 +150,23 @@ public final class Entities {
     }
 
     /**
+     * Gets the highest level parent of this entity.
+     *
+     * @param e
+     *            Entity to get parent for.
+     * @return Highest level parent (or this entity if it has no parent.
+     */
+    public static EntityContainer getHighestParent(final Entity e) {
+	final EntityContainer container = e.getOrNullContainer();
+
+	if (container instanceof Entity) {
+	    return getHighestParent((Entity) container);
+	} else {
+	    return container != null ? container : e;
+	}
+    }
+
+    /**
      * Gets all ancestors for the specified descendant type (not including {@link Entity}).
      *
      * @param type
@@ -303,6 +320,20 @@ public final class Entities {
 	while (walker.isWalking()) {
 	    walker.walk();
 	}
+    }
+
+    /**
+     * Checks to see if an entity is in the same tree as the container.
+     *
+     * @param e
+     *            Entity to check.
+     * @param container
+     *            Container to check.
+     * @return Whether the entity is within the same tree as the container.
+     */
+    public static boolean withinSameTree(final Entity e, final EntityContainer container) {
+	return Objects.equals(getHighestParent(e), container instanceof Entity ? getHighestParent((Entity) container)
+		: container);
     }
 
     private Entities() {

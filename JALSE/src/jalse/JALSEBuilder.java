@@ -6,7 +6,9 @@ import jalse.actions.ManualActionEngine;
 import jalse.actions.ThreadPoolActionEngine;
 import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
+import jalse.misc.Identifiable;
 
+import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -16,7 +18,9 @@ import java.util.concurrent.ForkJoinPool;
  * can still be created without this builder.<br>
  * <br>
  * Parallelism:<br>
- * If {@code parallelism <= 0}(or {@link #setManual()}) then {@link ManualActionEngine} is used.<br>
+ * If {@code parallelism < 0}(or {@link #setCommonPoolEngine()}) then
+ * {@link ForkJoinActionEngine#commonPoolEngine()} is used.<br>
+ * If {@code parallelism == 0}(or {@link #setManual()}) then {@link ManualActionEngine} is used.<br>
  * If {@code parallelism == 1} then {@link ThreadPoolActionEngine} will be used (
  * {@code corePoolSize = 1}).<br>
  * If {@code parallelism > 1} then {@link ForkJoinActionEngine} will be used.
@@ -24,6 +28,8 @@ import java.util.concurrent.ForkJoinPool;
  * @author Elliot Ford
  *
  * @see #DEFAULT_TOTAL_ENTITY_LIMIT
+ * @see #DEFAULT_PARALLELISM
+ * @see #DEFAULT_ID
  *
  * @see ForkJoinActionEngine
  * @see ThreadPoolActionEngine
@@ -42,6 +48,13 @@ public final class JALSEBuilder {
      * The default {@link Entity} limit ({@code Integer.MAX_VALUE}).
      */
     public static final int DEFAULT_TOTAL_ENTITY_LIMIT = Integer.MAX_VALUE;
+
+    /**
+     * The default {@link UUID}.
+     *
+     * @see Identifiable#DUMMY_ID
+     */
+    public static final UUID DEFAULT_ID = Identifiable.DUMMY_ID;
 
     /**
      * Creates a JALSE instance with default parallelism.
@@ -86,6 +99,7 @@ public final class JALSEBuilder {
 	return new JALSEBuilder();
     }
 
+    private UUID id = DEFAULT_ID;
     private int parallelism = DEFAULT_PARALLELISM;
     private int totalEntityLimit = DEFAULT_TOTAL_ENTITY_LIMIT;
 
@@ -109,7 +123,44 @@ public final class JALSEBuilder {
 	    engine = new ForkJoinActionEngine(parallelism);
 	}
 
-	return new JALSE(engine, new DefaultEntityFactory(totalEntityLimit));
+	return new JALSE(id, engine, new DefaultEntityFactory(totalEntityLimit));
+    }
+
+    /**
+     * Users the common engine based on the common pool.
+     *
+     * @return This builder.
+     *
+     * @see ForkJoinPool#commonPool()
+     * @see ForkJoinActionEngine#commonPoolEngine()
+     */
+    public JALSEBuilder setCommonPoolEngine() {
+	setParallelism(-1);
+	return this;
+    }
+
+    /**
+     * Sets the unique ID for JALSE to a dummy ID.
+     *
+     * @return This builder.
+     *
+     * @see Identifiable#DUMMY_ID
+     */
+    public JALSEBuilder setDummyID() {
+	id = DEFAULT_ID;
+	return this;
+    }
+
+    /**
+     * Sets the unique ID for JALSE instance.
+     *
+     * @param id
+     *            ID of JALSE.
+     * @return This builder.
+     */
+    public JALSEBuilder setID(final UUID id) {
+	this.id = id;
+	return this;
     }
 
     /**
@@ -134,6 +185,30 @@ public final class JALSEBuilder {
     }
 
     /**
+     * Sets the parallelism to the available processors.
+     *
+     * @return This builder.
+     *
+     * @see Runtime#availableProcessors()
+     */
+    public JALSEBuilder setParallelismToProcessors() {
+	parallelism = DEFAULT_PARALLELISM;
+	return this;
+    }
+
+    /**
+     * Sets the ID to a random one.
+     *
+     * @return This builder.
+     *
+     * @see UUID#randomUUID()
+     */
+    public JALSEBuilder setRandomID() {
+	id = UUID.randomUUID();
+	return this;
+    }
+
+    /**
      * Sets the total entity limit parameter.
      *
      * @param totalEntityLimit
@@ -142,19 +217,6 @@ public final class JALSEBuilder {
      */
     public JALSEBuilder setTotalEntityLimit(final int totalEntityLimit) {
 	this.totalEntityLimit = totalEntityLimit;
-	return this;
-    }
-
-    /**
-     * Users the common engine based on the common pool.
-     *
-     * @return This builder.
-     *
-     * @see ForkJoinPool#commonPool()
-     * @see ForkJoinActionEngine#commonPoolEngine()
-     */
-    public JALSEBuilder useCommonPoolEngine() {
-	setParallelism(-1);
 	return this;
     }
 }

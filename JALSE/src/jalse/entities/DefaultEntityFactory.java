@@ -12,6 +12,7 @@ import jalse.entities.EntityVisitor.EntityVisitResult;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.locks.StampedLock;
 
 /**
  * A {@link EntityFactory} implementation that creates/kills {@link DefaultEntity}. Default entity
@@ -30,6 +31,7 @@ public class DefaultEntityFactory implements EntityFactory {
     private final Set<UUID> entityIDs;
     private ActionEngine engine;
     private int entityCount;
+    private final StampedLock lock;
 
     /**
      * Creates a default entity factory with no entity limit.
@@ -52,12 +54,18 @@ public class DefaultEntityFactory implements EntityFactory {
 	entityIDs = new HashSet<>();
 	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
 	entityCount = 0;
+	lock = new StampedLock();
     }
 
     @Override
-    public boolean exportEntity(final Entity e) {
-	if (!entityIDs.remove(e.getID())) {
-	    return false;
+    public void exportEntity(final Entity e) {
+	final long stamp = lock.writeLock();
+	try {
+	    if (!entityIDs.remove(e.getID())) {
+		throw new IllegalArgumentException("Does not know if this entity");
+	    }
+	} finally {
+	    lock.unlockWrite(stamp);
 	}
 
 	final ActionEngine emptyEngine = Actions.emptyActionEngine();
@@ -74,8 +82,6 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	    return EntityVisitResult.CONTINUE;
 	});
-
-	return true;
     }
 
     /**
@@ -84,7 +90,12 @@ public class DefaultEntityFactory implements EntityFactory {
      * @return Action engine.
      */
     public ActionEngine getEngine() {
-	return engine;
+	final long stamp = lock.readLock();
+	try {
+	    return engine;
+	} finally {
+	    lock.unlockRead(stamp);
+	}
     }
 
     /**
@@ -93,7 +104,12 @@ public class DefaultEntityFactory implements EntityFactory {
      * @return Entity count.
      */
     public int getEntityCount() {
-	return entityCount;
+	final long stamp = lock.readLock();
+	try {
+	    return entityCount;
+	} finally {
+	    lock.unlockRead(stamp);
+	}
     }
 
     /**
@@ -106,65 +122,111 @@ public class DefaultEntityFactory implements EntityFactory {
     }
 
     @Override
-    public boolean importEntity(final Entity e, final EntityContainer container) {
-	if (!entityIDs.add(e.getID())) {
-	    return false;
-	}
-
-	final DefaultEntity de = (DefaultEntity) e;
-	de.setEngine(engine);
-	de.setContainer(container);
-
-	Entities.walkEntityTree(de, vi -> {
-	    ((DefaultEntity) vi).setEngine(engine);
-	    return EntityVisitResult.CONTINUE;
-	});
-
-	return false;
-    }
-
-    @Override
-    public boolean killEntity(final Entity e) {
-	final DefaultEntity de = (DefaultEntity) e;
-
-	if (!entityIDs.remove(de.getID()) || !de.isAlive()) { // Kill only those in need
-	    return false;
-	}
-
-	de.markAsDead();
-	de.cancelAllScheduledForActor();
-	de.setEngine(null);
-
-	entityCount--;
-
-	de.killEntities(); // Kill tree
-
-	EntityProxies.removeProxiesOfEntity(de); // Force clean-up
-
-	return true;
-    }
-
-    @Override
     public DefaultEntity newEntity(final UUID id, final EntityContainer container) {
-	if (entityCount >= entityLimit) {
-	    throwRE(ENTITY_LIMIT_REACHED);
+	final long stamp = lock.writeLock();
+	try {
+	    if (entityCount >= entityLimit) {
+		throwRE(ENTITY_LIMIT_REACHED);
+	    }
+
+	    if (!entityIDs.add(id)) { // Unique only
+		throwRE(ENTITY_ALREADY_ASSOCIATED);
+	    }
+
+	    final DefaultEntity e = new DefaultEntity(id, this, container);
+	    e.setEngine(engine);
+	    e.markAsAlive();
+
+	    entityCount++;
+
+	    return e;
+	} finally {
+	    lock.unlockWrite(stamp);
 	}
-
-	if (!entityIDs.add(id)) { // Unique only
-	    throwRE(ENTITY_ALREADY_ASSOCIATED);
-	}
-
-	final DefaultEntity e = new DefaultEntity(id, this, container);
-	e.setEngine(engine);
-	e.markAsAlive();
-
-	entityCount++;
-
-	return e;
     }
 
     @Override
     public void setEngine(final ActionEngine engine) {
-	this.engine = requireNotStopped(engine);
+	final long stamp = lock.writeLock();
+	try {
+	    this.engine = requireNotStopped(engine);
+	} finally {
+	    lock.unlockWrite(stamp);
+	}
+    }
+
+    @Override
+    public boolean tryImportEntity(final Entity e, final EntityContainer container) {
+	long stamp = lock.writeLock();
+	try {
+	    if (!entityIDs.add(e.getID())) {
+		return false;
+	    }
+
+	    final long ws = lock.tryConvertToReadLock(stamp);
+	    if (ws != 0L) {
+		stamp = ws;
+	    } else {
+		lock.unlockWrite(stamp);
+		stamp = lock.readLock();
+	    }
+
+	    final DefaultEntity de = (DefaultEntity) e;
+
+	    de.setEngine(engine);
+	    de.setContainer(container);
+
+	    Entities.walkEntities(de).map(DefaultEntity.class::cast).forEach(ve -> ve.setEngine(engine));
+
+	    return true;
+	} finally {
+	    lock.unlock(stamp);
+	}
+    }
+
+    @Override
+    public boolean tryKillEntity(final Entity e) {
+	final long stamp = lock.writeLock();
+	try {
+	    final DefaultEntity de = (DefaultEntity) e;
+
+	    if (!entityIDs.remove(de.getID()) || !de.isAlive()) { // Kill only those in need
+		return false;
+	    }
+
+	    de.markAsDead();
+	    de.cancelAllScheduledForActor();
+	    de.setEngine(null);
+
+	    entityCount--;
+
+	    de.killEntities(); // Kill tree
+
+	    EntityProxies.removeProxiesOfEntity(de); // Force clean-up
+
+	    return true;
+	} finally {
+	    lock.unlockWrite(stamp);
+	}
+    }
+
+    @Override
+    public boolean tryMoveWithinTree(final Entity e, final EntityContainer container) {
+	final long stamp = lock.writeLock();
+	try {
+	    if (!Entities.withinSameTree(e, container)) {
+		return false;
+	    }
+
+	    ((DefaultEntity) e).setContainer(container);
+
+	    if (container instanceof DefaultEntity) {
+		return ((DefaultEntity) container).receiveFromTree(e);
+	    } else {
+		return e.receiveEntity(e);
+	    }
+	} finally {
+	    lock.unlockWrite(stamp);
+	}
     }
 }

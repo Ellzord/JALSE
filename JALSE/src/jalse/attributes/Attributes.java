@@ -2,7 +2,9 @@ package jalse.attributes;
 
 import static jalse.misc.JALSEExceptions.INVALID_ATTRIBUTE_TYPE;
 import static jalse.misc.JALSEExceptions.throwRE;
+import static jalse.misc.TypeParameterResolver.toClass;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -50,6 +52,21 @@ public final class Attributes {
      * Validation method for ensuring the class is a descendant of Attribute (but also not Attribute
      * itself).
      *
+     * @param attr
+     *            Class to check.
+     * @return The supplied class
+     *
+     * @throws RuntimeException
+     *             If the class does not meet the above requirements.
+     */
+    public static <T extends Attribute> Class<T> requireNonNullAttrSub(final Class<T> attr) throws RuntimeException {
+	return requireNonNullNonAttribute(attr);
+    }
+
+    /**
+     * Validation method for ensuring the class is a descendant of Attribute (but also not Attribute
+     * itself).
+     *
      * @param clazz
      *            Class to check.
      * @return The supplied class
@@ -57,10 +74,21 @@ public final class Attributes {
      * @throws RuntimeException
      *             If the class does not meet the above requirements.
      */
-    public static Class<?> requireNonNullAttrSub(final Class<?> clazz) throws RuntimeException {
-	if (clazz == null || Attribute.class.equals(clazz) || !Attribute.class.isAssignableFrom(clazz)) {
+    @SuppressWarnings("unchecked")
+    public static Class<? extends Attribute> requireNonNullAttrSub(final Type clazz) throws RuntimeException {
+	final Class<?> attr = requireNonNullNonAttribute(toClass(clazz));
+	if (!Attribute.class.isAssignableFrom(attr)) {
 	    throwRE(INVALID_ATTRIBUTE_TYPE);
 	}
+
+	return (Class<? extends Attribute>) attr;
+    }
+
+    private static <T> Class<T> requireNonNullNonAttribute(final Class<T> clazz) {
+	if (clazz == null || Attribute.class.equals(clazz)) {
+	    throwRE(INVALID_ATTRIBUTE_TYPE);
+	}
+
 	return clazz;
     }
 

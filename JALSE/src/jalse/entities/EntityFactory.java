@@ -21,29 +21,8 @@ public interface EntityFactory {
      *
      * @param e
      *            Entity to detach.
-     * @return Whether the entity was exported.
      */
-    boolean exportEntity(Entity e);
-
-    /**
-     * Imports the entity into the container.
-     *
-     * @param e
-     *            Entity to import.
-     * @param container
-     *            Target container.
-     * @return Whether the entity can be imported.
-     */
-    boolean importEntity(Entity e, EntityContainer container);
-
-    /**
-     * Kills the specified entity.
-     *
-     * @param e
-     *            Entity to kill.
-     * @return Whether the entity was killed.
-     */
-    boolean killEntity(Entity e);
+    void exportEntity(Entity e);
 
     /**
      * Creates a new entity with the specified ID and parent container.
@@ -63,4 +42,35 @@ public interface EntityFactory {
      *            Action engine.
      */
     void setEngine(ActionEngine engine);
+
+    /**
+     * Imports the entity into the factory.
+     *
+     * @param e
+     *            Entity to import.
+     * @param container
+     *            Target container.
+     * @return Whether the entity was imported.
+     */
+    boolean tryImportEntity(Entity e, EntityContainer container);
+
+    /**
+     * Kills the specified entity.
+     *
+     * @param e
+     *            Entity to kill.
+     * @return Whether the entity was killed.
+     */
+    boolean tryKillEntity(Entity e);
+
+    /**
+     * If applicable will move the entity within the tree (transfer).
+     *
+     * @param e
+     *            Entity to move.
+     * @param container
+     *            Container to become new parent.
+     * @return Whether the move was possible.
+     */
+    boolean tryMoveWithinTree(Entity e, EntityContainer container);
 }

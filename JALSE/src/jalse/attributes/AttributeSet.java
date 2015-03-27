@@ -2,7 +2,6 @@ package jalse.attributes;
 
 import static jalse.attributes.Attributes.requireNonNullAttrSub;
 import static jalse.listeners.Listeners.createAttributeListenerSet;
-import static jalse.misc.TypeParameterResolver.toClass;
 import jalse.listeners.AttributeEvent;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.ListenerSet;
@@ -10,14 +9,15 @@ import jalse.misc.TypeParameterResolver;
 
 import java.util.AbstractSet;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.StampedLock;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
@@ -37,10 +37,11 @@ public class AttributeSet extends AbstractSet<Attribute> {
 
     private static final TypeParameterResolver RESOLVER = new TypeParameterResolver(AttributeListener.TYPE_PARAMETER);
 
-    private final Map<Class<? extends Attribute>, ListenerSet<AttributeListener>> attributeListeners;
-    private final Map<Class<? extends Attribute>, Attribute> attributes;
+    private final ConcurrentMap<Class<? extends Attribute>, ListenerSet<AttributeListener>> attributeListeners;
+    private final ConcurrentMap<Class<? extends Attribute>, Attribute> attributes;
     private final AttributeContainer delegateContainer;
-    private final StampedLock lock;
+    private final Lock read;
+    private final Lock write;
 
     /**
      * Creates a new AttributeSet with no delegate container.
@@ -58,8 +59,10 @@ public class AttributeSet extends AbstractSet<Attribute> {
     public AttributeSet(final AttributeContainer delegateContainer) {
 	this.delegateContainer = delegateContainer != null ? delegateContainer : Attributes.toAttributeContainer(this);
 	attributes = new ConcurrentHashMap<>();
-	attributeListeners = new HashMap<>();
-	lock = new StampedLock();
+	attributeListeners = new ConcurrentHashMap<>();
+	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	read = rwLock.readLock();
+	write = rwLock.writeLock();
     }
 
     @Override
@@ -74,20 +77,11 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *            Listener to add.
      * @return Whether the listener was not already assigned.
      */
-    @SuppressWarnings("unchecked")
     public boolean addListener(final AttributeListener<? extends Attribute> listener) {
-	final Class<?> attr = requireNonNullAttrSub(toClass(RESOLVER.resolve(listener)));
-
-	final long stamp = lock.writeLock();
-	try {
-	    ListenerSet<AttributeListener> ls = attributeListeners.get(attr);
-	    if (ls == null) {
-		attributeListeners.put((Class<? extends Attribute>) attr, ls = createAttributeListenerSet());
-	    }
-	    return ls.add(listener);
-	} finally {
-	    lock.unlockWrite(stamp);
-	}
+	final Class<? extends Attribute> attr = requireNonNullAttrSub(RESOLVER.resolve(listener));
+	final ListenerSet<AttributeListener> ls = attributeListeners.computeIfAbsent(attr,
+		k -> createAttributeListenerSet());
+	return ls.add(listener);
     }
 
     /**
@@ -101,34 +95,39 @@ public class AttributeSet extends AbstractSet<Attribute> {
     public <T extends Attribute> T addOfType(final T attr) {
 	final Class<? extends Attribute> type = attr.getClass();
 
-	final T previous = (T) attributes.put(type, attr);
-
-	ListenerSet<? extends AttributeListener<T>> ls;
-	final long stamp = lock.readLock();
+	write.lock();
 	try {
-	    ls = (ListenerSet<? extends AttributeListener<T>>) attributeListeners.get(type);
+	    final T previous = (T) attributes.put(type, attr);
+
+	    final ListenerSet<?> ls = attributeListeners.get(type);
+	    if (ls != null) {
+		((ListenerSet<? extends AttributeListener<T>>) ls).getProxy().attributeAdded(
+			new AttributeEvent<>(delegateContainer, attr, previous));
+	    }
+
+	    return previous;
 	} finally {
-	    lock.unlockRead(stamp);
+	    write.unlock();
 	}
-
-	if (ls != null) {
-	    ls.getProxy().attributeAdded(new AttributeEvent<>(delegateContainer, attr, previous));
-	}
-
-	return previous;
     }
 
     @Override
     public void clear() {
-	new HashSet<>(attributes.values()).forEach(this::remove);
+	write.lock();
+	try {
+	    new HashSet<>(attributes.keySet()).forEach(this::removeOfType);
+	} finally {
+	    write.unlock();
+	}
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean contains(final Object o) {
 	if (!(o instanceof Attribute)) {
 	    throw new IllegalArgumentException();
 	}
-	return Objects.equals(o, attributes.get(o.getClass()));
+	return Objects.equals(o, getOfType((Class<? extends Attribute>) o.getClass()));
     }
 
     /**
@@ -146,16 +145,10 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	    return false;
 	}
 
-	ListenerSet<? extends AttributeListener<T>> ls;
-	final long stamp = lock.readLock();
-	try {
-	    ls = (ListenerSet<? extends AttributeListener<T>>) attributeListeners.get(attr);
-	} finally {
-	    lock.unlockRead(stamp);
-	}
-
+	final ListenerSet<?> ls = attributeListeners.get(attr);
 	if (ls != null) {
-	    ls.getProxy().attributeChanged(new AttributeEvent<>(delegateContainer, associated));
+	    ((ListenerSet<? extends AttributeListener<T>>) ls).getProxy().attributeChanged(
+		    new AttributeEvent<>(delegateContainer, associated));
 	}
 
 	return true;
@@ -167,7 +160,12 @@ public class AttributeSet extends AbstractSet<Attribute> {
      * @return Set of the types attribute listeners are for or an empty set if none were found.
      */
     public Set<Class<? extends Attribute>> getAttributeTypes() {
-	return Collections.unmodifiableSet(attributes.keySet());
+	read.lock();
+	try {
+	    return Collections.unmodifiableSet(attributes.keySet()); // Read-only.
+	} finally {
+	    read.unlock();
+	}
     }
 
     /**
@@ -197,14 +195,9 @@ public class AttributeSet extends AbstractSet<Attribute> {
      */
     @SuppressWarnings("unchecked")
     public <T extends Attribute> Set<? extends AttributeListener<T>> getListeners(final Class<T> attr) {
-	final long stamp = lock.readLock();
-	try {
-	    final Set<AttributeListener> ls = attributeListeners.get(requireNonNullAttrSub(attr));
-	    return ls != null ? Collections.unmodifiableSet((Set<? extends AttributeListener<T>>) ls) : Collections
-		    .emptySet();
-	} finally {
-	    lock.unlockRead(stamp);
-	}
+	final Set<AttributeListener> ls = attributeListeners.get(requireNonNullAttrSub(attr));
+	return ls != null ? Collections.unmodifiableSet((Set<? extends AttributeListener<T>>) ls) : Collections
+		.emptySet();
     }
 
     /**
@@ -225,17 +218,27 @@ public class AttributeSet extends AbstractSet<Attribute> {
      */
     @SuppressWarnings("unchecked")
     public <T extends Attribute> T getOfType(final Class<T> attr) {
-	return (T) attributes.get(requireNonNullAttrSub(attr));
+	read.lock();
+	try {
+	    return (T) attributes.get(requireNonNullAttrSub(attr));
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
     public boolean isEmpty() {
-	return attributes.isEmpty();
+	read.lock();
+	try {
+	    return attributes.isEmpty();
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
     public Iterator<Attribute> iterator() {
-	return attributes.values().iterator();
+	return attributes.values().iterator(); // Read-only
     }
 
     @SuppressWarnings("unchecked")
@@ -251,12 +254,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
      * Removes all listeners for all attribute types.
      */
     public void removeAllListeners() {
-	final long stamp = lock.writeLock();
-	try {
-	    attributeListeners.clear();
-	} finally {
-	    lock.unlockWrite(stamp);
-	}
+	attributeListeners.clear();
     }
 
     /**
@@ -267,20 +265,15 @@ public class AttributeSet extends AbstractSet<Attribute> {
      * @return Whether the listener was assigned.
      */
     public <T extends Attribute> boolean removeListener(final AttributeListener<T> listener) {
-	final Class<?> attr = requireNonNullAttrSub(toClass(RESOLVER.resolve(listener)));
+	final Class<?> attr = requireNonNullAttrSub(RESOLVER.resolve(listener));
 
-	final long stamp = lock.writeLock();
-	try {
-	    final Set<AttributeListener> ls = attributeListeners.get(attr);
-	    if (ls != null) {
-		boolean removed;
-		if (removed = ls.remove(listener) && ls.isEmpty()) { // No more listeners of type
-		    attributeListeners.remove(attr);
-		}
-		return removed;
+	final Set<AttributeListener> ls = attributeListeners.get(attr);
+	if (ls != null && ls.remove(listener)) {
+	    if (attributeListeners.isEmpty()) { // No more listeners of type
+		attributeListeners.remove(attr);
 	    }
-	} finally {
-	    lock.unlockWrite(stamp);
+
+	    return true;
 	}
 
 	return false;
@@ -293,12 +286,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *            Attribute type.
      */
     public <T extends Attribute> void removeListeners(final Class<T> attr) {
-	final long stamp = lock.writeLock();
-	try {
-	    attributeListeners.remove(requireNonNullAttrSub(attr));
-	} finally {
-	    lock.unlockWrite(stamp);
-	}
+	attributeListeners.remove(requireNonNullAttrSub(attr));
     }
 
     /**
@@ -310,28 +298,31 @@ public class AttributeSet extends AbstractSet<Attribute> {
      */
     @SuppressWarnings("unchecked")
     public <T extends Attribute> T removeOfType(final Class<T> attr) {
-	final T previous = (T) attributes.remove(requireNonNullAttrSub(attr));
+	write.lock();
+	try {
+	    final T previous = (T) attributes.remove(requireNonNullAttrSub(attr));
 
-	if (previous != null) {
-	    ListenerSet<? extends AttributeListener<T>> ls;
-
-	    final long stamp = lock.readLock();
-	    try {
-		ls = (ListenerSet<? extends AttributeListener<T>>) attributeListeners.get(attr);
-	    } finally {
-		lock.unlockRead(stamp);
+	    if (previous != null) {
+		final ListenerSet<?> ls = attributeListeners.get(attr);
+		if (ls != null) {
+		    ((ListenerSet<? extends AttributeListener<T>>) ls).getProxy().attributeRemoved(
+			    new AttributeEvent<>(delegateContainer, previous));
+		}
 	    }
 
-	    if (ls != null) {
-		ls.getProxy().attributeRemoved(new AttributeEvent<>(delegateContainer, previous));
-	    }
+	    return previous;
+	} finally {
+	    write.unlock();
 	}
-
-	return previous;
     }
 
     @Override
     public int size() {
-	return attributes.size();
+	read.lock();
+	try {
+	    return attributes.size();
+	} finally {
+	    read.unlock();
+	}
     }
 }

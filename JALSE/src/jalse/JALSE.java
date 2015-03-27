@@ -13,6 +13,7 @@ import jalse.entities.EntityContainer;
 import jalse.entities.EntityFactory;
 import jalse.entities.EntitySet;
 import jalse.listeners.EntityListener;
+import jalse.misc.AbstractIdentifiable;
 import jalse.tags.Tag;
 import jalse.tags.TagSet;
 import jalse.tags.Taggable;
@@ -38,7 +39,8 @@ import java.util.stream.Stream;
  * @see EntityFactory
  *
  */
-public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContainer, Taggable {
+public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionScheduler<JALSE>, EntityContainer,
+	Taggable {
 
     /**
      * Backing entity set for top level entities.
@@ -68,13 +70,17 @@ public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContai
     /**
      * Creates a new instance of JALSE with the supplied engine and factory.
      *
+     * @param id
+     *            The ID used to identify between JALSE instances.
+     *
      * @param engine
      *            Action engine to associate to factory and schedule actions.
      * @param factory
      *            Entity factory to create/kill child entities.
      *
      */
-    public JALSE(final ActionEngine engine, final EntityFactory factory) {
+    public JALSE(final UUID id, final ActionEngine engine, final EntityFactory factory) {
+	super(id);
 	this.engine = requireNotStopped(engine);
 	this.factory = Objects.requireNonNull(factory);
 	factory.setEngine(engine);
@@ -209,6 +215,9 @@ public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContai
 
     @Override
     public boolean receiveEntity(final Entity e) {
+	if (Entities.withinSameTree(e, this)) {
+	    return entities.receiveFromTree(e); // Wont import.
+	}
 	return entities.receive(e);
     }
 
@@ -255,6 +264,6 @@ public class JALSE implements ActionEngine, ActionScheduler<JALSE>, EntityContai
 
     @Override
     public boolean transferEntity(final UUID id, final EntityContainer destination) {
-	return entities.transfer(id, destination);
+	return entities.transferOrExport(id, destination);
     }
 }

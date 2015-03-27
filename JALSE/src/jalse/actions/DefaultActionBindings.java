@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * This is a simple yet fully-featured implementation of {@link MutableActionBindings}.<br>
@@ -22,7 +23,7 @@ public class DefaultActionBindings implements MutableActionBindings {
 	}
     }
 
-    private final Map<String, Object> bindings;
+    private final ConcurrentMap<String, Object> bindings;
 
     /**
      * Creates a new instance of DefaultActionBindings.

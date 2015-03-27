@@ -3,11 +3,11 @@ package jalse.tags;
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.StampedLock;
 
 /**
@@ -25,14 +25,14 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 
     private static final long serialVersionUID = 4251919034814631329L;
 
-    private final Map<Class<?>, Set<Tag>> tags;
+    private final ConcurrentMap<Class<?>, Set<Tag>> tags;
     private final StampedLock lock;
 
     /**
      * Creates a new instance of tag set.
      */
     public TagSet() {
-	tags = new HashMap<>();
+	tags = new ConcurrentHashMap<>();
 	lock = new StampedLock();
     }
 
@@ -40,10 +40,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
     public boolean add(final Tag e) {
 	final long stamp = lock.writeLock();
 	try {
-	    Set<Tag> tagsOfType = tags.get(e.getClass());
-	    if (tagsOfType == null) {
-		tags.put(e.getClass(), tagsOfType = new HashSet<>());
-	    }
+	    final Set<Tag> tagsOfType = tags.computeIfAbsent(e.getClass(), k -> new CopyOnWriteArraySet<>());
 	    return tagsOfType.add(e);
 	} finally {
 	    lock.unlockWrite(stamp);
@@ -118,12 +115,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 
     @Override
     public Iterator<Tag> iterator() {
-	final long stamp = lock.readLock();
-	try {
-	    return tags.values().stream().flatMap(Set::stream).iterator();
-	} finally {
-	    lock.unlockRead(stamp);
-	}
+	return tags.values().stream().flatMap(Set::stream).iterator();
     }
 
     @Override
