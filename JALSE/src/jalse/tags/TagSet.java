@@ -1,6 +1,5 @@
 package jalse.tags;
 
-import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Collections;
 import java.util.Iterator;
@@ -23,7 +22,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @see Object#hashCode()
  *
  */
-public class TagSet extends AbstractSet<Tag> implements Serializable {
+public class TagSet extends AbstractSet<Tag> {
 
     private class TagsOfType {
 
@@ -40,8 +39,6 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 	    t = null;
 	}
     }
-
-    private static final long serialVersionUID = 4251919034814631329L;
 
     private final ConcurrentMap<Class<?>, TagsOfType> tags;
 
@@ -153,7 +150,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
 
 	tot.w.lock();
 	try {
-	    if (tot.t.remove(tot)) {
+	    if (tot.t.remove(o)) {
 		if (tot.t.isEmpty()) {
 		    tot.t = null;
 		    tags.remove(type);

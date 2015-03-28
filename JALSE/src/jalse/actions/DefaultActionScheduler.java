@@ -46,14 +46,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     @Override
     public void cancelAllScheduledForActor() {
 	synchronized (contexts) {
-	    final Iterator<WeakReference<ActionContext<T>>> it = contexts.iterator();
-	    while (it.hasNext()) {
-		final ActionContext<T> cxt = it.next().get();
-		if (cxt != null) {
-		    cxt.cancel();
-		}
-		it.remove();
-	    }
+	    purge(true);
 	}
     }
 
@@ -75,6 +68,19 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	return engine;
     }
 
+    private void purge(final boolean cancel) {
+	final Iterator<WeakReference<ActionContext<T>>> it = contexts.iterator();
+	while (it.hasNext()) {
+	    final ActionContext<T> cxt = it.next().get();
+	    if (cxt == null || cxt.isDone() || cancel) {
+		if (cxt != null && !cxt.isDone()) {
+		    cxt.cancel();
+		}
+		it.remove();
+	    }
+	}
+    }
+
     @Override
     public MutableActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
 	    final TimeUnit unit) {
@@ -89,6 +95,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	    context.setActor(actor);
 	    context.setInitialDelay(initialDelay, unit);
 	    context.setPeriod(period, unit);
+	    purge(false);
 
 	    contexts.add(new WeakReference<>(context));
 	}
