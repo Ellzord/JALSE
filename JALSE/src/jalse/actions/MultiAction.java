@@ -73,7 +73,7 @@ class MultiAction<T> implements Action<T> {
 	final T actor = context.getOrNullActor();
 
 	for (final Action<T> action : actions) {
-	    final MutableActionContext<T> newContext = engine.createContext(action);
+	    final MutableActionContext<T> newContext = engine.newContext(action);
 	    newContext.setActor(actor); // Same actor
 	    newContext.putAll(context.toMap()); // Copy bindings (current)
 	    newContext.schedule();

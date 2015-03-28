@@ -185,7 +185,7 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
     }
 
     @Override
-    public <T> MutableActionContext<T> createContext(final Action<T> action) {
+    public <T> MutableActionContext<T> newContext(final Action<T> action) {
 	return new ForkJoinContext<>(action);
     }
 

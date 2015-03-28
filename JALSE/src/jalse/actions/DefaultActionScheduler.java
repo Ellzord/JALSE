@@ -91,7 +91,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	final MutableActionContext<T> context;
 
 	synchronized (contexts) {
-	    context = engine.createContext(action);
+	    context = engine.newContext(action);
 	    context.setActor(actor);
 	    context.setInitialDelay(initialDelay, unit);
 	    context.setPeriod(period, unit);

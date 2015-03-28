@@ -24,7 +24,7 @@ public interface ActionEngine {
      *            Action to create context for.
      * @return Context associated to the action.
      */
-    <T> MutableActionContext<T> createContext(Action<T> action);
+    <T> MutableActionContext<T> newContext(Action<T> action);
 
     /**
      * Bindings for this engine.
@@ -114,7 +114,7 @@ public interface ActionEngine {
 	    return Actions.emptyActionContext(); // Case of post cancel scheduling
 	}
 
-	final MutableActionContext<T> context = createContext(action);
+	final MutableActionContext<T> context = newContext(action);
 	context.setActor(actor);
 	context.schedule();
 

@@ -77,7 +77,7 @@ public class ManualActionEngine implements ActionEngine {
     }
 
     @Override
-    public <T> MutableActionContext<T> createContext(final Action<T> action) {
+    public <T> MutableActionContext<T> newContext(final Action<T> action) {
 	return new ManualContext<>(action);
     }
 

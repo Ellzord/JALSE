@@ -11,8 +11,8 @@ class UnmodifiableDelegateActionEngine implements ActionEngine {
     }
 
     @Override
-    public <T> MutableActionContext<T> createContext(final Action<T> action) {
-	return new UnmodifiableDelegateActionContext<>(delegate != null ? delegate.createContext(action) : null);
+    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+	return new UnmodifiableDelegateActionContext<>(delegate != null ? delegate.newContext(action) : null);
     }
 
     @Override

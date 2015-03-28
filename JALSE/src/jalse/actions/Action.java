@@ -11,7 +11,7 @@ package jalse.actions;
  * @param <T>
  *            Type of actor to be supplied (can be {@code ?} for no actor).
  *
- * @see ActionEngine#createContext(Action)
+ * @see ActionEngine#newContext(Action)
  * @see ActionEngine#schedule(Action, Object)
  * @see ActionScheduler#scheduleForActor(Action, long, long, java.util.concurrent.TimeUnit)
  */

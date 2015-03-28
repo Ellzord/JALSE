@@ -101,8 +101,8 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
     }
 
     @Override
-    public <T> MutableActionContext<T> createContext(final Action<T> action) {
-	return engine.createContext(action);
+    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+	return engine.newContext(action);
     }
 
     /**
