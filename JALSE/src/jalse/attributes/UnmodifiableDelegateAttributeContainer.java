@@ -25,7 +25,7 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T extends Attribute> boolean fireAttributeChanged(final Class<T> attr) {
+    public <T extends Attribute> void fireAttributeChanged(final Class<T> attr) {
 	throw new UnsupportedOperationException();
     }
 

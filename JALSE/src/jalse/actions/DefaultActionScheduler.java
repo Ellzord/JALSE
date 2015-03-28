@@ -2,10 +2,11 @@ package jalse.actions;
 
 import static jalse.actions.Actions.unmodifiableActionContext;
 
-import java.util.Collections;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,7 +26,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 
     private final T actor;
     private ActionEngine engine;
-    private final Set<ActionContext<T>> contexts;
+    private final List<WeakReference<ActionContext<T>>> contexts;
 
     /**
      * Creates a DefaultScheduler for the supplied actor.
@@ -36,7 +37,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     public DefaultActionScheduler(final T actor) {
 	this.actor = Objects.requireNonNull(actor);
 	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
-	contexts = Collections.newSetFromMap(new WeakHashMap<>());
+	contexts = new ArrayList<>();
     }
 
     /**
@@ -45,8 +46,14 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     @Override
     public void cancelAllScheduledForActor() {
 	synchronized (contexts) {
-	    contexts.forEach(ActionContext<T>::cancel);
-	    contexts.clear();
+	    final Iterator<WeakReference<ActionContext<T>>> it = contexts.iterator();
+	    while (it.hasNext()) {
+		final ActionContext<T> cxt = it.next().get();
+		if (cxt != null) {
+		    cxt.cancel();
+		}
+		it.remove();
+	    }
 	}
     }
 
@@ -76,13 +83,14 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	}
 
 	final MutableActionContext<T> context;
+
 	synchronized (contexts) {
 	    context = engine.createContext(action);
 	    context.setActor(actor);
 	    context.setInitialDelay(initialDelay, unit);
 	    context.setPeriod(period, unit);
 
-	    contexts.add(context);
+	    contexts.add(new WeakReference<>(context));
 	}
 
 	context.schedule();

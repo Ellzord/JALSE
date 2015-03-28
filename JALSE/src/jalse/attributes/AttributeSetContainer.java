@@ -25,8 +25,8 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
-    public <T extends Attribute> boolean fireAttributeChanged(final Class<T> attr) {
-	return delegate.fireChanged(attr);
+    public <T extends Attribute> void fireAttributeChanged(final Class<T> attr) {
+	delegate.fireChanged(attr);
     }
 
     @Override

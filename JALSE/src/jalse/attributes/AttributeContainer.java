@@ -60,9 +60,8 @@ public interface AttributeContainer {
      *
      * @param attr
      *            Attribute type to fire for.
-     * @return Whether the collection contains an attribute matching the supplied type.
      */
-    <T extends Attribute> boolean fireAttributeChanged(Class<T> attr);
+    <T extends Attribute> void fireAttributeChanged(Class<T> attr);
 
     /**
      * Gets the number of total attributes within the container.

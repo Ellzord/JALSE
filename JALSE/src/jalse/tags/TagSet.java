@@ -8,7 +8,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.locks.StampedLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A tag set is a thread-safe {@link Set} implementation for {@link Tag}. A tag set will allow
@@ -23,48 +25,70 @@ import java.util.concurrent.locks.StampedLock;
  */
 public class TagSet extends AbstractSet<Tag> implements Serializable {
 
+    private class TagsOfType {
+
+	private final Lock r;
+	private final Lock w;
+
+	private Set<Tag> t;
+
+	private TagsOfType() {
+	    final ReadWriteLock rw = new ReentrantReadWriteLock();
+	    r = rw.readLock();
+	    w = rw.writeLock();
+
+	    t = null;
+	}
+    }
+
     private static final long serialVersionUID = 4251919034814631329L;
 
-    private final ConcurrentMap<Class<?>, Set<Tag>> tags;
-    private final StampedLock lock;
+    private final ConcurrentMap<Class<?>, TagsOfType> tags;
 
     /**
      * Creates a new instance of tag set.
      */
     public TagSet() {
 	tags = new ConcurrentHashMap<>();
-	lock = new StampedLock();
     }
 
     @Override
     public boolean add(final Tag e) {
-	final long stamp = lock.writeLock();
+	final TagsOfType tot = tags.compute(e.getClass(), (k, v) -> {
+	    if (v == null) {
+		v = new TagsOfType();
+	    }
+	    v.w.lock();
+	    if (v.t == null) {
+		v.t = new CopyOnWriteArraySet<>();
+	    }
+	    return v;
+	});
 	try {
-	    final Set<Tag> tagsOfType = tags.computeIfAbsent(e.getClass(), k -> new CopyOnWriteArraySet<>());
-	    return tagsOfType.add(e);
+
+	    return tot.t.add(e);
 	} finally {
-	    lock.unlockWrite(stamp);
+	    tot.w.unlock();
 	}
     }
 
     @Override
     public void clear() {
-	final long stamp = lock.writeLock();
-	try {
-	    tags.clear();
-	} finally {
-	    lock.unlockWrite(stamp);
-	}
+	tags.clear();
     }
 
     @Override
     public boolean contains(final Object o) {
-	final long stamp = lock.readLock();
+	final TagsOfType tot = tags.get(o.getClass());
+	if (tot == null) {
+	    return false;
+	}
+
+	tot.r.lock();
 	try {
-	    final Set<Tag> tagsOfType = tags.get(o.getClass());
-	    return tagsOfType != null && tagsOfType.contains(o);
+	    return tot.t.contains(o);
 	} finally {
-	    lock.unlockRead(stamp);
+	    tot.r.unlock();
 	}
     }
 
@@ -77,12 +101,7 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
      *         it does not.
      */
     public boolean containsOfType(final Class<? extends Tag> type) {
-	final long stamp = lock.readLock();
-	try {
-	    return tags.containsKey(type);
-	} finally {
-	    lock.unlockRead(stamp);
-	}
+	return tags.containsKey(type);
     }
 
     /**
@@ -94,46 +113,56 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public <T extends Tag> Set<T> getOfType(final Class<T> type) {
-	final long stamp = lock.readLock();
+	final TagsOfType tot = tags.get(type);
+	if (tot == null) {
+	    return Collections.emptySet();
+	}
+
+	tot.r.lock();
 	try {
-	    final Set<T> tagsOfType = (Set<T>) tags.get(type);
-	    return tagsOfType != null ? Collections.unmodifiableSet(tagsOfType) : Collections.emptySet();
+	    return Collections.unmodifiableSet((Set<T>) tot.t);
 	} finally {
-	    lock.unlockRead(stamp);
+	    tot.r.unlock();
 	}
     }
 
     @Override
     public boolean isEmpty() {
-	final long stamp = lock.readLock();
-	try {
-	    return tags.isEmpty();
-	} finally {
-	    lock.unlockRead(stamp);
-	}
+	return tags.isEmpty();
     }
 
     @Override
     public Iterator<Tag> iterator() {
-	return tags.values().stream().flatMap(Set::stream).iterator();
+	return tags.values().stream().flatMap(tot -> {
+	    tot.r.lock();
+	    try {
+		return tot.t.stream();
+	    } finally {
+		tot.r.unlock();
+	    }
+	}).iterator();
     }
 
     @Override
     public boolean remove(final Object o) {
-	final long stamp = lock.writeLock();
-	try {
-	    final Set<Tag> tagsOfType = tags.get(o.getClass());
-	    boolean removed = false;
+	final Class<?> type = o.getClass();
+	final TagsOfType tot = tags.get(type);
+	if (tot == null) {
+	    return false;
+	}
 
-	    if (tagsOfType != null) {
-		removed = tagsOfType.remove(o);
-		if (tagsOfType.isEmpty()) {
-		    tags.remove(o.getClass());
+	tot.w.lock();
+	try {
+	    if (tot.t.remove(tot)) {
+		if (tot.t.isEmpty()) {
+		    tot.t = null;
+		    tags.remove(type);
 		}
+		return true;
 	    }
-	    return removed;
+	    return false;
 	} finally {
-	    lock.unlockWrite(stamp);
+	    tot.w.unlock();
 	}
     }
 
@@ -145,21 +174,11 @@ public class TagSet extends AbstractSet<Tag> implements Serializable {
      * @return Whether any tags were removed.
      */
     public boolean removeOfType(final Class<? extends Tag> type) {
-	final long stamp = lock.writeLock();
-	try {
-	    return tags.remove(type) != null;
-	} finally {
-	    lock.unlockWrite(stamp);
-	}
+	return tags.remove(type) != null;
     }
 
     @Override
     public int size() {
-	final long stamp = lock.readLock();
-	try {
-	    return tags.values().stream().mapToInt(Set::size).sum();
-	} finally {
-	    lock.unlockRead(stamp);
-	}
+	return stream().mapToInt(t -> 1).sum();
     }
 }

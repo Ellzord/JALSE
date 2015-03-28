@@ -117,8 +117,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <S extends Attribute> boolean fireAttributeChanged(final Class<S> attr) {
-	return attributes.fireChanged(attr);
+    public <S extends Attribute> void fireAttributeChanged(final Class<S> attr) {
+	attributes.fireChanged(attr);
     }
 
     @Override

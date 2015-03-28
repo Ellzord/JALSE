@@ -209,6 +209,15 @@ public final class JALSEBuilder {
     }
 
     /**
+     * Sets to use a single thread.
+     *
+     * @return This builder.
+     */
+    public JALSEBuilder setSingleThread() {
+	return setParallelism(1);
+    }
+
+    /**
      * Sets the total entity limit parameter.
      *
      * @param totalEntityLimit
