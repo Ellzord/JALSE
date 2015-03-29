@@ -1,6 +1,5 @@
 package jalse.attributes;
 
-import static jalse.attributes.Attributes.newType;
 import jalse.listeners.AttributeListener;
 
 import java.util.Optional;
@@ -54,8 +53,6 @@ public interface AttributeContainer {
      *
      * @param name
      *            Attribute type name.
-     * @param type
-     *            Value type.
      * @param attr
      *            Attribute to add.
      * @return Optional containing the replaced attribute if set or else empty optional if none
@@ -63,8 +60,8 @@ public interface AttributeContainer {
      *
      * @see Attributes#newType(String, Class)
      */
-    default <T> Optional<T> addAttributeOfType(final String name, final Class<T> type, final T attr) {
-	return addAttributeOfType(newType(name, type), attr);
+    default <T> Optional<T> addAttributeOfType(final String name, final T attr) {
+	return Optional.ofNullable(addOrNullAttributeOfType(name, attr));
     }
 
     /**
@@ -79,21 +76,18 @@ public interface AttributeContainer {
     <T> T addOrNullAttributeOfType(final AttributeType<T> type, T attr);
 
     /**
-     * Adds the supplied attribute to the collection.
+     * Adds the supplied attribute to the collection (creating a new type using the supplied
+     * attribute value).
      *
      * @param name
      *            Attribute type name.
-     * @param type
-     *            Value type.
      * @param attr
      *            Attribute to add.
      * @return The replaced attribute or null if none was replaced.
      *
-     * @see Attributes#newType(String, Class)
+     * @see Attributes#newTypeFor(String, Object)
      */
-    default <T> T addOrNullAttributeOfType(final String name, final Class<T> type, final T attr) {
-	return addOrNullAttributeOfType(newType(name, type), attr);
-    }
+    <T> T addOrNullAttributeOfType(final String name, final T attr);
 
     /**
      * Manually fires an attribute change for the supplied attribute type. This is used for mutable
@@ -110,14 +104,8 @@ public interface AttributeContainer {
      *
      * @param name
      *            Attribute type name.
-     * @param type
-     *            Value type.
-     *
-     * @see Attributes#newType(String, Class)
      */
-    default <T> void fireAttributeChanged(final String name, final Class<T> type) {
-	fireAttributeChanged(newType(name, type));
-    }
+    void fireAttributeChanged(final String name);
 
     /**
      * Gets the number of total attributes within the container.
@@ -171,8 +159,8 @@ public interface AttributeContainer {
      * @return Optional containing the attribute or else empty optional if none found.
      * @see Attributes#newType(String, Class)
      */
-    default <T> Optional<T> getAttributeOfType(final String name, final Class<T> type) {
-	return getAttributeOfType(newType(name, type));
+    default Optional<?> getAttributeOfType(final String name) {
+	return Optional.ofNullable(getOrNullAttributeOfType(name));
     }
 
     /**
@@ -203,15 +191,9 @@ public interface AttributeContainer {
      *
      * @param name
      *            Attribute type name.
-     * @param type
-     *            Value type.
      * @return The attribute matching the supplied type or null if none found.
-     *
-     * @see Attributes#newType(String, Class)
      */
-    default <T> T getOrNullAttributeOfType(final String name, final Class<T> type) {
-	return getOrNullAttributeOfType(newType(name, type));
-    }
+    Object getOrNullAttributeOfType(final String name);
 
     /**
      * Checks whether the container has a value associated to the supplied attribute type.
@@ -235,8 +217,8 @@ public interface AttributeContainer {
      *
      * @see Attributes#newType(String, Class)
      */
-    default <T> boolean hasAttributeOfType(final String name, final Class<T> type) {
-	return getOrNullAttributeOfType(name, type) != null;
+    default boolean hasAttributeOfType(final String name) {
+	return getOrNullAttributeOfType(name) != null;
     }
 
     /**
@@ -294,8 +276,8 @@ public interface AttributeContainer {
      *
      * @see Attributes#newType(String, Class)
      */
-    default <T> Optional<T> removeAttributeOfType(final String name, final Class<T> type) {
-	return removeAttributeOfType(newType(name, type));
+    default Optional<?> removeAttributeOfType(final String name) {
+	return Optional.ofNullable(removeOrNullAttributeOfType(name));
     }
 
     /**
@@ -313,19 +295,13 @@ public interface AttributeContainer {
     <T> T removeOrNullAttributeOfType(final AttributeType<T> type);
 
     /**
-     * Removes the attribute matching the supplied type.
+     * Removes the attribute matching the attribute type name.
      *
      * @param name
      *            Attribute type name.
-     * @param type
-     *            Value type.
      * @return The removed attribute or null if none was removed.
-     *
-     * @see Attributes#newType(String, Class)
      */
-    default <T> T removeOrNullAttributeOfType(final String name, final Class<T> type) {
-	return removeOrNullAttributeOfType(newType(name, type));
-    }
+    Object removeOrNullAttributeOfType(final String name);
 
     /**
      * Streams all of the attributes within the container.

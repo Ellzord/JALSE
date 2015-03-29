@@ -25,8 +25,18 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
+    public <T> T addOrNullAttributeOfType(final String name, final T attr) {
+	return delegate.addOfType(name, attr);
+    }
+
+    @Override
     public <T> void fireAttributeChanged(final AttributeType<T> type) {
 	delegate.fireChanged(type);
+    }
+
+    @Override
+    public void fireAttributeChanged(final String name) {
+	delegate.fireChanged(name);
     }
 
     @Override
@@ -65,6 +75,11 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
+    public Object getOrNullAttributeOfType(final String name) {
+	return delegate.getOfType(name);
+    }
+
+    @Override
     public void removeAllAttributeListeners() {
 	delegate.removeAllListeners();
     }
@@ -87,6 +102,11 @@ class AttributeSetContainer implements AttributeContainer {
     @Override
     public <T> T removeOrNullAttributeOfType(final AttributeType<T> type) {
 	return delegate.removeOfType(type);
+    }
+
+    @Override
+    public Object removeOrNullAttributeOfType(final String name) {
+	return delegate.removeOfType(name);
     }
 
     @Override

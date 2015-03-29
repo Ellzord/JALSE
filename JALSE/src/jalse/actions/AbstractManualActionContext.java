@@ -56,10 +56,10 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
      *
      * @param engine
      *            Parent engine.
+     * @param action
+     *            The action this context is for.
      * @param sourceBindings
      *            Bindings to shallow copy.
-     *
-     * @param sourceBindings
      */
     protected AbstractManualActionContext(final ActionEngine engine, final Action<T> action,
 	    final ActionBindings sourceBindings) {

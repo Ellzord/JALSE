@@ -18,7 +18,6 @@ public final class EntityType implements Tag {
      *
      * @param type
      *            Entity type
-     * @throws IllegalArgumentException
      *
      * @see EntityProxies#validateEntityType(Class)
      */

@@ -40,7 +40,7 @@ public final class AttributeType<T> {
 
     AttributeType(final String name, final Class<? extends T> type) {
 	if (name == null || name.length() == 0) {
-	    throw new IllegalArgumentException("Must have a non-null and non-empty name");
+	    throw new IllegalArgumentException("Must have a non-empty name");
 	}
 	this.name = name;
 	this.type = Objects.requireNonNull(type);
@@ -48,11 +48,18 @@ public final class AttributeType<T> {
 
     @Override
     public boolean equals(final Object obj) {
-	return this == obj || obj instanceof AttributeType<?> && this.name.equals(((AttributeType<?>) obj).name);
+	if (this == obj) {
+	    return true;
+	}
+	if (!(obj instanceof AttributeType<?>)) {
+	    return false;
+	}
+	final AttributeType<?> other = (AttributeType<?>) obj;
+	return name.equals(other.name) && type.equals(other.type);
     }
 
     /**
-     * Name of the attribute type (unsed for uniqueness).
+     * Name of the attribute type.
      *
      * @return Type name.
      */
@@ -72,6 +79,43 @@ public final class AttributeType<T> {
     @Override
     public int hashCode() {
 	return Objects.hash(name);
+    }
+
+    /**
+     * Whether the value would be accepted by this type.
+     *
+     * @param obj
+     *            Value.
+     * @return Whether the value is accepted.
+     *
+     * @see #isAcceptableValueType(Class)
+     */
+    public boolean isAcceptableValue(final Object obj) {
+	return isAcceptableValueType(obj.getClass());
+    }
+
+    /**
+     * Whether the value type is an accepted type.
+     *
+     * @param clazz
+     *            Value type to check.
+     * @return Whether the type was accepted.
+     *
+     * @see Class#isAssignableFrom(Class)
+     */
+    public boolean isAcceptableValueType(final Class<?> clazz) {
+	return type.isAssignableFrom(clazz);
+    }
+
+    /**
+     * Whether the attribute type is a subclass of this one.
+     *
+     * @param at
+     *            Attribute type to check.
+     * @return Whether the supplied type is a subclass.
+     */
+    public boolean isSubtype(final AttributeType<?> at) {
+	return name.equals(at.name) && isAcceptableValueType(at.type);
     }
 
     @Override

@@ -64,7 +64,6 @@ public final class Actions {
      * @param executorService
      *            Service to check.
      * @return The service.
-     * @throws IllegalArgumentException
      */
     public static <T extends ExecutorService> T requireNotShutdown(final T executorService) {
 	if (executorService.isShutdown()) {

@@ -105,6 +105,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	return attributes.addOfType(type, attr);
     }
 
+    @Override
+    public <T> T addOrNullAttributeOfType(final String name, final T attr) {
+	return attributes.addOfType(name, attr);
+    }
+
     private void addParentTag() {
 	if (container instanceof Identifiable) {
 	    tags.add(new Parent(Identifiable.getID(container)));
@@ -119,6 +124,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public <S> void fireAttributeChanged(final AttributeType<S> attr) {
 	attributes.fireChanged(attr);
+    }
+
+    @Override
+    public void fireAttributeChanged(final String name) {
+	attributes.fireChanged(name);
     }
 
     @Override
@@ -194,6 +204,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public <S> S getOrNullAttributeOfType(final AttributeType<S> type) {
 	return attributes.getOfType(type);
+    }
+
+    @Override
+    public Object getOrNullAttributeOfType(final String name) {
+	return attributes.getOfType(name);
     }
 
     @Override
@@ -357,6 +372,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public <S> S removeOrNullAttributeOfType(final AttributeType<S> type) {
 	return attributes.removeOfType(type);
+    }
+
+    @Override
+    public Object removeOrNullAttributeOfType(final String name) {
+	return attributes.removeOfType(name);
     }
 
     @Override

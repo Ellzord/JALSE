@@ -25,7 +25,17 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
+    public <T> T addOrNullAttributeOfType(final String name, final T attr) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
     public <T> void fireAttributeChanged(final AttributeType<T> attr) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void fireAttributeChanged(final String name) {
 	throw new UnsupportedOperationException();
     }
 
@@ -65,6 +75,11 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
+    public Object getOrNullAttributeOfType(final String name) {
+	return delegate != null ? delegate.getOrNullAttributeOfType(name) : null;
+    }
+
+    @Override
     public void removeAllAttributeListeners() {
 	throw new UnsupportedOperationException();
     }
@@ -86,6 +101,11 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
 
     @Override
     public <T> T removeOrNullAttributeOfType(final AttributeType<T> attr) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object removeOrNullAttributeOfType(final String name) {
 	throw new UnsupportedOperationException();
     }
 

@@ -87,6 +87,17 @@ public final class Attributes {
     }
 
     /**
+     * Creates a new attribute type (Object).
+     *
+     * @param name
+     *            Name of attribute type.
+     * @return New object attribute type.
+     */
+    public static AttributeType<?> newEmptyType(final String name) {
+	return new AttributeType<>(name, Object.class);
+    }
+
+    /**
      * Creates a new attribute type (Float).
      *
      * @param name
@@ -155,6 +166,20 @@ public final class Attributes {
     }
 
     /**
+     * Creates a new type for the specified object (using class).
+     *
+     * @param name
+     *            Attribute type name.
+     * @param obj
+     *            Object to create attribute type for.
+     * @return New attribute type.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> AttributeType<T> newTypeFor(final String name, final T obj) {
+	return (AttributeType<T>) newType(name, obj.getClass());
+    }
+
+    /**
      * Predicate to check attribute is not present.
      *
      * @param type
@@ -163,6 +188,23 @@ public final class Attributes {
      */
     public static Predicate<AttributeContainer> notPresent(final AttributeType<?> type) {
 	return isPresent(type).negate();
+    }
+
+    /**
+     * Ensures the String is not null or empty.
+     *
+     * @param str
+     *            String to check.
+     * @return The string.
+     * @throws IllegalArgumentException
+     *             If the string was null or empty.
+     *
+     */
+    public static String requireNotEmpty(final String str) throws IllegalArgumentException {
+	if (str == null || str.length() == 0) {
+	    throw new IllegalArgumentException();
+	}
+	return str;
     }
 
     /**
