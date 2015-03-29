@@ -1,7 +1,5 @@
 package jalse.listeners;
 
-import jalse.attributes.Attribute;
-
 /**
  * An abstract adapter for {@link AttributeListener}. This is a convenience class for creating
  * attribute listeners that may not require a full implementation. All methods implemented by this
@@ -12,7 +10,7 @@ import jalse.attributes.Attribute;
  *            Attribute type to trigger for.
  *
  */
-public abstract class AttributeAdapter<T extends Attribute> implements AttributeListener<T> {
+public abstract class AttributeAdapter<T> implements AttributeListener<T> {
 
     @Override
     public void attributeAdded(final AttributeEvent<T> event) {}

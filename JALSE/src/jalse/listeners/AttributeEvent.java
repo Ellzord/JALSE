@@ -1,7 +1,7 @@
 package jalse.listeners;
 
-import jalse.attributes.Attribute;
 import jalse.attributes.AttributeContainer;
+import jalse.attributes.AttributeType;
 import jalse.misc.AbstractIdentifiable;
 
 import java.util.Objects;
@@ -10,9 +10,9 @@ import java.util.UUID;
 
 /**
  * Attribute change event for {@link AttributeListener}. This is a unique event that contains the
- * relevant {@link Attribute} and it's parent {@link AttributeContainer} (even if the Attribute has
- * been removed). When an Attribute is replaced the previous Attribute is also contained within the
- * event.
+ * relevant {@link AttributeType} value and it's parent {@link AttributeContainer} (even if the
+ * Attribute has been removed). When an Attribute is replaced the previous Attribute is also
+ * contained within the event.
  *
  * @author Elliot Ford
  * @param <T>
@@ -21,22 +21,25 @@ import java.util.UUID;
  * @see AttributeContainer
  *
  */
-public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
+public class AttributeEvent<T> extends AbstractIdentifiable {
 
     private final AttributeContainer container;
-    private final T attr;
-    private final T replacedAttr;
+    private final AttributeType<T> type;
+    private final T value;
+    private final T replacedValue;
 
     /**
      * Creates a new AttributeEvent with a random ID (with no previous Attribute).
      *
      * @param container
      *            Parent container for the Attribute.
-     * @param attr
+     * @param type
+     *            Attribute type.
+     * @param value
      *            Attribute the event is for.
      */
-    public AttributeEvent(final AttributeContainer container, final T attr) {
-	this(container, attr, null);
+    public AttributeEvent(final AttributeContainer container, final AttributeType<T> type, final T value) {
+	this(container, type, value, null);
     }
 
     /**
@@ -44,25 +47,20 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      *
      * @param container
      *            Parent container for the Attribute.
-     * @param attr
+     * @param type
+     *            Attribute type.
+     * @param value
      *            Attribute the event is for.
-     * @param replacedAttr
+     * @param replacedValue
      *            The previous attribute that has been replaced by this Attribute (can be null).
      */
-    public AttributeEvent(final AttributeContainer container, final T attr, final T replacedAttr) {
+    public AttributeEvent(final AttributeContainer container, final AttributeType<T> type, final T value,
+	    final T replacedValue) {
 	super(UUID.randomUUID());
 	this.container = Objects.requireNonNull(container);
-	this.attr = Objects.requireNonNull(attr);
-	this.replacedAttr = replacedAttr;
-    }
-
-    /**
-     * Gets the Attribute the event is for.
-     *
-     * @return The relevant Attribute.
-     */
-    public T getAttribute() {
-	return attr;
+	this.type = Objects.requireNonNull(type);
+	this.value = Objects.requireNonNull(value);
+	this.replacedValue = replacedValue;
     }
 
     /**
@@ -79,8 +77,8 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      *
      * @return Replaced Attribute or null if nothing was replaced.
      */
-    public T getOrNullReplacedAttribute() {
-	return replacedAttr;
+    public T getOrNullReplacedValue() {
+	return replacedValue;
     }
 
     /**
@@ -88,8 +86,26 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      *
      * @return Optional containing replaced attribute or empty optional if nothing was replaced.
      */
-    public Optional<T> getReplacedAttribute() {
-	return Optional.ofNullable(replacedAttr);
+    public Optional<T> getReplacedValue() {
+	return Optional.ofNullable(replacedValue);
+    }
+
+    /**
+     * Gets the attribute type for the attribute.
+     *
+     * @return Attribute type.
+     */
+    public AttributeType<T> getType() {
+	return type;
+    }
+
+    /**
+     * Gets the Attribute the event is for.
+     *
+     * @return The relevant Attribute.
+     */
+    public T getValue() {
+	return value;
     }
 
     /**
@@ -98,6 +114,6 @@ public class AttributeEvent<T extends Attribute> extends AbstractIdentifiable {
      * @return Whether the previous Attribute was replaced.
      */
     public boolean isReplacement() {
-	return replacedAttr != null;
+	return replacedValue != null;
     }
 }

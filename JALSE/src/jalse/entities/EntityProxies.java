@@ -4,7 +4,8 @@ import static jalse.misc.JALSEExceptions.INVALID_ENTITY_TYPE;
 import static jalse.misc.JALSEExceptions.throwRE;
 import static jalse.misc.TypeParameterResolver.getTypeParameter;
 import static jalse.misc.TypeParameterResolver.toClass;
-import jalse.attributes.Attribute;
+import jalse.attributes.AttributeType;
+import jalse.attributes.Attributes;
 import jalse.entities.annotations.GetAttribute;
 import jalse.entities.annotations.GetEntities;
 import jalse.entities.annotations.GetEntity;
@@ -49,8 +50,8 @@ import java.util.stream.Stream;
  * 6) Getting a Stream of all of the child entities of or as type.<br>
  * <br>
  * For an Entity proxy to be created the type be validated: <br>
- * 1. Must be a subclass of Entity (can be indirect). <br>
- * 2. Can only have super types that are also subclasses of Entity. <br>
+ * 2. All attributes types must not be primitives (can be null).<br>
+ * 1. Can only have super types that are (or are subclasses of) Entity. <br>
  * 3. Must only contain default or annotated methods:<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;a) {@link SetAttribute} <br>
  * &nbsp;&nbsp;&nbsp;&nbsp;b) {@link GetAttribute} <br>
@@ -65,19 +66,21 @@ import java.util.stream.Stream;
  *
  * <pre>
  * <code>
- * public interface Car extends Entity {
+ * public interface Ghost extends Entity {
  * 
- * 	{@code @GetAttribute}
- * 	Optional{@code<Load>} getLoad();
+ * 	{@code @GetAttribute("scary")}
+ * 	Optional{@code<Boolean>} isScary();
  * 
- * 	{@code @SetAttribute}
- * 	void setLoad(Load load);
+ * 	{@code @SetAttribute("scary")}
+ * 	void setScary(Boolean scary);
  * }
  * 
  * Entity e; // Previously created entity
  * 
- * Car car = Entities.asType(e, Car.class);
- * Load load = car.getLoad();
+ * Ghost evilGhost = Entities.asType(e, Ghost.class);
+ * if (evilGhost.isScary()) {
+ * 	// AAAAAH!
+ * }
  * </code>
  * </pre>
  *
@@ -141,10 +144,10 @@ public final class EntityProxies {
 	     * getAttributeOfType(Class) / getOrNullAttributeOfType(Class)
 	     */
 	    if (etmi.forAnnotationType(GetAttribute.class)) {
-		if (etmi.isOrNull()) {
-		    return entity.getOrNullAttributeOfType((Class<? extends Attribute>) etmi.getResolved());
+		if (etmi.orNull) {
+		    return entity.getOrNullAttributeOfType(etmi.type);
 		} else {
-		    return entity.getAttributeOfType((Class<? extends Attribute>) etmi.getResolved());
+		    return entity.getAttributeOfType(etmi.type);
 		}
 	    }
 
@@ -153,19 +156,17 @@ public final class EntityProxies {
 	     * removeAttributeOfType(Class) / removeOrNullAttributeOfType(Class)
 	     */
 	    if (etmi.forAnnotationType(SetAttribute.class)) {
-		final Attribute attr = (Attribute) args[0];
-
-		if (etmi.isOrNull()) {
-		    if (attr != null) {
-			return entity.addOrNullAttributeOfType((Attribute) args[0]);
+		if (etmi.orNull) {
+		    if (args[0] != null) {
+			return entity.addOrNullAttributeOfType((AttributeType<Object>) etmi.type, args[0]);
 		    } else {
-			return entity.removeOrNullAttributeOfType((Class<? extends Attribute>) etmi.getResolved());
+			return entity.removeOrNullAttributeOfType(etmi.type);
 		    }
 		} else {
-		    if (attr != null) {
-			return entity.addAttributeOfType((Attribute) args[0]);
+		    if (args[0] != null) {
+			return entity.addAttributeOfType((AttributeType<Object>) etmi.type, args[0]);
 		    } else {
-			return entity.removeAttributeOfType((Class<? extends Attribute>) etmi.getResolved());
+			return entity.removeAttributeOfType(etmi.type);
 		    }
 		}
 	    }
@@ -175,10 +176,9 @@ public final class EntityProxies {
 	     */
 	    if (etmi.forAnnotationType(NewEntity.class)) {
 		if (args != null && args.length == 1) {
-		    return entity.newEntity((UUID) args[0], (Class<? extends Entity>) etmi.getResolved());
-
+		    return entity.newEntity((UUID) args[0], (Class<? extends Entity>) etmi.resolved);
 		} else {
-		    return entity.newEntity((Class<? extends Entity>) etmi.getResolved());
+		    return entity.newEntity((Class<? extends Entity>) etmi.resolved);
 		}
 	    }
 
@@ -186,10 +186,10 @@ public final class EntityProxies {
 	     * getEntityAsType(Class)
 	     */
 	    if (etmi.forAnnotationType(GetEntity.class)) {
-		if (etmi.isOrNull()) {
-		    return entity.getOrNullEntityAsType((UUID) args[0], (Class<? extends Entity>) etmi.getResolved());
+		if (etmi.orNull) {
+		    return entity.getOrNullEntityAsType((UUID) args[0], (Class<? extends Entity>) etmi.resolved);
 		} else {
-		    return entity.getEntityAsType((UUID) args[0], (Class<? extends Entity>) etmi.getResolved());
+		    return entity.getEntityAsType((UUID) args[0], (Class<? extends Entity>) etmi.resolved);
 		}
 	    }
 
@@ -197,10 +197,10 @@ public final class EntityProxies {
 	     * streamEntitiesOfType(Class) / streamEntitiesAsType(Class)
 	     */
 	    if (etmi.forAnnotationType(StreamEntities.class)) {
-		if (((StreamEntities) etmi.getAnnotation()).ofType()) {
-		    return entity.streamEntitiesOfType((Class<? extends Entity>) etmi.getResolved());
+		if (((StreamEntities) etmi.annotation).ofType()) {
+		    return entity.streamEntitiesOfType((Class<? extends Entity>) etmi.resolved);
 		} else {
-		    return entity.streamEntitiesAsType((Class<? extends Entity>) etmi.getResolved());
+		    return entity.streamEntitiesAsType((Class<? extends Entity>) etmi.resolved);
 		}
 	    }
 
@@ -208,10 +208,10 @@ public final class EntityProxies {
 	     * getEntitiesOfType(Class) / getEntitiesAsType(Class)
 	     */
 	    if (etmi.forAnnotationType(GetEntities.class)) {
-		if (((GetEntities) etmi.getAnnotation()).ofType()) {
-		    return entity.getEntitiesOfType((Class<? extends Entity>) etmi.getResolved());
+		if (((GetEntities) etmi.annotation).ofType()) {
+		    return entity.getEntitiesOfType((Class<? extends Entity>) etmi.resolved);
 		} else {
-		    return entity.getEntitiesAsType((Class<? extends Entity>) etmi.getResolved());
+		    return entity.getEntitiesAsType((Class<? extends Entity>) etmi.resolved);
 		}
 	    }
 
@@ -222,29 +222,19 @@ public final class EntityProxies {
     private static class EntityTypeMethodInfo {
 
 	private final Annotation annotation;
-	private final boolean orNull;
 	private final Class<?> resolved;
+	private boolean orNull;
+	private AttributeType<?> type;
 
-	public EntityTypeMethodInfo(final Annotation annotation, final Class<?> resolved, final boolean orNull) {
+	private EntityTypeMethodInfo(final Annotation annotation, final Class<?> resolved) {
 	    this.annotation = annotation;
 	    this.resolved = resolved;
-	    this.orNull = orNull;
+	    orNull = false;
+	    type = null;
 	}
 
 	public boolean forAnnotationType(final Class<? extends Annotation> type) {
 	    return annotation.annotationType().equals(type);
-	}
-
-	public Annotation getAnnotation() {
-	    return annotation;
-	}
-
-	public Class<?> getResolved() {
-	    return resolved;
-	}
-
-	public boolean isOrNull() {
-	    return orNull;
 	}
     }
 
@@ -399,12 +389,14 @@ public final class EntityProxies {
 		}
 	    }
 
+	    final boolean isDefaultOrStatic = method.isDefault() || Modifier.isStatic(method.getModifiers());
+
 	    /*
 	     * Skip un-annotated default methods.
 	     */
-	    if (annotation == null && method.isDefault()) {
+	    if (annotation == null && isDefaultOrStatic) {
 		continue;
-	    } else if (annotation == null || method.isDefault()) {
+	    } else if (annotation == null || isDefaultOrStatic) {
 		return false;
 	    }
 
@@ -420,7 +412,8 @@ public final class EntityProxies {
 	     * getAttributeOfType(Class) / getOrNullAttributeOfType(Class)
 	     */
 	    if (GetAttribute.class.equals(annotation.annotationType())) {
-		if (!hasReturnType || hasParams) {
+		final String name = ((GetAttribute) annotation).value();
+		if (!hasReturnType || hasParams || name.length() == 0) {
 		    return false;
 		}
 
@@ -432,12 +425,15 @@ public final class EntityProxies {
 		    orNull = false;
 		}
 
-		if (Modifier.isAbstract(resolved.getModifiers()) || resolved.isInterface()
-			|| !Attribute.class.isAssignableFrom(resolved)) {
+		if (resolved.isPrimitive()) {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, orNull));
+		final EntityTypeMethodInfo etmi = new EntityTypeMethodInfo(annotation, resolved);
+		etmi.orNull = orNull;
+		etmi.type = Attributes.newType(name, resolved);
+
+		resolvedMethods.put(method, etmi);
 		continue;
 	    }
 
@@ -446,15 +442,15 @@ public final class EntityProxies {
 	     * removeAttributeOfType(Class) / removeOrNullAttributeOfType(Class)
 	     */
 	    if (SetAttribute.class.equals(annotation.annotationType())) {
-		if (!hasParams || params.length != 1) {
+		final String name = ((SetAttribute) annotation).value();
+		if (!hasParams || params.length != 1 || name.length() == 0) {
 		    return false;
 		}
 
 		final Class<?> resolved = toClass(params[0]);
 		boolean orNull = true;
 
-		if (Modifier.isAbstract(resolved.getModifiers()) || resolved.isInterface()
-			|| !Attribute.class.isAssignableFrom(resolved)) {
+		if (resolved.isPrimitive()) {
 		    return false;
 		}
 
@@ -471,7 +467,11 @@ public final class EntityProxies {
 		    }
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, orNull));
+		final EntityTypeMethodInfo etmi = new EntityTypeMethodInfo(annotation, resolved);
+		etmi.orNull = orNull;
+		etmi.type = Attributes.newType(name, resolved);
+
+		resolvedMethods.put(method, etmi);
 		continue;
 	    }
 
@@ -488,7 +488,7 @@ public final class EntityProxies {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, false));
+		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved));
 		referencedtypes.add(resolved);
 		continue;
 	    }
@@ -513,7 +513,10 @@ public final class EntityProxies {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, orNull));
+		final EntityTypeMethodInfo etmi = new EntityTypeMethodInfo(annotation, resolved);
+		etmi.orNull = orNull;
+
+		resolvedMethods.put(method, etmi);
 		referencedtypes.add(resolved);
 		continue;
 	    }
@@ -539,7 +542,7 @@ public final class EntityProxies {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, false));
+		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved));
 		referencedtypes.add(resolved);
 		continue;
 	    }
@@ -565,7 +568,7 @@ public final class EntityProxies {
 		    return false;
 		}
 
-		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved, false));
+		resolvedMethods.put(method, new EntityTypeMethodInfo(annotation, resolved));
 		referencedtypes.add(resolved);
 		continue;
 	    }

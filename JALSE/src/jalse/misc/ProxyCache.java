@@ -137,6 +137,31 @@ public class ProxyCache {
 	lock = new StampedLock();
     }
 
+    private long checkValidateType(final long stamp, final Class<?> type) {
+	if (validTypes.contains(type)) { // Already valid
+	    return stamp;
+	}
+
+	final long ws = lock.tryConvertToWriteLock(stamp);
+	long newStamp;
+
+	if (ws != 0L) { // Could not convert
+	    newStamp = ws;
+	} else {
+	    lock.unlockRead(stamp);
+	    newStamp = lock.writeLock();
+	    if (validTypes.contains(type)) { // Re-check may have lost lock
+		return newStamp;
+	    }
+	}
+
+	if (factory.validate(type)) {
+	    validTypes.add(type);
+	}
+
+	return newStamp;
+    }
+
     private long ensureEntryForObj(final Object obj, final long stamp, final boolean forceWrite) {
 	long newStamp = stamp;
 
@@ -197,7 +222,7 @@ public class ProxyCache {
 
 	long stamp = lock.readLock();
 	try {
-	    stamp = validateTypeStartRead(stamp, type); // Validate and keep lock
+	    stamp = checkValidateType(stamp, type); // Validate and keep lock
 	    if (!validTypes.contains(type)) { // Failed
 		throw new IllegalArgumentException("Supplied type did not pass validation");
 	    }
@@ -452,35 +477,10 @@ public class ProxyCache {
     public boolean validateType(final Class<?> type) {
 	long stamp = lock.readLock();
 	try {
-	    stamp = validateTypeStartRead(stamp, type);
+	    stamp = checkValidateType(stamp, type);
 	    return validTypes.contains(type);
 	} finally {
 	    lock.unlock(stamp);
 	}
-    }
-
-    private long validateTypeStartRead(final long stamp, final Class<?> type) {
-	if (validTypes.contains(type)) { // Already valid
-	    return stamp;
-	}
-
-	final long ws = lock.tryConvertToWriteLock(stamp);
-	long newStamp;
-
-	if (ws != 0L) { // Could not convert
-	    newStamp = ws;
-	} else {
-	    lock.unlockRead(stamp);
-	    newStamp = lock.writeLock();
-	    if (validTypes.contains(type)) { // Re-check may have lost lock
-		return newStamp;
-	    }
-	}
-
-	if (factory.validate(type)) {
-	    validTypes.add(type);
-	}
-
-	return newStamp;
     }
 }

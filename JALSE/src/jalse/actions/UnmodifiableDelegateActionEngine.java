@@ -11,11 +11,6 @@ class UnmodifiableDelegateActionEngine implements ActionEngine {
     }
 
     @Override
-    public <T> MutableActionContext<T> newContext(final Action<T> action) {
-	return new UnmodifiableDelegateActionContext<>(delegate != null ? delegate.newContext(action) : null);
-    }
-
-    @Override
     public MutableActionBindings getBindings() {
 	return bindings;
     }
@@ -28,6 +23,11 @@ class UnmodifiableDelegateActionEngine implements ActionEngine {
     @Override
     public boolean isStopped() {
 	return delegate != null ? delegate.isPaused() : true;
+    }
+
+    @Override
+    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+	return new UnmodifiableDelegateActionContext<>(delegate != null ? delegate.newContext(action) : null);
     }
 
     @Override

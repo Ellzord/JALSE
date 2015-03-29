@@ -1,11 +1,9 @@
 package jalse.attributes;
 
-import static jalse.attributes.Attributes.requireNonNullAttrSub;
 import static jalse.listeners.Listeners.createAttributeListenerSet;
 import jalse.listeners.AttributeEvent;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.ListenerSet;
-import jalse.misc.TypeParameterResolver;
 
 import java.util.AbstractSet;
 import java.util.Collections;
@@ -21,7 +19,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
- * An AttributeSet is a thread-safe {@link Set} implementation for {@link Attribute}. An
+ * An AttributeSet is a thread-safe {@link Set} implementation for {@link AttributeType}. An
  * AttributeSet follows the same pattern defined in {@link AttributeContainer} but offers a
  * collections based implementation (so it may be used more generically).<br>
  * <br>
@@ -33,15 +31,15 @@ import java.util.stream.Collectors;
  *
  */
 @SuppressWarnings("rawtypes")
-public class AttributeSet extends AbstractSet<Attribute> {
+public class AttributeSet extends AbstractSet<Object> {
 
     private class AttributeValue {
 
 	private final Lock r;
 	private final Lock w;
 
-	private Attribute a;
-	private Attribute p;
+	private Object a;
+	private Object p;
 
 	private AttributeValue() {
 	    final ReadWriteLock rw = new ReentrantReadWriteLock();
@@ -53,10 +51,8 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	}
     }
 
-    private static final TypeParameterResolver RESOLVER = new TypeParameterResolver(AttributeListener.TYPE_PARAMETER);
-
-    private final ConcurrentMap<Class<? extends Attribute>, ListenerSet<AttributeListener>> attributeListeners;
-    private final ConcurrentMap<Class<? extends Attribute>, AttributeValue> attributes;
+    private final ConcurrentMap<AttributeType<?>, ListenerSet<AttributeListener>> attributeListeners;
+    private final ConcurrentMap<AttributeType<?>, AttributeValue> attributes;
     private final AttributeContainer delegateContainer;
 
     /**
@@ -78,21 +74,17 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	attributeListeners = new ConcurrentHashMap<>();
     }
 
-    @Override
-    public boolean add(final Attribute e) {
-	return addOfType(e) != null;
-    }
-
     /**
      * Adds an attribute listener for the supplied attribute type.
      *
+     * @param type
+     *            Attribute type.
      * @param listener
      *            Listener to add.
      * @return Whether the listener was not already assigned.
      */
-    public boolean addListener(final AttributeListener<? extends Attribute> listener) {
-	final Class<? extends Attribute> attr = requireNonNullAttrSub(RESOLVER.resolve(listener));
-	final ListenerSet<AttributeListener> ls = attributeListeners.computeIfAbsent(attr,
+    public <T> boolean addListener(final AttributeType<T> type, final AttributeListener<T> listener) {
+	final ListenerSet<AttributeListener> ls = attributeListeners.computeIfAbsent(type,
 		k -> createAttributeListenerSet());
 	return ls.add(listener);
     }
@@ -100,14 +92,14 @@ public class AttributeSet extends AbstractSet<Attribute> {
     /**
      * Adds the supplied attribute to the collection.
      *
+     * @param type
+     *            Attribute type.
      * @param attr
      *            Attribute to add.
      * @return The replaced attribute or null if none was replaced.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Attribute> T addOfType(final T attr) {
-	final Class<? extends Attribute> type = attr.getClass();
-
+    public <T> T addOfType(final AttributeType<T> type, final T attr) {
 	final AttributeValue av = attributes.compute(type, (k, v) -> {
 	    if (v == null) {
 		v = new AttributeValue();
@@ -123,7 +115,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	    final ListenerSet<?> ls = attributeListeners.get(type);
 	    if (ls != null) {
 		((ListenerSet<? extends AttributeListener<T>>) ls).getProxy().attributeAdded(
-			new AttributeEvent<>(delegateContainer, attr, prev));
+			new AttributeEvent<>(delegateContainer, type, attr, prev));
 	    }
 	    return prev;
 	} finally {
@@ -136,35 +128,26 @@ public class AttributeSet extends AbstractSet<Attribute> {
 	new HashSet<>(attributes.keySet()).forEach(this::removeOfType);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean contains(final Object o) {
-	if (!(o instanceof Attribute)) {
-	    throw new IllegalArgumentException();
-	}
-	return Objects.equals(o, getOfType((Class<? extends Attribute>) o.getClass()));
-    }
-
     /**
      * Manually fires an attribute change for the supplied attribute type. This is used for mutable
      * attributes that can change their internal state.
      *
-     * @param attr
-     *            Attribute type to fire for.
+     * @param type
+     *            Attribute type.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Attribute> void fireChanged(final Class<T> attr) {
-	final AttributeValue av = attributes.get(requireNonNullAttrSub(attr));
+    public <T> void fireChanged(final AttributeType<T> type) {
+	final AttributeValue av = attributes.get(Objects.requireNonNull(type));
 	if (av == null) {
 	    return;
 	}
 
 	av.r.lock();
 	try {
-	    final ListenerSet<?> ls = attributeListeners.get(attr);
+	    final ListenerSet<?> ls = attributeListeners.get(type);
 	    if (ls != null) {
 		((ListenerSet<? extends AttributeListener<T>>) ls).getProxy().attributeChanged(
-			new AttributeEvent<>(delegateContainer, (T) av.a));
+			new AttributeEvent<>(delegateContainer, type, (T) av.a));
 	    }
 	} finally {
 	    av.r.unlock();
@@ -176,7 +159,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *
      * @return Set of the types attribute listeners are for or an empty set if none were found.
      */
-    public Set<Class<? extends Attribute>> getAttributeTypes() {
+    public Set<AttributeType<?>> getAttributeTypes() {
 	return Collections.unmodifiableSet(attributes.keySet());
     }
 
@@ -194,20 +177,20 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *
      * @return Set of attribute listeners or an empty set if none were found.
      */
-    public Set<? extends AttributeListener<? extends Attribute>> getListeners() {
+    public Set<? extends AttributeListener<?>> getListeners() {
 	return attributeListeners.values().stream().flatMap(ListenerSet::stream).collect(Collectors.toSet());
     }
 
     /**
      * Gets all attribute listeners associated to the supplied attribute type.
      *
-     * @param attr
-     *            Attribute type to check for.
+     * @param type
+     *            Attribute type.
      * @return Set of attribute listeners or an empty set if none were found.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Attribute> Set<? extends AttributeListener<T>> getListeners(final Class<T> attr) {
-	final Set<AttributeListener> ls = attributeListeners.get(requireNonNullAttrSub(attr));
+    public <T> Set<? extends AttributeListener<T>> getListeners(final AttributeType<T> type) {
+	final Set<AttributeListener> ls = attributeListeners.get(Objects.requireNonNull(type));
 	return ls != null ? Collections.unmodifiableSet((Set<? extends AttributeListener<T>>) ls) : Collections
 		.emptySet();
     }
@@ -217,20 +200,20 @@ public class AttributeSet extends AbstractSet<Attribute> {
      *
      * @return Set of the types attribute listeners are for or an empty set if none were found.
      */
-    public Set<Class<? extends Attribute>> getListenerTypes() {
+    public Set<AttributeType<?>> getListenerTypes() {
 	return Collections.unmodifiableSet(attributeListeners.keySet());
     }
 
     /**
      * Gets the attribute matching the supplied type.
      *
-     * @param attr
-     *            Attribute type to check for.
+     * @param type
+     *            Attribute type.
      * @return The attribute matching the supplied type or null if none found.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Attribute> T getOfType(final Class<T> attr) {
-	final AttributeValue av = attributes.get(requireNonNullAttrSub(attr));
+    public <T> T getOfType(final AttributeType<T> type) {
+	final AttributeValue av = attributes.get(Objects.requireNonNull(type));
 	if (av == null) {
 	    return null;
 	}
@@ -249,7 +232,7 @@ public class AttributeSet extends AbstractSet<Attribute> {
     }
 
     @Override
-    public Iterator<Attribute> iterator() {
+    public Iterator<Object> iterator() {
 	return attributes.values().stream().map(av -> {
 	    av.r.lock();
 	    try {
@@ -258,15 +241,6 @@ public class AttributeSet extends AbstractSet<Attribute> {
 		av.r.unlock();
 	    }
 	}).iterator();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean remove(final Object o) {
-	if (!(o instanceof Attribute)) {
-	    throw new IllegalArgumentException();
-	}
-	return removeOfType((Class<? extends Attribute>) o.getClass()) != null;
     }
 
     /**
@@ -279,17 +253,17 @@ public class AttributeSet extends AbstractSet<Attribute> {
     /**
      * Removes an attribute listener assigned to the supplied attribute type.
      *
+     * @param type
+     *            Attribute type.
      * @param listener
      *            Listener to remove.
      * @return Whether the listener was assigned.
      */
-    public <T extends Attribute> boolean removeListener(final AttributeListener<T> listener) {
-	final Class<?> attr = requireNonNullAttrSub(RESOLVER.resolve(listener));
-
-	final Set<AttributeListener> ls = attributeListeners.get(attr);
+    public <T> boolean removeListener(final AttributeType<T> type, final AttributeListener<T> listener) {
+	final Set<AttributeListener> ls = attributeListeners.get(Objects.requireNonNull(type));
 	if (ls != null && ls.remove(listener)) {
 	    if (attributeListeners.isEmpty()) { // No more listeners of type
-		attributeListeners.remove(attr);
+		attributeListeners.remove(type);
 	    }
 	    return true;
 	}
@@ -299,39 +273,39 @@ public class AttributeSet extends AbstractSet<Attribute> {
     /**
      * Removes all listeners for the supplied attribute types.
      *
-     * @param attr
+     * @param type
      *            Attribute type.
      */
-    public <T extends Attribute> void removeListeners(final Class<T> attr) {
-	attributeListeners.remove(requireNonNullAttrSub(attr));
+    public <T> void removeListeners(final AttributeType<T> type) {
+	attributeListeners.remove(Objects.requireNonNull(type));
     }
 
     /**
      * Removes the attribute matching the supplied type.
      *
-     * @param attr
-     *            Attribute type to remove.
+     * @param type
+     *            Attribute type.
      * @return The removed attribute or null if none was removed.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Attribute> T removeOfType(final Class<T> attr) {
-	final AttributeValue av = attributes.get(requireNonNullAttrSub(attr));
+    public <T> T removeOfType(final AttributeType<T> type) {
+	final AttributeValue av = attributes.get(Objects.requireNonNull(type));
 	if (av == null) {
 	    return null;
 	}
 
 	av.w.lock();
 	try {
-	    attributes.remove(attr);
+	    attributes.remove(type);
 	    final T prev = (T) av.a;
 
 	    av.a = null;
 	    av.p = null;
 
-	    final ListenerSet<?> ls = attributeListeners.get(attr);
+	    final ListenerSet<?> ls = attributeListeners.get(type);
 	    if (ls != null) {
 		((ListenerSet<? extends AttributeListener<T>>) ls).getProxy().attributeRemoved(
-			new AttributeEvent<>(delegateContainer, prev));
+			new AttributeEvent<>(delegateContainer, type, prev));
 	    }
 
 	    return prev;

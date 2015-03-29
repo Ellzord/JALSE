@@ -1,17 +1,20 @@
 package jalse.listeners;
 
-import jalse.attributes.Attribute;
+import jalse.attributes.AttributeType;
 import jalse.entities.Entity;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
-class AttributeListenerSupplier extends EntityAdapter {
+class AttributeListenerSupplier<T> extends EntityAdapter {
 
-    private final Supplier<AttributeListener<? extends Attribute>> supplier;
+    private final AttributeType<T> type;
+    private final Supplier<AttributeListener<T>> supplier;
     private final boolean deep;
 
-    AttributeListenerSupplier(final Supplier<AttributeListener<? extends Attribute>> supplier, final boolean deep) {
+    AttributeListenerSupplier(final AttributeType<T> type, final Supplier<AttributeListener<T>> supplier,
+	    final boolean deep) {
+	this.type = Objects.requireNonNull(type);
 	this.supplier = Objects.requireNonNull(supplier);
 	this.deep = deep;
     }
@@ -22,6 +25,6 @@ class AttributeListenerSupplier extends EntityAdapter {
 	if (deep) { // Recursive
 	    e.addEntityListener(this);
 	}
-	e.addAttributeListener(supplier.get());
+	e.addAttributeListener(type, supplier.get());
     }
 }

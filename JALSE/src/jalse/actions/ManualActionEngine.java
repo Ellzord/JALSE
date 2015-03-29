@@ -77,11 +77,6 @@ public class ManualActionEngine implements ActionEngine {
     }
 
     @Override
-    public <T> MutableActionContext<T> newContext(final Action<T> action) {
-	return new ManualContext<>(action);
-    }
-
-    @Override
     public MutableActionBindings getBindings() {
 	return bindings;
     }
@@ -103,6 +98,11 @@ public class ManualActionEngine implements ActionEngine {
     @Override
     public boolean isStopped() {
 	return stopped.get();
+    }
+
+    @Override
+    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+	return new ManualContext<>(action);
     }
 
     @Override

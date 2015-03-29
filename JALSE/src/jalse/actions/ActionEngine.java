@@ -18,15 +18,6 @@ import jalse.misc.JALSEExceptions;
 public interface ActionEngine {
 
     /**
-     * Creates an action context to define how the action will be scheduled for execution.
-     *
-     * @param action
-     *            Action to create context for.
-     * @return Context associated to the action.
-     */
-    <T> MutableActionContext<T> newContext(Action<T> action);
-
-    /**
      * Bindings for this engine.
      *
      * @return Engine bindings.
@@ -46,6 +37,15 @@ public interface ActionEngine {
      * @return Stopped state.
      */
     boolean isStopped();
+
+    /**
+     * Creates an action context to define how the action will be scheduled for execution.
+     *
+     * @param action
+     *            Action to create context for.
+     * @return Context associated to the action.
+     */
+    <T> MutableActionContext<T> newContext(Action<T> action);
 
     /**
      * Pauses action processing.

@@ -7,8 +7,8 @@ import jalse.actions.Action;
 import jalse.actions.ActionEngine;
 import jalse.actions.DefaultActionScheduler;
 import jalse.actions.MutableActionContext;
-import jalse.attributes.Attribute;
 import jalse.attributes.AttributeSet;
+import jalse.attributes.AttributeType;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.EntityListener;
 import jalse.misc.AbstractIdentifiable;
@@ -16,7 +16,7 @@ import jalse.misc.Identifiable;
 import jalse.tags.EntityType;
 import jalse.tags.Parent;
 import jalse.tags.Tag;
-import jalse.tags.TagSet;
+import jalse.tags.TagTypeSet;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  * @see EntitySet
  * @see AttributeSet
  * @see DefaultActionScheduler
- * @see TagSet
+ * @see TagTypeSet
  *
  */
 public class DefaultEntity extends AbstractIdentifiable implements Entity {
@@ -66,7 +66,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     /**
      * Current state information.
      */
-    protected final TagSet tags;
+    protected final TagTypeSet tags;
 
     private final AtomicBoolean alive;
 
@@ -85,14 +85,14 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	this.container = container;
 	entities = new EntitySet(factory, this);
 	attributes = new AttributeSet(this);
-	tags = new TagSet();
+	tags = new TagTypeSet();
 	scheduler = new DefaultActionScheduler<>(this);
 	alive = new AtomicBoolean();
     }
 
     @Override
-    public boolean addAttributeListener(final AttributeListener<? extends Attribute> listener) {
-	return attributes.addListener(listener);
+    public <S> boolean addAttributeListener(final AttributeType<S> type, final AttributeListener<S> listener) {
+	return attributes.addListener(type, listener);
     }
 
     @Override
@@ -101,8 +101,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <S extends Attribute> S addOrNullAttributeOfType(final S attr) {
-	return attributes.addOfType(attr);
+    public <S> S addOrNullAttributeOfType(final AttributeType<S> type, final S attr) {
+	return attributes.addOfType(type, attr);
     }
 
     private void addParentTag() {
@@ -117,7 +117,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <S extends Attribute> void fireAttributeChanged(final Class<S> attr) {
+    public <S> void fireAttributeChanged(final AttributeType<S> attr) {
 	attributes.fireChanged(attr);
     }
 
@@ -127,27 +127,27 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Set<? extends AttributeListener<? extends Attribute>> getAttributeListeners() {
+    public Set<? extends AttributeListener<?>> getAttributeListeners() {
 	return attributes.getListeners();
     }
 
     @Override
-    public <S extends Attribute> Set<? extends AttributeListener<S>> getAttributeListeners(final Class<S> attr) {
-	return attributes.getListeners(attr);
+    public <S> Set<? extends AttributeListener<S>> getAttributeListeners(final AttributeType<S> type) {
+	return attributes.getListeners(type);
     }
 
     @Override
-    public Set<Class<? extends Attribute>> getAttributeListenerTypes() {
+    public Set<AttributeType<?>> getAttributeListenerTypes() {
 	return attributes.getListenerTypes();
     }
 
     @Override
-    public Set<? extends Attribute> getAttributes() {
+    public Set<?> getAttributes() {
 	return Collections.unmodifiableSet(attributes);
     }
 
     @Override
-    public Set<Class<? extends Attribute>> getAttributeTypes() {
+    public Set<AttributeType<?>> getAttributeTypes() {
 	return attributes.getAttributeTypes();
     }
 
@@ -192,8 +192,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <S extends Attribute> S getOrNullAttributeOfType(final Class<S> attr) {
-	return attributes.getOfType(attr);
+    public <S> S getOrNullAttributeOfType(final AttributeType<S> type) {
+	return attributes.getOfType(type);
     }
 
     @Override
@@ -335,13 +335,13 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public boolean removeAttributeListener(final AttributeListener<? extends Attribute> listener) {
-	return attributes.removeListener(listener);
+    public <S> boolean removeAttributeListener(final AttributeType<S> type, final AttributeListener<S> listener) {
+	return attributes.removeListener(type, listener);
     }
 
     @Override
-    public <T extends Attribute> void removeAttributeListeners(final Class<T> attr) {
-	attributes.removeListeners(attr);
+    public <S> void removeAttributeListeners(final AttributeType<S> type) {
+	attributes.removeListeners(type);
     }
 
     @Override
@@ -355,8 +355,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <S extends Attribute> S removeOrNullAttributeOfType(final Class<S> attr) {
-	return attributes.removeOfType(attr);
+    public <S> S removeOrNullAttributeOfType(final AttributeType<S> type) {
+	return attributes.removeOfType(type);
     }
 
     @Override
@@ -395,7 +395,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Stream<? extends Attribute> streamAttributes() {
+    public Stream<?> streamAttributes() {
 	return attributes.stream();
     }
 

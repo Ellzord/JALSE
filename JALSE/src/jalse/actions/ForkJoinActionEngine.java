@@ -184,11 +184,6 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
 	}
     }
 
-    @Override
-    public <T> MutableActionContext<T> newContext(final Action<T> action) {
-	return new ForkJoinContext<>(action);
-    }
-
     /**
      * Gets the engine's work queue.
      *
@@ -196,6 +191,11 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
      */
     protected ManualWorkQueue<ForkJoinContext<?>> getWorkQueue() {
 	return workQueue;
+    }
+
+    @Override
+    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+	return new ForkJoinContext<>(action);
     }
 
     /**

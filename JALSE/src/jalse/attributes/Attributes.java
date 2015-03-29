@@ -1,16 +1,13 @@
 package jalse.attributes;
 
-import static jalse.misc.JALSEExceptions.INVALID_ATTRIBUTE_TYPE;
+import static jalse.misc.JALSEExceptions.PRIMITIVE_VALUE_TYPE;
 import static jalse.misc.JALSEExceptions.throwRE;
-import static jalse.misc.TypeParameterResolver.toClass;
 
-import java.lang.reflect.Type;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * A utility for {@link Attribute} related functionality.
+ * A utility for {@link AttributeType} value related functionality.
  *
  * @author Elliot Ford
  *
@@ -29,67 +26,143 @@ public final class Attributes {
     /**
      * Predicate to check attribute is present.
      *
-     * @param attr
+     * @param type
      *            Attribute type.
      * @return Predicate of {@code true} if the attribute is present and {@code false} if it is not.
      */
-    public static Predicate<AttributeContainer> isPresent(final Class<? extends Attribute> attr) {
-	return a -> a.getAttributeOfType(attr).isPresent();
+    public static Predicate<AttributeContainer> isPresent(final AttributeType<?> type) {
+	return a -> a.getAttributeOfType(type).isPresent();
+    }
+
+    /**
+     * Creates a new attribute type (Boolean).
+     *
+     * @param name
+     *            Name of the attribute type.
+     * @return New boolean attribute type.
+     *
+     * @see #newType(String, Class)
+     */
+    public static AttributeType<Boolean> newBooleanType(final String name) {
+	return newType(name, Boolean.class);
+    }
+
+    /**
+     * Creates a new attribute type (Byte).
+     *
+     * @param name
+     *            Name of the attribute type.
+     * @return New byte attribute type.
+     *
+     * @see #newType(String, Class)
+     */
+    public static AttributeType<Byte> newByteType(final String name) {
+	return newType(name, Byte.class);
+    }
+
+    /**
+     * Creates a new attribute type (String).
+     *
+     * @param name
+     *            Name of the attribute type.
+     * @return New string attribute type.
+     *
+     * @see #newType(String, Class)
+     */
+    public static AttributeType<Character> newCharacterType(final String name) {
+	return newType(name, Character.class);
+    }
+
+    /**
+     * Creates a new attribute type (Double).
+     *
+     * @param name
+     *            Name of the attribute type.
+     * @return New double attribute type.
+     *
+     * @see #newType(String, Class)
+     */
+    public static AttributeType<Double> newDoubleType(final String name) {
+	return newType(name, Double.class);
+    }
+
+    /**
+     * Creates a new attribute type (Float).
+     *
+     * @param name
+     *            Name of the attribute type.
+     * @return New float attribute type.
+     *
+     * @see #newType(String, Class)
+     */
+    public static AttributeType<Float> newFloatType(final String name) {
+	return newType(name, Float.class);
+    }
+
+    /**
+     * Creates a new attribute type (Integer).
+     *
+     * @param name
+     *            Name of the attribute type.
+     * @return New integer attribute type.
+     *
+     * @see #newType(String, Class)
+     */
+    public static AttributeType<Integer> newIntegerType(final String name) {
+	return newType(name, Integer.class);
+    }
+
+    /**
+     * Creates a new attribute type (Long).
+     *
+     * @param name
+     *            Name of the attribute type.
+     * @return New long attribute type.
+     *
+     * @see #newType(String, Class)
+     */
+    public static AttributeType<Long> newLongType(final String name) {
+	return newType(name, Long.class);
+    }
+
+    /**
+     * Creates a new attribute type (String).
+     *
+     * @param name
+     *            Name of the attribute type.
+     * @return New string attribute type.
+     *
+     * @see #newType(String, Class)
+     */
+    public static AttributeType<String> newStringType(final String name) {
+	return newType(name, String.class);
+    }
+
+    /**
+     * Creates a new attribute type.
+     *
+     * @param name
+     *            Name of attribute type.
+     * @param type
+     *            Value type.
+     * @return New attribute type.
+     */
+    public static <T> AttributeType<T> newType(final String name, final Class<T> type) {
+	if (type.isPrimitive()) {
+	    throwRE(PRIMITIVE_VALUE_TYPE);
+	}
+	return new AttributeType<>(name, type);
     }
 
     /**
      * Predicate to check attribute is not present.
      *
-     * @param attr
+     * @param type
      *            Attribute type.
      * @return Predicate of {@code true} if the attribute is not present and {@code false} if it is.
      */
-    public static Predicate<AttributeContainer> notPresent(final Class<? extends Attribute> attr) {
-	return isPresent(attr).negate();
-    }
-
-    /**
-     * Validation method for ensuring the class is a descendant of Attribute (but also not Attribute
-     * itself).
-     *
-     * @param attr
-     *            Class to check.
-     * @return The supplied class
-     *
-     * @throws RuntimeException
-     *             If the class does not meet the above requirements.
-     */
-    public static <T extends Attribute> Class<T> requireNonNullAttrSub(final Class<T> attr) throws RuntimeException {
-	return requireNonNullNonAttribute(attr);
-    }
-
-    /**
-     * Validation method for ensuring the class is a descendant of Attribute (but also not Attribute
-     * itself).
-     *
-     * @param clazz
-     *            Class to check.
-     * @return The supplied class
-     *
-     * @throws RuntimeException
-     *             If the class does not meet the above requirements.
-     */
-    @SuppressWarnings("unchecked")
-    public static Class<? extends Attribute> requireNonNullAttrSub(final Type clazz) throws RuntimeException {
-	final Class<?> attr = requireNonNullNonAttribute(toClass(clazz));
-	if (!Attribute.class.isAssignableFrom(attr)) {
-	    throwRE(INVALID_ATTRIBUTE_TYPE);
-	}
-
-	return (Class<? extends Attribute>) attr;
-    }
-
-    private static <T> Class<T> requireNonNullNonAttribute(final Class<T> clazz) {
-	if (clazz == null || Attribute.class.equals(clazz)) {
-	    throwRE(INVALID_ATTRIBUTE_TYPE);
-	}
-
-	return clazz;
+    public static Predicate<AttributeContainer> notPresent(final AttributeType<?> type) {
+	return isPresent(type).negate();
     }
 
     /**
@@ -112,17 +185,6 @@ public final class Attributes {
      */
     public static AttributeContainer unmodifiableAttributeContainer(final AttributeContainer container) {
 	return new UnmodifiableDelegateAttributeContainer(Objects.requireNonNull(container));
-    }
-
-    /**
-     * Convenience method for getting the value within a optional wrapper.
-     *
-     * @param attr
-     *            Optional non-attribute wrapper.
-     * @return The unwrapped object or null if not present.
-     */
-    public static <T> T unwrap(final Optional<? extends NonAttributeWrapper<T>> attr) {
-	return attr.isPresent() ? attr.get().unwrap() : null;
     }
 
     private Attributes() {

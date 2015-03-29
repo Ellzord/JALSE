@@ -1,6 +1,7 @@
 package jalse.entities.annotations;
 
 import jalse.attributes.AttributeContainer;
+import jalse.attributes.AttributeType;
 import jalse.entities.Entity;
 
 import java.lang.annotation.ElementType;
@@ -10,8 +11,9 @@ import java.lang.annotation.Target;
 import java.util.Optional;
 
 /**
- * An {@link Entity} type annotation for {@link AttributeContainer#getAttributeOfType(Class)} and
- * {@link AttributeContainer#getOrNullAttributeOfType(Class)}.<br>
+ * An {@link Entity} type annotation for
+ * {@link AttributeContainer#getAttributeOfType(AttributeType)} and
+ * {@link AttributeContainer#getOrNullAttributeOfType(AttributeType)}.<br>
  * <br>
  * The correct method is selected depending if the result is wrapped in an {@link Optional}.
  *
@@ -20,4 +22,12 @@ import java.util.Optional;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface GetAttribute {}
+public @interface GetAttribute {
+
+    /**
+     * Attribute type name.
+     *
+     * @return Name.
+     */
+    String value();
+}

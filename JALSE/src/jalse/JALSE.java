@@ -15,7 +15,7 @@ import jalse.entities.EntitySet;
 import jalse.listeners.EntityListener;
 import jalse.misc.AbstractIdentifiable;
 import jalse.tags.Tag;
-import jalse.tags.TagSet;
+import jalse.tags.TagTypeSet;
 import jalse.tags.Taggable;
 
 import java.util.Collections;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  *
  * @see ActionEngine
  * @see EntitySet
- * @see TagSet
+ * @see TagTypeSet
  * @see EntityFactory
  *
  */
@@ -50,7 +50,7 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
     /**
      * Current state information.
      */
-    protected final TagSet tags;
+    protected final TagTypeSet tags;
 
     /**
      * Action engine to be supplied to entities.
@@ -87,7 +87,7 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 	scheduler = new DefaultActionScheduler<>(this);
 	scheduler.setEngine(engine);
 	entities = new EntitySet(factory, this);
-	tags = new TagSet();
+	tags = new TagTypeSet();
     }
 
     @Override
@@ -98,11 +98,6 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
     @Override
     public void cancelAllScheduledForActor() {
 	scheduler.cancelAllScheduledForActor();
-    }
-
-    @Override
-    public <T> MutableActionContext<T> newContext(final Action<T> action) {
-	return engine.newContext(action);
     }
 
     /**
@@ -186,6 +181,11 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
     @Override
     public boolean killEntity(final UUID id) {
 	return entities.killEntity(id);
+    }
+
+    @Override
+    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+	return engine.newContext(action);
     }
 
     @Override

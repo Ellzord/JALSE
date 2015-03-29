@@ -26,5 +26,5 @@ public @interface GetEntities {
      *
      * @return Filter of type.
      */
-    boolean ofType();
+    boolean ofType() default true;
 }

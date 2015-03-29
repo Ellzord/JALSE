@@ -15,17 +15,17 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public boolean addAttributeListener(final AttributeListener<? extends Attribute> listener) {
+    public <T> boolean addAttributeListener(final AttributeType<T> type, final AttributeListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T extends Attribute> T addOrNullAttributeOfType(final T attr) {
+    public <T> T addOrNullAttributeOfType(final AttributeType<T> type, final T attr) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T extends Attribute> void fireAttributeChanged(final Class<T> attr) {
+    public <T> void fireAttributeChanged(final AttributeType<T> attr) {
 	throw new UnsupportedOperationException();
     }
 
@@ -35,33 +35,33 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public Set<? extends AttributeListener<? extends Attribute>> getAttributeListeners() {
+    public Set<? extends AttributeListener<?>> getAttributeListeners() {
 	return delegate != null ? delegate.getAttributeListeners() : Collections.emptySet();
     }
 
     @Override
-    public <T extends Attribute> Set<? extends AttributeListener<T>> getAttributeListeners(final Class<T> attr) {
-	return delegate != null ? delegate.getAttributeListeners(attr) : Collections.emptySet();
+    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final AttributeType<T> type) {
+	return delegate != null ? delegate.getAttributeListeners(type) : Collections.emptySet();
     }
 
     @Override
-    public Set<Class<? extends Attribute>> getAttributeListenerTypes() {
+    public Set<AttributeType<?>> getAttributeListenerTypes() {
 	return delegate != null ? delegate.getAttributeListenerTypes() : Collections.emptySet();
     }
 
     @Override
-    public Set<? extends Attribute> getAttributes() {
+    public Set<?> getAttributes() {
 	return delegate != null ? delegate.getAttributes() : Collections.emptySet();
     }
 
     @Override
-    public Set<Class<? extends Attribute>> getAttributeTypes() {
+    public Set<AttributeType<?>> getAttributeTypes() {
 	return delegate != null ? delegate.getAttributeTypes() : Collections.emptySet();
     }
 
     @Override
-    public <T extends Attribute> T getOrNullAttributeOfType(final Class<T> attr) {
-	return delegate != null ? delegate.getOrNullAttributeOfType(attr) : null;
+    public <T> T getOrNullAttributeOfType(final AttributeType<T> type) {
+	return delegate != null ? delegate.getOrNullAttributeOfType(type) : null;
     }
 
     @Override
@@ -70,12 +70,12 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public boolean removeAttributeListener(final AttributeListener<? extends Attribute> listener) {
+    public <T> boolean removeAttributeListener(final AttributeType<T> type, final AttributeListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T extends Attribute> void removeAttributeListeners(final Class<T> attr) {
+    public <T> void removeAttributeListeners(final AttributeType<T> attr) {
 	throw new UnsupportedOperationException();
     }
 
@@ -85,12 +85,12 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T extends Attribute> T removeOrNullAttributeOfType(final Class<T> attr) {
+    public <T> T removeOrNullAttributeOfType(final AttributeType<T> attr) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public Stream<? extends Attribute> streamAttributes() {
+    public Stream<?> streamAttributes() {
 	return delegate != null ? delegate.streamAttributes() : Stream.empty();
     }
 }

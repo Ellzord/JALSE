@@ -22,7 +22,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @see Object#hashCode()
  *
  */
-public class TagSet extends AbstractSet<Tag> {
+public class TagTypeSet extends AbstractSet<Tag> {
 
     private class TagsOfType {
 
@@ -45,7 +45,7 @@ public class TagSet extends AbstractSet<Tag> {
     /**
      * Creates a new instance of tag set.
      */
-    public TagSet() {
+    public TagTypeSet() {
 	tags = new ConcurrentHashMap<>();
     }
 
