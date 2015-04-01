@@ -37,6 +37,11 @@ abstract class BaseActionContext<T> implements MutableActionContext<T> {
     }
 
     @Override
+    public T getActor() {
+	return actor.get();
+    }
+
+    @Override
     public ActionEngine getEngine() {
 	return engine;
     }
@@ -44,11 +49,6 @@ abstract class BaseActionContext<T> implements MutableActionContext<T> {
     @Override
     public long getInitialDelay(final TimeUnit unit) {
 	return unit.convert(initialDelay.get(), TimeUnit.NANOSECONDS);
-    }
-
-    @Override
-    public T getOrNullActor() {
-	return actor.get();
     }
 
     @Override

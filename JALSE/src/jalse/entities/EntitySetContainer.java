@@ -36,6 +36,11 @@ class EntitySetContainer implements EntityContainer {
     }
 
     @Override
+    public Entity getEntity(final UUID id) {
+	return delegate.getEntity(id);
+    }
+
+    @Override
     public int getEntityCount() {
 	return delegate.size();
     }
@@ -48,11 +53,6 @@ class EntitySetContainer implements EntityContainer {
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
 	return delegate.getListeners();
-    }
-
-    @Override
-    public Entity getOrNullEntity(final UUID id) {
-	return delegate.getEntity(id);
     }
 
     @Override

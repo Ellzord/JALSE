@@ -15,27 +15,18 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> boolean addAttributeListener(final AttributeType<T> type, final AttributeListener<T> listener) {
+    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T addOrNullAttributeOfType(final AttributeType<T> type, final T attr) {
+    public <T> T addAttributeOfType(final String name, final AttributeType<T> type, final T attr) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T addOrNullAttributeOfType(final String name, final T attr) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <T> void fireAttributeChanged(final AttributeType<T> attr) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void fireAttributeChanged(final String name) {
+    public <T> void fireAttributeChanged(final String name, final AttributeType<T> type) {
 	throw new UnsupportedOperationException();
     }
 
@@ -45,18 +36,28 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public Set<? extends AttributeListener<?>> getAttributeListeners() {
-	return delegate != null ? delegate.getAttributeListeners() : Collections.emptySet();
+    public Set<String> getAttributeListenerNames() {
+	return delegate != null ? delegate.getAttributeListenerNames() : Collections.emptySet();
     }
 
     @Override
-    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final AttributeType<T> type) {
-	return delegate != null ? delegate.getAttributeListeners(type) : Collections.emptySet();
+    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
+	return delegate != null ? delegate.getAttributeListeners(name, type) : Collections.emptySet();
     }
 
     @Override
-    public Set<AttributeType<?>> getAttributeListenerTypes() {
-	return delegate != null ? delegate.getAttributeListenerTypes() : Collections.emptySet();
+    public Set<AttributeType<?>> getAttributeListenerTypes(final String name) {
+	return delegate != null ? delegate.getAttributeListenerTypes(name) : Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> getAttributeNames() {
+	return delegate != null ? delegate.getAttributeNames() : Collections.emptySet();
+    }
+
+    @Override
+    public <T> T getAttributeOfType(final String name, final AttributeType<T> type) {
+	return delegate != null ? delegate.getAttributeOfType(name, type) : null;
     }
 
     @Override
@@ -65,47 +66,28 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public Set<AttributeType<?>> getAttributeTypes() {
-	return delegate != null ? delegate.getAttributeTypes() : Collections.emptySet();
+    public Set<AttributeType<?>> getAttributeTypes(final String name) {
+	return delegate != null ? delegate.getAttributeTypes(name) : Collections.emptySet();
     }
 
     @Override
-    public <T> T getOrNullAttributeOfType(final AttributeType<T> type) {
-	return delegate != null ? delegate.getOrNullAttributeOfType(type) : null;
-    }
-
-    @Override
-    public Object getOrNullAttributeOfType(final String name) {
-	return delegate != null ? delegate.getOrNullAttributeOfType(name) : null;
-    }
-
-    @Override
-    public void removeAllAttributeListeners() {
+    public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> boolean removeAttributeListener(final AttributeType<T> type, final AttributeListener<T> listener) {
+    public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> void removeAttributeListeners(final AttributeType<T> attr) {
+    public <T> T removeAttributeOfType(final String name, final AttributeType<T> type) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
     public void removeAttributes() {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <T> T removeOrNullAttributeOfType(final AttributeType<T> attr) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Object removeOrNullAttributeOfType(final String name) {
 	throw new UnsupportedOperationException();
     }
 

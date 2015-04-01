@@ -64,11 +64,10 @@ public class EntityEvent extends AbstractIdentifiable {
     /**
      * Get the destination container for the transfer event.
      *
-     * @return Optional containing the destination container or empty optional if nothing was
-     *         transferred.
+     * @return Destination container or null if there was not one.
      */
-    public Optional<EntityContainer> getDestinationContainer() {
-	return Optional.ofNullable(destination);
+    public EntityContainer getDestinationContainer() {
+	return destination;
     }
 
     /**
@@ -83,10 +82,11 @@ public class EntityEvent extends AbstractIdentifiable {
     /**
      * Get the destination container for the transfer event.
      *
-     * @return Destination container or null if there was not one.
+     * @return Optional containing the destination container or empty optional if nothing was
+     *         transferred.
      */
-    public EntityContainer getOrNullDestinationContainer() {
-	return destination;
+    public Optional<EntityContainer> getOptDestinationContainer() {
+	return Optional.ofNullable(destination);
     }
 
     /**

@@ -1,7 +1,13 @@
 package jalse.attributes;
 
+import static jalse.misc.JALSEExceptions.INVALID_ATTRTYPE_SUBTYPE;
+import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.listeners.AttributeListener;
+import jalse.misc.JALSEExceptions;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Objects;
 
 /**
@@ -9,19 +15,32 @@ import java.util.Objects;
  * defines what type the data must be. {@link AttributeContainer} is an attribute container where
  * attributes can be stored and {@link AttributeListener} can be set to trigger on value updates.<br>
  * <br>
- * The attribute type name is used for uniqueness. <br>
- * <br>
- *
- * An example attribute type:
+ * For simple value types (no type arguments) {@link Attributes#newTypeOf(Class)} can be used:
  *
  * <pre>
  * <code>
- * AttributeType{@code<Boolean>} at = Attributes.newBooleanType("scary");
- * 
- * attributes.addOfType(at, true); // Adding
- * boolean scary = attributes.getOfType(at); // Getting
+ * AttributeType{@code <String>} stringType = Attributes.newTypeOf(String.class);
  * </code>
  * </pre>
+ *
+ * For more complex types an anonymous (or declared) subclasses should be created supplying the
+ * intended value type as the type argument. This is needed so full generic type information can be
+ * retrieved then raw and parameterised types can be differentiated:
+ *
+ * <pre>
+ * <code>
+ * AttributeType{@code <Collection<String>>} colStringType = new AttributeType{@code <Collection<String>>}(){};
+ * </code>
+ * </pre>
+ *
+ * When using reflection or where type erasure is not possible
+ * {@link Attributes#newUnknownType(Type)} can be used. This will be unique to the type not to
+ * {@code Object.class}.<br>
+ * <br>
+ * AttributeTypes are meant to be easily distinguishable but for full generic information a
+ * Anonymous class is needed. To ensure this behaviour and so that AttributeType can be used as a
+ * unique key {@link #equals(Object)}, {@link #hashCode()} and {@link #getValueType()} are all
+ * {@code final}.
  *
  * @author Elliot Ford
  * @param <T>
@@ -33,93 +52,64 @@ import java.util.Objects;
  * @see Attributes
  *
  */
-public final class AttributeType<T> {
+public abstract class AttributeType<T> {
 
-    private final String name;
-    private final Class<? extends T> type;
+    /**
+     * Attribute value type.
+     */
+    protected final Type valueType;
 
-    AttributeType(final String name, final Class<? extends T> type) {
-	if (name == null || name.length() == 0) {
-	    throw new IllegalArgumentException("Must have a non-empty name");
+    /**
+     * Creates a new instance of Attribute type (using generic type information).
+     *
+     * @see JALSEExceptions#INVALID_ATTRTYPE_SUBTYPE
+     */
+    public AttributeType() {
+	/*
+	 * Get direct superclass of AttributeType.
+	 */
+	Class<?> superType = getClass();
+	while (!superType.getSuperclass().equals(AttributeType.class)) {
+	    superType = superType.getSuperclass();
 	}
-	this.name = name;
-	this.type = Objects.requireNonNull(type);
+	/*
+	 * Get generic parameter type.
+	 */
+	final ParameterizedType genericSuperType = (ParameterizedType) getClass().getGenericSuperclass();
+	final Type typeArg = genericSuperType.getActualTypeArguments()[0]; // T
+
+	if (typeArg instanceof TypeVariable<?>) { // Could not get generic type argument.
+	    throwRE(INVALID_ATTRTYPE_SUBTYPE);
+	}
+
+	this.valueType = typeArg;
+    }
+
+    AttributeType(final Type valueType) {
+	this.valueType = Objects.requireNonNull(valueType);
     }
 
     @Override
-    public boolean equals(final Object obj) {
-	if (this == obj) {
-	    return true;
-	}
-	if (!(obj instanceof AttributeType<?>)) {
-	    return false;
-	}
-	final AttributeType<?> other = (AttributeType<?>) obj;
-	return name.equals(other.name) && type.equals(other.type);
+    public final boolean equals(final Object obj) {
+	return obj == this || obj instanceof AttributeType<?> && valueType.equals(((AttributeType<?>) obj).valueType);
     }
 
     /**
-     * Name of the attribute type.
-     *
-     * @return Type name.
-     */
-    public String getName() {
-	return name;
-    }
-
-    /**
-     * Gets the value type.
+     * Gets attribute value type.
      *
      * @return Value type.
      */
-    public Class<? extends T> getType() {
-	return type;
+    public final Type getValueType() {
+	return valueType;
     }
 
     @Override
-    public int hashCode() {
-	return Objects.hash(name);
-    }
-
-    /**
-     * Whether the value would be accepted by this type.
-     *
-     * @param obj
-     *            Value.
-     * @return Whether the value is accepted.
-     *
-     * @see #isAcceptableValueType(Class)
-     */
-    public boolean isAcceptableValue(final Object obj) {
-	return isAcceptableValueType(obj.getClass());
-    }
-
-    /**
-     * Whether the value type is an accepted type.
-     *
-     * @param clazz
-     *            Value type to check.
-     * @return Whether the type was accepted.
-     *
-     * @see Class#isAssignableFrom(Class)
-     */
-    public boolean isAcceptableValueType(final Class<?> clazz) {
-	return type.isAssignableFrom(clazz);
-    }
-
-    /**
-     * Whether the attribute type is a subclass of this one.
-     *
-     * @param at
-     *            Attribute type to check.
-     * @return Whether the supplied type is a subclass.
-     */
-    public boolean isSubtype(final AttributeType<?> at) {
-	return name.equals(at.name) && isAcceptableValueType(at.type);
+    public final int hashCode() {
+	return 31 * (valueType == null ? 0 : valueType.hashCode());
     }
 
     @Override
     public String toString() {
-	return "AttributeType [name=" + name + " type=" + type.getName() + "]";
+	return "AttributeType [valueType=" + valueType.getTypeName() + "]";
     }
 }

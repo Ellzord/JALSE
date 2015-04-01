@@ -15,28 +15,19 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> boolean addAttributeListener(final AttributeType<T> type, final AttributeListener<T> listener) {
-	return delegate.addListener(type, listener);
+    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
+	return delegate.addListener(name, type, listener);
     }
 
     @Override
-    public <T> T addOrNullAttributeOfType(final AttributeType<T> type, final T attr) {
-	return delegate.addOfType(type, attr);
+    public <T> T addAttributeOfType(final String name, final AttributeType<T> type, final T attr) {
+	return delegate.addOfType(name, type, attr);
     }
 
     @Override
-    public <T> T addOrNullAttributeOfType(final String name, final T attr) {
-	return delegate.addOfType(name, attr);
-    }
-
-    @Override
-    public <T> void fireAttributeChanged(final AttributeType<T> type) {
-	delegate.fireChanged(type);
-    }
-
-    @Override
-    public void fireAttributeChanged(final String name) {
-	delegate.fireChanged(name);
+    public <T> void fireAttributeChanged(final String name, final AttributeType<T> type) {
+	delegate.fireChanged(name, type);
     }
 
     @Override
@@ -45,18 +36,28 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
-    public Set<? extends AttributeListener<?>> getAttributeListeners() {
-	return delegate.getListeners();
+    public Set<String> getAttributeListenerNames() {
+	return delegate.getListenerNames();
     }
 
     @Override
-    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final AttributeType<T> type) {
-	return delegate.getListeners(type);
+    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
+	return delegate.getListeners(name, type);
     }
 
     @Override
-    public Set<AttributeType<?>> getAttributeListenerTypes() {
-	return delegate.getListenerTypes();
+    public Set<AttributeType<?>> getAttributeListenerTypes(final String name) {
+	return delegate.getListenerTypes(name);
+    }
+
+    @Override
+    public Set<String> getAttributeNames() {
+	return delegate.getNames();
+    }
+
+    @Override
+    public <T> T getAttributeOfType(final String name, final AttributeType<T> type) {
+	return delegate.getOfType(name, type);
     }
 
     @Override
@@ -65,48 +66,29 @@ class AttributeSetContainer implements AttributeContainer {
     }
 
     @Override
-    public Set<AttributeType<?>> getAttributeTypes() {
-	return delegate.getAttributeTypes();
+    public Set<AttributeType<?>> getAttributeTypes(final String name) {
+	return delegate.getTypes(name);
     }
 
     @Override
-    public <T> T getOrNullAttributeOfType(final AttributeType<T> attr) {
-	return delegate.getOfType(attr);
+    public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
+	return delegate.removeListener(name, type, listener);
     }
 
     @Override
-    public Object getOrNullAttributeOfType(final String name) {
-	return delegate.getOfType(name);
+    public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
+	delegate.removeListeners(name, type);
     }
 
     @Override
-    public void removeAllAttributeListeners() {
-	delegate.removeAllListeners();
-    }
-
-    @Override
-    public <T> boolean removeAttributeListener(final AttributeType<T> type, final AttributeListener<T> listener) {
-	return delegate.removeListener(type, listener);
-    }
-
-    @Override
-    public <T> void removeAttributeListeners(final AttributeType<T> type) {
-	delegate.removeListeners(type);
+    public <T> T removeAttributeOfType(final String name, final AttributeType<T> type) {
+	return delegate.removeOfType(name, type);
     }
 
     @Override
     public void removeAttributes() {
 	delegate.clear();
-    }
-
-    @Override
-    public <T> T removeOrNullAttributeOfType(final AttributeType<T> type) {
-	return delegate.removeOfType(type);
-    }
-
-    @Override
-    public Object removeOrNullAttributeOfType(final String name) {
-	return delegate.removeOfType(name);
     }
 
     @Override

@@ -36,6 +36,11 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     }
 
     @Override
+    public Entity getEntity(final UUID id) {
+	return delegate != null ? delegate.getEntity(id) : null;
+    }
+
+    @Override
     public int getEntityCount() {
 	return delegate != null ? delegate.getEntityCount() : 0;
     }
@@ -48,11 +53,6 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
 	return delegate != null ? delegate.getEntityListeners() : Collections.emptySet();
-    }
-
-    @Override
-    public Entity getOrNullEntity(final UUID id) {
-	return delegate != null ? delegate.getOrNullEntity(id) : null;
     }
 
     @Override

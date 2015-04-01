@@ -2,11 +2,10 @@ package jalse.actions;
 
 import static jalse.actions.Actions.unmodifiableActionContext;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,7 +25,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 
     private final T actor;
     private ActionEngine engine;
-    private final List<WeakReference<ActionContext<T>>> contexts;
+    private final Set<ActionContext<T>> contexts;
 
     /**
      * Creates a DefaultScheduler for the supplied actor.
@@ -37,7 +36,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     public DefaultActionScheduler(final T actor) {
 	this.actor = Objects.requireNonNull(actor);
 	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
-	contexts = new ArrayList<>();
+	contexts = new HashSet<>();
     }
 
     /**
@@ -46,7 +45,14 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     @Override
     public void cancelAllScheduledForActor() {
 	synchronized (contexts) {
-	    purge(true);
+	    final Iterator<ActionContext<T>> it = contexts.iterator();
+	    while (it.hasNext()) {
+		final ActionContext<T> cxt = it.next();
+		if (!cxt.isDone()) {
+		    cxt.cancel();
+		}
+		it.remove();
+	    }
 	}
     }
 
@@ -68,19 +74,6 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	return engine;
     }
 
-    private void purge(final boolean cancel) {
-	final Iterator<WeakReference<ActionContext<T>>> it = contexts.iterator();
-	while (it.hasNext()) {
-	    final ActionContext<T> cxt = it.next().get();
-	    if (cxt == null || cxt.isDone() || cancel) {
-		if (cxt != null && !cxt.isDone()) {
-		    cxt.cancel();
-		}
-		it.remove();
-	    }
-	}
-    }
-
     @Override
     public MutableActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
 	    final TimeUnit unit) {
@@ -88,19 +81,16 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	    return Actions.emptyActionContext(); // Case of post cancel scheduling
 	}
 
-	final MutableActionContext<T> context;
+	final MutableActionContext<T> context = engine.newContext(action);
+	context.setActor(actor);
+	context.setInitialDelay(initialDelay, unit);
+	context.setPeriod(period, unit);
+	context.schedule();
 
 	synchronized (contexts) {
-	    context = engine.newContext(action);
-	    context.setActor(actor);
-	    context.setInitialDelay(initialDelay, unit);
-	    context.setPeriod(period, unit);
-	    purge(false);
-
-	    contexts.add(new WeakReference<>(context));
+	    contexts.add(context);
+	    contexts.removeIf(ActionContext<T>::isDone);
 	}
-
-	context.schedule();
 
 	return unmodifiableActionContext(context); // Don't allow for mutation (it's running)
     }

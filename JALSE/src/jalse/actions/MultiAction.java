@@ -70,7 +70,7 @@ class MultiAction<T> implements Action<T> {
 	final Collection<MutableActionContext<T>> newContexts = new ArrayList<>();
 
 	final ActionEngine engine = context.getEngine();
-	final T actor = context.getOrNullActor();
+	final T actor = context.getActor();
 
 	for (final Action<T> action : actions) {
 	    final MutableActionContext<T> newContext = engine.newContext(action);

@@ -12,10 +12,10 @@ import java.util.Optional;
 
 /**
  * An {@link Entity} type annotation for
- * {@link AttributeContainer#addAttributeOfType(AttributeType, Object)},
- * {@link AttributeContainer#addOrNullAttributeOfType(AttributeType, Object)},
- * {@link AttributeContainer#removeAttributeOfType(AttributeType)} and
- * {@link AttributeContainer#removeOrNullAttributeOfType(AttributeType)}.<br>
+ * {@link AttributeContainer#addOptAttributeOfType(String, AttributeType, Object)},
+ * {@link AttributeContainer#addAttributeOfType(String, AttributeType, Object)},
+ * {@link AttributeContainer#removeOptAttributeOfType(String, AttributeType)} and
+ * {@link AttributeContainer#removeAttributeOfType(String, AttributeType)}.<br>
  * <br>
  * The correct method is selected depending if the result is wrapped in an {@link Optional} and if
  * the argument supplied to the proxy is {@code null} (removal).

@@ -25,7 +25,7 @@ public final class Actions {
      *            Target context.
      */
     public static <T> void copy(final ActionContext<T> source, final MutableActionContext<T> target) {
-	target.setActor(source.getOrNullActor());
+	target.setActor(source.getActor());
 	target.putAll(source.toMap());
 	target.setInitialDelay(target.getInitialDelay(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
 	target.setPeriod(source.getPeriod(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);

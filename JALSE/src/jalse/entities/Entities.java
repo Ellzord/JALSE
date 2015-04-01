@@ -157,7 +157,7 @@ public final class Entities {
      * @return Highest level parent (or this entity if it has no parent.
      */
     public static EntityContainer getHighestParent(final Entity e) {
-	final EntityContainer container = e.getOrNullContainer();
+	final EntityContainer container = e.getContainer();
 
 	if (container instanceof Entity) {
 	    return getHighestParent((Entity) container);

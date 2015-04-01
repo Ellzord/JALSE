@@ -30,6 +30,11 @@ class UnmodifiableDelegateActionContext<T> extends UnmodifiableDelegateActionBin
     }
 
     @Override
+    public T getActor() {
+	return delegate != null ? delegate.getActor() : null;
+    }
+
+    @Override
     public ActionEngine getEngine() {
 	return delegate != null ? delegate.getEngine() : null;
     }
@@ -37,11 +42,6 @@ class UnmodifiableDelegateActionContext<T> extends UnmodifiableDelegateActionBin
     @Override
     public long getInitialDelay(final TimeUnit unit) {
 	return delegate != null ? delegate.getInitialDelay(unit) : 0L;
-    }
-
-    @Override
-    public T getOrNullActor() {
-	return delegate != null ? delegate.getOrNullActor() : null;
     }
 
     @Override

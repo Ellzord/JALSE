@@ -15,8 +15,7 @@ import java.util.concurrent.locks.StampedLock;
  * A type validating proxy cache where proxies of different types can be associated to an owner. The
  * cache uses {@link WeakReference} keys so when there are no references to the owner the proxies
  * are dropped. This cache works on the ideal that each owner will only need one proxy of each type
- * that can be referenced (or created if it does not yet exist - {@link #getOrCreate(Object, Class)}
- * ).<br>
+ * that can be referenced (or created if it does not yet exist - {@link #getOrNew(Object, Class)} ).<br>
  * <br>
  * The proxies that are created and the types that are valid are defined controlled by
  * {@link ProxyFactory}. This class should make {@link CacheHandler} instances to be used as
@@ -106,7 +105,7 @@ public class ProxyCache {
 	 *            ProxyType.
 	 * @return Newly created invoation handler.
 	 */
-	CacheHandler createHandler(Object obj, Class<?> type);
+	CacheHandler newHandler(Object obj, Class<?> type);
 
 	/**
 	 * Validates the class suitable for the cache.
@@ -205,7 +204,7 @@ public class ProxyCache {
      * @return Existing or newly created proxy.
      */
     @SuppressWarnings("unchecked")
-    public <T> T getOrCreate(final Object obj, final Class<T> type) {
+    public <T> T getOrNew(final Object obj, final Class<T> type) {
 	Object unwrapped = obj;
 
 	if (Proxy.isProxyClass(obj.getClass())) {
@@ -247,7 +246,7 @@ public class ProxyCache {
 	     * New proxy handler of object.
 	     */
 	    proxy = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { type },
-		    factory.createHandler(unwrapped, type));
+		    factory.newHandler(unwrapped, type));
 	    objProxies.put(type, proxy);
 
 	    return (T) proxy;

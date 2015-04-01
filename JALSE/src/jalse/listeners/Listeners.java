@@ -1,8 +1,7 @@
 package jalse.listeners;
 
-import static jalse.attributes.Attributes.newType;
 import jalse.attributes.AttributeType;
-import jalse.attributes.Attributes;
+import jalse.attributes.NamedAttributeType;
 
 import java.util.function.Supplier;
 
@@ -25,13 +24,32 @@ public final class Listeners {
      * @return New AttributeListener ListenerSet.
      */
     @SuppressWarnings("rawtypes")
-    public static ListenerSet<AttributeListener> createAttributeListenerSet() {
+    public static ListenerSet<AttributeListener> newAttributeListenerSet() {
 	return new ListenerSet<>(AttributeListener.class);
     }
 
     /**
      * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
      * created direct Entity descendants.
+     *
+     * @param namedType
+     *            Named attribute name.
+     *
+     * @param supplier
+     *            AttributeListener supplier.
+     * @return AttributeListener that adds supplied AttributeListeners to descendants.
+     */
+    public static <T> EntityListener newAttributeListenerSupplier(final NamedAttributeType<T> namedType,
+	    final Supplier<AttributeListener<T>> supplier) {
+	return newAttributeListenerSupplier(namedType.getName(), namedType.getType(), supplier);
+    }
+
+    /**
+     * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
+     * created direct Entity descendants.
+     *
+     * @param name
+     *            Attribute name.
      *
      * @param type
      *            Attribute type.
@@ -40,29 +58,9 @@ public final class Listeners {
      *            AttributeListener supplier.
      * @return AttributeListener that adds supplied AttributeListeners to descendants.
      */
-    public static <T> EntityListener createAttributeListenerSupplier(final AttributeType<T> type,
+    public static <T> EntityListener newAttributeListenerSupplier(final String name, final AttributeType<T> type,
 	    final Supplier<AttributeListener<T>> supplier) {
-	return new AttributeListenerSupplier<>(type, supplier, false);
-    }
-
-    /**
-     * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
-     * created direct Entity descendants.
-     *
-     * @param name
-     *            Attribute type name.
-     * @param type
-     *            Value type.
-     *
-     * @param supplier
-     *            AttributeListener supplier.
-     * @return AttributeListener that adds supplied AttributeListeners to descendants.
-     *
-     * @see Attributes#newType(String, Class)
-     */
-    public static <T> EntityListener createAttributeListenerSupplier(final String name, final Class<T> type,
-	    final Supplier<AttributeListener<T>> supplier) {
-	return createAttributeListenerSupplier(newType(name, type), supplier);
+	return new AttributeListenerSupplier<>(name, type, supplier, false);
     }
 
     /**
@@ -70,7 +68,7 @@ public final class Listeners {
      *
      * @return New EntityListener ListenerSet.
      */
-    public static ListenerSet<EntityListener> createEntityListenerSet() {
+    public static ListenerSet<EntityListener> newEntityListenerSet() {
 	return new ListenerSet<>(EntityListener.class);
     }
 
@@ -82,13 +80,32 @@ public final class Listeners {
      *            EntityListener supplier.
      * @return EntityLitener that adds supplied EntityLitenes to descendants.
      */
-    public static EntityListener createEntityListenerSupplier(final Supplier<EntityListener> supplier) {
+    public static EntityListener newEntityListenerSupplier(final Supplier<EntityListener> supplier) {
 	return new EntityListenerSupplier(supplier, false);
     }
 
     /**
      * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
      * created Entities and their descendants recursively.
+     *
+     * @param namedType
+     *            Named attribute type.
+     *
+     * @param supplier
+     *            AttributeListener supplier.
+     * @return AttributeListener that adds supplied AttributeListeners to descendants.
+     */
+    public static <T> EntityListener newRecursiveAttributeListenerSupplier(final NamedAttributeType<T> namedType,
+	    final Supplier<AttributeListener<T>> supplier) {
+	return newRecursiveAttributeListenerSupplier(namedType.getName(), namedType.getType(), supplier);
+    }
+
+    /**
+     * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
+     * created Entities and their descendants recursively.
+     *
+     * @param name
+     *            Attribute name.
      *
      * @param type
      *            Attribute type.
@@ -97,29 +114,9 @@ public final class Listeners {
      *            AttributeListener supplier.
      * @return AttributeListener that adds supplied AttributeListeners to descendants.
      */
-    public static <T> EntityListener createRecursiveAttributeListenerSupplier(final AttributeType<T> type,
-	    final Supplier<AttributeListener<T>> supplier) {
-	return new AttributeListenerSupplier<>(type, supplier, true);
-    }
-
-    /**
-     * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
-     * created Entities and their descendants recursively.
-     *
-     * @param name
-     *            Attribute type name.
-     * @param type
-     *            Value type.
-     *
-     * @param supplier
-     *            AttributeListener supplier.
-     * @return AttributeListener that adds supplied AttributeListeners to descendants.
-     *
-     * @see Attributes#newType(String, Class)
-     */
-    public static <T> EntityListener createRecursiveAttributeListenerSupplier(final String name, final Class<T> type,
-	    final Supplier<AttributeListener<T>> supplier) {
-	return createRecursiveAttributeListenerSupplier(newType(name, type), supplier);
+    public static <T> EntityListener newRecursiveAttributeListenerSupplier(final String name,
+	    final AttributeType<T> type, final Supplier<AttributeListener<T>> supplier) {
+	return new AttributeListenerSupplier<>(name, type, supplier, true);
     }
 
     /**
@@ -130,7 +127,7 @@ public final class Listeners {
      *            EntityListener supplier.
      * @return EntityLitener that adds supplied EntityLiteners to descendants.
      */
-    public static EntityListener createRecursiveEntityListenerSupplier(final Supplier<EntityListener> supplier) {
+    public static EntityListener newRecursiveEntityListenerSupplier(final Supplier<EntityListener> supplier) {
 	return new EntityListenerSupplier(supplier, true);
     }
 

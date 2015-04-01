@@ -18,9 +18,9 @@ import java.util.concurrent.ForkJoinPool;
  * can still be created without this builder.<br>
  * <br>
  * Parallelism:<br>
- * If {@code parallelism < 0}(or {@link #setCommonPoolEngine()}) then
+ * If {@code parallelism < 0} (or {@link #setCommonPoolEngine()}) then
  * {@link ForkJoinActionEngine#commonPoolEngine()} is used.<br>
- * If {@code parallelism == 0}(or {@link #setManual()}) then {@link ManualActionEngine} is used.<br>
+ * If {@code parallelism == 0} (or {@link #setManual()}) then {@link ManualActionEngine} is used.<br>
  * If {@code parallelism == 1} then {@link ThreadPoolActionEngine} will be used (
  * {@code corePoolSize = 1}).<br>
  * If {@code parallelism > 1} then {@link ForkJoinActionEngine} will be used.

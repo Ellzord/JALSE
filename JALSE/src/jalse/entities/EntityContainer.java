@@ -71,34 +71,29 @@ public interface EntityContainer {
     <T extends Entity> Set<T> getEntitiesOfType(Class<T> type);
 
     /**
-     * This is a convenience method for getting an entity (optional).
+     * Gets the entity with the specified ID.
      *
      * @param id
      *            Unique ID of the entity.
-     * @return Gets an Optional of the resulting entity or an empty Optional if it was not found.
-     * @throws NullPointerException
-     *             If the ID is null.
+     * @return The entity matching the supplied id or null if none found.
      */
-    default Optional<Entity> getEntity(final UUID id) {
-	return Optional.ofNullable(getOrNullEntity(id));
-    }
+    Entity getEntity(final UUID id);
 
     /**
-     * This is a convenience method for getting an entity (optional).The entity is wrapped with the
-     * supplied entity type.
+     * This is a convenience method for getting an entity (no optional). The entity is wrapped with
+     * the supplied entity type.
      *
      * @param id
      *            Unique ID of the entity.
      * @param type
      *            Entity type to wrap to.
-     * @return Gets an Optional of the resulting entity or an empty Optional if it was not found.
-     * @throws NullPointerException
-     *             If type is null.
+     * @return The entity matching the supplied id or null if none found.
      *
      * @see Entities#asType(Entity, Class)
      */
-    default <T extends Entity> Optional<T> getEntityAsType(final UUID id, final Class<T> type) {
-	return getEntity(id).map(e -> asType(e, type));
+    default <T extends Entity> T getEntityAsType(final UUID id, final Class<T> type) {
+	final Entity e = getEntity(id);
+	return e != null ? asType(e, type) : null;
     }
 
     /**
@@ -123,29 +118,34 @@ public interface EntityContainer {
     Set<? extends EntityListener> getEntityListeners();
 
     /**
-     * Gets the entity with the specified ID.
+     * This is a convenience method for getting an entity (optional).
      *
      * @param id
      *            Unique ID of the entity.
-     * @return The entity matching the supplied id or null if none found.
+     * @return Gets an Optional of the resulting entity or an empty Optional if it was not found.
+     * @throws NullPointerException
+     *             If the ID is null.
      */
-    Entity getOrNullEntity(final UUID id);
+    default Optional<Entity> getOptEntity(final UUID id) {
+	return Optional.ofNullable(getEntity(id));
+    }
 
     /**
-     * This is a convenience method for getting an entity (no optional). The entity is wrapped with
-     * the supplied entity type.
+     * This is a convenience method for getting an entity (optional).The entity is wrapped with the
+     * supplied entity type.
      *
      * @param id
      *            Unique ID of the entity.
      * @param type
      *            Entity type to wrap to.
-     * @return The entity matching the supplied id or null if none found.
+     * @return Gets an Optional of the resulting entity or an empty Optional if it was not found.
+     * @throws NullPointerException
+     *             If type is null.
      *
      * @see Entities#asType(Entity, Class)
      */
-    default <T extends Entity> T getOrNullEntityAsType(final UUID id, final Class<T> type) {
-	final Entity e = getOrNullEntity(id);
-	return e != null ? asType(e, type) : null;
+    default <T extends Entity> Optional<T> getOptEntityAsType(final UUID id, final Class<T> type) {
+	return getOptEntity(id).map(e -> asType(e, type));
     }
 
     /**
@@ -165,7 +165,7 @@ public interface EntityContainer {
      * @return Whether the entity was found.
      */
     default boolean hasEntity(final UUID id) {
-	return getOrNullEntity(id) != null;
+	return getEntity(id) != null;
     }
 
     /**

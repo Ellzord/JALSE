@@ -1,28 +1,26 @@
 package jalse.attributes;
 
 import static jalse.attributes.Attributes.requireNotEmpty;
-import static jalse.listeners.Listeners.createAttributeListenerSet;
-import static jalse.misc.JALSEExceptions.TYPE_VALUE_MISMATCH;
-import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.listeners.AttributeEvent;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.ListenerSet;
+import jalse.listeners.Listeners;
 
 import java.util.AbstractSet;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 
 /**
- * An AttributeSet is a thread-safe {@link Set} implementation for {@link AttributeType}. An
+ * An AttributeSet is a thread-safe {@link Set} implementation for {@link AttributeType} values. An
  * AttributeSet follows the same pattern defined in {@link AttributeContainer} but offers a
  * collections based implementation (so it may be used more generically). This set considers types
  * to be unique on name only.<br>
@@ -34,56 +32,47 @@ import java.util.stream.Collectors;
  * @author Elliot Ford
  *
  */
-@SuppressWarnings("rawtypes")
 public class AttributeSet extends AbstractSet<Object> {
 
-    private class AttributeValue {
-
-	private final Lock r;
-	private final Lock w;
-
-	private AttributeType<Object> t;
-	private AttributeType<Object> tp;
-	private Object a;
-	private Object ap;
-
-	private AttributeValue() {
-	    final ReadWriteLock rw = new ReentrantReadWriteLock();
-	    r = rw.readLock();
-	    w = rw.writeLock();
-
-	    t = null;
-	    tp = null;
-	    a = null;
-	    ap = null;
-	}
+    private static void checkNameAndType(final String name, final AttributeType<?> type) {
+	requireNotEmpty(name);
+	Objects.requireNonNull(type);
     }
 
-    private final ConcurrentMap<AttributeType<?>, ListenerSet<AttributeListener>> attributeListeners;
-    private final ConcurrentMap<String, AttributeValue> attributes;
+    @SuppressWarnings("rawtypes")
+    private final Map<String, Map<AttributeType<?>, ListenerSet<AttributeListener>>> listeners;
+    private final Map<String, Map<AttributeType<?>, Object>> attributes;
     private final AttributeContainer delegateContainer;
+    private final Lock read;
+    private final Lock write;
 
     /**
-     * Creates a new AttributeSet with no delegate container.
+     * Creates a new instance of AttributeSet with no delegate container (self).
      */
     public AttributeSet() {
 	this(null);
     }
 
     /**
-     * Creates a new AttributeSet with the supplied delegate container.
+     * Creates a new instance of AttributeSet with a delegate container.
      *
      * @param delegateContainer
-     *            Delegate container for events.
+     *            Delegate AttributeContainer for events.
      */
     public AttributeSet(final AttributeContainer delegateContainer) {
 	this.delegateContainer = delegateContainer != null ? delegateContainer : Attributes.toAttributeContainer(this);
 	attributes = new ConcurrentHashMap<>();
-	attributeListeners = new ConcurrentHashMap<>();
+	listeners = new ConcurrentHashMap<>();
+	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	read = rwLock.readLock();
+	write = rwLock.writeLock();
     }
 
     /**
      * Adds an attribute listener for the supplied attribute type.
+     *
+     * @param name
+     *            Attribute type name.
      *
      * @param type
      *            Attribute type.
@@ -91,99 +80,79 @@ public class AttributeSet extends AbstractSet<Object> {
      *            Listener to add.
      * @return Whether the listener was not already assigned.
      */
-    public <T> boolean addListener(final AttributeType<T> type, final AttributeListener<T> listener) {
-	final ListenerSet<AttributeListener> ls = attributeListeners.computeIfAbsent(type,
-		k -> createAttributeListenerSet());
-	return ls.add(listener);
+    public <T> boolean addListener(final String name, final AttributeType<T> type, final AttributeListener<T> listener) {
+	checkNameAndType(name, type);
+	Objects.requireNonNull(listener);
+
+	write.lock();
+	try {
+	    @SuppressWarnings("rawtypes")
+	    final Map<AttributeType<?>, ListenerSet<AttributeListener>> lsn = listeners.computeIfAbsent(name,
+		    k -> new ConcurrentHashMap<>());
+
+	    @SuppressWarnings("rawtypes")
+	    final ListenerSet<AttributeListener> lst = lsn.computeIfAbsent(type,
+		    k -> Listeners.newAttributeListenerSet());
+
+	    return lst.add(listener);
+	} finally {
+	    write.unlock();
+	}
     }
 
     /**
      * Adds the supplied attribute to the collection.
      *
+     * @param name
+     *            Attribute type name.
+     *
      * @param type
      *            Attribute type.
      * @param attr
      *            Attribute to add.
      * @return The replaced attribute or null if none was replaced.
      */
-    @SuppressWarnings("unchecked")
-    public <T> T addOfType(final AttributeType<T> type, final T attr) {
-	final AttributeValue av = attributes.compute(type.getName(), (k, v) -> {
-	    if (v == null) {
-		v = new AttributeValue();
-	    }
-	    v.w.lock();
+    public <T> T addOfType(final String name, final AttributeType<T> type, final T attr) {
+	checkNameAndType(name, type);
+	Objects.requireNonNull(attr);
 
-	    if (v.t != null && !v.t.equals(type)) {
-		v.tp = v.t; // Type changed
-	    }
-
-	    v.ap = v.a;
-	    v.a = attr;
-	    v.t = (AttributeType<Object>) type;
-
-	    return v;
-	});
-
+	write.lock();
 	try {
-	    return (T) updateAndFireForAdd(av);
-	} finally {
-	    av.w.unlock();
-	}
-    }
+	    final Map<AttributeType<?>, Object> atrn = attributes.computeIfAbsent(name, k -> new ConcurrentHashMap<>());
 
-    /**
-     * Adds the supplied attribute to the collection (creating a new type using the supplied
-     * attribute value).
-     *
-     * @param name
-     *            Attribute type name.
-     * @param attr
-     *            Attribute to add.
-     * @return The replaced attribute or null if none was replaced.
-     *
-     * @see Attributes#newTypeFor(String, Object)
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T addOfType(final String name, final T attr) {
-	final AttributeValue av = attributes.compute(name, (k, v) -> {
-	    if (v == null) {
-		v = new AttributeValue();
-	    }
-	    v.w.lock();
+	    @SuppressWarnings("unchecked")
+	    final T prev = (T) atrn.put(type, attr);
 
-	    if (v.t == null || !v.t.isAcceptableValue(attr)) {
-		v.tp = v.t;
-		v.t = Attributes.newTypeFor(name, attr);
+	    @SuppressWarnings("rawtypes")
+	    final ListenerSet<AttributeListener> ls = getListeners0(name, type);
+	    if (ls != null) {
+		@SuppressWarnings("unchecked")
+		final AttributeListener<T> als = ls.getProxy();
+		als.attributeAdded(new AttributeEvent<>(delegateContainer, type, attr, prev));
 	    }
 
-	    v.ap = v.a;
-	    v.a = attr;
-
-	    return v;
-	});
-
-	try {
-	    return (T) updateAndFireForAdd(av);
+	    return prev;
 	} finally {
-	    av.w.unlock();
+	    write.unlock();
 	}
     }
 
     @Override
     public void clear() {
-	getAttributeTypes().forEach(this::removeOfType);
-    }
-
-    /**
-     * Manually fires an attribute change for the supplied attribute type. This is used for mutable
-     * attributes that can change their internal state.
-     *
-     * @param type
-     *            Attribute type.
-     */
-    public <T> void fireChanged(final AttributeType<T> type) {
-	fireChangedWithType(type.getName(), type.getType());
+	write.lock();
+	try {
+	    final Map<String, Set<AttributeType<?>>> namesToTypes = new HashMap<>();
+	    attributes.entrySet().forEach(e -> {
+		namesToTypes.put(e.getKey(), new HashSet<>(e.getValue().keySet()));
+	    });
+	    namesToTypes.forEach((n, ts) -> {
+		ts.forEach(t -> {
+		    removeOfType(n, t);
+		});
+	    });
+	} finally {
+	    write.unlock();
+	}
     }
 
     /**
@@ -192,65 +161,40 @@ public class AttributeSet extends AbstractSet<Object> {
      *
      * @param name
      *            Attribute type name.
+     *
+     * @param type
+     *            Attribute type to fire for.
      */
-    public void fireChanged(final String name) {
-	fireChangedWithType(name, null);
-    }
+    public <T> void fireChanged(final String name, final AttributeType<T> type) {
+	checkNameAndType(name, type);
 
-    @SuppressWarnings("unchecked")
-    private void fireChangedWithType(final String name, final Class<?> type) {
-	final AttributeValue av = attributes.get(requireNotEmpty(name));
-	if (av == null) {
-	    return;
-	}
-
-	av.r.lock();
+	read.lock();
 	try {
-	    if (type != null && !av.t.getType().equals(type)) {
-		throwRE(TYPE_VALUE_MISMATCH);
+	    final Map<AttributeType<?>, Object> atrn = attributes.get(name);
+	    if (atrn == null) {
+		return;
 	    }
 
-	    final ListenerSet<?> ls = attributeListeners.get(av.t);
+	    @SuppressWarnings("unchecked")
+	    final T current = (T) atrn.get(type);
+	    if (current == null) {
+		return;
+	    }
+
+	    @SuppressWarnings("rawtypes")
+	    final ListenerSet<AttributeListener> ls = getListeners0(name, type);
 	    if (ls != null) {
-		((ListenerSet<? extends AttributeListener<Object>>) ls).getProxy().attributeChanged(
-			new AttributeEvent<>(delegateContainer, av.t, av.a));
+		@SuppressWarnings("unchecked")
+		final AttributeListener<T> als = ls.getProxy();
+		als.attributeChanged(new AttributeEvent<>(delegateContainer, type, current));
 	    }
 	} finally {
-	    av.r.unlock();
-	}
-    }
-
-    @SuppressWarnings("unchecked")
-    private void fireRemoved(final AttributeType<Object> type, final Object value) {
-	final ListenerSet<?> ls = attributeListeners.get(type);
-	if (ls != null) {
-	    ((ListenerSet<? extends AttributeListener<Object>>) ls).getProxy().attributeRemoved(
-		    new AttributeEvent<>(delegateContainer, type, value));
+	    read.unlock();
 	}
     }
 
     /**
-     * Gets all the attribute listener types.
-     *
-     * @return Set of the types attribute listeners are for or an empty set if none were found.
-     */
-    public Set<AttributeType<?>> getAttributeTypes() {
-	final Set<AttributeType<?>> types = new HashSet<>();
-
-	for (final AttributeValue av : attributes.values()) {
-	    av.r.lock();
-	    try {
-		types.add(av.t);
-	    } finally {
-		av.r.unlock();
-	    }
-	}
-
-	return Collections.unmodifiableSet(types);
-    }
-
-    /**
-     * Gets the delegate container for the events.
+     * Gets the delegate container.
      *
      * @return Delegate event container.
      */
@@ -259,51 +203,71 @@ public class AttributeSet extends AbstractSet<Object> {
     }
 
     /**
-     * Gets all the attribute listeners.
+     * Gets the attribute type names with listeners associated.
      *
-     * @return Set of attribute listeners or an empty set if none were found.
+     * @return Associated attribute type names to listeners.
      */
-    public Set<? extends AttributeListener<?>> getListeners() {
-	return attributeListeners.values().stream().flatMap(ListenerSet::stream).collect(Collectors.toSet());
+    public Set<String> getListenerNames() {
+	return Collections.unmodifiableSet(listeners.keySet());
     }
 
     /**
-     * Gets all attribute listeners associated to the supplied attribute type.
+     * Gets all attribute listeners associated to the supplied named attribute type.
+     *
+     * @param name
+     *            Attribute type name.
      *
      * @param type
-     *            Attribute type.
+     *            Attribute type to check for.
      * @return Set of attribute listeners or an empty set if none were found.
      */
-    @SuppressWarnings("unchecked")
-    public <T> Set<? extends AttributeListener<T>> getListeners(final AttributeType<T> type) {
-	final Set<AttributeListener> ls = attributeListeners.get(Objects.requireNonNull(type));
-	return ls != null ? Collections.unmodifiableSet((Set<? extends AttributeListener<T>>) ls) : Collections
-		.emptySet();
+    public <T> Set<? extends AttributeListener<T>> getListeners(final String name, final AttributeType<T> type) {
+	checkNameAndType(name, type);
+	read.lock();
+	try {
+	    @SuppressWarnings("unchecked")
+	    final Set<? extends AttributeListener<T>> ls = (Set<? extends AttributeListener<T>>) getListeners0(name,
+		    type);
+	    return ls != null ? Collections.unmodifiableSet(ls) : Collections.emptySet();
+	} finally {
+	    read.unlock();
+	}
+    }
+
+    @SuppressWarnings("rawtypes")
+    private ListenerSet<AttributeListener> getListeners0(final String name, final AttributeType<?> type) {
+	final Map<AttributeType<?>, ListenerSet<AttributeListener>> ls = listeners.get(name);
+	return ls != null ? ls.get(type) : null;
     }
 
     /**
      * Gets all the attribute listener types.
      *
+     * @param name
+     *            Attribute type name.
+     *
      * @return Set of the types attribute listeners are for or an empty set if none were found.
      */
-    public Set<AttributeType<?>> getListenerTypes() {
-	return Collections.unmodifiableSet(attributeListeners.keySet());
+    public Set<AttributeType<?>> getListenerTypes(final String name) {
+	requireNotEmpty(name);
+
+	read.lock();
+	try {
+	    @SuppressWarnings("rawtypes")
+	    final Map<AttributeType<?>, ListenerSet<AttributeListener>> ls = listeners.get(name);
+	    return ls != null ? Collections.unmodifiableSet(ls.keySet()) : Collections.emptySet();
+	} finally {
+	    read.unlock();
+	}
     }
 
     /**
-     * Gets the attribute matching the supplied type.
+     * Gets all the attribute type names assigned to attributes.
      *
-     * @param type
-     *            Attribute type.
-     * @return The attribute matching the supplied type or null if none found.
+     * @return Attribute type names with values.
      */
-    @SuppressWarnings("unchecked")
-    public <T> T getOfType(final AttributeType<T> type) {
-	final Object value = getOfType(type.getName());
-	if (value != null && !type.isAcceptableValue(value)) {
-	    throwRE(TYPE_VALUE_MISMATCH);
-	}
-	return (T) value;
+    public Set<String> getNames() {
+	return Collections.unmodifiableSet(attributes.keySet());
     }
 
     /**
@@ -311,150 +275,162 @@ public class AttributeSet extends AbstractSet<Object> {
      *
      * @param name
      *            Attribute type name.
+     *
+     * @param type
+     *            Attribute type to check for.
      * @return The attribute matching the supplied type or null if none found.
      */
-    public Object getOfType(final String name) {
-	final AttributeValue av = attributes.get(requireNotEmpty(name));
-	if (av == null) {
-	    return null;
-	}
+    @SuppressWarnings("unchecked")
+    public <T> T getOfType(final String name, final AttributeType<T> type) {
+	checkNameAndType(name, type);
 
-	av.r.lock();
+	read.lock();
 	try {
-	    return av.a;
+	    final Map<AttributeType<?>, Object> atrn = attributes.get(name);
+	    return atrn != null ? (T) atrn.get(type) : null;
 	} finally {
-	    av.r.unlock();
+	    read.unlock();
 	}
     }
 
-    @Override
-    public boolean isEmpty() {
-	return attributes.isEmpty();
+    /**
+     * Gets all of the attribute types within the container.
+     *
+     * @param name
+     *            Attribute type name.
+     *
+     * @return All of the types of the attributes or an empty set if none were found.
+     */
+    public Set<AttributeType<?>> getTypes(final String name) {
+	requireNotEmpty(name);
+
+	read.lock();
+	try {
+	    final Map<AttributeType<?>, Object> atrn = attributes.get(name);
+	    return atrn != null ? Collections.unmodifiableSet(atrn.keySet()) : Collections.emptySet();
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
     public Iterator<Object> iterator() {
-	return attributes.values().stream().map(av -> {
-	    av.r.lock();
-	    try {
-		return av.a;
-	    } finally {
-		av.r.unlock();
-	    }
-	}).iterator();
-    }
-
-    /**
-     * Removes all listeners for all attribute types.
-     */
-    public void removeAllListeners() {
-	attributeListeners.clear();
+	return attributes.values().stream().flatMap(atrn -> atrn.values().stream()).iterator();
     }
 
     /**
      * Removes an attribute listener assigned to the supplied attribute type.
      *
+     * @param name
+     *            Attribute type name.
      * @param type
      *            Attribute type.
      * @param listener
      *            Listener to remove.
      * @return Whether the listener was assigned.
      */
-    public <T> boolean removeListener(final AttributeType<T> type, final AttributeListener<T> listener) {
-	final Set<AttributeListener> ls = attributeListeners.get(Objects.requireNonNull(type));
-	if (ls != null && ls.remove(listener)) {
-	    if (attributeListeners.isEmpty()) { // No more listeners of type
-		attributeListeners.remove(type);
+    public <T> boolean removeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
+	checkNameAndType(name, type);
+	Objects.requireNonNull(listener);
+
+	write.lock();
+	try {
+	    @SuppressWarnings("rawtypes")
+	    final Map<AttributeType<?>, ListenerSet<AttributeListener>> lsn = listeners.get(name);
+	    if (lsn == null) {
+		return false;
 	    }
+
+	    @SuppressWarnings("rawtypes")
+	    final ListenerSet<AttributeListener> lst = lsn.get(type);
+	    if (lst == null) {
+		return false;
+	    }
+
+	    if (!lst.remove(listener)) {
+		return false;
+	    }
+
+	    lsn.computeIfPresent(type, (k, v) -> v.isEmpty() ? null : v);
+	    listeners.computeIfPresent(name, (k, v) -> v.isEmpty() ? null : v);
+
 	    return true;
+	} finally {
+	    write.unlock();
 	}
-	return false;
     }
 
     /**
      * Removes all listeners for the supplied attribute types.
      *
+     * @param name
+     *            Attribute type name.
      * @param type
      *            Attribute type.
      */
-    public <T> void removeListeners(final AttributeType<T> type) {
-	attributeListeners.remove(Objects.requireNonNull(type));
+    public <T> void removeListeners(final String name, final AttributeType<T> type) {
+	checkNameAndType(name, type);
+
+	write.lock();
+	try {
+	    @SuppressWarnings("rawtypes")
+	    final Map<AttributeType<?>, ListenerSet<AttributeListener>> lsn = listeners.get(name);
+	    if (lsn == null) {
+		return;
+	    }
+
+	    if (lsn.remove(type) != null) {
+		listeners.computeIfPresent(name, (k, v) -> v.isEmpty() ? null : v);
+	    }
+	} finally {
+	    write.unlock();
+	}
     }
 
     /**
      * Removes the attribute matching the supplied type.
      *
-     * @param type
-     *            Attribute type.
-     * @return The removed attribute or null if none was removed.
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T removeOfType(final AttributeType<T> type) {
-	return (T) removeWithType(type.getName(), type.getType());
-    }
-
-    /**
-     * Removes the attribute matching the attribute type name.
-     *
      * @param name
      *            Attribute type name.
+     *
+     * @param type
+     *            Attribute type to remove.
      * @return The removed attribute or null if none was removed.
      */
-    public Object removeOfType(final String name) {
-	return removeWithType(name, null);
-    }
+    public <T> T removeOfType(final String name, final AttributeType<T> type) {
+	checkNameAndType(name, type);
 
-    private Object removeWithType(final String name, final Class<?> type) {
-	final AttributeValue av = attributes.get(requireNotEmpty(name));
-	if (av == null) {
-	    return null;
-	}
-
-	av.w.lock();
+	write.lock();
 	try {
-	    if (type != null && type.equals(av.t.getType())) {
-		throwRE(TYPE_VALUE_MISMATCH);
+	    final Map<AttributeType<?>, Object> atrn = attributes.get(name);
+	    if (atrn == null) {
+		return null;
 	    }
 
-	    attributes.remove(name);
+	    @SuppressWarnings("unchecked")
+	    final T prev = (T) atrn.remove(type);
 
-	    fireRemoved(av.t, av.a);
+	    if (prev != null) {
+		attributes.computeIfPresent(name, (k, v) -> v.isEmpty() ? null : v);
 
-	    final Object prev = av.a;
-
-	    av.a = null;
-	    av.ap = null;
-	    av.t = null;
-	    av.tp = null;
+		@SuppressWarnings("rawtypes")
+		final ListenerSet<AttributeListener> ls = getListeners0(name, type);
+		if (ls != null) {
+		    @SuppressWarnings("unchecked")
+		    final AttributeListener<T> als = ls.getProxy();
+		    als.attributeRemoved(new AttributeEvent<>(delegateContainer, type, prev));
+		}
+	    }
 
 	    return prev;
 	} finally {
-	    av.w.unlock();
+	    write.unlock();
 	}
     }
 
     @Override
     public int size() {
-	return attributes.size();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Object updateAndFireForAdd(final AttributeValue av) {
-	if (av.tp != null) { // Fire removed for old value (of type).
-	    fireRemoved(av.tp, av.ap);
-	}
-
-	final Object prev = av.tp == null ? av.ap : null;
-
-	av.tp = null;
-	av.ap = null;
-
-	final ListenerSet<?> ls = attributeListeners.get(av.t);
-	if (ls != null) {
-	    ((ListenerSet<? extends AttributeListener<Object>>) ls).getProxy().attributeAdded(
-		    new AttributeEvent<>(delegateContainer, av.t, av.a, prev));
-	}
-
-	return prev;
+	return attributes.values().stream().mapToInt(Map::size).sum();
     }
 }
