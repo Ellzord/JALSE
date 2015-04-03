@@ -1,0 +1,47 @@
+<project name="JALSE" default="main" basedir=".">
+	<property file="build.properties" />
+
+	<property name="src" location="src" />
+	<property name="build" location="build" />
+	<property name="dist" location="dist" />
+	<property name="docs" location="docs" />
+
+	<target name="init" description="creates build dir">
+		<mkdir dir="${build}" />
+		<tstamp>
+			<format property="TODAY_GB" pattern="d-MMMM-yyyy" locale="en,GB" />
+		</tstamp>
+	</target>
+
+	<target name="compile" depends="init" description="compile the source ">
+		<javac srcdir="${src}" destdir="${build}" includeantruntime="false" />
+	</target>
+
+	<target name="docs" description="creates API javadoc">
+		<javadoc packagenames="jalse.*" sourcepath="${src}" destdir="${docs}" author="true" version="true" use="true" windowtitle="JALSE API" additionalparam="-Xdoclint:none" />
+	</target>
+
+	<target name="jar" depends="compile" description="generate the distribution">
+		<jar jarfile="${dist}/JALSE-${version}.jar" basedir="${build}">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<section name="jalse">
+					<attribute name="Specification-Title" value="JALSE" />
+					<attribute name="Specification-Version" value="${version}" />
+					<attribute name="Specification-Vendor" value="Elliot Ford (Ellzord)" />
+					<attribute name="Implementation-Title" value="jalse" />
+					<attribute name="Implementation-Version" value="${version} ${TODAY}" />
+					<attribute name="Implementation-Vendor" value="Elliot Ford (Ellzord)" />
+				</section>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean" description="clean up">
+		<delete dir="${build}" />
+		<delete dir="${docs}" />
+		<delete dir="${dist}" />
+	</target>
+
+	<target name="main" depends="jar, docs" description="compiles and creates javadoc" />
+</project>

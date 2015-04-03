@@ -67,7 +67,7 @@ import java.util.stream.Stream;
  * public interface Ghost extends Entity {
  * 
  * 	{@code @GetAttribute("scary")}
- * 	Optional{@code<Boolean>} isScary();
+ * 	Optional{@code <Boolean>} isScary();
  * 
  * 	{@code @SetAttribute("scary")}
  * 	void setScary(Boolean scary);

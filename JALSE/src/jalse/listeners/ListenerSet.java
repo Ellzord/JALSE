@@ -36,7 +36,7 @@ public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements Invocation
      *            Listener type to store.
      */
     @SuppressWarnings("unchecked")
-    public ListenerSet(final Class<T> clazz) {
+    public ListenerSet(final Class<? super T> clazz) {
 	proxy = (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { clazz }, this);
     }
 

@@ -23,8 +23,7 @@ public final class Listeners {
      *
      * @return New AttributeListener ListenerSet.
      */
-    @SuppressWarnings("rawtypes")
-    public static ListenerSet<AttributeListener> newAttributeListenerSet() {
+    public static <T> ListenerSet<AttributeListener<T>> newAttributeListenerSet() {
 	return new ListenerSet<>(AttributeListener.class);
     }
 

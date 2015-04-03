@@ -303,7 +303,7 @@ public class ProxyCache {
     /**
      * Whether the cache has proxies.
      *
-     * @return Proxy count > 0.
+     * @return Proxy count more than 0.
      */
     public boolean hasProxies() {
 	return getProxyCount() > 0;
@@ -314,7 +314,7 @@ public class ProxyCache {
      *
      * @param obj
      *            Owner object.
-     * @return Owner proxy count > 0.
+     * @return Owner proxy count more than 0.
      */
     public boolean hasProxies(final Object obj) {
 	return getProxyCount(obj) > 0;

@@ -39,8 +39,7 @@ public class AttributeSet extends AbstractSet<Object> {
 	Objects.requireNonNull(type);
     }
 
-    @SuppressWarnings("rawtypes")
-    private final Map<String, Map<AttributeType<?>, ListenerSet<AttributeListener>>> listeners;
+    private final Map<String, Map<AttributeType<?>, ListenerSet<?>>> listeners;
     private final Map<String, Map<AttributeType<?>, Object>> attributes;
     private final AttributeContainer delegateContainer;
     private final Lock read;
@@ -86,13 +85,14 @@ public class AttributeSet extends AbstractSet<Object> {
 
 	write.lock();
 	try {
-	    @SuppressWarnings("rawtypes")
-	    final Map<AttributeType<?>, ListenerSet<AttributeListener>> lsn = listeners.computeIfAbsent(name,
+	    final Map<AttributeType<?>, ListenerSet<?>> lsn = listeners.computeIfAbsent(name,
 		    k -> new ConcurrentHashMap<>());
 
-	    @SuppressWarnings("rawtypes")
-	    final ListenerSet<AttributeListener> lst = lsn.computeIfAbsent(type,
-		    k -> Listeners.newAttributeListenerSet());
+	    @SuppressWarnings({ "unchecked" })
+	    final ListenerSet<AttributeListener<T>> lst = (ListenerSet<AttributeListener<T>>) lsn.computeIfAbsent(type,
+		    k -> {
+			return Listeners.<T> newAttributeListenerSet();
+		    });
 
 	    return lst.add(listener);
 	} finally {
@@ -123,12 +123,10 @@ public class AttributeSet extends AbstractSet<Object> {
 	    @SuppressWarnings("unchecked")
 	    final T prev = (T) atrn.put(type, attr);
 
-	    @SuppressWarnings("rawtypes")
-	    final ListenerSet<AttributeListener> ls = getListeners0(name, type);
+	    @SuppressWarnings("unchecked")
+	    final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getListeners0(name, type);
 	    if (ls != null) {
-		@SuppressWarnings("unchecked")
-		final AttributeListener<T> als = ls.getProxy();
-		als.attributeAdded(new AttributeEvent<>(delegateContainer, type, attr, prev));
+		ls.getProxy().attributeAdded(new AttributeEvent<>(delegateContainer, type, attr, prev));
 	    }
 
 	    return prev;
@@ -181,12 +179,10 @@ public class AttributeSet extends AbstractSet<Object> {
 		return;
 	    }
 
-	    @SuppressWarnings("rawtypes")
-	    final ListenerSet<AttributeListener> ls = getListeners0(name, type);
+	    @SuppressWarnings("unchecked")
+	    final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getListeners0(name, type);
 	    if (ls != null) {
-		@SuppressWarnings("unchecked")
-		final AttributeListener<T> als = ls.getProxy();
-		als.attributeChanged(new AttributeEvent<>(delegateContainer, type, current));
+		ls.getProxy().attributeChanged(new AttributeEvent<>(delegateContainer, type, current));
 	    }
 	} finally {
 	    read.unlock();
@@ -234,9 +230,8 @@ public class AttributeSet extends AbstractSet<Object> {
 	}
     }
 
-    @SuppressWarnings("rawtypes")
-    private ListenerSet<AttributeListener> getListeners0(final String name, final AttributeType<?> type) {
-	final Map<AttributeType<?>, ListenerSet<AttributeListener>> ls = listeners.get(name);
+    private ListenerSet<?> getListeners0(final String name, final AttributeType<?> type) {
+	final Map<AttributeType<?>, ListenerSet<?>> ls = listeners.get(name);
 	return ls != null ? ls.get(type) : null;
     }
 
@@ -253,8 +248,7 @@ public class AttributeSet extends AbstractSet<Object> {
 
 	read.lock();
 	try {
-	    @SuppressWarnings("rawtypes")
-	    final Map<AttributeType<?>, ListenerSet<AttributeListener>> ls = listeners.get(name);
+	    final Map<AttributeType<?>, ListenerSet<?>> ls = listeners.get(name);
 	    return ls != null ? Collections.unmodifiableSet(ls.keySet()) : Collections.emptySet();
 	} finally {
 	    read.unlock();
@@ -336,14 +330,13 @@ public class AttributeSet extends AbstractSet<Object> {
 
 	write.lock();
 	try {
-	    @SuppressWarnings("rawtypes")
-	    final Map<AttributeType<?>, ListenerSet<AttributeListener>> lsn = listeners.get(name);
+	    final Map<AttributeType<?>, ListenerSet<?>> lsn = listeners.get(name);
 	    if (lsn == null) {
 		return false;
 	    }
 
-	    @SuppressWarnings("rawtypes")
-	    final ListenerSet<AttributeListener> lst = lsn.get(type);
+	    @SuppressWarnings("unchecked")
+	    final ListenerSet<AttributeListener<T>> lst = (ListenerSet<AttributeListener<T>>) lsn.get(type);
 	    if (lst == null) {
 		return false;
 	    }
@@ -374,8 +367,7 @@ public class AttributeSet extends AbstractSet<Object> {
 
 	write.lock();
 	try {
-	    @SuppressWarnings("rawtypes")
-	    final Map<AttributeType<?>, ListenerSet<AttributeListener>> lsn = listeners.get(name);
+	    final Map<AttributeType<?>, ListenerSet<?>> lsn = listeners.get(name);
 	    if (lsn == null) {
 		return;
 	    }
@@ -414,12 +406,11 @@ public class AttributeSet extends AbstractSet<Object> {
 	    if (prev != null) {
 		attributes.computeIfPresent(name, (k, v) -> v.isEmpty() ? null : v);
 
-		@SuppressWarnings("rawtypes")
-		final ListenerSet<AttributeListener> ls = getListeners0(name, type);
+		@SuppressWarnings("unchecked")
+		final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getListeners0(name,
+			type);
 		if (ls != null) {
-		    @SuppressWarnings("unchecked")
-		    final AttributeListener<T> als = ls.getProxy();
-		    als.attributeRemoved(new AttributeEvent<>(delegateContainer, type, prev));
+		    ls.getProxy().attributeRemoved(new AttributeEvent<>(delegateContainer, type, prev));
 		}
 	    }
 

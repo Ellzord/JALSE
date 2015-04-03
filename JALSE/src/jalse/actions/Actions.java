@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public final class Actions {
 
     /**
-     * Copies context information to a target context (actor, bindings, initial delay & period).
+     * Copies context information to a target context (actor, bindings, initial delay and period).
      *
      * @param source
      *            Source context.
