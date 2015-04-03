@@ -1,7 +1,7 @@
 ## [JALSE](https://ellzord.github.io/JALSE) - Java Artificial Life Simulation Engine
-By Elliot Ford
-
 JALSE is a lightweight framework for simple simulation written in Java 8. The framework provides dyanmic yet typed entities that can be processed concurrently. The underlying implementation is up to you - by default its there but it can be replaced.
+
+By Elliot Ford
 
 ### Getting Started
 * [Download]() or fork JALSE.
