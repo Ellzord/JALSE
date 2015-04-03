@@ -6,6 +6,7 @@ By Elliot Ford
 ### Getting Started
 * [Download](https://github.com/Ellzord/JALSE/blob/gh-pages/JALSE-0.0.1.jar?raw=true) or fork JALSE.
 * Check out the [Wiki](https://github.com/Ellzord/JALSE/wiki).
+* See the [API docs](http://ellzord.github.io/JALSE/docs/).
 * Have a look at the example projects ([HappyCows](https://github.com/Ellzord/JALSE-HappyCows) and [Messengers](https://github.com/Ellzord/JALSE-Messengers)).
 
 ### Model key
