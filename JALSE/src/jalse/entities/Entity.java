@@ -43,7 +43,7 @@ import java.util.Optional;
  * @author Elliot Ford
  *
  * @see EntityContainer
- * @see EntitySet
+ * @see DefaultEntityContainer
  * @see EntityListener
  * @see EntityFactory
  * @see Entities#asType(Entity, Class)

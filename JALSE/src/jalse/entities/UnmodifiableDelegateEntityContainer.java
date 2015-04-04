@@ -1,5 +1,6 @@
 package jalse.entities;
 
+import jalse.attributes.AttributeContainer;
 import jalse.listeners.EntityListener;
 
 import java.util.Collections;
@@ -18,21 +19,6 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     @Override
     public boolean addEntityListener(final EntityListener listener) {
 	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Set<Entity> getEntities() {
-	return delegate != null ? delegate.getEntities() : Collections.emptySet();
-    }
-
-    @Override
-    public <T extends Entity> Set<T> getEntitiesAsType(final Class<T> type) {
-	return delegate != null ? delegate.getEntitiesAsType(type) : Collections.emptySet();
-    }
-
-    @Override
-    public <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
-	return delegate != null ? delegate.getEntitiesOfType(type) : Collections.emptySet();
     }
 
     @Override
@@ -66,22 +52,12 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     }
 
     @Override
-    public Entity newEntity() {
+    public Entity newEntity(final UUID id, final AttributeContainer attributes) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T extends Entity> T newEntity(final Class<T> type) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Entity newEntity(final UUID id) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
+    public <T extends Entity> T newEntity(final UUID id, final Class<T> type, final AttributeContainer attributes) {
 	throw new UnsupportedOperationException();
     }
 
@@ -103,16 +79,6 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     @Override
     public Stream<Entity> streamEntities() {
 	return delegate != null ? delegate.streamEntities() : Stream.empty();
-    }
-
-    @Override
-    public <T extends Entity> Stream<T> streamEntitiesAsType(final Class<T> type) {
-	return delegate != null ? delegate.streamEntitiesAsType(type) : Stream.empty();
-    }
-
-    @Override
-    public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
-	return delegate != null ? delegate.streamEntitiesOfType(type) : Stream.empty();
     }
 
     @Override

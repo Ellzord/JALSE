@@ -17,6 +17,22 @@ import java.util.concurrent.TimeUnit;
 public final class Actions {
 
     /**
+     * An empty ActionEngine instance.
+     */
+    public static final ActionEngine EMPTY_ACTIONENGINE = new UnmodifiableDelegateActionEngine(null);
+
+    /**
+     * An empty MutableActionBindings instance.
+     */
+    public static final MutableActionBindings EMPTY_ACTIONBINDINGS = new UnmodifiableDelegateActionBindings(null);
+
+    /**
+     * An empty MutableActionContext instance.
+     */
+    @SuppressWarnings("rawtypes")
+    public static final MutableActionContext EMPTY_ACTIONCONTEXT = new UnmodifiableDelegateActionContext<>(null);
+
+    /**
      * Copies context information to a target context (actor, bindings, initial delay and period).
      *
      * @param source
@@ -36,8 +52,8 @@ public final class Actions {
      *
      * @return Empty bindings.
      */
-    public static <T> MutableActionContext<T> emptyActionBindings() {
-	return new UnmodifiableDelegateActionContext<>(null);
+    public static MutableActionBindings emptyActionBindings() {
+	return EMPTY_ACTIONBINDINGS;
     }
 
     /**
@@ -45,8 +61,9 @@ public final class Actions {
      *
      * @return Empty context.
      */
+    @SuppressWarnings("unchecked")
     public static <T> MutableActionContext<T> emptyActionContext() {
-	return new UnmodifiableDelegateActionContext<>(null);
+	return EMPTY_ACTIONCONTEXT;
     }
 
     /**
@@ -55,7 +72,7 @@ public final class Actions {
      * @return Empty action engine.
      */
     public static ActionEngine emptyActionEngine() {
-	return new UnmodifiableDelegateActionEngine(null);
+	return EMPTY_ACTIONENGINE;
     }
 
     /**

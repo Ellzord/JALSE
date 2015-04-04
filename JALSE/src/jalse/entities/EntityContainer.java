@@ -1,14 +1,20 @@
 package jalse.entities;
 
+import static jalse.attributes.Attributes.EMPTY_ATTRIBUTECONTAINER;
 import static jalse.entities.Entities.asType;
+import jalse.attributes.AttributeContainer;
 import jalse.listeners.EntityEvent;
 import jalse.listeners.EntityListener;
 import jalse.listeners.ListenerSet;
 import jalse.misc.JALSEExceptions;
 
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -18,7 +24,7 @@ import java.util.stream.Stream;
  *
  * @author Elliot Ford
  *
- * @see EntitySet
+ * @see DefaultEntityContainer
  * @see EntityFactory
  * @see Entities#emptyEntityContainer()
  * @see Entities#unmodifiableEntityContainer(EntityContainer)
@@ -44,8 +50,12 @@ public interface EntityContainer {
      * Gets all the entities within the containers.
      *
      * @return Gets all entities or an empty set if none were found.
+     *
+     * @see #streamEntities()
      */
-    Set<Entity> getEntities();
+    default Set<Entity> getEntities() {
+	return streamEntities().collect(Collectors.toSet());
+    }
 
     /**
      * Gets all the entities as the specified type.
@@ -54,9 +64,11 @@ public interface EntityContainer {
      *            Entity type to check for.
      * @return Set of entities as the type.
      *
-     * @see Entity#asType(Class)
+     * @see #streamEntitiesAsType(Class)
      */
-    <T extends Entity> Set<T> getEntitiesAsType(Class<T> type);
+    default <T extends Entity> Set<T> getEntitiesAsType(final Class<T> type) {
+	return streamEntitiesAsType(type).collect(Collectors.toSet());
+    }
 
     /**
      * Gets all the entities marked with the specified type.
@@ -65,10 +77,11 @@ public interface EntityContainer {
      *            Entity type to check for.
      * @return Set of entities marked with the type.
      *
-     * @see Entity#isMarkedAsType(Class)
-     * @see Entity#asType(Class)
+     * @see #streamEntitiesOfType(Class)
      */
-    <T extends Entity> Set<T> getEntitiesOfType(Class<T> type);
+    default <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
+	return streamEntitiesOfType(type).collect(Collectors.toSet());
+    }
 
     /**
      * Gets the entity with the specified ID.
@@ -192,7 +205,26 @@ public interface EntityContainer {
      * @see UUID#randomUUID()
      * @see JALSEExceptions#ENTITY_LIMIT_REACHED
      */
-    Entity newEntity();
+    default Entity newEntity() {
+	return newEntity(EMPTY_ATTRIBUTECONTAINER);
+    }
+
+    /**
+     * Creates a new entity with a random ID.
+     *
+     * @param sourceContainer
+     *            Source attribute container.
+     *
+     * @return The newly created entity's ID.
+     * @throws IllegalStateException
+     *             If the entity limit has been reached.
+     *
+     * @see UUID#randomUUID()
+     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
+     */
+    default Entity newEntity(final AttributeContainer sourceContainer) {
+	return newEntity(UUID.randomUUID(), sourceContainer);
+    }
 
     /**
      * Creates a new entity with a random ID. This entity is marked as the specified entity type and
@@ -209,7 +241,30 @@ public interface EntityContainer {
      * @see Entity#markAsType(Class)
      * @see Entities#asType(Entity, Class)
      */
-    <T extends Entity> T newEntity(Class<T> type);
+    default <T extends Entity> T newEntity(final Class<T> type) {
+	return newEntity(type, EMPTY_ATTRIBUTECONTAINER);
+    }
+
+    /**
+     * Creates a new entity with a random ID. This entity is marked as the specified entity type and
+     * then wrapped to it.
+     *
+     * @param type
+     *            Entity type.
+     * @param sourceContainer
+     *            Source attribute container.
+     * @return The newly created entity.
+     * @throws IllegalStateException
+     *             If the entity limit has been reached.
+     *
+     * @see UUID#randomUUID()
+     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
+     * @see Entity#markAsType(Class)
+     * @see Entities#asType(Entity, Class)
+     */
+    default <T extends Entity> T newEntity(final Class<T> type, final AttributeContainer sourceContainer) {
+	return newEntity(UUID.randomUUID(), type, sourceContainer);
+    }
 
     /**
      * Creates new entity with the specified ID.
@@ -225,7 +280,27 @@ public interface EntityContainer {
      * @see JALSEExceptions#ENTITY_LIMIT_REACHED
      * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
      */
-    Entity newEntity(UUID id);
+    default Entity newEntity(final UUID id) {
+	return newEntity(id, EMPTY_ATTRIBUTECONTAINER);
+    }
+
+    /**
+     * Creates new entity with the specified ID.
+     *
+     * @param id
+     *            Entity ID.
+     * @param sourceContainer
+     *            Source attribute container.
+     * @return The newly created entity.
+     * @throws IllegalStateException
+     *             If the entity limit has been reached.
+     * @throws IllegalArgumentException
+     *             If the entity ID is already assigned.
+     *
+     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
+     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
+     */
+    Entity newEntity(UUID id, AttributeContainer sourceContainer);
 
     /**
      * Creates new entity with the specified ID. This entity is marked as the specified entity type
@@ -247,7 +322,33 @@ public interface EntityContainer {
      * @see Entity#markAsType(Class)
      * @see Entities#asType(Entity, Class)
      */
-    <T extends Entity> T newEntity(UUID id, Class<T> type);
+    default <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
+	return newEntity(id, type, EMPTY_ATTRIBUTECONTAINER);
+    }
+
+    /**
+     * Creates new entity with the specified ID. This entity is marked as the specified entity type
+     * and then wrapped to it.
+     *
+     *
+     * @param id
+     *            Entity ID.
+     * @param type
+     *            Entity type.
+     * @param sourceContainer
+     *            Source attribute container.
+     * @return The newly created entity.
+     * @throws IllegalStateException
+     *             If the entity limit has been reached.
+     * @throws IllegalArgumentException
+     *             If the entity ID is already assigned.
+     *
+     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
+     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
+     * @see Entity#markAsType(Class)
+     * @see Entities#asType(Entity, Class)
+     */
+    <T extends Entity> T newEntity(UUID id, Class<T> type, AttributeContainer sourceContainer);
 
     /**
      * Receives an entity (from a transfer). This method may receive an entity from within or
@@ -296,8 +397,11 @@ public interface EntityContainer {
      * @return Stream of entities as the type.
      *
      * @see Entity#asType(Class)
+     * @see #streamEntities()
      */
-    <T extends Entity> Stream<T> streamEntitiesAsType(Class<T> type);
+    default <T extends Entity> Stream<T> streamEntitiesAsType(final Class<T> type) {
+	return streamEntities().map(e -> asType(e, type));
+    }
 
     /**
      * Gets a stream of entities marked with the specified type.
@@ -308,8 +412,59 @@ public interface EntityContainer {
      *
      * @see Entity#isMarkedAsType(Class)
      * @see Entity#asType(Class)
+     * @see #streamEntities()
      */
-    <T extends Entity> Stream<T> streamEntitiesOfType(Class<T> type);
+    default <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
+	return streamEntities().filter(e -> e.isMarkedAsType(type)).map(e -> asType(e, type));
+    }
+
+    /**
+     * Transfers all entities to the destination.
+     *
+     * @param destination
+     *            Destination to transfer to.
+     * @return Entities that could not be transfered.
+     *
+     * @see #transferEntities(Set, EntityContainer)
+     */
+    default Set<UUID> transferAllEntities(final EntityContainer destination) {
+	return transferEntities(getEntityIDs(), destination);
+    }
+
+    /**
+     * Transfers all entities to the destination.
+     *
+     * @param predicate
+     *            Predicate to filter entities.
+     * @param destination
+     *            Destination to transfer to.
+     * @return Entities that could not be transfered.
+     */
+    default Set<UUID> transferEntities(final Predicate<Entity> predicate, final EntityContainer destination) {
+	return transferEntities(streamEntities().filter(predicate).map(Entity::getID).collect(Collectors.toSet()),
+		destination);
+    }
+
+    /**
+     * Transfers a number of entities
+     *
+     * @param entityIDs
+     *            Entities to transfer.
+     * @param destination
+     *            Destination to transfer to.
+     * @return Entities that could not be transfered.
+     */
+    default Set<UUID> transferEntities(final Set<UUID> entityIDs, final EntityContainer destination) {
+	Objects.requireNonNull(destination);
+
+	final Set<UUID> notTransfered = new HashSet<>();
+	for (final UUID id : entityIDs) {
+	    if (!transferEntity(id, destination)) {
+		notTransfered.add(id);
+	    }
+	}
+	return notTransfered;
+    }
 
     /**
      * Transfers the entity to the supplied destination container.

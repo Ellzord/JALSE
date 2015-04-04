@@ -7,11 +7,12 @@ import jalse.actions.ActionScheduler;
 import jalse.actions.DefaultActionScheduler;
 import jalse.actions.MutableActionBindings;
 import jalse.actions.MutableActionContext;
+import jalse.attributes.AttributeContainer;
+import jalse.entities.DefaultEntityContainer;
 import jalse.entities.Entities;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
 import jalse.entities.EntityFactory;
-import jalse.entities.EntitySet;
 import jalse.listeners.EntityListener;
 import jalse.misc.AbstractIdentifiable;
 import jalse.tags.Tag;
@@ -23,7 +24,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  * @author Elliot Ford
  *
  * @see ActionEngine
- * @see EntitySet
+ * @see DefaultEntityContainer
  * @see TagTypeSet
  * @see EntityFactory
  *
@@ -43,9 +43,9 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 	Taggable {
 
     /**
-     * Backing entity set for top level entities.
+     * Backing entity container for top level entities.
      */
-    protected final EntitySet entities;
+    protected final DefaultEntityContainer entities;
 
     /**
      * Current state information.
@@ -86,13 +86,13 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 	factory.setEngine(engine);
 	scheduler = new DefaultActionScheduler<>(this);
 	scheduler.setEngine(engine);
-	entities = new EntitySet(factory, this);
+	entities = new DefaultEntityContainer(factory, this);
 	tags = new TagTypeSet();
     }
 
     @Override
     public boolean addEntityListener(final EntityListener listener) {
-	return entities.addListener(listener);
+	return entities.addEntityListener(listener);
     }
 
     @Override
@@ -115,28 +115,13 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
     }
 
     @Override
-    public Set<Entity> getEntities() {
-	return streamEntities().collect(Collectors.toSet());
-    }
-
-    @Override
-    public <T extends Entity> Set<T> getEntitiesAsType(final Class<T> type) {
-	return entities.getAsType(type);
-    }
-
-    @Override
-    public <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
-	return entities.getOfType(type);
-    }
-
-    @Override
     public Entity getEntity(final UUID id) {
 	return entities.getEntity(id);
     }
 
     @Override
     public int getEntityCount() {
-	return entities.size();
+	return entities.getEntityCount();
     }
 
     @Override
@@ -146,7 +131,7 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
-	return entities.getListeners();
+	return entities.getEntityListeners();
     }
 
     @Override
@@ -175,7 +160,7 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 
     @Override
     public void killEntities() {
-	entities.clear();
+	entities.killEntities();
     }
 
     @Override
@@ -189,23 +174,13 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
     }
 
     @Override
-    public Entity newEntity() {
-	return entities.newEntity();
+    public Entity newEntity(final UUID id, final AttributeContainer sourceContainer) {
+	return entities.newEntity(id, sourceContainer);
     }
 
     @Override
-    public <T extends Entity> T newEntity(final Class<T> type) {
-	return entities.newEntity(type);
-    }
-
-    @Override
-    public Entity newEntity(final UUID id) {
-	return entities.newEntity(id);
-    }
-
-    @Override
-    public <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
-	return entities.newEntity(id, type);
+    public <T extends Entity> T newEntity(final UUID id, final Class<T> type, final AttributeContainer sourceContainer) {
+	return entities.newEntity(id, type, sourceContainer);
     }
 
     @Override
@@ -218,17 +193,17 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 	if (Entities.withinSameTree(e, this)) {
 	    return entities.receiveFromTree(e); // Wont import.
 	}
-	return entities.receive(e);
+	return entities.receiveEntity(e);
     }
 
     @Override
     public void removeAllEntityListeners() {
-	entities.removeAllListeners();
+	entities.removeAllEntityListeners();
     }
 
     @Override
     public boolean removeEntityListener(final EntityListener listener) {
-	return entities.removeListener(listener);
+	return entities.removeEntityListener(listener);
     }
 
     @Override
@@ -249,21 +224,11 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 
     @Override
     public Stream<Entity> streamEntities() {
-	return entities.stream();
-    }
-
-    @Override
-    public <T extends Entity> Stream<T> streamEntitiesAsType(final Class<T> type) {
-	return entities.streamAsType(type);
-    }
-
-    @Override
-    public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
-	return entities.streamOfType(type);
+	return entities.streamEntities();
     }
 
     @Override
     public boolean transferEntity(final UUID id, final EntityContainer destination) {
-	return entities.transferOrExport(id, destination);
+	return entities.transferEntity(id, destination);
     }
 }

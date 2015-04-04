@@ -48,7 +48,7 @@ import java.util.Objects;
  *
  * @see AttributeContainer
  * @see AttributeListener
- * @see AttributeSet
+ * @see DefaultAttributeContainer
  * @see Attributes
  *
  */

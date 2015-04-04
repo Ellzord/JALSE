@@ -10,7 +10,7 @@ import java.util.UUID;
  *
  * @author Elliot Ford
  *
- * @see EntitySet
+ * @see DefaultEntityContainer
  * @see DefaultEntityFactory
  *
  */

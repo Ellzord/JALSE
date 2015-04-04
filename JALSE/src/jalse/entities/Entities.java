@@ -40,6 +40,11 @@ import java.util.stream.StreamSupport;
  */
 public final class Entities {
 
+    /**
+     * An empty EntityContainer.
+     */
+    public static EntityContainer EMPTY_ENTITYCONTAINER = new UnmodifiableDelegateEntityContainer(null);
+
     @SuppressWarnings("unchecked")
     private static void addDirectTypeAncestors(final Set<Class<? extends Entity>> ancestry, final Class<?> type) {
 	for (final Class<?> t : type.getInterfaces()) {
@@ -106,7 +111,7 @@ public final class Entities {
      * @return Empty entity container.
      */
     public static EntityContainer emptyEntityContainer() {
-	return new UnmodifiableDelegateEntityContainer(null);
+	return EMPTY_ENTITYCONTAINER;
     }
 
     /**
@@ -220,17 +225,6 @@ public final class Entities {
      */
     public static Predicate<Entity> notMarkedAsType(final Class<? extends Entity> type) {
 	return isMarkedAsType(type).negate();
-    }
-
-    /**
-     * Wraps the entity set as an entity container.
-     *
-     * @param entities
-     *            Entity set.
-     * @return Entity container.
-     */
-    public static EntityContainer toEntityContainer(final EntitySet entities) {
-	return new EntitySetContainer(entities);
     }
 
     /**

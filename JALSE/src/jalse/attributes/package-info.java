@@ -5,7 +5,7 @@
  *
  * @see jalse.attributes.NamedAttributeType
  * @see jalse.attributes.Attributes
- * @see jalse.attributes.AttributeSet
+ * @see jalse.attributes.DefaultAttributeContainer
  */
 package jalse.attributes;
 

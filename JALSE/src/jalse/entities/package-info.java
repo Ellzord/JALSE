@@ -5,7 +5,7 @@
  *
  * @see jalse.entities.EntityFactory
  * @see jalse.entities.Entities
- * @see jalse.entities.EntitySet
+ * @see jalse.entities.DefaultEntityContainer
  */
 package jalse.entities;
 

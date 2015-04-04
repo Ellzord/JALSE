@@ -62,12 +62,17 @@ public final class Attributes {
     public static final AttributeType<Object> OBJECT_TYPE = new AttributeType<Object>() {};
 
     /**
+     * An empty AttributeContainer.
+     */
+    public static final AttributeContainer EMPTY_ATTRIBUTECONTAINER = new UnmodifiableDelegateAttributeContainer(null);
+
+    /**
      * Creates an immutable empty attribute container.
      *
      * @return Empty attribute container.
      */
     public static AttributeContainer emptyAttributeContainer() {
-	return new UnmodifiableDelegateAttributeContainer(null);
+	return EMPTY_ATTRIBUTECONTAINER;
     }
 
     /**
@@ -267,17 +272,6 @@ public final class Attributes {
 	    throw new IllegalArgumentException();
 	}
 	return str;
-    }
-
-    /**
-     * Wraps the attribute set as an attribute container.
-     *
-     * @param attributes
-     *            Attribute set.
-     * @return Attribute container.
-     */
-    public static AttributeContainer toAttributeContainer(final AttributeSet attributes) {
-	return new AttributeSetContainer(attributes);
     }
 
     /**

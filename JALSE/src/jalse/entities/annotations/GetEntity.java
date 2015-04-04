@@ -10,7 +10,8 @@ import java.lang.annotation.Target;
 import java.util.UUID;
 
 /**
- * An {@link Entity} type annotation for {@link EntityContainer#getOptEntityAsType(UUID, Class)}.
+ * An {@link Entity} type annotation for {@link EntityContainer#getEntityAsType(UUID, Class)} and
+ * {@link EntityContainer#getOptEntityAsType(UUID, Class)}.
  *
  * @author Elliot Ford
  *

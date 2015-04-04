@@ -7,8 +7,9 @@ import jalse.actions.Action;
 import jalse.actions.ActionEngine;
 import jalse.actions.DefaultActionScheduler;
 import jalse.actions.MutableActionContext;
-import jalse.attributes.AttributeSet;
+import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
+import jalse.attributes.DefaultAttributeContainer;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.EntityListener;
 import jalse.misc.AbstractIdentifiable;
@@ -35,8 +36,8 @@ import java.util.stream.Stream;
  * @author Elliot Ford
  *
  * @see DefaultEntityFactory
- * @see EntitySet
- * @see AttributeSet
+ * @see DefaultEntityContainer
+ * @see DefaultAttributeContainer
  * @see DefaultActionScheduler
  * @see TagTypeSet
  *
@@ -51,12 +52,12 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     /**
      * Child entities.
      */
-    protected final EntitySet entities;
+    protected final DefaultEntityContainer entities;
 
     /**
      * Associated attributes.
      */
-    protected final AttributeSet attributes;
+    protected final DefaultAttributeContainer attributes;
 
     /**
      * Self action scheduler.
@@ -83,27 +84,27 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     protected DefaultEntity(final UUID id, final EntityFactory factory, final EntityContainer container) {
 	super(id);
 	this.container = container;
-	entities = new EntitySet(factory, this);
-	attributes = new AttributeSet(this);
+	entities = new DefaultEntityContainer(factory, this);
+	attributes = new DefaultAttributeContainer(this);
 	tags = new TagTypeSet();
 	scheduler = new DefaultActionScheduler<>(this);
 	alive = new AtomicBoolean();
     }
 
     @Override
-    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
-	    final AttributeListener<T> listener) {
-	return attributes.addListener(name, type, listener);
+    public <T> T addAttribute(final String name, final AttributeType<T> type, final T attr) {
+	return attributes.addAttribute(name, type, attr);
     }
 
     @Override
-    public <T> T addAttributeOfType(final String name, final AttributeType<T> type, final T attr) {
-	return attributes.addOfType(name, type, attr);
+    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
+	return attributes.addAttributeListener(name, type, listener);
     }
 
     @Override
     public boolean addEntityListener(final EntityListener listener) {
-	return entities.addListener(listener);
+	return entities.addEntityListener(listener);
     }
 
     private void addParentTag() {
@@ -119,47 +120,42 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public <T> void fireAttributeChanged(final String name, final AttributeType<T> type) {
-	attributes.fireChanged(name, type);
+	attributes.fireAttributeChanged(name, type);
+    }
+
+    @Override
+    public <T> T getAttribute(final String name, final AttributeType<T> type) {
+	return attributes.getAttribute(name, type);
     }
 
     @Override
     public int getAttributeCount() {
-	return attributes.size();
+	return attributes.getAttributeCount();
     }
 
     @Override
     public Set<String> getAttributeListenerNames() {
-	return attributes.getListenerNames();
+	return attributes.getAttributeListenerNames();
     }
 
     @Override
     public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
-	return attributes.getListeners(name, type);
+	return attributes.getAttributeListeners(name, type);
     }
 
     @Override
     public Set<AttributeType<?>> getAttributeListenerTypes(final String name) {
-	return attributes.getListenerTypes(name);
+	return attributes.getAttributeListenerTypes(name);
     }
 
     @Override
     public Set<String> getAttributeNames() {
-	return attributes.getNames();
-    }
-
-    @Override
-    public <T> T getAttributeOfType(final String name, final AttributeType<T> type) {
-	return attributes.getOfType(name, type);
-    }
-
-    @Override
-    public Set<?> getAttributes() {
-	return Collections.unmodifiableSet(attributes);
+	return attributes.getAttributeNames();
     }
 
     @Override
     public Set<AttributeType<?>> getAttributeTypes(final String name) {
-	return attributes.getTypes(name);
+	return attributes.getAttributeTypes(name);
     }
 
     @Override
@@ -178,28 +174,13 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Set<Entity> getEntities() {
-	return Collections.unmodifiableSet(entities);
-    }
-
-    @Override
-    public <T extends Entity> Set<T> getEntitiesAsType(final Class<T> type) {
-	return entities.getAsType(type);
-    }
-
-    @Override
-    public <T extends Entity> Set<T> getEntitiesOfType(final Class<T> type) {
-	return entities.getOfType(type);
-    }
-
-    @Override
     public Entity getEntity(final UUID id) {
 	return entities.getEntity(id);
     }
 
     @Override
     public int getEntityCount() {
-	return entities.size();
+	return entities.getEntityCount();
     }
 
     @Override
@@ -209,7 +190,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
-	return entities.getListeners();
+	return entities.getEntityListeners();
     }
 
     @Override
@@ -234,7 +215,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public void killEntities() {
-	entities.clear();
+	entities.killEntities();
     }
 
     @Override
@@ -279,44 +260,26 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Entity newEntity() {
+    public Entity newEntity(final UUID id, final AttributeContainer sourceContainer) {
 	if (!isAlive()) {
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
 
-	return entities.newEntity();
+	return entities.newEntity(id, sourceContainer);
     }
 
     @Override
-    public <T extends Entity> T newEntity(final Class<T> type) {
+    public <T extends Entity> T newEntity(final UUID id, final Class<T> type, final AttributeContainer sourceContainer) {
 	if (!isAlive()) {
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
 
-	return entities.newEntity(type);
-    }
-
-    @Override
-    public Entity newEntity(final UUID id) {
-	if (!isAlive()) {
-	    throwRE(ENTITY_NOT_ALIVE);
-	}
-
-	return entities.newEntity(id);
-    }
-
-    @Override
-    public <T extends Entity> T newEntity(final UUID id, final Class<T> type) {
-	if (!isAlive()) {
-	    throwRE(ENTITY_NOT_ALIVE);
-	}
-
-	return entities.newEntity(id, type);
+	return entities.newEntity(id, type, sourceContainer);
     }
 
     @Override
     public boolean receiveEntity(final Entity e) {
-	return entities.receive(e);
+	return entities.receiveEntity(e);
     }
 
     /**
@@ -331,34 +294,39 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public void removeAllAttributeListeners() {
+	attributes.removeAllAttributeListeners();
+    }
+
+    @Override
     public void removeAllEntityListeners() {
-	entities.removeAllListeners();
+	entities.removeAllEntityListeners();
+    }
+
+    @Override
+    public <T> T removeAttribute(final String name, final AttributeType<T> type) {
+	return attributes.removeAttribute(name, type);
     }
 
     @Override
     public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
 	    final AttributeListener<T> listener) {
-	return attributes.removeListener(name, type, listener);
+	return attributes.removeAttributeListener(name, type, listener);
     }
 
     @Override
     public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
-	attributes.removeListeners(name, type);
-    }
-
-    @Override
-    public <T> T removeAttributeOfType(final String name, final AttributeType<T> type) {
-	return attributes.removeOfType(name, type);
+	attributes.removeAttributeListeners(name, type);
     }
 
     @Override
     public void removeAttributes() {
-	attributes.clear();
+	attributes.removeAttributes();
     }
 
     @Override
     public boolean removeEntityListener(final EntityListener listener) {
-	return entities.removeListener(listener);
+	return entities.removeEntityListener(listener);
     }
 
     @Override
@@ -398,22 +366,12 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Stream<?> streamAttributes() {
-	return attributes.stream();
+	return attributes.streamAttributes();
     }
 
     @Override
     public Stream<Entity> streamEntities() {
-	return entities.stream();
-    }
-
-    @Override
-    public <T extends Entity> Stream<T> streamEntitiesAsType(final Class<T> type) {
-	return entities.streamAsType(type);
-    }
-
-    @Override
-    public <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
-	return entities.streamOfType(type);
+	return entities.streamEntities();
     }
 
     @Override
@@ -423,7 +381,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public boolean transferEntity(final UUID id, final EntityContainer destination) {
-	return entities.transferOrExport(id, destination);
+	return entities.transferEntity(id, destination);
     }
 
     @Override

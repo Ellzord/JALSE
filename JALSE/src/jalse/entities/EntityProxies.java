@@ -2,6 +2,7 @@ package jalse.entities;
 
 import static jalse.misc.JALSEExceptions.INVALID_ENTITY_TYPE;
 import static jalse.misc.JALSEExceptions.throwRE;
+import jalse.attributes.AttributeContainer;
 import jalse.attributes.Attributes;
 import jalse.attributes.NamedAttributeType;
 import jalse.entities.annotations.GetAttribute;
@@ -139,42 +140,52 @@ public final class EntityProxies {
 	    final EntityTypeMethodInfo etmi = methodInfos.get(method);
 
 	    /*
-	     * getAttributeOfType(Class) / getOrNullAttributeOfType(Class)
+	     * getAttribute(Class) / getOrNullAttribute(Class)
 	     */
 	    if (etmi.forAnnotationType(GetAttribute.class)) {
 		if (etmi.opt) {
-		    return entity.getOptAttributeOfType(etmi.attrType);
+		    return entity.getOptAttribute(etmi.attrType);
 		} else {
-		    return entity.getAttributeOfType(etmi.attrType);
+		    return entity.getAttribute(etmi.attrType);
 		}
 	    }
 
 	    /*
-	     * addAttributeOfType(Attribute) / addOrNullAttributeOfType(Attribute) /
-	     * removeAttributeOfType(Class) / removeOrNullAttributeOfType(Class)
+	     * addAttribute(Attribute) / addOrNullAttribute(Attribute) / removeAttribute(Class) /
+	     * removeOrNullAttribute(Class)
 	     */
 	    if (etmi.forAnnotationType(SetAttribute.class)) {
 		if (etmi.opt) {
 		    if (args[0] != null) {
-			return entity.addOptAttributeOfType(etmi.attrType, args[0]);
+			return entity.addOptAttribute(etmi.attrType, args[0]);
 		    } else {
-			return entity.removeOptAttributeOfType(etmi.attrType);
+			return entity.removeOptAttribute(etmi.attrType);
 		    }
 		} else {
 		    if (args[0] != null) {
-			return entity.addAttributeOfType(etmi.attrType, args[0]);
+			return entity.addAttribute(etmi.attrType, args[0]);
 		    } else {
-			return entity.removeAttributeOfType(etmi.attrType);
+			return entity.removeAttribute(etmi.attrType);
 		    }
 		}
 	    }
 
 	    /*
-	     * newEntity(Class) / newEntity(UUID, Class)
+	     * newEntity(Class) / newEntity(Class, AttributeContainer) / newEntity(UUID, class) /
+	     * newEntity(UUID, Class, AttributeContainer)
 	     */
 	    if (etmi.forAnnotationType(NewEntity.class)) {
 		if (args != null && args.length == 1) {
-		    return entity.newEntity((UUID) args[0], (Class<? extends Entity>) etmi.entityType);
+		    if (args[0] instanceof UUID) {
+			return entity.newEntity((UUID) args[0], (Class<? extends Entity>) etmi.entityType);
+
+		    } else {
+			return entity
+				.newEntity((Class<? extends Entity>) etmi.entityType, (AttributeContainer) args[0]);
+		    }
+		} else if (args != null && args.length == 2) {
+		    return entity.newEntity((UUID) args[0], (Class<? extends Entity>) etmi.entityType,
+			    (AttributeContainer) args[1]);
 		} else {
 		    return entity.newEntity((Class<? extends Entity>) etmi.entityType);
 		}
@@ -425,7 +436,7 @@ public final class EntityProxies {
 	    final boolean hasReturnType = !Void.TYPE.equals(returnType);
 
 	    /*
-	     * getAttributeOfType(Class) / getOptAttributeOfType(Class)
+	     * getAttribute(Class) / getOptAttribute(Class)
 	     */
 	    if (GetAttribute.class.equals(annotation.annotationType())) {
 		final String name = ((GetAttribute) annotation).value();
@@ -452,8 +463,8 @@ public final class EntityProxies {
 	    }
 
 	    /*
-	     * addAttributeOfType(Attribute) / addOptAttributeOfType(Attribute) /
-	     * removeAttributeOfType(Class) / removeOptAttributeOfType(Class)
+	     * addAttribute(Attribute) / addOptAttribute(Attribute) / removeAttribute(Class) /
+	     * removeOptAttribute(Class)
 	     */
 	    if (SetAttribute.class.equals(annotation.annotationType())) {
 		final String name = ((SetAttribute) annotation).value();
@@ -490,12 +501,24 @@ public final class EntityProxies {
 	    }
 
 	    /*
-	     * newEntity(Class) / newEntity(UUID, Class)
+	     * newEntity(Class) / newEntity(Class, AttributeContainer) / newEntity(UUID, class) /
+	     * newEntity(UUID, Class, AttributeContainer)
 	     */
 	    if (NewEntity.class.equals(annotation.annotationType())) {
-		if (!hasReturnType
-			|| !(!hasParams || hasParams && params.length == 1 && UUID.class.equals(toClass(params[0])))) {
+		if (!hasReturnType || !(!hasParams || hasParams && params.length <= 2)) {
 		    return false;
+		}
+
+		if (hasParams) { // UUID or AttributeContainer / UUID and AttributeContainer
+		    final Class<?> paramOne = toClass(params[0]);
+		    if (!UUID.class.equals(paramOne) && !AttributeContainer.class.equals(paramOne)) {
+			return false;
+		    } else if (params.length == 2) {
+			final Class<?> paramTwo = toClass(params[1]);
+			if (!(UUID.class.equals(paramOne) && AttributeContainer.class.equals(paramTwo))) {
+			    return false;
+			}
+		    }
 		}
 
 		final Class<?> entityType = toClass(returnType);

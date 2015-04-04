@@ -12,8 +12,8 @@ import java.util.Optional;
 
 /**
  * An {@link Entity} type annotation for
- * {@link AttributeContainer#getOptAttributeOfType(String, AttributeType)} and
- * {@link AttributeContainer#getAttributeOfType(String, AttributeType)}.<br>
+ * {@link AttributeContainer#getOptAttribute(String, AttributeType)} and
+ * {@link AttributeContainer#getAttribute(String, AttributeType)}.<br>
  * <br>
  * The correct method is selected depending if the result is wrapped in an {@link Optional}.
  *

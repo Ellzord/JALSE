@@ -4,6 +4,7 @@ import jalse.listeners.AttributeListener;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -16,12 +17,85 @@ import java.util.stream.Stream;
  * @author Elliot Ford
  *
  * @see Optional
- * @see AttributeSet
+ * @see DefaultAttributeContainer
  * @see Attributes#emptyAttributeContainer()
  * @see Attributes#unmodifiableAttributeContainer(AttributeContainer)
  *
  */
 public interface AttributeContainer {
+
+    /**
+     * Adds all attributes and listeners from the source container.
+     *
+     * @param sourceContainer
+     *            Source container to copy from.
+     */
+    default void addAll(final AttributeContainer sourceContainer) {
+	addAllAttributes(sourceContainer);
+	addAllAttributeListeners(sourceContainer);
+    }
+
+    /**
+     * Adds all attribute listeners from the source container.
+     *
+     * @param sourceContainer
+     *            Source attribute container.
+     */
+    @SuppressWarnings("unchecked")
+    default void addAllAttributeListeners(final AttributeContainer sourceContainer) {
+	for (final String name : sourceContainer.getAttributeListenerNames()) {
+	    for (final AttributeType<?> type : sourceContainer.getAttributeListenerTypes(name)) {
+		for (final AttributeListener<?> listener : sourceContainer.getAttributeListeners(name, type)) {
+		    addAttributeListener(name, (AttributeType<Object>) type, (AttributeListener<Object>) listener);
+		}
+	    }
+	}
+    }
+
+    /**
+     * Adds all attributes from the source container.
+     *
+     * @param sourceContainer
+     *            Source attribute container.
+     */
+    @SuppressWarnings("unchecked")
+    default void addAllAttributes(final AttributeContainer sourceContainer) {
+	for (final String name : sourceContainer.getAttributeNames()) {
+	    for (final AttributeType<?> type : sourceContainer.getAttributeTypes(name)) {
+		final Object attr = sourceContainer.getAttribute(name, type);
+		if (attr != null) {
+		    addAttribute(name, (AttributeType<Object>) type, attr);
+		}
+	    }
+	}
+    }
+
+    /**
+     * Adds the supplied attribute to the collection.
+     *
+     * @param namedType
+     *            Named attribute type.
+     * @param attr
+     *            Attribute to add.
+     * @return The replaced attribute or null if none was replaced.
+     */
+    default <T> T addAttribute(final NamedAttributeType<T> namedType, final T attr) {
+	return addAttribute(namedType.getName(), namedType.getType(), attr);
+    }
+
+    /**
+     * Adds the supplied attribute to the collection.
+     *
+     * @param name
+     *            Attribute type name.
+     *
+     * @param type
+     *            Attribute type.
+     * @param attr
+     *            Attribute to add.
+     * @return The replaced attribute or null if none was replaced.
+     */
+    <T> T addAttribute(String name, final AttributeType<T> type, T attr);
 
     /**
      * Adds an attribute listener for the supplied named attribute type.
@@ -51,33 +125,6 @@ public interface AttributeContainer {
     <T> boolean addAttributeListener(String name, AttributeType<T> type, AttributeListener<T> listener);
 
     /**
-     * Adds the supplied attribute to the collection.
-     *
-     * @param namedType
-     *            Named attribute type.
-     * @param attr
-     *            Attribute to add.
-     * @return The replaced attribute or null if none was replaced.
-     */
-    default <T> T addAttributeOfType(final NamedAttributeType<T> namedType, final T attr) {
-	return addAttributeOfType(namedType.getName(), namedType.getType(), attr);
-    }
-
-    /**
-     * Adds the supplied attribute to the collection.
-     *
-     * @param name
-     *            Attribute type name.
-     *
-     * @param type
-     *            Attribute type.
-     * @param attr
-     *            Attribute to add.
-     * @return The replaced attribute or null if none was replaced.
-     */
-    <T> T addAttributeOfType(String name, final AttributeType<T> type, T attr);
-
-    /**
      * This is a convenience method for adding an attribute (optional).
      *
      * @param namedType
@@ -88,8 +135,8 @@ public interface AttributeContainer {
      *         found
      *
      */
-    default <T> Optional<T> addOptAttributeOfType(final NamedAttributeType<T> namedType, final T attr) {
-	return addOptAttributeOfType(namedType.getName(), namedType.getType(), attr);
+    default <T> Optional<T> addOptAttribute(final NamedAttributeType<T> namedType, final T attr) {
+	return addOptAttribute(namedType.getName(), namedType.getType(), attr);
     }
 
     /**
@@ -105,8 +152,8 @@ public interface AttributeContainer {
      * @return Optional containing the replaced attribute if set or else empty optional if none
      *         found
      */
-    default <T> Optional<T> addOptAttributeOfType(final String name, final AttributeType<T> type, final T attr) {
-	return Optional.ofNullable(addAttributeOfType(name, type, attr));
+    default <T> Optional<T> addOptAttribute(final String name, final AttributeType<T> type, final T attr) {
+	return Optional.ofNullable(addAttribute(name, type, attr));
     }
 
     /**
@@ -131,6 +178,29 @@ public interface AttributeContainer {
      *            Attribute type to fire for.
      */
     <T> void fireAttributeChanged(String name, AttributeType<T> type);
+
+    /**
+     * Gets the attribute matching the supplied type.
+     *
+     * @param namedType
+     *            Named attribute type to check for.
+     * @return The attribute matching the supplied type or null if none found.
+     */
+    default <T> T getAttribute(final NamedAttributeType<T> namedType) {
+	return getAttribute(namedType.getName(), namedType.getType());
+    }
+
+    /**
+     * Gets the attribute matching the supplied type.
+     *
+     * @param name
+     *            Attribute type name.
+     *
+     * @param type
+     *            Attribute type to check for.
+     * @return The attribute matching the supplied type or null if none found.
+     */
+    <T> T getAttribute(String name, final AttributeType<T> type);
 
     /**
      * Gets the number of total attributes within the container.
@@ -187,34 +257,15 @@ public interface AttributeContainer {
     Set<String> getAttributeNames();
 
     /**
-     * Gets the attribute matching the supplied type.
-     *
-     * @param namedType
-     *            Named attribute type to check for.
-     * @return The attribute matching the supplied type or null if none found.
-     */
-    default <T> T getAttributeOfType(final NamedAttributeType<T> namedType) {
-	return getAttributeOfType(namedType.getName(), namedType.getType());
-    }
-
-    /**
-     * Gets the attribute matching the supplied type.
-     *
-     * @param name
-     *            Attribute type name.
-     *
-     * @param type
-     *            Attribute type to check for.
-     * @return The attribute matching the supplied type or null if none found.
-     */
-    <T> T getAttributeOfType(String name, final AttributeType<T> type);
-
-    /**
      * Gets all of the attributes within the container.
      *
      * @return All of the attributes or an empty set if none were found.
+     *
+     * @see #streamAttributes()
      */
-    Set<?> getAttributes();
+    default Set<?> getAttributes() {
+	return streamAttributes().collect(Collectors.toSet());
+    }
 
     /**
      * Gets all of the attribute types within the container.
@@ -234,8 +285,8 @@ public interface AttributeContainer {
      *            Named attribute type to check for.
      * @return Optional containing the attribute or else empty optional if none found.
      */
-    default <T> Optional<T> getOptAttributeOfType(final NamedAttributeType<T> namedType) {
-	return getOptAttributeOfType(namedType.getName(), namedType.getType());
+    default <T> Optional<T> getOptAttribute(final NamedAttributeType<T> namedType) {
+	return getOptAttribute(namedType.getName(), namedType.getType());
     }
 
     /**
@@ -247,8 +298,8 @@ public interface AttributeContainer {
      *            Attribute type to check for.
      * @return Optional containing the attribute or else empty optional if none found.
      */
-    default <T> Optional<T> getOptAttributeOfType(final String name, final AttributeType<T> type) {
-	return Optional.ofNullable(getAttributeOfType(name, type));
+    default <T> Optional<T> getOptAttribute(final String name, final AttributeType<T> type) {
+	return Optional.ofNullable(getAttribute(name, type));
     }
 
     /**
@@ -258,8 +309,8 @@ public interface AttributeContainer {
      *            Named attribute type.
      * @return Whether the attribute was found.
      */
-    default <T> boolean hasAttributeOfType(final NamedAttributeType<T> namedType) {
-	return hasAttributeOfType(namedType.getName(), namedType.getType());
+    default <T> boolean hasAttribute(final NamedAttributeType<T> namedType) {
+	return hasAttribute(namedType.getName(), namedType.getType());
     }
 
     /**
@@ -271,8 +322,8 @@ public interface AttributeContainer {
      *            Attribute type.
      * @return Whether the attribute was found.
      */
-    default <T> boolean hasAttributeOfType(final String name, final AttributeType<T> type) {
-	return getAttributeOfType(name, type) != null;
+    default <T> boolean hasAttribute(final String name, final AttributeType<T> type) {
+	return getAttribute(name, type) != null;
     }
 
     /**
@@ -283,6 +334,35 @@ public interface AttributeContainer {
     default boolean hasAttributes() {
 	return getAttributeCount() > 0;
     }
+
+    /**
+     * Removes all listeners.
+     */
+    void removeAllAttributeListeners();
+
+    /**
+     * Removes the attribute matching the supplied type.
+     *
+     * @param namedType
+     *            Named attribute type to remove.
+     *
+     * @return The removed attribute or null if none was removed.
+     */
+    default <T> T removeAttribute(final NamedAttributeType<T> namedType) {
+	return removeAttribute(namedType.getName(), namedType.getType());
+    }
+
+    /**
+     * Removes the attribute matching the supplied type.
+     *
+     * @param name
+     *            Attribute type name.
+     *
+     * @param type
+     *            Attribute type to remove.
+     * @return The removed attribute or null if none was removed.
+     */
+    <T> T removeAttribute(String name, final AttributeType<T> type);
 
     /**
      * Removes an attribute listener assigned to the supplied attribute type.
@@ -332,30 +412,6 @@ public interface AttributeContainer {
     <T> void removeAttributeListeners(String name, AttributeType<T> type);
 
     /**
-     * Removes the attribute matching the supplied type.
-     *
-     * @param namedType
-     *            Named attribute type to remove.
-     *
-     * @return The removed attribute or null if none was removed.
-     */
-    default <T> T removeAttributeOfType(final NamedAttributeType<T> namedType) {
-	return removeAttributeOfType(namedType.getName(), namedType.getType());
-    }
-
-    /**
-     * Removes the attribute matching the supplied type.
-     *
-     * @param name
-     *            Attribute type name.
-     *
-     * @param type
-     *            Attribute type to remove.
-     * @return The removed attribute or null if none was removed.
-     */
-    <T> T removeAttributeOfType(String name, final AttributeType<T> type);
-
-    /**
      * Removes all attributes within the container (firing removal events).
      */
     void removeAttributes();
@@ -367,8 +423,8 @@ public interface AttributeContainer {
      *            Named attribute type to remove.
      * @return Optional containing the removed attribute or else empty optional if none found
      */
-    default <T> Optional<T> removeOptAttributeOfType(final NamedAttributeType<T> namedType) {
-	return removeOptAttributeOfType(namedType.getName(), namedType.getType());
+    default <T> Optional<T> removeOptAttribute(final NamedAttributeType<T> namedType) {
+	return removeOptAttribute(namedType.getName(), namedType.getType());
     }
 
     /**
@@ -381,8 +437,8 @@ public interface AttributeContainer {
      *            Attribute type to remove.
      * @return Optional containing the removed attribute or else empty optional if none found
      */
-    default <T> Optional<T> removeOptAttributeOfType(final String name, final AttributeType<T> type) {
-	return Optional.ofNullable(removeAttributeOfType(name, type));
+    default <T> Optional<T> removeOptAttribute(final String name, final AttributeType<T> type) {
+	return Optional.ofNullable(removeAttribute(name, type));
     }
 
     /**

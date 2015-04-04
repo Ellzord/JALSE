@@ -15,19 +15,24 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
+    public <T> T addAttribute(final String name, final AttributeType<T> type, final T attr) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
     public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
 	    final AttributeListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T addAttributeOfType(final String name, final AttributeType<T> type, final T attr) {
+    public <T> void fireAttributeChanged(final String name, final AttributeType<T> type) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> void fireAttributeChanged(final String name, final AttributeType<T> type) {
-	throw new UnsupportedOperationException();
+    public <T> T getAttribute(final String name, final AttributeType<T> type) {
+	return delegate != null ? delegate.getAttribute(name, type) : null;
     }
 
     @Override
@@ -56,11 +61,6 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> T getAttributeOfType(final String name, final AttributeType<T> type) {
-	return delegate != null ? delegate.getAttributeOfType(name, type) : null;
-    }
-
-    @Override
     public Set<?> getAttributes() {
 	return delegate != null ? delegate.getAttributes() : Collections.emptySet();
     }
@@ -71,6 +71,16 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
+    public void removeAllAttributeListeners() {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <T> T removeAttribute(final String name, final AttributeType<T> type) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
     public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
 	    final AttributeListener<T> listener) {
 	throw new UnsupportedOperationException();
@@ -78,11 +88,6 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
 
     @Override
     public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <T> T removeAttributeOfType(final String name, final AttributeType<T> type) {
 	throw new UnsupportedOperationException();
     }
 

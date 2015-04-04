@@ -1,8 +1,8 @@
 package jalse.listeners;
 
 import jalse.attributes.AttributeContainer;
-import jalse.attributes.AttributeSet;
 import jalse.attributes.AttributeType;
+import jalse.attributes.DefaultAttributeContainer;
 
 /**
  * Listener for {@link AttributeType} value manipulation. When attributes are added, updated or
@@ -15,7 +15,7 @@ import jalse.attributes.AttributeType;
  *            Attribute type to trigger for.
  *
  * @see AttributeContainer
- * @see AttributeSet
+ * @see DefaultAttributeContainer
  *
  */
 public interface AttributeListener<T> {
