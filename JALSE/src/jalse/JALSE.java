@@ -145,7 +145,7 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
      * @return Total number of entities within the simulation.
      */
     public int getTotalEntityCount() {
-	return Entities.getEntityCountRecursively(this);
+	return Entities.getEntityCountRecursively(entities);
     }
 
     @Override
@@ -190,7 +190,7 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 
     @Override
     public boolean receiveEntity(final Entity e) {
-	if (Entities.withinSameTree(e, this)) {
+	if (Entities.withinSameTree(e, this)) { // Requires unique IDs!
 	    return entities.receiveFromTree(e); // Wont import.
 	}
 	return entities.receiveEntity(e);

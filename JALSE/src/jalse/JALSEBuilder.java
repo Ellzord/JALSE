@@ -23,7 +23,10 @@ import java.util.concurrent.ForkJoinPool;
  * If {@code parallelism == 0} (or {@link #setManual()}) then {@link ManualActionEngine} is used.<br>
  * If {@code parallelism == 1} then {@link ThreadPoolActionEngine} will be used (
  * {@code corePoolSize = 1}).<br>
- * If {@code parallelism > 1} then {@link ForkJoinActionEngine} will be used.
+ * If {@code parallelism > 1} then {@link ForkJoinActionEngine} will be used. <br>
+ * <br>
+ * If {@link Entity} must be transfered extenerally (between two JALSE instances) then uniue IDs
+ * should be set.
  *
  * @author Elliot Ford
  *

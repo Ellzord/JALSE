@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -297,6 +298,32 @@ public final class Entities {
     }
 
     /**
+     * Walks through the entity tree looking for an entity.
+     * 
+     * @param container
+     *            Entity container.
+     * @param id
+     *            Entity ID to look for.
+     * @return Whether the entity was found.
+     * 
+     * @see #walkEntityTree(EntityContainer, EntityVisitor)
+     */
+    public static boolean findEntityRecursively(EntityContainer container, UUID id) {
+	AtomicBoolean found = new AtomicBoolean();
+
+	walkEntityTree(container, e -> {
+	    if (id.equals(e.getID())) {
+		found.set(true);
+		return EntityVisitResult.EXIT;
+	    } else {
+		return EntityVisitResult.CONTINUE;
+	    }
+	});
+
+	return found.get();
+    }
+
+    /**
      * Walks through all entities (recursive and breadth-first). Walking can be stopped or filtered
      * based on the visit result returned.
      *
@@ -317,7 +344,7 @@ public final class Entities {
     }
 
     /**
-     * Checks to see if an entity is in the same tree as the container.
+     * Checks to see if an entity is in the same tree as the container (checking parent container).
      *
      * @param e
      *            Entity to check.
