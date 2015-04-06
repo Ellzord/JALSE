@@ -18,7 +18,7 @@
 	</target>
 
 	<target name="docs" description="creates API javadoc">
-		<javadoc packagenames="jalse.*" sourcepath="${src}" destdir="${docs}" author="true" version="true" use="true" windowtitle="JALSE API docs (${version})" additionalparam="-Xdoclint:none" />
+		<javadoc packagenames="jalse.*" sourcepath="${src}" destdir="${docs}" author="true" version="true" use="true" windowtitle="JALSE ${version}" additionalparam="-Xdoclint:none" />
 	</target>
 
 	<target name="jar" depends="compile" description="generate the distribution">
