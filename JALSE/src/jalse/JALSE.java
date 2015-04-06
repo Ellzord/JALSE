@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -100,15 +101,6 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 	scheduler.cancelAllScheduledForActor();
     }
 
-    /**
-     * Gets the current set of IDs for the entire tree.
-     *
-     * @return All entity IDs.
-     */
-    public Set<UUID> getAllEntityIDs() {
-	return Entities.getEntityIDsRecursively(this);
-    }
-
     @Override
     public MutableActionBindings getBindings() {
 	return engine.getBindings();
@@ -134,6 +126,28 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 	return entities.getEntityListeners();
     }
 
+    /**
+     * Gets a set containing the entire entity tree.
+     *
+     * @return The entire entity tree.
+     *
+     * @see #streamEntityTree()
+     */
+    public Set<Entity> getEntityTree() {
+	return streamEntityTree().collect(Collectors.toSet());
+    }
+
+    /**
+     * Gets the current set of IDs for the entire tree.
+     *
+     * @return All entity IDs.
+     *
+     * @see Entities#getEntityIDsRecursively(EntityContainer)
+     */
+    public Set<UUID> getIDsInTree() {
+	return Entities.getEntityIDsRecursively(entities);
+    }
+
     @Override
     public Set<Tag> getTags() {
 	return Collections.unmodifiableSet(tags);
@@ -143,8 +157,10 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
      * Gets the current total number of entities.
      *
      * @return Total number of entities within the simulation.
+     *
+     * @see Entities#getEntityCountRecursively(EntityContainer)
      */
-    public int getTotalEntityCount() {
+    public int getTreeCount() {
 	return Entities.getEntityCountRecursively(entities);
     }
 
@@ -190,9 +206,6 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
 
     @Override
     public boolean receiveEntity(final Entity e) {
-	if (Entities.withinSameTree(e, this)) { // Requires unique IDs!
-	    return entities.receiveFromTree(e); // Wont import.
-	}
 	return entities.receiveEntity(e);
     }
 
@@ -225,6 +238,17 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
     @Override
     public Stream<Entity> streamEntities() {
 	return entities.streamEntities();
+    }
+
+    /**
+     * Streams the entire entity tree.
+     *
+     * @return Stream of the entire tree.
+     *
+     * @see Entities#walkEntities(EntityContainer)
+     */
+    public Stream<Entity> streamEntityTree() {
+	return Entities.walkEntities(entities);
     }
 
     @Override

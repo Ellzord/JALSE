@@ -7,17 +7,21 @@ import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.ActionEngine;
 import jalse.actions.Actions;
 import jalse.actions.ForkJoinActionEngine;
-import jalse.entities.EntityVisitor.EntityVisitResult;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.locks.StampedLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A {@link EntityFactory} implementation that creates/kills {@link DefaultEntity}. Default entity
  * factory can have a total entity limit set. When this factory kills an entity it will kill the
  * entity tree under it (can only kill entities his factory has created).<br>
+ * <br>
+ * This factory assumes all source containers (and when importing target containers) are genuine. <br>
  * <br>
  * If no {@link ActionEngine} is supplied {@link ForkJoinActionEngine#commonPoolEngine()} will be
  * used.
@@ -31,7 +35,8 @@ public class DefaultEntityFactory implements EntityFactory {
     private final Set<UUID> entityIDs;
     private ActionEngine engine;
     private int entityCount;
-    private final StampedLock lock;
+    private final Lock read;
+    private final Lock write;
 
     /**
      * Creates a default entity factory with no entity limit.
@@ -54,18 +59,20 @@ public class DefaultEntityFactory implements EntityFactory {
 	entityIDs = new HashSet<>();
 	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
 	entityCount = 0;
-	lock = new StampedLock();
+	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	read = rwLock.readLock();
+	write = rwLock.writeLock();
     }
 
     @Override
     public void exportEntity(final Entity e) {
-	final long stamp = lock.writeLock();
+	write.lock();
 	try {
 	    if (!entityIDs.remove(e.getID())) {
 		throw new IllegalArgumentException("Does not know if this entity");
 	    }
 	} finally {
-	    lock.unlockWrite(stamp);
+	    write.unlock();
 	}
 
 	final ActionEngine emptyEngine = Actions.emptyActionEngine();
@@ -75,12 +82,9 @@ public class DefaultEntityFactory implements EntityFactory {
 	de.setEngine(emptyEngine);
 	de.setContainer(null); // Remove parent reference.
 
-	Entities.walkEntityTree(e, vi -> {
-	    final DefaultEntity dvi = (DefaultEntity) vi;
-	    dvi.cancelAllScheduledForActor();
-	    dvi.setEngine(emptyEngine);
-
-	    return EntityVisitResult.CONTINUE;
+	Entities.walkEntities(e).map(DefaultEntity.class::cast).forEach(ce -> {
+	    ce.cancelAllScheduledForActor();
+	    ce.setEngine(emptyEngine);
 	});
     }
 
@@ -90,11 +94,11 @@ public class DefaultEntityFactory implements EntityFactory {
      * @return Action engine.
      */
     public ActionEngine getEngine() {
-	final long stamp = lock.readLock();
+	read.lock();
 	try {
 	    return engine;
 	} finally {
-	    lock.unlockRead(stamp);
+	    read.unlock();
 	}
     }
 
@@ -104,11 +108,11 @@ public class DefaultEntityFactory implements EntityFactory {
      * @return Entity count.
      */
     public int getEntityCount() {
-	final long stamp = lock.readLock();
+	read.lock();
 	try {
 	    return entityCount;
 	} finally {
-	    lock.unlockRead(stamp);
+	    read.unlock();
 	}
     }
 
@@ -122,8 +126,11 @@ public class DefaultEntityFactory implements EntityFactory {
     }
 
     @Override
-    public DefaultEntity newEntity(final UUID id, final EntityContainer container) {
-	final long stamp = lock.writeLock();
+    public DefaultEntity newEntity(final UUID id, final EntityContainer target) {
+	Objects.requireNonNull(id);
+	Objects.requireNonNull(target);
+
+	write.lock();
 	try {
 	    if (entityCount >= entityLimit) {
 		throwRE(ENTITY_LIMIT_REACHED);
@@ -133,7 +140,7 @@ public class DefaultEntityFactory implements EntityFactory {
 		throwRE(ENTITY_ALREADY_ASSOCIATED);
 	    }
 
-	    final DefaultEntity e = new DefaultEntity(id, this, container);
+	    final DefaultEntity e = new DefaultEntity(id, this, target);
 	    e.setEngine(engine);
 	    e.markAsAlive();
 
@@ -141,52 +148,44 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	    return e;
 	} finally {
-	    lock.unlockWrite(stamp);
+	    write.unlock();
 	}
     }
 
     @Override
     public void setEngine(final ActionEngine engine) {
-	final long stamp = lock.writeLock();
+	write.lock();
 	try {
 	    this.engine = requireNotStopped(engine);
 	} finally {
-	    lock.unlockWrite(stamp);
+	    write.unlock();
 	}
     }
 
     @Override
-    public boolean tryImportEntity(final Entity e, final EntityContainer container) {
-	long stamp = lock.writeLock();
+    public boolean tryImportEntity(final Entity e, final EntityContainer target) {
+	write.lock();
 	try {
 	    if (!entityIDs.add(e.getID())) {
 		return false;
 	    }
 
-	    final long ws = lock.tryConvertToReadLock(stamp);
-	    if (ws != 0L) {
-		stamp = ws;
-	    } else {
-		lock.unlockWrite(stamp);
-		stamp = lock.readLock();
-	    }
-
 	    final DefaultEntity de = (DefaultEntity) e;
 
 	    de.setEngine(engine);
-	    de.setContainer(container);
+	    de.setContainer(target);
 
 	    Entities.walkEntities(de).map(DefaultEntity.class::cast).forEach(ve -> ve.setEngine(engine));
 
 	    return true;
 	} finally {
-	    lock.unlock(stamp);
+	    write.unlock();
 	}
     }
 
     @Override
     public boolean tryKillEntity(final Entity e) {
-	final long stamp = lock.writeLock();
+	write.lock();
 	try {
 	    final DefaultEntity de = (DefaultEntity) e;
 
@@ -206,27 +205,36 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	    return true;
 	} finally {
-	    lock.unlockWrite(stamp);
+	    write.unlock();
 	}
     }
 
     @Override
-    public boolean tryMoveWithinTree(final Entity e, final EntityContainer container) {
-	final long stamp = lock.writeLock();
+    public boolean tryTakeFromTree(final Entity e, final EntityContainer target) {
+	write.lock();
 	try {
-	    if (!Entities.withinSameTree(e, container)) {
+	    if (!entityIDs.contains(e.getID())) {
 		return false;
 	    }
 
-	    ((DefaultEntity) e).setContainer(container);
+	    ((DefaultEntity) e).setContainer(target);
 
-	    if (container instanceof DefaultEntity) {
-		return ((DefaultEntity) container).receiveFromTree(e);
-	    } else {
-		return e.receiveEntity(e);
-	    }
+	    return true;
 	} finally {
-	    lock.unlockWrite(stamp);
+	    write.unlock();
+	}
+    }
+
+    @Override
+    public boolean withinSameTree(final EntityContainer source, final EntityContainer target) {
+	Objects.requireNonNull(source);
+	Objects.requireNonNull(target);
+
+	read.lock();
+	try {
+	    return Entities.withinSameTree(source, target);
+	} finally {
+	    read.unlock();
 	}
     }
 }

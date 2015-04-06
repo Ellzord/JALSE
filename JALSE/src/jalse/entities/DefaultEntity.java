@@ -282,17 +282,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	return entities.receiveEntity(e);
     }
 
-    /**
-     * Receives an entity from within the tree (so does not need to import).
-     *
-     * @param e
-     *            Entity to receive.
-     * @return Whether the entity was added.
-     */
-    protected boolean receiveFromTree(final Entity e) {
-	return entities.receiveFromTree(e);
-    }
-
     @Override
     public void removeAllAttributeListeners() {
 	attributes.removeAllAttributeListeners();

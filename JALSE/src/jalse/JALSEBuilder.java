@@ -1,5 +1,6 @@
 package jalse;
 
+import static jalse.misc.Identifiable.DUMMY_ID;
 import jalse.actions.ActionEngine;
 import jalse.actions.ForkJoinActionEngine;
 import jalse.actions.ManualActionEngine;
@@ -25,14 +26,13 @@ import java.util.concurrent.ForkJoinPool;
  * {@code corePoolSize = 1}).<br>
  * If {@code parallelism > 1} then {@link ForkJoinActionEngine} will be used. <br>
  * <br>
- * If {@link Entity} must be transfered extenerally (between two JALSE instances) then uniue IDs
- * should be set.
+ * If {@link Entity} must be transfered externally (between two JALSE instances) then unique IDs
+ * should be set ({@link UUID#randomUUID()} is used by default).
  *
  * @author Elliot Ford
  *
  * @see #DEFAULT_TOTAL_ENTITY_LIMIT
  * @see #DEFAULT_PARALLELISM
- * @see #DEFAULT_ID
  *
  * @see ForkJoinActionEngine
  * @see ThreadPoolActionEngine
@@ -51,13 +51,6 @@ public final class JALSEBuilder {
      * The default {@link Entity} limit ({@code Integer.MAX_VALUE}).
      */
     public static final int DEFAULT_TOTAL_ENTITY_LIMIT = Integer.MAX_VALUE;
-
-    /**
-     * The default {@link UUID}.
-     *
-     * @see Identifiable#DUMMY_ID
-     */
-    public static final UUID DEFAULT_ID = Identifiable.DUMMY_ID;
 
     /**
      * Creates a JALSE instance with default parallelism.
@@ -102,7 +95,7 @@ public final class JALSEBuilder {
 	return new JALSEBuilder();
     }
 
-    private UUID id = DEFAULT_ID;
+    private UUID id = UUID.randomUUID();
     private int parallelism = DEFAULT_PARALLELISM;
     private int totalEntityLimit = DEFAULT_TOTAL_ENTITY_LIMIT;
 
@@ -150,7 +143,7 @@ public final class JALSEBuilder {
      * @see Identifiable#DUMMY_ID
      */
     public JALSEBuilder setDummyID() {
-	id = DEFAULT_ID;
+	id = DUMMY_ID;
 	return this;
     }
 

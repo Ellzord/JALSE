@@ -29,11 +29,11 @@ public interface EntityFactory {
      *
      * @param id
      *            Entity ID.
-     * @param container
+     * @param target
      *            Parent container.
      * @return Newly created entity.
      */
-    Entity newEntity(UUID id, EntityContainer container);
+    Entity newEntity(UUID id, EntityContainer target);
 
     /**
      * Sets the engine to supply to new entities.
@@ -48,11 +48,11 @@ public interface EntityFactory {
      *
      * @param e
      *            Entity to import.
-     * @param container
+     * @param target
      *            Target container.
      * @return Whether the entity was imported.
      */
-    boolean tryImportEntity(Entity e, EntityContainer container);
+    boolean tryImportEntity(Entity e, EntityContainer target);
 
     /**
      * Kills the specified entity.
@@ -64,13 +64,24 @@ public interface EntityFactory {
     boolean tryKillEntity(Entity e);
 
     /**
-     * If applicable will move the entity within the tree (transfer).
+     * Tries to take the entity from within the tree if possible.
      *
      * @param e
-     *            Entity to move.
-     * @param container
-     *            Container to become new parent.
-     * @return Whether the move was possible.
+     *            Entity to take.
+     * @param target
+     *            Target container.
+     * @return Whether the entity could be taken from within the tree.
      */
-    boolean tryMoveWithinTree(Entity e, EntityContainer container);
+    boolean tryTakeFromTree(Entity e, EntityContainer target);
+
+    /**
+     * Checks if the two containers are within the same tree (for in tree transfer or export).
+     *
+     * @param source
+     *            Source container.
+     * @param target
+     *            Target container.
+     * @return Whether they're within the same tree.
+     */
+    boolean withinSameTree(EntityContainer source, EntityContainer target);
 }

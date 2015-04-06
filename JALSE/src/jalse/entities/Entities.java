@@ -116,6 +116,32 @@ public final class Entities {
     }
 
     /**
+     * Walks through the entity tree looking for an entity.
+     *
+     * @param container
+     *            Entity container.
+     * @param id
+     *            Entity ID to look for.
+     * @return Whether the entity was found.
+     *
+     * @see #walkEntityTree(EntityContainer, EntityVisitor)
+     */
+    public static boolean findEntityRecursively(final EntityContainer container, final UUID id) {
+	final AtomicBoolean found = new AtomicBoolean();
+
+	walkEntityTree(container, e -> {
+	    if (id.equals(e.getID())) {
+		found.set(true);
+		return EntityVisitResult.EXIT;
+	    } else {
+		return EntityVisitResult.CONTINUE;
+	    }
+	});
+
+	return found.get();
+    }
+
+    /**
      * Gets the total entity count (recursive).
      *
      * @param container
@@ -156,20 +182,22 @@ public final class Entities {
     }
 
     /**
-     * Gets the highest level parent of this entity.
+     * Gets the highest level parent of this container.
      *
-     * @param e
-     *            Entity to get parent for.
-     * @return Highest level parent (or this entity if it has no parent.
+     * @param container
+     *            Container to get parent for.
+     * @return Highest level parent (or this container if it has no parent).
      */
-    public static EntityContainer getHighestParent(final Entity e) {
-	final EntityContainer container = e.getContainer();
+    public static EntityContainer getHighestParent(final EntityContainer container) {
+	Objects.requireNonNull(container);
 
 	if (container instanceof Entity) {
-	    return getHighestParent((Entity) container);
-	} else {
-	    return container != null ? container : e;
+	    final EntityContainer parent = ((Entity) container).getContainer();
+	    if (parent != null) {
+		return getHighestParent(parent);
+	    }
 	}
+	return container;
     }
 
     /**
@@ -298,32 +326,6 @@ public final class Entities {
     }
 
     /**
-     * Walks through the entity tree looking for an entity.
-     * 
-     * @param container
-     *            Entity container.
-     * @param id
-     *            Entity ID to look for.
-     * @return Whether the entity was found.
-     * 
-     * @see #walkEntityTree(EntityContainer, EntityVisitor)
-     */
-    public static boolean findEntityRecursively(EntityContainer container, UUID id) {
-	AtomicBoolean found = new AtomicBoolean();
-
-	walkEntityTree(container, e -> {
-	    if (id.equals(e.getID())) {
-		found.set(true);
-		return EntityVisitResult.EXIT;
-	    } else {
-		return EntityVisitResult.CONTINUE;
-	    }
-	});
-
-	return found.get();
-    }
-
-    /**
      * Walks through all entities (recursive and breadth-first). Walking can be stopped or filtered
      * based on the visit result returned.
      *
@@ -344,17 +346,19 @@ public final class Entities {
     }
 
     /**
-     * Checks to see if an entity is in the same tree as the container (checking parent container).
+     * Checks to see if an container is in the same tree as the other container (checking highest
+     * parent container).
      *
-     * @param e
-     *            Entity to check.
-     * @param container
+     * @param one
      *            Container to check.
-     * @return Whether the entity is within the same tree as the container.
+     * @param two
+     *            Container to check.
+     * @return Whether the container is within the same tree as the other container.
+     *
+     * @see #getHighestParent(EntityContainer)
      */
-    public static boolean withinSameTree(final Entity e, final EntityContainer container) {
-	return Objects.equals(getHighestParent(e), container instanceof Entity ? getHighestParent((Entity) container)
-		: container);
+    public static boolean withinSameTree(final EntityContainer one, final EntityContainer two) {
+	return Objects.equals(getHighestParent(one), getHighestParent(two));
     }
 
     private Entities() {

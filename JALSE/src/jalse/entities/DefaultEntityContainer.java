@@ -199,45 +199,31 @@ public class DefaultEntityContainer implements EntityContainer {
 
     @Override
     public boolean receiveEntity(final Entity e) {
-	Objects.requireNonNull(e);
-
-	write.lock();
-	try {
-	    final UUID id = e.getID();
-	    if (entities.containsKey(id) || !factory.tryImportEntity(e, delegateContainer)) {
-		return false;
-	    }
-
-	    entities.put(id, e);
-	    entityListeners.getProxy().entityReceived(new EntityEvent(delegateContainer, e));
-
-	    return true;
-	} finally {
-	    write.unlock();
+	if (Objects.equals(delegateContainer, Objects.requireNonNull(e))) {
+	    throwRE(CANNOT_SELF_TRANSFER);
 	}
-    }
-
-    /**
-     * Receives an entity from within the tree (so does not need to import).
-     *
-     * @param e
-     *            Entity to receive.
-     * @return Whether the entity was added.
-     *
-     * @see EntityFactory#tryMoveWithinTree(Entity, EntityContainer)
-     */
-    public boolean receiveFromTree(final Entity e) {
-	Objects.requireNonNull(e);
 
 	write.lock();
 	try {
-	    final UUID id = e.getID();
 
+	    final UUID id = e.getID();
 	    if (entities.containsKey(id)) {
 		return false;
 	    }
 
+	    boolean imported = false;
+	    if (!factory.tryTakeFromTree(e, delegateContainer)) {
+		if (!factory.tryImportEntity(e, delegateContainer)) {
+		    return false;
+		}
+		imported = true;
+	    }
+
 	    entities.put(id, e);
+	    if (imported) { // Otherwise transfer is triggered.
+		entityListeners.getProxy().entityReceived(new EntityEvent(delegateContainer, e));
+	    }
+
 	    return true;
 	} finally {
 	    write.unlock();
@@ -284,13 +270,23 @@ public class DefaultEntityContainer implements EntityContainer {
 		return false;
 	    }
 
-	    if (!factory.tryMoveWithinTree(e, destination)) {
-		factory.exportEntity(e);
+	    if (Objects.equals(e, destination)) {
+		throwRE(CANNOT_SELF_TRANSFER);
+	    }
 
-		if (!destination.receiveEntity(e)) {
+	    boolean exported = false;
+	    if (!factory.withinSameTree(delegateContainer, destination)) {
+		factory.exportEntity(e);
+		exported = true;
+	    }
+
+	    if (!destination.receiveEntity(e)) {
+		if (exported) {
 		    throwRE(ENTITY_EXPORT_NO_TRANSFER);
 		}
+		return false;
 	    }
+
 	    entities.remove(id);
 	    entityListeners.getProxy().entityTransferred(new EntityEvent(delegateContainer, e, destination));
 
