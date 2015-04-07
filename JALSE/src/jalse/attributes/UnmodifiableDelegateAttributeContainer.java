@@ -71,7 +71,7 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public void removeAllAttributeListeners() {
+    public void removeAttributeListeners() {
 	throw new UnsupportedOperationException();
     }
 

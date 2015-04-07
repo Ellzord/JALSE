@@ -365,7 +365,7 @@ public interface EntityContainer {
     /**
      * Removes all listeners for entities.
      */
-    void removeAllEntityListeners();
+    void removeEntityListeners();
 
     /**
      * Removes a entity listener.

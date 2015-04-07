@@ -283,13 +283,13 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public void removeAllAttributeListeners() {
-	attributes.removeAllAttributeListeners();
+    public void removeAttributeListeners() {
+	attributes.removeAttributeListeners();
     }
 
     @Override
-    public void removeAllEntityListeners() {
-	entities.removeAllEntityListeners();
+    public void removeEntityListeners() {
+	entities.removeEntityListeners();
     }
 
     @Override

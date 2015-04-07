@@ -80,7 +80,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	    final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getAttributeListeners0(
 		    name, type);
 	    if (ls != null) {
-		ls.getProxy().attributeAdded(new AttributeEvent<>(delegateContainer, type, attr, prev));
+		ls.getProxy().attributeAdded(new AttributeEvent<>(delegateContainer, name, type, attr, prev));
 	    }
 
 	    return prev;
@@ -133,7 +133,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	    final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getAttributeListeners0(
 		    name, type);
 	    if (ls != null) {
-		ls.getProxy().attributeChanged(new AttributeEvent<>(delegateContainer, type, current));
+		ls.getProxy().attributeChanged(new AttributeEvent<>(delegateContainer, name, type, current));
 	    }
 	} finally {
 	    read.unlock();
@@ -224,7 +224,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public void removeAllAttributeListeners() {
+    public void removeAttributeListeners() {
 	write.lock();
 	try {
 	    listeners.clear();
@@ -254,7 +254,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
 		final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getAttributeListeners0(
 			name, type);
 		if (ls != null) {
-		    ls.getProxy().attributeRemoved(new AttributeEvent<>(delegateContainer, type, prev));
+		    ls.getProxy().attributeRemoved(new AttributeEvent<>(delegateContainer, name, type, prev));
 		}
 	    }
 

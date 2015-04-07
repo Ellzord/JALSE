@@ -338,7 +338,7 @@ public interface AttributeContainer {
     /**
      * Removes all listeners.
      */
-    void removeAllAttributeListeners();
+    void removeAttributeListeners();
 
     /**
      * Removes the attribute matching the supplied type.

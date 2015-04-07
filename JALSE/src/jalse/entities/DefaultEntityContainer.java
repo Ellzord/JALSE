@@ -231,7 +231,7 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
-    public void removeAllEntityListeners() {
+    public void removeEntityListeners() {
 	read.lock();
 	try {
 	    entityListeners.clear();
