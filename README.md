@@ -20,6 +20,7 @@ By [Elliot Ford](https://twitter.com/ellzord)
 Creating and using a simple entity type:
 ```java
 public interface Friend extends Entity {
+
   @GetAttribute("name")
   String getName();
   
@@ -44,13 +45,50 @@ jalse.streamEntitiesOfType(Animal.class).foreach(/* Feed */);
 Replacing fallen enemies:
 ```java
 jalse.addEntityListener(new EntityAdapter() {
+
   public void entityKilled(EntityEvent event) {
     if (event.getEntity().isMarkedAsType(Evil.class)) {
       /* Spawn more */
     }
   }
 });
+```
 
+Adrenaline when life is at risk:
+```java
+entity.addAttributeListener("danger", Attributes.BOOLEAN_TYPE, new AttributeAdapter<Boolean>(){
+
+  public void attributeAdded(AttributeEvent<Boolean> event) {
+    if (event.getValue()) {
+      /* Run like hell */
+    }
+  }
+});
+```
+
+Managing a crash landing:
+```java
+StrandedSurvivors living = jalse.newEntity(StrandedSurvivors.class);
+for (int i = 0; i < 10; i++) {
+  living.newSurvivor();
+}
+
+living.scheduleForActor(new Action<StrandedSurvivors>() {
+
+  public void perform(ActionContext<StrandedSurvivors> context) {
+    context.getActor().streamSurvivors().foreach(Survivor::lookForFood);
+  }
+}, 0, 1, TimeUnit.SECONDS);
+```
+
+On the fly values:
+```java
+entity.addAttribute("falling", Attributes.BOOLEAN_TYPE, true);
+
+...
+
+entity.removeAttribute("falling", Attribute.BOOLEAN_TYPE);
+entity.addAttribute("death", Attributes.newTypeOf(Date.class), new Date());
 ```
 
 ### Model key
