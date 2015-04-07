@@ -31,7 +31,7 @@ public interface Friend extends Entity {
 Friend f = jalse.newEntity(Friend.class);
 f.setName("Ellzord");
 
-assert("Ellzord".equals(f.getName()));
+System.out.println(f.getName());
 ```
 
 Feeding all animals (not just the birds):
