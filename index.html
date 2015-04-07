@@ -39,15 +39,97 @@
 <p>By <a href="https://twitter.com/ellzord">Elliot Ford</a></p>
 
 <h3>
-<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting Started</h3>
+<a id="why-use-jalse" class="anchor" href="#why-use-jalse" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why use JALSE?</h3>
+
+<ol>
+<li>Its free and works right out of the box!</li>
+<li>You can a self-managed living data model for your simulation (or game) easily.</li>
+<li>Entities are soft-typed (add and remove at runtime) and can be used as any type (without error).</li>
+<li>Entities can be filtered and processed easily (by type, ID or attributes).</li>
+<li>JALSE is backed by an ActionEngine that can schedule run-once and periodic tasks (several implementations).</li>
+</ol>
+
+<h3>
+<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting started</h3>
 
 <ul>
 <li>
-<a href="https://github.com/Ellzord/JALSE/blob/gh-pages/JALSE-0.1.2.jar?raw=true">Download</a> or <a href="https://github.com/Ellzord/JALSE/">fork</a> JALSE.</li>
+<a href="https://github.com/Ellzord/JALSE/releases">Download</a> or fork JALSE.</li>
 <li>Check out the <a href="https://github.com/Ellzord/JALSE/wiki">Wiki</a>.</li>
 <li>See the <a href="http://ellzord.github.io/JALSE/docs/">API docs</a>.</li>
 <li>Have a look at the example projects (<a href="https://github.com/Ellzord/JALSE-HappyCows">HappyCows</a> and <a href="https://github.com/Ellzord/JALSE-Messengers">Messengers</a>).</li>
 </ul>
+
+<h3>
+<a id="code-snippets" class="anchor" href="#code-snippets" aria-hidden="true"><span class="octicon octicon-link"></span></a>Code Snippets</h3>
+
+<p>Creating and using a simple entity type:</p>
+
+<div class="highlight highlight-java"><pre><span class="pl-k">public</span> <span class="pl-k">interface</span> <span class="pl-en">Friend</span> <span class="pl-k">extends</span> <span class="pl-e">Entity</span> {
+
+  <span class="pl-k">@GetAttribute</span>(<span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>)
+  <span class="pl-smi">String</span> <span class="pl-en">getName</span>();
+
+  <span class="pl-k">@SetAttribute</span>(<span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>)
+  <span class="pl-k">void</span> <span class="pl-en">setName</span>(<span class="pl-smi">String</span> <span class="pl-v">name</span>);
+}
+
+<span class="pl-smi">Friend</span> f <span class="pl-k">=</span> jalse<span class="pl-k">.</span>newEntity(<span class="pl-smi">Friend</span><span class="pl-k">.</span>class);
+f<span class="pl-k">.</span>setName(<span class="pl-s"><span class="pl-pds">"</span>Ellzord<span class="pl-pds">"</span></span>);
+
+assert(<span class="pl-s"><span class="pl-pds">"</span>Ellzord<span class="pl-pds">"</span></span><span class="pl-k">.</span>equals(f<span class="pl-k">.</span>getName()));</pre></div>
+
+<p>Feeding all animals (not just the birds):</p>
+
+<div class="highlight highlight-java"><pre><span class="pl-k">public</span> <span class="pl-k">interface</span> <span class="pl-en">Animal</span> <span class="pl-k">extends</span> <span class="pl-e">Entity</span>{}
+<span class="pl-k">public</span> <span class="pl-k">interface</span> <span class="pl-en">FlyingAnimal</span> <span class="pl-k">extends</span> <span class="pl-e">Animal</span>{}
+
+jalse<span class="pl-k">.</span>streamEntitiesOfType(<span class="pl-smi">Animal</span><span class="pl-k">.</span>class)<span class="pl-k">.</span>foreach(<span class="pl-c">/* Feed */</span>);</pre></div>
+
+<p>Replacing fallen enemies:</p>
+
+<div class="highlight highlight-java"><pre>jalse<span class="pl-k">.</span>addEntityListener(<span class="pl-k">new</span> <span class="pl-smi">EntityAdapter</span>() {
+
+  <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">entityKilled</span>(<span class="pl-smi">EntityEvent</span> <span class="pl-v">event</span>) {
+    <span class="pl-k">if</span> (event<span class="pl-k">.</span>getEntity()<span class="pl-k">.</span>isMarkedAsType(<span class="pl-smi">Evil</span><span class="pl-k">.</span>class)) {
+      <span class="pl-c">/* Spawn more */</span>
+    }
+  }
+});</pre></div>
+
+<p>Adrenaline when life is at risk:</p>
+
+<div class="highlight highlight-java"><pre>entity<span class="pl-k">.</span>addAttributeListener(<span class="pl-s"><span class="pl-pds">"</span>danger<span class="pl-pds">"</span></span>, <span class="pl-smi">Attributes</span><span class="pl-c1"><span class="pl-k">.</span>BOOLEAN_TYPE</span>, <span class="pl-k">new</span> <span class="pl-k">AttributeAdapter&lt;<span class="pl-smi">Boolean</span>&gt;</span>(){
+
+  <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">attributeAdded</span>(<span class="pl-k">AttributeEvent&lt;<span class="pl-smi">Boolean</span>&gt;</span> <span class="pl-v">event</span>) {
+    <span class="pl-k">if</span> (event<span class="pl-k">.</span>getValue()) {
+      <span class="pl-c">/* Run like hell */</span>
+    }
+  }
+});</pre></div>
+
+<p>Managing a crash landing:</p>
+
+<div class="highlight highlight-java"><pre><span class="pl-smi">StrandedSurvivors</span> living <span class="pl-k">=</span> jalse<span class="pl-k">.</span>newEntity(<span class="pl-smi">StrandedSurvivors</span><span class="pl-k">.</span>class);
+<span class="pl-k">for</span> (<span class="pl-k">int</span> i <span class="pl-k">=</span> <span class="pl-c1">0</span>; i <span class="pl-k">&lt;</span> <span class="pl-c1">10</span>; i<span class="pl-k">++</span>) {
+  living<span class="pl-k">.</span>newSurvivor();
+}
+
+living<span class="pl-k">.</span>scheduleForActor(<span class="pl-k">new</span> <span class="pl-k">Action&lt;<span class="pl-smi">StrandedSurvivors</span>&gt;</span>() {
+
+  <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">perform</span>(<span class="pl-k">ActionContext&lt;<span class="pl-smi">StrandedSurvivors</span>&gt;</span> <span class="pl-v">context</span>) {
+    context<span class="pl-k">.</span>getActor()<span class="pl-k">.</span>streamSurvivors()<span class="pl-k">.</span>foreach(<span class="pl-smi">Survivor</span><span class="pl-k">::</span>lookForFood);
+  }
+}, <span class="pl-c1">0</span>, <span class="pl-c1">1</span>, <span class="pl-smi">TimeUnit</span><span class="pl-c1"><span class="pl-k">.</span>SECONDS</span>);</pre></div>
+
+<p>On the fly values:</p>
+
+<div class="highlight highlight-java"><pre>entity<span class="pl-k">.</span>addAttribute(<span class="pl-s"><span class="pl-pds">"</span>falling<span class="pl-pds">"</span></span>, <span class="pl-smi">Attributes</span><span class="pl-c1"><span class="pl-k">.</span>BOOLEAN_TYPE</span>, <span class="pl-c1">true</span>);
+
+<span class="pl-c1">...</span>
+
+entity<span class="pl-k">.</span>removeAttribute(<span class="pl-s"><span class="pl-pds">"</span>falling<span class="pl-pds">"</span></span>, <span class="pl-smi">Attribute</span><span class="pl-c1"><span class="pl-k">.</span>BOOLEAN_TYPE</span>);
+entity<span class="pl-k">.</span>addAttribute(<span class="pl-s"><span class="pl-pds">"</span>death<span class="pl-pds">"</span></span>, <span class="pl-smi">Attributes</span><span class="pl-k">.</span>newTypeOf(<span class="pl-smi">Date</span><span class="pl-k">.</span>class), <span class="pl-k">new</span> <span class="pl-smi">Date</span>());</pre></div>
 
 <h3>
 <a id="going-forward" class="anchor" href="#going-forward" aria-hidden="true"><span class="octicon octicon-link"></span></a>Going forward</h3>
