@@ -3,11 +3,55 @@ JALSE is a lightweight framework for simple simulation written in Java 8. The fr
 
 By [Elliot Ford](https://twitter.com/ellzord)
 
-### Getting Started
-* [Download](https://github.com/Ellzord/JALSE/blob/gh-pages/JALSE-0.1.2.jar?raw=true) or fork JALSE.
+### Why use JALSE?
+1. Its free and works right out of the box!
+2. You can a self-managed living data model for your simulation (or game) easily.
+3. Entities are soft-typed (add and remove at runtime) and can be used as any type (without error).
+4. Entities can be filtered and processed easily (by type, ID or attributes).
+5. JALSE is backed by an ActionEngine that can schedule run-once and periodic tasks (several implementations).
+
+### Getting started
+* [Download](https://github.com/Ellzord/JALSE/releases) or fork JALSE.
 * Check out the [Wiki](https://github.com/Ellzord/JALSE/wiki).
 * See the [API docs](http://ellzord.github.io/JALSE/docs/).
 * Have a look at the example projects ([HappyCows](https://github.com/Ellzord/JALSE-HappyCows) and [Messengers](https://github.com/Ellzord/JALSE-Messengers)).
+
+### Code Snippets
+Creating and using a simple entity type:
+```java
+public interface Friend extends Entity {
+  @GetAttribute("name")
+  String getName();
+  
+  @SetAttribute("name")
+  void setName(String name);
+}
+
+Friend f = jalse.newEntity(Friend.class);
+f.setName("Ellzord");
+
+assert("Ellzord".equals(f.getName()));
+```
+
+Feeding all animals (not just the birds):
+```java
+public interface Animal extends Entity{}
+public interface FlyingAnimal extends Animal{}
+
+jalse.streamEntitiesOfType(Animal.class).foreach(/* Feed */);
+```
+
+Replacing fallen enemies:
+```java
+jalse.addEntityListener(new EntityAdapter() {
+  public void entityKilled(EntityEvent event) {
+    if (event.getEntity().isMarkedAsType(Evil.class)) {
+      /* Spawn more */
+    }
+  }
+});
+
+```
 
 ### Model key
 ![GitHub Logo](/jalse-model-key.png)
