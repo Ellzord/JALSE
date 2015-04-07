@@ -4,7 +4,7 @@ JALSE is a lightweight framework for simple simulation written in Java 8. The fr
 By [Elliot Ford](https://twitter.com/ellzord)
 
 ### Getting Started
-* [Download](https://github.com/Ellzord/JALSE/blob/gh-pages/JALSE-0.1.1.jar?raw=true) or fork JALSE.
+* [Download](https://github.com/Ellzord/JALSE/blob/gh-pages/JALSE-0.1.2.jar?raw=true) or fork JALSE.
 * Check out the [Wiki](https://github.com/Ellzord/JALSE/wiki).
 * See the [API docs](http://ellzord.github.io/JALSE/docs/).
 * Have a look at the example projects ([HappyCows](https://github.com/Ellzord/JALSE-HappyCows) and [Messengers](https://github.com/Ellzord/JALSE-Messengers)).
