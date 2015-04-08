@@ -4,7 +4,7 @@ JALSE is a lightweight framework for simple simulation written in Java 8. The fr
 By [Elliot Ford](https://twitter.com/ellzord)
 
 ### Why use JALSE?
-1. Its free and works right out of the box!
+1. It's free and works right out of the box!
 2. You can create a self-managed living data model for your simulation (or game) easily.
 3. Entities are soft-typed (add and remove at runtime) and can be used as any type (without error).
 4. Entities can be filtered and processed easily (by type, ID or attributes).
