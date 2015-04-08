@@ -5,7 +5,7 @@ By [Elliot Ford](https://twitter.com/ellzord)
 
 ### Why use JALSE?
 1. Its free and works right out of the box!
-2. You can a self-managed living data model for your simulation (or game) easily.
+2. You can create a self-managed living data model for your simulation (or game) easily.
 3. Entities are soft-typed (add and remove at runtime) and can be used as any type (without error).
 4. Entities can be filtered and processed easily (by type, ID or attributes).
 5. JALSE is backed by an ActionEngine that can schedule run-once and periodic tasks (several implementations).
