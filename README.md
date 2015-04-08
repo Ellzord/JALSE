@@ -39,6 +39,8 @@ Feeding all animals (not just the birds):
 public interface Animal extends Entity{}
 public interface FlyingAnimal extends Animal{}
 
+...
+
 jalse.streamEntitiesOfType(Animal.class).foreach(/* Feed */);
 ```
 
