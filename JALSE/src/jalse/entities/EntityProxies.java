@@ -49,8 +49,8 @@ import java.util.stream.Stream;
  * 6) Getting a Stream of all of the child entities of or as type.<br>
  * <br>
  * For an Entity proxy to be created the type be validated: <br>
- * 2. All attributes types must not be primitives (can be null).<br>
- * 1. Can only have super types that are (or are subclasses of) Entity. <br>
+ * 1. All attributes types must not be primitives (can be null).<br>
+ * 2. Can only have super types that are (or are subclasses of) Entity. <br>
  * 3. Must only contain default or annotated methods:<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;a) {@link SetAttribute} <br>
  * &nbsp;&nbsp;&nbsp;&nbsp;b) {@link GetAttribute} <br>
