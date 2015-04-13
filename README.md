@@ -12,7 +12,7 @@ By [Elliot Ford](https://twitter.com/ellzord)
 
 ### Getting started
 * [Download](https://github.com/Ellzord/JALSE/releases) or fork JALSE.
-* Check out the [Wiki](https://github.com/Ellzord/JALSE/wiki).
+* Read the [Wiki](https://github.com/Ellzord/JALSE/wiki).
 * See the [API docs](http://ellzord.github.io/JALSE/docs/).
 * Have a look at the example projects ([HappyCows](https://github.com/Ellzord/JALSE-HappyCows) and [Messengers](https://github.com/Ellzord/JALSE-Messengers)).
 
