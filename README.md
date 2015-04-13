@@ -13,8 +13,8 @@ By [Elliot Ford](https://twitter.com/ellzord)
 ### Getting started
 * [Download](https://github.com/Ellzord/JALSE/releases) or fork JALSE.
 * Read the [Wiki](https://github.com/Ellzord/JALSE/wiki).
-* Look up the relevant [API docs](http://ellzord.github.io/JALSE/docs/).
 * Check out the example projects ([HappyCows](https://github.com/Ellzord/JALSE-HappyCows) and [Messengers](https://github.com/Ellzord/JALSE-Messengers)).
+* Look up the relevant [API docs](http://ellzord.github.io/JALSE/docs/).
 
 ### Code Snippets
 Creating and using a simple entity type:
