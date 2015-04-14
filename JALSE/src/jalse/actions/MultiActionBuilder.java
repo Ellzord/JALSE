@@ -162,18 +162,6 @@ public final class MultiActionBuilder<T> {
     }
 
     /**
-     * Adds an action to be scheduled then awaited.
-     *
-     * @param action
-     *            Action to schedule and await.
-     * @return This builder.
-     */
-    public MultiActionBuilder<T> thenScheduleAndAwait(final Action<T> action) {
-	multiAction.addOperation(action, MultiActionOperation.SCHEDULE_AWAIT);
-	return this;
-    }
-
-    /**
      * Adds a number of actions to be scheduled then awaited.
      *
      * @param actions
