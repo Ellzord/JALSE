@@ -9,30 +9,24 @@ import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
 import jalse.misc.Identifiable;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
 /**
  * A {@link JALSE} instance builder where each method in this builder can be chained. This builder
- * constructs a JALSE instance using the supplied parameters. It does this by creating the
- * appropriate {@link ActionEngine} implementation along with a {@link DefaultEntityFactory}. JALSE
- * can still be created without this builder.<br>
+ * constructs a JALSE instance using the supplied parameters. It does this by using the appropriate
+ * {@link ActionEngine} implementation along with a {@link DefaultEntityFactory}. JALSE can still be
+ * created without this builder.<br>
  * <br>
- * Parallelism:<br>
- * If {@code parallelism < 0} (or {@link #setCommonPoolEngine()}) then
- * {@link ForkJoinActionEngine#commonPoolEngine()} is used.<br>
- * If {@code parallelism == 0} (or {@link #setManual()}) then {@link ManualActionEngine} is used.<br>
- * If {@code parallelism == 1} then {@link ThreadPoolActionEngine} will be used (
- * {@code corePoolSize = 1}).<br>
- * If {@code parallelism > 1} then {@link ForkJoinActionEngine} will be used. <br>
+ * By default this builder uses {@link #setCommonPoolEngine()}, {@link #setRandomID()} and
+ * {@link #setNoEntityLimit()}. <br>
  * <br>
  * If {@link Entity} must be transfered externally (between two JALSE instances) then unique IDs
  * should be set ({@link UUID#randomUUID()} is used by default).
  *
  * @author Elliot Ford
  *
- * @see #DEFAULT_TOTAL_ENTITY_LIMIT
- * @see #DEFAULT_PARALLELISM
  *
  * @see ForkJoinActionEngine
  * @see ThreadPoolActionEngine
@@ -42,45 +36,39 @@ import java.util.concurrent.ForkJoinPool;
 public final class JALSEBuilder {
 
     /**
-     * The default parallelism to be utilised by the engine for performing actions (
-     * {@code Runtime.getRuntime().availableProcessors()}).
-     */
-    public static final int DEFAULT_PARALLELISM = Runtime.getRuntime().availableProcessors();
-
-    /**
-     * The default {@link Entity} limit ({@code Integer.MAX_VALUE}).
-     */
-    public static final int DEFAULT_TOTAL_ENTITY_LIMIT = Integer.MAX_VALUE;
-
-    /**
-     * Creates a JALSE instance with default parallelism.
+     * Creates a common pool JALSE instance (with a random ID and no entity limit).
      *
      * @return Default parallelism JALSE instance.
      *
-     * @see #DEFAULT_PARALLELISM
-     * @see #DEFAULT_TOTAL_ENTITY_LIMIT
+     * @see #setRandomID()
+     * @see #setCommonPoolEngine()
+     * @see #setNoEntityLimit()
      */
-    public static JALSE buildDefaultJALSE() {
+    public static JALSE buildCommonPoolJALSE() {
 	return newBuilder().build();
     }
 
     /**
-     * Builds a manually ticked JALSE instance ({@code parallelism == 0}).
+     * Builds a manually ticked JALSE instance (with a random ID and no entity limit).
      *
      * @return Manual tick JALSE.
      *
-     * @see #DEFAULT_TOTAL_ENTITY_LIMIT
+     * @see #setRandomID()
+     * @see #setManual()
+     * @see #setNoEntityLimit()
      */
     public static JALSE buildManualJALSE() {
 	return newBuilder().setManual().build();
     }
 
     /**
-     * Builds a single threaded JALSE instance ({@code parallelism == 1}).
+     * Builds a single threaded JALSE instance (with a random ID and no entity limit).
      *
      * @return Single threaded JALSE instance.
      *
-     * @see #DEFAULT_TOTAL_ENTITY_LIMIT
+     * @see #setRandomID()
+     * @see #setSingleThread()
+     * @see #setNoEntityLimit()
      */
     public static JALSE buildSingleThreadedJALSE() {
 	return newBuilder().setParallelism(1).build();
@@ -95,11 +83,25 @@ public final class JALSEBuilder {
 	return new JALSEBuilder();
     }
 
-    private UUID id = UUID.randomUUID();
-    private int parallelism = DEFAULT_PARALLELISM;
-    private int totalEntityLimit = DEFAULT_TOTAL_ENTITY_LIMIT;
+    private static int requireAboveOne(final int value) {
+	if (value < 1) {
+	    throw new IllegalArgumentException();
+	}
+	return value;
+    }
 
-    private JALSEBuilder() {}
+    private UUID id;
+    private int parallelism;
+    private int totalEntityLimit;
+    private boolean commonPool;
+
+    private boolean manual;
+
+    private JALSEBuilder() {
+	setRandomID();
+	setCommonPoolEngine();
+	setNoEntityLimit();
+    }
 
     /**
      * Builds an instance of JALSE with the supplied parameters.
@@ -109,9 +111,9 @@ public final class JALSEBuilder {
     public JALSE build() {
 	final ActionEngine engine;
 
-	if (parallelism < 0) {
+	if (commonPool) {
 	    engine = ForkJoinActionEngine.commonPoolEngine();
-	} else if (parallelism == 0) {
+	} else if (manual) {
 	    engine = new ManualActionEngine();
 	} else if (parallelism == 1) {
 	    engine = new ThreadPoolActionEngine(1);
@@ -131,7 +133,9 @@ public final class JALSEBuilder {
      * @see ForkJoinActionEngine#commonPoolEngine()
      */
     public JALSEBuilder setCommonPoolEngine() {
-	setParallelism(-1);
+	commonPool = true;
+	manual = false;
+	parallelism = 0;
 	return this;
     }
 
@@ -143,8 +147,7 @@ public final class JALSEBuilder {
      * @see Identifiable#DUMMY_ID
      */
     public JALSEBuilder setDummyID() {
-	id = DUMMY_ID;
-	return this;
+	return setID(DUMMY_ID);
     }
 
     /**
@@ -155,7 +158,7 @@ public final class JALSEBuilder {
      * @return This builder.
      */
     public JALSEBuilder setID(final UUID id) {
-	this.id = id;
+	this.id = Objects.requireNonNull(id);
 	return this;
     }
 
@@ -165,7 +168,21 @@ public final class JALSEBuilder {
      * @return This builder.
      */
     public JALSEBuilder setManual() {
-	return setParallelism(0);
+	manual = true;
+	commonPool = false;
+	parallelism = 0;
+	return this;
+    }
+
+    /**
+     * Sets there to be no entity limit.
+     *
+     * @return This builder.
+     *
+     * @see Integer#MAX_VALUE
+     */
+    public JALSEBuilder setNoEntityLimit() {
+	return setTotalEntityLimit(Integer.MAX_VALUE);
     }
 
     /**
@@ -176,7 +193,9 @@ public final class JALSEBuilder {
      * @return This builder.
      */
     public JALSEBuilder setParallelism(final int parallelism) {
-	this.parallelism = parallelism;
+	this.parallelism = requireAboveOne(parallelism);
+	commonPool = false;
+	manual = false;
 	return this;
     }
 
@@ -188,8 +207,7 @@ public final class JALSEBuilder {
      * @see Runtime#availableProcessors()
      */
     public JALSEBuilder setParallelismToProcessors() {
-	parallelism = DEFAULT_PARALLELISM;
-	return this;
+	return setParallelism(Runtime.getRuntime().availableProcessors());
     }
 
     /**
@@ -200,8 +218,7 @@ public final class JALSEBuilder {
      * @see UUID#randomUUID()
      */
     public JALSEBuilder setRandomID() {
-	id = UUID.randomUUID();
-	return this;
+	return setID(UUID.randomUUID());
     }
 
     /**
@@ -221,7 +238,7 @@ public final class JALSEBuilder {
      * @return This builder.
      */
     public JALSEBuilder setTotalEntityLimit(final int totalEntityLimit) {
-	this.totalEntityLimit = totalEntityLimit;
+	this.totalEntityLimit = requireAboveOne(totalEntityLimit);
 	return this;
     }
 }
