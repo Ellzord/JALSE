@@ -56,11 +56,11 @@ public final class JALSEBuilder {
      * @return Manual tick JALSE.
      *
      * @see #setRandomID()
-     * @see #setManual()
+     * @see #setManualEngine()
      * @see #setNoEntityLimit()
      */
     public static JALSE buildManualJALSE() {
-	return newBuilder().setRandomID().setNoEntityLimit().setManual().build();
+	return newBuilder().setRandomID().setNoEntityLimit().setManualEngine().build();
     }
 
     /**
@@ -70,11 +70,11 @@ public final class JALSEBuilder {
      *
      * @see #setRandomID()
      * @see #setSingleThread()
-     * @see #setThreadPool()
+     * @see #setThreadPoolEngine()
      * @see #setNoEntityLimit()
      */
     public static JALSE buildSingleThreadedJALSE() {
-	return newBuilder().setRandomID().setNoEntityLimit().setSingleThread().setThreadPool().build();
+	return newBuilder().setRandomID().setNoEntityLimit().setSingleThread().setThreadPoolEngine().build();
     }
 
     /**
@@ -169,7 +169,7 @@ public final class JALSEBuilder {
      *
      * @see ForkJoinActionEngine
      */
-    public JALSEBuilder setForkJoin() {
+    public JALSEBuilder setForkJoinEngine() {
 	engineType = EngineType.FORKJOIN;
 	return this;
     }
@@ -191,7 +191,7 @@ public final class JALSEBuilder {
      *
      * @return This builder.
      */
-    public JALSEBuilder setManual() {
+    public JALSEBuilder setManualEngine() {
 	engineType = EngineType.MANUAL;
 	return this;
     }
@@ -257,7 +257,7 @@ public final class JALSEBuilder {
      *
      * @see ThreadPoolActionEngine
      */
-    public JALSEBuilder setThreadPool() {
+    public JALSEBuilder setThreadPoolEngine() {
 	engineType = EngineType.THREADPOOL;
 	return this;
     }
