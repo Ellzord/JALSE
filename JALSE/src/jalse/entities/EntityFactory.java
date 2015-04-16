@@ -5,8 +5,8 @@ import jalse.actions.ActionEngine;
 import java.util.UUID;
 
 /**
- * An entity factory is used to control the creation and killing of {@link Entity} within the entire
- * tree.
+ * An entity factory is used to control the creation, transfer and killing of {@link Entity} within
+ * the entire tree.
  *
  * @author Elliot Ford
  *

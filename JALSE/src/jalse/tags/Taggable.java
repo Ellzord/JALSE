@@ -20,7 +20,7 @@ public interface Taggable {
 
     /**
      * Streams all tag state information.
-     * 
+     *
      * @return Stream of all tags.
      */
     default Stream<Tag> streamTags() {

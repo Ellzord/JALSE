@@ -363,11 +363,6 @@ public interface EntityContainer {
     boolean receiveEntity(Entity e);
 
     /**
-     * Removes all listeners for entities.
-     */
-    void removeEntityListeners();
-
-    /**
      * Removes a entity listener.
      *
      * @param listener
@@ -381,6 +376,11 @@ public interface EntityContainer {
      *
      */
     boolean removeEntityListener(EntityListener listener);
+
+    /**
+     * Removes all listeners for entities.
+     */
+    void removeEntityListeners();
 
     /**
      * Provides a stream of entities from the container.

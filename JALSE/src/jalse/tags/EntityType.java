@@ -4,7 +4,7 @@ import jalse.entities.Entity;
 import jalse.entities.EntityProxies;
 
 /**
- * Tag used to help identify an {@link Entity} marked by type.
+ * A {@link Tag} used to help identify an {@link Entity} marked by type.
  *
  * @author Elliot Ford
  *

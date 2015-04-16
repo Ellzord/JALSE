@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * An implementation of {@link ActionEngine} based on {@link ScheduledThreadPoolExecutor} .
+ * An implementation of {@link ActionEngine} based on {@link ScheduledThreadPoolExecutor}.
  *
  * @author Elliot Ford
  *

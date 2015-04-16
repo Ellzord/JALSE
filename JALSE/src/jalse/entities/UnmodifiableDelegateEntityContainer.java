@@ -67,12 +67,12 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     }
 
     @Override
-    public void removeEntityListeners() {
+    public boolean removeEntityListener(final EntityListener listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean removeEntityListener(final EntityListener listener) {
+    public void removeEntityListeners() {
 	throw new UnsupportedOperationException();
     }
 

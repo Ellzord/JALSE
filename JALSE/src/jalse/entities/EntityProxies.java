@@ -41,14 +41,14 @@ import java.util.stream.Stream;
  * new uncached proxy instance with {@link #uncachedProxyOfEntity(Entity, Class)}.<br>
  * <br>
  * An entity subclass can have the following method definitions: <br>
- * 1) Setting an Attribute of type (will remove if argument passed is null).<br>
- * 2) Getting an Attribute of type. <br>
- * 3) Getting an Entity as type. <br>
- * 4) Creating a new Entity of type. <br>
+ * 1) Setting an attribute of type (will remove if argument passed is null).<br>
+ * 2) Getting an attribute of type. <br>
+ * 3) Getting an entity as type. <br>
+ * 4) Creating a new entity of type. <br>
  * 5) Getting a Set of all of the child entities of or as type.<br>
  * 6) Getting a Stream of all of the child entities of or as type.<br>
  * <br>
- * For an Entity proxy to be created the type be validated: <br>
+ * For an entity proxy to be created the type be validated: <br>
  * 1. All attributes types must not be primitives (can be null).<br>
  * 2. Can only have super types that are (or are subclasses of) Entity. <br>
  * 3. Must only contain default or annotated methods:<br>

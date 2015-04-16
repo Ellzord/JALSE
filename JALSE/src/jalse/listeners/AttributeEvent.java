@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * Attribute change event for {@link AttributeListener}. This is a unique event that contains the
  * relevant {@link AttributeType} value and it's parent {@link AttributeContainer} (even if the
- * Attribute has been removed). When an Attribute is replaced the previous Attribute is also
+ * Attribute has been removed). When an attribute is replaced the previous attribute is also
  * contained within the event.
  *
  * @author Elliot Ford

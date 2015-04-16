@@ -224,16 +224,6 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public void removeAttributeListeners() {
-	write.lock();
-	try {
-	    listeners.clear();
-	} finally {
-	    write.unlock();
-	}
-    }
-
-    @Override
     public <T> T removeAttribute(final String name, final AttributeType<T> type) {
 	checkNameAndType(name, type);
 
@@ -291,6 +281,16 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	    listeners.computeIfPresent(name, (k, v) -> v.isEmpty() ? null : v);
 
 	    return true;
+	} finally {
+	    write.unlock();
+	}
+    }
+
+    @Override
+    public void removeAttributeListeners() {
+	write.lock();
+	try {
+	    listeners.clear();
 	} finally {
 	    write.unlock();
 	}

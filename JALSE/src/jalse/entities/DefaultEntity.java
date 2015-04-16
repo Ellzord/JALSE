@@ -283,16 +283,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public void removeAttributeListeners() {
-	attributes.removeAttributeListeners();
-    }
-
-    @Override
-    public void removeEntityListeners() {
-	entities.removeEntityListeners();
-    }
-
-    @Override
     public <T> T removeAttribute(final String name, final AttributeType<T> type) {
 	return attributes.removeAttribute(name, type);
     }
@@ -301,6 +291,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
 	    final AttributeListener<T> listener) {
 	return attributes.removeAttributeListener(name, type, listener);
+    }
+
+    @Override
+    public void removeAttributeListeners() {
+	attributes.removeAttributeListeners();
     }
 
     @Override
@@ -316,6 +311,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public boolean removeEntityListener(final EntityListener listener) {
 	return entities.removeEntityListener(listener);
+    }
+
+    @Override
+    public void removeEntityListeners() {
+	entities.removeEntityListeners();
     }
 
     @Override

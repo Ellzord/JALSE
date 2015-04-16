@@ -36,7 +36,7 @@ import java.util.Optional;
  * </code>
  * </pre>
  *
- * NOTE: Taking an Entity {@link #asType(Class)} is similar to casting but does not mark as the
+ * NOTE: Taking an entity {@link #asType(Class)} is similar to casting but does not mark as the
  * entity with the type.
  *
  *

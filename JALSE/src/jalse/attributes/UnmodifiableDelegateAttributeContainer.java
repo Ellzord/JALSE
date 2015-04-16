@@ -71,11 +71,6 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public void removeAttributeListeners() {
-	throw new UnsupportedOperationException();
-    }
-
-    @Override
     public <T> T removeAttribute(final String name, final AttributeType<T> type) {
 	throw new UnsupportedOperationException();
     }
@@ -83,6 +78,11 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     @Override
     public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
 	    final AttributeListener<T> listener) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeAttributeListeners() {
 	throw new UnsupportedOperationException();
     }
 

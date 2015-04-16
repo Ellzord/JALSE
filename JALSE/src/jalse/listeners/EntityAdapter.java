@@ -1,9 +1,9 @@
 package jalse.listeners;
 
 /**
- * An abstract adapter for {@link EntityListener}. This is a convenience class for creating entity
- * listeners that may not require a full implementation. All methods implemented by this class are
- * empty.
+ * An {@code abstract} adapter for {@link EntityListener}. This is a convenience class for creating
+ * entity listeners that may not require a full implementation. All methods implemented by this
+ * class are empty.
  *
  * @author Elliot Ford
  *

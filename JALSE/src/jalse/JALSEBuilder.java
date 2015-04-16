@@ -13,15 +13,14 @@ import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
 /**
- * A {@link JALSE} instance builder where each method in this builder can be chained. This builder
- * constructs a JALSE instance using the supplied parameters. It does this by using the appropriate
- * {@link ActionEngine} implementation along with a {@link DefaultEntityFactory}. JALSE can still be
- * created without this builder.<br>
+ * A {@link JALSE} instance builder where each method in this builder can be chained. It creates the
+ * instance using the appropriate {@link ActionEngine} implementation along with a
+ * {@link DefaultEntityFactory}.<br>
  * <br>
  * By default this builder will throw {@link IllegalStateException} as the values must be built. <br>
  * <br>
- * If {@link Entity} must be transfered externally (between two JALSE instances) then unique IDs
- * should be set ({@link UUID#randomUUID()} is used by default).
+ * If {@link Entity} must be transfered externally (between two {@link JALSE} instances) then unique
+ * IDs should be set ({@link UUID#randomUUID()} is used by default).
  *
  * @author Elliot Ford
  *

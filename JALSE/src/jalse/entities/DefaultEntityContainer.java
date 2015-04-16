@@ -27,8 +27,8 @@ import java.util.stream.Stream;
  * An DefaultEntityContainer is a thread-safe implementation of {@link EntityContainer}. <br>
  * <br>
  *
- * DefaultEntityContainer can take a delegate EntityContainer to supply to {@link EntityEvent}.
- * Entity updates will trigger these events using {@link EntityListener}.<br>
+ * DefaultEntityContainer can take a delegate container to supply to {@link EntityEvent}. Entity
+ * updates will trigger these events using {@link EntityListener}.<br>
  * <br>
  *
  * By default DefaultEntityContainer will use {@link DefaultEntityFactory} with no delegate
@@ -231,22 +231,22 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
-    public void removeEntityListeners() {
-	read.lock();
-	try {
-	    entityListeners.clear();
-	} finally {
-	    read.unlock();
-	}
-    }
-
-    @Override
     public boolean removeEntityListener(final EntityListener listener) {
 	write.lock();
 	try {
 	    return entityListeners.remove(listener);
 	} finally {
 	    write.unlock();
+	}
+    }
+
+    @Override
+    public void removeEntityListeners() {
+	read.lock();
+	try {
+	    entityListeners.clear();
+	} finally {
+	    read.unlock();
 	}
     }
 

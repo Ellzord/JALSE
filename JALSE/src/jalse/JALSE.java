@@ -210,13 +210,13 @@ public class JALSE extends AbstractIdentifiable implements ActionEngine, ActionS
     }
 
     @Override
-    public void removeEntityListeners() {
-	entities.removeEntityListeners();
+    public boolean removeEntityListener(final EntityListener listener) {
+	return entities.removeEntityListener(listener);
     }
 
     @Override
-    public boolean removeEntityListener(final EntityListener listener) {
-	return entities.removeEntityListener(listener);
+    public void removeEntityListeners() {
+	entities.removeEntityListeners();
     }
 
     @Override

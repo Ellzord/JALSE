@@ -336,11 +336,6 @@ public interface AttributeContainer {
     }
 
     /**
-     * Removes all listeners.
-     */
-    void removeAttributeListeners();
-
-    /**
      * Removes the attribute matching the supplied type.
      *
      * @param namedType
@@ -390,6 +385,11 @@ public interface AttributeContainer {
      * @return Whether the listener was assigned.
      */
     <T> boolean removeAttributeListener(String name, AttributeType<T> type, AttributeListener<T> listener);
+
+    /**
+     * Removes all listeners.
+     */
+    void removeAttributeListeners();
 
     /**
      * Removes all listeners for the supplied attribute types.

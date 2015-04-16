@@ -43,5 +43,5 @@
 		<delete dir="${dist}" />
 	</target>
 
-	<target name="main" depends="jar, docs" description="compiles and creates javadoc" />
+	<target name="main" depends="clean, jar, docs" description="compiles and creates javadoc" />
 </project>
