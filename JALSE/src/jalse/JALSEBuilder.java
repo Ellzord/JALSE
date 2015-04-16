@@ -9,7 +9,6 @@ import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
 import jalse.misc.Identifiable;
 
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
@@ -19,8 +18,7 @@ import java.util.concurrent.ForkJoinPool;
  * {@link ActionEngine} implementation along with a {@link DefaultEntityFactory}. JALSE can still be
  * created without this builder.<br>
  * <br>
- * By default this builder uses {@link #setCommonPoolEngine()}, {@link #setRandomID()} and
- * {@link #setNoEntityLimit()}. <br>
+ * By default this builder will throw {@link IllegalStateException} as the values must be built. <br>
  * <br>
  * If {@link Entity} must be transfered externally (between two JALSE instances) then unique IDs
  * should be set ({@link UUID#randomUUID()} is used by default).
@@ -35,6 +33,10 @@ import java.util.concurrent.ForkJoinPool;
  */
 public final class JALSEBuilder {
 
+    private enum EngineType {
+	FORKJOIN, THREADPOOL, COMMON, MANUAL, NONE
+    }
+
     /**
      * Creates a common pool JALSE instance (with a random ID and no entity limit).
      *
@@ -45,7 +47,7 @@ public final class JALSEBuilder {
      * @see #setNoEntityLimit()
      */
     public static JALSE buildCommonPoolJALSE() {
-	return newBuilder().build();
+	return newBuilder().setRandomID().setNoEntityLimit().setCommonPoolEngine().build();
     }
 
     /**
@@ -58,7 +60,7 @@ public final class JALSEBuilder {
      * @see #setNoEntityLimit()
      */
     public static JALSE buildManualJALSE() {
-	return newBuilder().setManual().build();
+	return newBuilder().setRandomID().setNoEntityLimit().setManual().build();
     }
 
     /**
@@ -68,10 +70,11 @@ public final class JALSEBuilder {
      *
      * @see #setRandomID()
      * @see #setSingleThread()
+     * @see #setThreadPool()
      * @see #setNoEntityLimit()
      */
     public static JALSE buildSingleThreadedJALSE() {
-	return newBuilder().setParallelism(1).build();
+	return newBuilder().setRandomID().setNoEntityLimit().setSingleThread().setThreadPool().build();
     }
 
     /**
@@ -83,24 +86,16 @@ public final class JALSEBuilder {
 	return new JALSEBuilder();
     }
 
-    private static int requireAboveOne(final int value) {
-	if (value < 1) {
-	    throw new IllegalArgumentException();
-	}
-	return value;
-    }
-
     private UUID id;
     private int parallelism;
     private int totalEntityLimit;
-    private boolean commonPool;
-
-    private boolean manual;
+    private EngineType engineType;
 
     private JALSEBuilder() {
-	setRandomID();
-	setCommonPoolEngine();
-	setNoEntityLimit();
+	id = null;
+	parallelism = 0;
+	totalEntityLimit = 0;
+	engineType = EngineType.NONE;
     }
 
     /**
@@ -108,17 +103,36 @@ public final class JALSEBuilder {
      *
      * @return Newly created JALSE.
      */
+    @SuppressWarnings("incomplete-switch")
     public JALSE build() {
-	final ActionEngine engine;
+	if (engineType == EngineType.NONE) {
+	    throw new IllegalStateException("No engine selected");
+	} else if (parallelism < 1 && (engineType == EngineType.THREADPOOL || engineType == EngineType.FORKJOIN)) {
+	    throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
+	}
 
-	if (commonPool) {
+	ActionEngine engine = null;
+	switch (engineType) {
+	case COMMON:
 	    engine = ForkJoinActionEngine.commonPoolEngine();
-	} else if (manual) {
+	    break;
+	case MANUAL:
 	    engine = new ManualActionEngine();
-	} else if (parallelism == 1) {
-	    engine = new ThreadPoolActionEngine(1);
-	} else {
+	    break;
+	case THREADPOOL:
+	    engine = new ThreadPoolActionEngine(parallelism);
+	    break;
+	case FORKJOIN:
 	    engine = new ForkJoinActionEngine(parallelism);
+	    break;
+	}
+
+	if (id == null) {
+	    throw new IllegalStateException("ID cannot be null");
+	}
+
+	if (totalEntityLimit < 1) {
+	    throw new IllegalStateException("Entity limit must be above one");
 	}
 
 	return new JALSE(id, engine, new DefaultEntityFactory(totalEntityLimit));
@@ -133,9 +147,7 @@ public final class JALSEBuilder {
      * @see ForkJoinActionEngine#commonPoolEngine()
      */
     public JALSEBuilder setCommonPoolEngine() {
-	commonPool = true;
-	manual = false;
-	parallelism = 0;
+	engineType = EngineType.COMMON;
 	return this;
     }
 
@@ -151,6 +163,18 @@ public final class JALSEBuilder {
     }
 
     /**
+     * Sets fork join engine to be used.
+     *
+     * @return This builder.
+     *
+     * @see ForkJoinActionEngine
+     */
+    public JALSEBuilder setForkJoin() {
+	engineType = EngineType.FORKJOIN;
+	return this;
+    }
+
+    /**
      * Sets the unique ID for JALSE instance.
      *
      * @param id
@@ -158,7 +182,7 @@ public final class JALSEBuilder {
      * @return This builder.
      */
     public JALSEBuilder setID(final UUID id) {
-	this.id = Objects.requireNonNull(id);
+	this.id = id;
 	return this;
     }
 
@@ -168,9 +192,7 @@ public final class JALSEBuilder {
      * @return This builder.
      */
     public JALSEBuilder setManual() {
-	manual = true;
-	commonPool = false;
-	parallelism = 0;
+	engineType = EngineType.MANUAL;
 	return this;
     }
 
@@ -193,9 +215,7 @@ public final class JALSEBuilder {
      * @return This builder.
      */
     public JALSEBuilder setParallelism(final int parallelism) {
-	this.parallelism = requireAboveOne(parallelism);
-	commonPool = false;
-	manual = false;
+	this.parallelism = parallelism;
 	return this;
     }
 
@@ -231,6 +251,18 @@ public final class JALSEBuilder {
     }
 
     /**
+     * Sets thread pool engine to be used.
+     *
+     * @return This builder.
+     *
+     * @see ThreadPoolActionEngine
+     */
+    public JALSEBuilder setThreadPool() {
+	engineType = EngineType.THREADPOOL;
+	return this;
+    }
+
+    /**
      * Sets the total entity limit parameter.
      *
      * @param totalEntityLimit
@@ -238,7 +270,7 @@ public final class JALSEBuilder {
      * @return This builder.
      */
     public JALSEBuilder setTotalEntityLimit(final int totalEntityLimit) {
-	this.totalEntityLimit = requireAboveOne(totalEntityLimit);
+	this.totalEntityLimit = totalEntityLimit;
 	return this;
     }
 }
