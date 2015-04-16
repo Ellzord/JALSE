@@ -100,7 +100,7 @@ entity.addAttribute("death", Attributes.newTypeOf(Date.class), new Date());
 ![GitHub Logo](/jalse-model.png)
 
 ### Going forward
-JALSE is still in development - to find out what is on the horizon see [Enhancements](https://github.com/Ellzord/JALSE/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) and [Future changes](https://github.com/Ellzord/JALSE/wiki/Future-changes)!
+JALSE is still in development - to find out what is on the horizon see [Future changes](https://github.com/Ellzord/JALSE/wiki/Future-changes)!
 
 ### Licence
 See [LICENCE](https://github.com/Ellzord/JALSE/blob/master/LICENSE).
