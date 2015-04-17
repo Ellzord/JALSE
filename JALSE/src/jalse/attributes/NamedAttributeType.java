@@ -67,7 +67,11 @@ public final class NamedAttributeType<T> {
 
     @Override
     public int hashCode() {
-	return 31 * super.hashCode() + (name == null ? 0 : name.hashCode());
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + name.hashCode();
+	result = prime * result + type.hashCode();
+	return result;
     }
 
     @Override

@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -45,6 +46,11 @@ public final class Entities {
      * An empty EntityContainer.
      */
     public static EntityContainer EMPTY_ENTITYCONTAINER = new UnmodifiableDelegateEntityContainer(null);
+
+    /**
+     * An empty EntityFactory.
+     */
+    public static EntityFactory EMPTY_ENTITYFACTORY = new UnmodifiableDelegateEntityFactory(null);
 
     @SuppressWarnings("unchecked")
     private static void addDirectTypeAncestors(final Set<Class<? extends Entity>> ancestry, final Class<?> type) {
@@ -113,6 +119,15 @@ public final class Entities {
      */
     public static EntityContainer emptyEntityContainer() {
 	return EMPTY_ENTITYCONTAINER;
+    }
+
+    /**
+     * Creates an immutable empty entity factory.
+     *
+     * @return Empty entity factory.
+     */
+    public static EntityFactory emptyEntityFactory() {
+	return EMPTY_ENTITYFACTORY;
     }
 
     /**
@@ -257,6 +272,18 @@ public final class Entities {
     }
 
     /**
+     * Gets a random entity from the container (if there is one).
+     *
+     * @param container
+     *            Source container.
+     * @return Random entity (if found).
+     */
+    public static Optional<Entity> randomEntity(final EntityContainer container) {
+	return container.streamEntities().skip(ThreadLocalRandom.current().nextInt(container.getEntityCount()))
+		.findFirst();
+    }
+
+    /**
      * Creates an immutable read-only delegate entity container for the supplied container.
      *
      * @param container
@@ -265,6 +292,17 @@ public final class Entities {
      */
     public static EntityContainer unmodifiableEntityContainer(final EntityContainer container) {
 	return new UnmodifiableDelegateEntityContainer(Objects.requireNonNull(container));
+    }
+
+    /**
+     * Creates an immutable read-only delegate entity factory for the supplied factory.
+     *
+     * @param factory
+     *            Factory to delegate for.
+     * @return Immutable entity factory.
+     */
+    public static EntityFactory unmodifiableEntityFactory(final EntityFactory factory) {
+	return new UnmodifiableDelegateEntityFactory(Objects.requireNonNull(factory));
     }
 
     /**

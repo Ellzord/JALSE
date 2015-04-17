@@ -105,7 +105,7 @@ public abstract class AttributeType<T> {
 
     @Override
     public final int hashCode() {
-	return 31 * (valueType == null ? 0 : valueType.hashCode());
+	return 31 * 1 + valueType.hashCode();
     }
 
     @Override

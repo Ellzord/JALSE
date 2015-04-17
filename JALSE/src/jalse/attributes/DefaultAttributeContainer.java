@@ -113,6 +113,20 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
+    public boolean equals(final Object obj) {
+	if (obj == this) {
+	    return true;
+	}
+
+	if (!(obj instanceof DefaultAttributeContainer)) {
+	    return false;
+	}
+
+	final DefaultAttributeContainer other = (DefaultAttributeContainer) obj;
+	return attributes.equals(other.attributes) && listeners.equals(other.listeners);
+    }
+
+    @Override
     public <T> void fireAttributeChanged(final String name, final AttributeType<T> type) {
 	checkNameAndType(name, type);
 
@@ -221,6 +235,15 @@ public class DefaultAttributeContainer implements AttributeContainer {
      */
     public AttributeContainer getDelegateContainer() {
 	return delegateContainer;
+    }
+
+    @Override
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + attributes.hashCode();
+	result = prime * result + listeners.hashCode();
+	return result;
     }
 
     @Override
