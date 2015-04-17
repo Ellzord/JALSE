@@ -21,7 +21,7 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
      * @param <T>
      *            Actor type.
      */
-    protected class ThreadPoolContext<T> extends AbstractFutureActionContext<T> implements Runnable {
+    public class ThreadPoolContext<T> extends AbstractFutureActionContext<T> implements Runnable {
 
 	/**
 	 * Creates new instance of ThreadPoolContext.
@@ -74,7 +74,7 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
     }
 
     @Override
-    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+    public <T> ThreadPoolContext<T> newContext(final Action<T> action) {
 	return new ThreadPoolContext<>(action);
     }
 }

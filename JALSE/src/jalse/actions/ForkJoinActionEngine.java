@@ -28,7 +28,7 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
      * @param <T>
      *            Actor type.
      */
-    protected class ForkJoinContext<T> extends AbstractManualActionContext<T> {
+    public class ForkJoinContext<T> extends AbstractManualActionContext<T> {
 
 	/**
 	 * Creates a new ForkJoinContext.
@@ -194,7 +194,7 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
     }
 
     @Override
-    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+    public <T> ForkJoinContext<T> newContext(final Action<T> action) {
 	return new ForkJoinContext<>(action);
     }
 

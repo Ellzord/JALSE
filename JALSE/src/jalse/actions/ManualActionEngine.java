@@ -22,7 +22,7 @@ public class ManualActionEngine implements ActionEngine {
      * @param <T>
      *            Actor type.
      */
-    protected class ManualContext<T> extends AbstractManualActionContext<T> {
+    public class ManualContext<T> extends AbstractManualActionContext<T> {
 
 	/**
 	 * Creates a new ManualActionContext instance.
@@ -101,7 +101,7 @@ public class ManualActionEngine implements ActionEngine {
     }
 
     @Override
-    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+    public <T> ManualContext<T> newContext(final Action<T> action) {
 	return new ManualContext<>(action);
     }
 
