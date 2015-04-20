@@ -66,16 +66,16 @@ import java.util.stream.Stream;
  * <pre>
  * <code>
  * public interface Ghost extends Entity {
- * 
+ *
  * 	{@code @GetAttribute("scary")}
  * 	Optional{@code <Boolean>} isScary();
- * 
+ *
  * 	{@code @SetAttribute("scary")}
  * 	void setScary(Boolean scary);
  * }
- * 
+ *
  * Entity e; // Previously created entity
- * 
+ *
  * Ghost evilGhost = Entities.asType(e, Ghost.class);
  * if (evilGhost.isScary()) {
  * 	// AAAAAH!
@@ -140,7 +140,7 @@ public final class EntityProxies {
 	    final EntityTypeMethodInfo etmi = methodInfos.get(method);
 
 	    /*
-	     * getAttribute(Class) / getOrNullAttribute(Class)
+	     * Getting attributes.
 	     */
 	    if (etmi.forAnnotationType(GetAttribute.class)) {
 		if (etmi.opt) {
@@ -151,19 +151,18 @@ public final class EntityProxies {
 	    }
 
 	    /*
-	     * addAttribute(Attribute) / addOrNullAttribute(Attribute) / removeAttribute(Class) /
-	     * removeOrNullAttribute(Class)
+	     * Adding / removing attributes.
 	     */
 	    if (etmi.forAnnotationType(SetAttribute.class)) {
 		if (etmi.opt) {
 		    if (args[0] != null) {
-			return entity.addOptAttribute(etmi.attrType, args[0]);
+			return entity.setOptAttribute(etmi.attrType, args[0]);
 		    } else {
 			return entity.removeOptAttribute(etmi.attrType);
 		    }
 		} else {
 		    if (args[0] != null) {
-			return entity.addAttribute(etmi.attrType, args[0]);
+			return entity.setAttribute(etmi.attrType, args[0]);
 		    } else {
 			return entity.removeAttribute(etmi.attrType);
 		    }
@@ -171,8 +170,7 @@ public final class EntityProxies {
 	    }
 
 	    /*
-	     * newEntity(Class) / newEntity(Class, AttributeContainer) / newEntity(UUID, class) /
-	     * newEntity(UUID, Class, AttributeContainer)
+	     * New entities.
 	     */
 	    if (etmi.forAnnotationType(NewEntity.class)) {
 		if (args != null && args.length == 1) {
@@ -192,7 +190,7 @@ public final class EntityProxies {
 	    }
 
 	    /*
-	     * getEntityAsType(Class)
+	     * Get entity as type.
 	     */
 	    if (etmi.forAnnotationType(GetEntity.class)) {
 		if (etmi.opt) {
@@ -203,7 +201,7 @@ public final class EntityProxies {
 	    }
 
 	    /*
-	     * streamEntitiesOfType(Class) / streamEntitiesAsType(Class)
+	     * Stream entities.
 	     */
 	    if (etmi.forAnnotationType(StreamEntities.class)) {
 		if (((StreamEntities) etmi.annotation).ofType()) {
@@ -214,7 +212,7 @@ public final class EntityProxies {
 	    }
 
 	    /*
-	     * getEntitiesOfType(Class) / getEntitiesAsType(Class)
+	     * Get entities.
 	     */
 	    if (etmi.forAnnotationType(GetEntities.class)) {
 		if (((GetEntities) etmi.annotation).ofType()) {

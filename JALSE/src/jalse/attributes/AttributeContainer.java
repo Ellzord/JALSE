@@ -64,38 +64,11 @@ public interface AttributeContainer {
 	    for (final AttributeType<?> type : sourceContainer.getAttributeTypes(name)) {
 		final Object attr = sourceContainer.getAttribute(name, type);
 		if (attr != null) {
-		    addAttribute(name, (AttributeType<Object>) type, attr);
+		    setAttribute(name, (AttributeType<Object>) type, attr);
 		}
 	    }
 	}
     }
-
-    /**
-     * Adds the supplied attribute to the collection.
-     *
-     * @param namedType
-     *            Named attribute type.
-     * @param attr
-     *            Attribute to add.
-     * @return The replaced attribute or null if none was replaced.
-     */
-    default <T> T addAttribute(final NamedAttributeType<T> namedType, final T attr) {
-	return addAttribute(namedType.getName(), namedType.getType(), attr);
-    }
-
-    /**
-     * Adds the supplied attribute to the collection.
-     *
-     * @param name
-     *            Attribute type name.
-     *
-     * @param type
-     *            Attribute type.
-     * @param attr
-     *            Attribute to add.
-     * @return The replaced attribute or null if none was replaced.
-     */
-    <T> T addAttribute(String name, final AttributeType<T> type, T attr);
 
     /**
      * Adds an attribute listener for the supplied named attribute type.
@@ -123,38 +96,6 @@ public interface AttributeContainer {
      * @return Whether the listener was not already assigned.
      */
     <T> boolean addAttributeListener(String name, AttributeType<T> type, AttributeListener<T> listener);
-
-    /**
-     * This is a convenience method for adding an attribute (optional).
-     *
-     * @param namedType
-     *            Named attribute type.
-     * @param attr
-     *            Attribute to add.
-     * @return Optional containing the replaced attribute if set or else empty optional if none
-     *         found
-     *
-     */
-    default <T> Optional<T> addOptAttribute(final NamedAttributeType<T> namedType, final T attr) {
-	return addOptAttribute(namedType.getName(), namedType.getType(), attr);
-    }
-
-    /**
-     * This is a convenience method for adding an attribute (optional).
-     *
-     * @param name
-     *            Attribute type name.
-     *
-     * @param type
-     *            Attribute type.
-     * @param attr
-     *            Attribute to add.
-     * @return Optional containing the replaced attribute if set or else empty optional if none
-     *         found
-     */
-    default <T> Optional<T> addOptAttribute(final String name, final AttributeType<T> type, final T attr) {
-	return Optional.ofNullable(addAttribute(name, type, attr));
-    }
 
     /**
      * Manually fires an attribute change for the supplied attribute type. This is used for mutable
@@ -439,6 +380,65 @@ public interface AttributeContainer {
      */
     default <T> Optional<T> removeOptAttribute(final String name, final AttributeType<T> type) {
 	return Optional.ofNullable(removeAttribute(name, type));
+    }
+
+    /**
+     * Adds the supplied attribute to the collection.
+     *
+     * @param namedType
+     *            Named attribute type.
+     * @param attr
+     *            Attribute to add.
+     * @return The replaced attribute or null if none was replaced.
+     */
+    default <T> T setAttribute(final NamedAttributeType<T> namedType, final T attr) {
+	return setAttribute(namedType.getName(), namedType.getType(), attr);
+    }
+
+    /**
+     * Adds the supplied attribute to the collection.
+     *
+     * @param name
+     *            Attribute type name.
+     *
+     * @param type
+     *            Attribute type.
+     * @param attr
+     *            Attribute to add.
+     * @return The replaced attribute or null if none was replaced.
+     */
+    <T> T setAttribute(String name, final AttributeType<T> type, T attr);
+
+    /**
+     * This is a convenience method for adding an attribute (optional).
+     *
+     * @param namedType
+     *            Named attribute type.
+     * @param attr
+     *            Attribute to add.
+     * @return Optional containing the replaced attribute if set or else empty optional if none
+     *         found
+     *
+     */
+    default <T> Optional<T> setOptAttribute(final NamedAttributeType<T> namedType, final T attr) {
+	return setOptAttribute(namedType.getName(), namedType.getType(), attr);
+    }
+
+    /**
+     * This is a convenience method for adding an attribute (optional).
+     *
+     * @param name
+     *            Attribute type name.
+     *
+     * @param type
+     *            Attribute type.
+     * @param attr
+     *            Attribute to add.
+     * @return Optional containing the replaced attribute if set or else empty optional if none
+     *         found
+     */
+    default <T> Optional<T> setOptAttribute(final String name, final AttributeType<T> type, final T attr) {
+	return Optional.ofNullable(setAttribute(name, type, attr));
     }
 
     /**

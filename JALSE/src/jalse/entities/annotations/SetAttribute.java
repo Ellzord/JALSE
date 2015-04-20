@@ -12,8 +12,8 @@ import java.util.Optional;
 
 /**
  * An {@link Entity} type annotation for
- * {@link AttributeContainer#addOptAttribute(String, AttributeType, Object)},
- * {@link AttributeContainer#addAttribute(String, AttributeType, Object)},
+ * {@link AttributeContainer#setOptAttribute(String, AttributeType, Object)},
+ * {@link AttributeContainer#setAttribute(String, AttributeType, Object)},
  * {@link AttributeContainer#removeOptAttribute(String, AttributeType)} and
  * {@link AttributeContainer#removeAttribute(String, AttributeType)}.<br>
  * <br>

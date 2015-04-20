@@ -65,7 +65,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> T addAttribute(final String name, final AttributeType<T> type, final T attr) {
+    public <T> T setAttribute(final String name, final AttributeType<T> type, final T attr) {
 	checkNameAndType(name, type);
 	Objects.requireNonNull(attr);
 

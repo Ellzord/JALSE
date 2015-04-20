@@ -92,8 +92,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> T addAttribute(final String name, final AttributeType<T> type, final T attr) {
-	return attributes.addAttribute(name, type, attr);
+    public <T> T setAttribute(final String name, final AttributeType<T> type, final T attr) {
+	return attributes.setAttribute(name, type, attr);
     }
 
     @Override
