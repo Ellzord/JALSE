@@ -85,12 +85,12 @@ living.scheduleForActor(new Action<StrandedSurvivors>() {
 
 On the fly values:
 ```java
-entity.addAttribute("falling", Attributes.BOOLEAN_TYPE, true);
+entity.setAttribute("falling", Attributes.BOOLEAN_TYPE, true);
 
 ...
 
 entity.removeAttribute("falling", Attribute.BOOLEAN_TYPE);
-entity.addAttribute("death", Attributes.newTypeOf(Date.class), new Date());
+entity.setAttribute("death", Attributes.newTypeOf(Date.class), new Date());
 ```
 
 ### Model key
