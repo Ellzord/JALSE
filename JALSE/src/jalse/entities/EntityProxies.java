@@ -24,6 +24,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
@@ -66,16 +68,16 @@ import java.util.stream.Stream;
  * <pre>
  * <code>
  * public interface Ghost extends Entity {
- *
+ * 
  * 	{@code @GetAttribute("scary")}
  * 	Optional{@code <Boolean>} isScary();
- *
+ * 
  * 	{@code @SetAttribute("scary")}
  * 	void setScary(Boolean scary);
  * }
- *
+ * 
  * Entity e; // Previously created entity
- *
+ * 
  * Ghost evilGhost = Entities.asType(e, Ghost.class);
  * if (evilGhost.isScary()) {
  * 	// AAAAAH!
@@ -91,6 +93,8 @@ import java.util.stream.Stream;
  */
 public final class EntityProxies {
 
+    private static final Logger logger = Logger.getLogger(EntityProxies.class.getName());
+
     private static class EntityTypeFactory implements ProxyFactory {
 
 	@Override
@@ -100,7 +104,8 @@ public final class EntityProxies {
 
 	@Override
 	public boolean validate(final Class<?> type) {
-	    return validateTree(type, new HashSet<>());
+	    logger.info(String.format("Validating type: %s", type));
+	    return validateTree(type, new HashSet<>(Collections.singleton(Entity.class)));
 	}
     }
 
@@ -313,6 +318,8 @@ public final class EntityProxies {
      */
     public static void removeAllProxies() {
 	typeCache.removeAll();
+	lookups.clear();
+	methodInfos.clear();
     }
 
     /**
@@ -323,6 +330,10 @@ public final class EntityProxies {
      */
     public static void removeAllProxiesOfType(final Class<? extends Entity> type) {
 	typeCache.invalidateType(type);
+	lookups.remove(type);
+	for (Method m : type.getDeclaredMethods()) {
+	    methodInfos.compute(m, (k, v) -> null);
+	}
     }
 
     /**
@@ -368,7 +379,8 @@ public final class EntityProxies {
      */
     @SuppressWarnings("unchecked")
     public static <T extends Entity> T uncachedProxyOfEntity(final Entity e, final Class<T> type) {
-	if (!validateTree(type, new HashSet<>())) {
+	logger.info(String.format("Validating type: %s", type));
+	if (!validateTree(type, new HashSet<>(Collections.singleton(Entity.class)))) {
 	    throwRE(INVALID_ENTITY_TYPE);
 	}
 	return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { type },
@@ -393,8 +405,6 @@ public final class EntityProxies {
     private static boolean validateTree(final Class<?> type, final Set<Class<?>> validated) {
 	if (!Entity.class.isAssignableFrom(type)) { // Not Entity or subclass.
 	    return false;
-	} else if (Entity.class.equals(type)) { // Can stop here.
-	    return true;
 	}
 
 	final Map<Method, EntityTypeMethodInfo> resolvedMethods = new HashMap<>();
