@@ -2,7 +2,11 @@ package jalse.actions;
 
 import static jalse.actions.Actions.requireNotStopped;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A manual-tick implementation of {@link ActionEngine}. ManualActionEngine uses no additional
@@ -44,6 +48,8 @@ public class ManualActionEngine implements ActionEngine {
 	    removeWork(this);
 	}
     }
+
+    private static final Logger logger = Logger.getLogger(ManualActionEngine.class.getName());
 
     private final ManualWorkQueue<ManualContext<?>> workQueue;
     private final MutableActionBindings bindings;
@@ -126,22 +132,31 @@ public class ManualActionEngine implements ActionEngine {
 	    return;
 	}
 
+	final List<ManualContext<?>> batch = new ArrayList<>();
+
+	// Create batch of work
 	for (;;) {
 	    final ManualContext<?> work = workQueue.pollReadyWork();
 	    if (work == null) { // No more ready work
 		break;
 	    }
-
-	    try {
-		work.performAction(); // Execution action
-	    } catch (final InterruptedException e) {
-		ticking.set(false);
-		Thread.currentThread().interrupt();
-		throw new IllegalStateException(e);
-	    }
+	    batch.add(work);
 	}
 
-	ticking.set(false);
+	// Perform batch
+	try {
+	    batch.forEach(work -> {
+		try {
+		    work.performAction();
+		} catch (final InterruptedException e) {
+		    Thread.currentThread().interrupt();
+		} catch (final Exception e) {
+		    logger.log(Level.WARNING, "Error performing action", e);
+		}
+	    });
+	} finally {
+	    ticking.set(false);
+	}
     }
 
     @Override
