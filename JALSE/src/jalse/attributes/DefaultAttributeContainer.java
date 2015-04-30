@@ -65,31 +65,6 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> T setAttribute(final String name, final AttributeType<T> type, final T attr) {
-	checkNameAndType(name, type);
-	Objects.requireNonNull(attr);
-
-	write.lock();
-	try {
-	    final Map<AttributeType<?>, Object> atrn = attributes.computeIfAbsent(name, k -> new ConcurrentHashMap<>());
-
-	    @SuppressWarnings("unchecked")
-	    final T prev = (T) atrn.put(type, attr);
-
-	    @SuppressWarnings("unchecked")
-	    final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getAttributeListeners0(
-		    name, type);
-	    if (ls != null) {
-		ls.getProxy().attributeAdded(new AttributeEvent<>(delegateContainer, name, type, attr, prev));
-	    }
-
-	    return prev;
-	} finally {
-	    write.unlock();
-	}
-    }
-
-    @Override
     public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
 	    final AttributeListener<T> listener) {
 	checkNameAndType(name, type);
@@ -351,6 +326,31 @@ public class DefaultAttributeContainer implements AttributeContainer {
 		    removeAttribute(n, t);
 		});
 	    });
+	} finally {
+	    write.unlock();
+	}
+    }
+
+    @Override
+    public <T> T setAttribute(final String name, final AttributeType<T> type, final T attr) {
+	checkNameAndType(name, type);
+	Objects.requireNonNull(attr);
+
+	write.lock();
+	try {
+	    final Map<AttributeType<?>, Object> atrn = attributes.computeIfAbsent(name, k -> new ConcurrentHashMap<>());
+
+	    @SuppressWarnings("unchecked")
+	    final T prev = (T) atrn.put(type, attr);
+
+	    @SuppressWarnings("unchecked")
+	    final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getAttributeListeners0(
+		    name, type);
+	    if (ls != null) {
+		ls.getProxy().attributeAdded(new AttributeEvent<>(delegateContainer, name, type, attr, prev));
+	    }
+
+	    return prev;
 	} finally {
 	    write.unlock();
 	}

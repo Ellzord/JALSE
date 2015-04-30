@@ -92,11 +92,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> T setAttribute(final String name, final AttributeType<T> type, final T attr) {
-	return attributes.setAttribute(name, type, attr);
-    }
-
-    @Override
     public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
 	    final AttributeListener<T> listener) {
 	return attributes.addAttributeListener(name, type, listener);
@@ -326,6 +321,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	}
 
 	return scheduler.scheduleForActor(action, initialDelay, period, unit);
+    }
+
+    @Override
+    public <T> T setAttribute(final String name, final AttributeType<T> type, final T attr) {
+	return attributes.setAttribute(name, type, attr);
     }
 
     /**

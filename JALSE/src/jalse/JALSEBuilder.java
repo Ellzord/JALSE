@@ -14,7 +14,7 @@ import java.util.concurrent.ForkJoinPool;
 
 /**
  * A {@link JALSE} instance builder where each method in this builder can be chained. It creates the
- * instance using the appropriate {@link ActionEngine} implementation along with a
+ * instance using {@link DefaultJALSE} with the appropriate {@link ActionEngine} implementation and
  * {@link DefaultEntityFactory}.<br>
  * <br>
  * By default this builder will throw {@link IllegalStateException} as the values must be built. <br>
@@ -33,6 +33,7 @@ import java.util.concurrent.ForkJoinPool;
 public final class JALSEBuilder {
 
     private enum EngineType {
+
 	FORKJOIN, THREADPOOL, COMMON, MANUAL, NONE
     }
 
@@ -134,7 +135,7 @@ public final class JALSEBuilder {
 	    throw new IllegalStateException("Entity limit must be above one");
 	}
 
-	return new JALSE(id, engine, new DefaultEntityFactory(totalEntityLimit));
+	return new DefaultJALSE(id, engine, new DefaultEntityFactory(totalEntityLimit));
     }
 
     /**

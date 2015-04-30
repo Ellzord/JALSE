@@ -93,8 +93,6 @@ import java.util.stream.Stream;
  */
 public final class EntityProxies {
 
-    private static final Logger logger = Logger.getLogger(EntityProxies.class.getName());
-
     private static class EntityTypeFactory implements ProxyFactory {
 
 	@Override
@@ -250,6 +248,8 @@ public final class EntityProxies {
 	}
     }
 
+    private static final Logger logger = Logger.getLogger(EntityProxies.class.getName());
+
     private static List<Class<? extends Annotation>> ANNOTATIONS = Arrays.asList(GetAttribute.class,
 	    SetAttribute.class, StreamEntities.class, GetEntities.class, GetEntity.class, NewEntity.class);
 
@@ -331,7 +331,7 @@ public final class EntityProxies {
     public static void removeAllProxiesOfType(final Class<? extends Entity> type) {
 	typeCache.invalidateType(type);
 	lookups.remove(type);
-	for (Method m : type.getDeclaredMethods()) {
+	for (final Method m : type.getDeclaredMethods()) {
 	    methodInfos.compute(m, (k, v) -> null);
 	}
     }

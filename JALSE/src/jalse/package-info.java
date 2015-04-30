@@ -4,6 +4,7 @@
  * {@link jalse.JALSE} instance).
  *
  * @see jalse.JALSEBuilder
+ * @see jalse.DefaultJALSE
  */
 package jalse;
 
