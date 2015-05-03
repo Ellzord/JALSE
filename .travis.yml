@@ -1,4 +1,5 @@
 language: java
 jdk:
   - oraclejdk8
-before-install: cd JALSE
+script:
+  - ant -f JALSE/build.xml
