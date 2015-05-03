@@ -1,4 +1,10 @@
 language: java
-jdk:
-  - oraclejdk8
+before-install:
+ - sudo add-apt-repository ppa:webupd8team/java
+ - sudo apt-get update
+ - echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+ - sudo apt-get install oracle-java8-installer
+ - sudo update-java-alternatives -s java-8-oracle
+ - sudo apt-get install oracle-java8-set-default
+ - sudo apt-get install -qq ant
 script: ant -f JALSE/build.xml
