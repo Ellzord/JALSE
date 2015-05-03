@@ -1,5 +1,5 @@
 language: java
 jdk: oraclejdk8
 before-install: sudo apt-get update; sudo apt-get install oracle-java8-installer;
-sudo: true
+sudo: required
 script: ant -f JALSE/build.xml
