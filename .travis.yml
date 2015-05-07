@@ -5,4 +5,4 @@ install:
   # Use 1.8.0_45 (Travis default of 1.8.0_31 does not erase types correctly)
   - sudo apt-get update -qq
   - sudo apt-get install -qq --only-upgrade -y oracle-java8-installer
-script: ant -f JALSE/build.xml
+

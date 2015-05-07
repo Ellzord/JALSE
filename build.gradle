@@ -1,0 +1,12 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+jar {
+    baseName = 'JALSE'
+    version = '1.0.0'
+    manifest {
+        attributes 'Implementation-Title': baseName,
+                   'Implementation-Version': version,
+                   'Implementation-Vendor': 'Elliot Ford (Ellzord)'
+    }
+}
