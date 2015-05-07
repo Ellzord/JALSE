@@ -1,9 +1,17 @@
+version = '1.0.0'
+group = 'jalse'
+
 apply plugin: 'java'
+apply plugin: 'maven'
 apply plugin: 'eclipse'
+
+repositories { 
+  mavenLocal()
+  mavenCentral()
+}
 
 jar {
     baseName = 'JALSE'
-    version = '1.0.0'
     manifest {
         attributes 'Implementation-Title': baseName,
                    'Implementation-Version': version,
