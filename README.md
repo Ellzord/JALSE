@@ -46,7 +46,7 @@ jalse.streamEntitiesOfType(Animal.class).foreach(/* Feed */);
 
 Replacing fallen enemies:
 ```java
-jalse.addEntityListener(new EntityAdapter() {
+jalse.addEntityListener(new EntityListener() {
 
   public void entityKilled(EntityEvent event) {
     if (event.getEntity().isMarkedAsType(Evil.class)) {
@@ -58,7 +58,7 @@ jalse.addEntityListener(new EntityAdapter() {
 
 Adrenaline when life is at risk:
 ```java
-entity.addAttributeListener("danger", Attributes.BOOLEAN_TYPE, new AttributeAdapter<Boolean>(){
+entity.addAttributeListener("danger", Attributes.BOOLEAN_TYPE, new AttributeListener<Boolean>(){
 
   public void attributeAdded(AttributeEvent<Boolean> event) {
     if (event.getValue()) {
