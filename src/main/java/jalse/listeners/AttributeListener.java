@@ -27,8 +27,7 @@ public interface AttributeListener<T> {
      * @param event
      *            The attribute event for this trigger.
      */
-    default void attributeAdded(AttributeEvent<T> event) {
-    }
+    default void attributeAdded(AttributeEvent<T> event) {}
 
     /**
      * Triggered when an attribute has been changed (either replacement by another attribute or an
@@ -37,8 +36,7 @@ public interface AttributeListener<T> {
      * @param event
      *            The attribute event for this trigger.
      */
-    default void attributeChanged(AttributeEvent<T> event) {
-    }
+    default void attributeChanged(AttributeEvent<T> event) {}
 
     /**
      * Triggered when an attribute has been removed.
@@ -46,6 +44,5 @@ public interface AttributeListener<T> {
      * @param event
      *            The attribute event for this trigger.
      */
-    default void attributeRemoved(AttributeEvent<T> event) {
-    }
+    default void attributeRemoved(AttributeEvent<T> event) {}
 }
