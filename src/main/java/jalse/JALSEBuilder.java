@@ -31,7 +31,9 @@ import java.util.concurrent.ForkJoinPool;
  *
  */
 public final class JALSEBuilder {
-
+	
+	public static int MINIMUM_PARALLALISM = 1;
+	
     private enum EngineType {
 
 	FORKJOIN, THREADPOOL, COMMON, MANUAL, NONE
@@ -103,12 +105,13 @@ public final class JALSEBuilder {
      *
      * @return Newly created JALSE.
      */
-    @SuppressWarnings("incomplete-switch")
     public JALSE build() {
-	if (engineType == EngineType.NONE) {
-	    throw new IllegalStateException("No engine selected");
-	} else if (parallelism < 1 && (engineType == EngineType.THREADPOOL || engineType == EngineType.FORKJOIN)) {
-	    throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
+	if (id == null) {
+	    throw new IllegalStateException("ID cannot be null");
+	}
+
+	if (totalEntityLimit < 1) {
+	    throw new IllegalStateException("Entity limit must be above one");
 	}
 
 	ActionEngine engine = null;
@@ -120,19 +123,17 @@ public final class JALSEBuilder {
 	    engine = new ManualActionEngine();
 	    break;
 	case THREADPOOL:
+		if (parallelism < MINIMUM_PARALLALISM)
+			throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
 	    engine = new ThreadPoolActionEngine(parallelism);
 	    break;
 	case FORKJOIN:
+		if (parallelism < MINIMUM_PARALLALISM)
+			throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
 	    engine = new ForkJoinActionEngine(parallelism);
 	    break;
-	}
-
-	if (id == null) {
-	    throw new IllegalStateException("ID cannot be null");
-	}
-
-	if (totalEntityLimit < 1) {
-	    throw new IllegalStateException("Entity limit must be above one");
+	default: //Assume engineType = EngineType.NONE;
+		throw new IllegalStateException("No engine selected");
 	}
 
 	return new DefaultJALSE(id, engine, new DefaultEntityFactory(totalEntityLimit));
