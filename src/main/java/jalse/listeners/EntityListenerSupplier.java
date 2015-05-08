@@ -5,7 +5,7 @@ import jalse.entities.Entity;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-class EntityListenerSupplier extends EntityAdapter {
+class EntityListenerSupplier implements EntityListener {
 
     private final Supplier<EntityListener> supplier;
     private final boolean deep;

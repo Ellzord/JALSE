@@ -7,7 +7,7 @@ import jalse.entities.Entity;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-class AttributeListenerSupplier<T> extends EntityAdapter {
+class AttributeListenerSupplier<T> implements EntityListener {
 
     private final String name;
     private final AttributeType<T> type;
