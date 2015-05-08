@@ -11,20 +11,3 @@ jar {
                    'Implementation-Vendor': 'Elliot Ford (Ellzord)'
     }
 }
-
-task wrapper(type: Wrapper){
-    gradleVersion = '2.0'
-}
-
-compileJava{
-    options.fork = true
-    options.incremental = true
-}
-
-repositories{
-    mavenCentral()
-}
-
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.+'
-}
