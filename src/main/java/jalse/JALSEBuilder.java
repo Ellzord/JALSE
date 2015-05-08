@@ -31,9 +31,9 @@ import java.util.concurrent.ForkJoinPool;
  *
  */
 public final class JALSEBuilder {
-	
-	public static int MINIMUM_PARALLALISM = 1;
-	
+
+    public static final int MINIMUM_PARALLALISM = 1;
+
     private enum EngineType {
 
 	FORKJOIN, THREADPOOL, COMMON, MANUAL, NONE
@@ -123,17 +123,17 @@ public final class JALSEBuilder {
 	    engine = new ManualActionEngine();
 	    break;
 	case THREADPOOL:
-		if (parallelism < MINIMUM_PARALLALISM)
-			throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
+	    if (parallelism < MINIMUM_PARALLALISM)
+		throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
 	    engine = new ThreadPoolActionEngine(parallelism);
 	    break;
 	case FORKJOIN:
-		if (parallelism < MINIMUM_PARALLALISM)
-			throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
+	    if (parallelism < MINIMUM_PARALLALISM)
+		throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
 	    engine = new ForkJoinActionEngine(parallelism);
 	    break;
-	default: //Assume engineType = EngineType.NONE;
-		throw new IllegalStateException("No engine selected");
+	default: // Assume engineType = EngineType.NONE;
+	    throw new IllegalStateException("No engine selected");
 	}
 
 	return new DefaultJALSE(id, engine, new DefaultEntityFactory(totalEntityLimit));
