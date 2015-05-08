@@ -1,14 +1,7 @@
 version = '1.0.3'
-group = 'jalse'
 
 apply plugin: 'java'
-apply plugin: 'maven'
 apply plugin: 'eclipse'
-
-repositories { 
-  mavenLocal()
-  mavenCentral()
-}
 
 jar {
     baseName = 'JALSE'
