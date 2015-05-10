@@ -5,9 +5,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.ellzord/JALSE.svg)](http://search.maven.org/#artifactdetails|com.github.ellzord|JALSE|1.0.4|)
 [![GitHub license](https://img.shields.io/github/license/Ellzord/JALSE.svg)](https://github.com/Ellzord/JALSE/blob/master/LICENSE)
 
-
-
-
 JALSE is a lightweight framework for simple simulation written in Java 8. The framework provides dynamic yet typed entities that can be processed concurrently. The underlying implementation is up to you - by default it's there but it can be replaced.
 
 Founded by [Elliot Ford](https://twitter.com/ellzord)
