@@ -2,12 +2,24 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'jacoco'
+apply plugin: 'com.github.kt3k.coveralls'
 
 group = "com.github.ellzord"
 archivesBaseName = "JALSE"
 version = "1.0.4"
 
 sourceCompatibility = 1.8
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1'
+    }
+}
 
 /*
  * http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html
@@ -48,6 +60,13 @@ task wrapper(type: Wrapper) {
 
 signing {
     sign configurations.archives
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
 }
 
 uploadArchives {
