@@ -5,5 +5,16 @@ install:
   # Use 1.8.0_45 (Travis default of 1.8.0_31 does not erase types correctly)
   - sudo apt-get update -qq
   - sudo apt-get install -qq --only-upgrade -y oracle-java8-installer
+before_script:
+  # Configure Sonatype OSSRH credentials (encrypted)
+  - sed -i 's/ossrhUsername=/ossrhUsername='$OSSRH_USERNAME'/g' gradle.properties
+  - sed -i 's/ossrhUsername=/ossrhUsername='$OSSRH_PASSWORD'/g' gradle.properties
 after_success:
+  # Publish code coverage analysis
   - ./gradlew jacocoTestReport coveralls
+  # Try to publish to SNAPSHOT repository
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then ./gradlew uploadArchives; fi
+env:
+  global:
+  - secure: GIw5EDAoNGYnL+zMwiT+/tDyD6iuiykMUT7ziIFlG1+Z+D4H3s+44Rwx1N/uCLQdDbLCaGuHDn6NG4toPDmMwHCKVo2/VLlR9jHoylSwvMPN/sjKrBUCx9IGOQeCUHfneeQ51GN2p3mTcZpwqF6vGQVu0UzgxTrfDb+N7aDQY00=
+  - secure: k7cREXXdib5At4gx9bpfVZmezx4yJFPVdgi9X6qCfqyq7zZXNWH/ayutBsm2JRLFIpzsvq1QrsdaQUtDZQwQmNLq44yTInO9/Vv/p6Vp/Cly6PHDVOemG9EY4ypXPrViSVdOcoe5HGodc7lMLAoSG5r30PS9ZYCwODizinOX4l8=
