@@ -8,12 +8,12 @@ install:
 before_script:
   # Configure Sonatype OSSRH credentials (encrypted)
   - sed -i 's/ossrhUsername=/ossrhUsername='$OSSRH_USERNAME'/g' gradle.properties
-  - sed -i 's/ossrhUsername=/ossrhUsername='$OSSRH_PASSWORD'/g' gradle.properties
+  - sed -i 's/ossrhPassword=/ossrhPassword='$OSSRH_PASSWORD'/g' gradle.properties
 after_success:
   # Publish code coverage analysis
   - ./gradlew jacocoTestReport coveralls
   # Try to publish to SNAPSHOT repository
-  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then ./gradlew uploadArchives; fi
+  - test $TRAVIS_PULL_REQUEST == "false" && ./gradlew uploadArchives
 env:
   global:
   - secure: GIw5EDAoNGYnL+zMwiT+/tDyD6iuiykMUT7ziIFlG1+Z+D4H3s+44Rwx1N/uCLQdDbLCaGuHDn6NG4toPDmMwHCKVo2/VLlR9jHoylSwvMPN/sjKrBUCx9IGOQeCUHfneeQ51GN2p3mTcZpwqF6vGQVu0UzgxTrfDb+N7aDQY00=
