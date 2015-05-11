@@ -1,8 +1,7 @@
 ## JALSE - Java Artificial Life Simulation Engine
-[![Build Status](https://api.travis-ci.org/Ellzord/JALSE.svg)](https://travis-ci.org/Ellzord/JALSE)
+[![Build Status](https://travis-ci.org/Ellzord/JALSE.svg?branch=master)](https://travis-ci.org/Ellzord/JALSE)
 [![Coverage Status](https://coveralls.io/repos/Ellzord/JALSE/badge.svg?branch=master)](https://coveralls.io/r/Ellzord/JALSE?branch=master)
-[![GitHub release](https://img.shields.io/github/release/Ellzord/JALSE.svg)](https://github.com/Ellzord/JALSE/releases/latest)
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.ellzord/JALSE.svg)](http://search.maven.org/#artifactdetails|com.github.ellzord|JALSE|1.0.4|)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.ellzord/JALSE/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.ellzord/JALSE/)
 [![GitHub license](https://img.shields.io/github/license/Ellzord/JALSE.svg)](https://github.com/Ellzord/JALSE/blob/master/LICENSE)
 
 JALSE is a lightweight framework for simple simulation written in Java 8. The framework provides dynamic yet typed entities that can be processed concurrently. The underlying implementation is up to you - by default it's there but it can be replaced.
