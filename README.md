@@ -94,7 +94,7 @@ entity.setAttribute("falling", Attributes.BOOLEAN_TYPE, true);
 
 ...
 
-entity.removeAttribute("falling", Attribute.BOOLEAN_TYPE);
+entity.removeAttribute("falling", Attributes.BOOLEAN_TYPE);
 entity.setAttribute("death", Attributes.newTypeOf(Date.class), new Date());
 ```
 
