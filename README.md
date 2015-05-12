@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/Ellzord/JALSE.svg?branch=master)](https://travis-ci.org/Ellzord/JALSE)
 [![Coverage Status](https://coveralls.io/repos/Ellzord/JALSE/badge.svg?branch=master)](https://coveralls.io/r/Ellzord/JALSE?branch=master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.ellzord/JALSE/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.ellzord/JALSE/)
-[![License](http://img.shields.io/:license-apache-blue.svg)](https://github.com/Ellzord/JALSE/blob/master/LICENSE)
+[![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 JALSE is a lightweight framework for simple simulation written in Java 8. The framework provides dynamic yet typed entities that can be processed concurrently. The underlying implementation is up to you - by default it's there but it can be replaced.
 
