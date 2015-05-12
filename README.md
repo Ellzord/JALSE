@@ -6,7 +6,7 @@
 
 JALSE is a lightweight entity framework for simulation written in Java 8. The framework is used to create a dynamic living data-model for your entity based simulation or game. By default all JALSE entities can have their attributes and child entities concurrently processed and mutated (no need for additional synchronisation).
 
-JALSE takes entities one step further by allowing the user to create Entity types. Unlike classic Java objects JALSE entities can have multiple types and 'casting' to another type causes no issues (just null fields). As well as making use of typing (```cow.isMooing()```) entities can be grouped and processed by entity type. Inheritance still is at play here so I can be sure to ```feed()``` all ```Animal```s but only ```moo()``` the ```cow```s!
+JALSE takes entities one step further by allowing the user to create Entity types. Unlike classic Java objects JALSE entities can have multiple types and 'casting' to another type causes no issues (just null fields). As well as making use of typing (```cow.isMooing()```) entities can be grouped and processed by entity type. Inheritance still is at play here so I can be sure to ```feed()``` every ```Animal``` but only ```moo()``` a ```cow```!
 
 Use JALSE for when you need to start processing entities in the thousands or if you want a structured way to increase the level of detail kept about an entity (or just add more fields forever).
 
