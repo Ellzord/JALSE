@@ -19,122 +19,56 @@
     </section>
 
     <section class="main-content">
-      <h3>
-<a id="what-is-jalse" class="anchor" href="#what-is-jalse" aria-hidden="true"><span class="octicon octicon-link"></span></a>What is JALSE?</h3>
+      <p>JALSE is a lightweight entity framework for simulation written in Java 8. The framework is used to create a dynamic living data-model for your entity based simulation or game. By default all JALSE entities can have their attributes and child entities concurrently processed and mutated (no need for additional synchronisation).</p>
 
-<p>JALSE is a lightweight framework for simple simulation written in Java 8. The framework provides dynamic yet typed entities that can be processed concurrently. The underlying implementation is up to you - by default it's there but it can be replaced.</p>
+<p>JALSE takes entities one step further by allowing the user to create Entity types. Unlike classic Java objects JALSE entities can have multiple types and 'casting' to another type causes no issues (just null fields). As well as making use of typing (<code>cow.isMooing()</code>) entities can be grouped and processed by entity type. Inheritance still is at play here so I can be sure to <code>feed()</code> every <code>Animal</code> but only <code>moo()</code> a <code>Cow</code>!</p>
 
-<p>By <a href="https://twitter.com/ellzord">Elliot Ford</a></p>
+<p>Use JALSE for when you need to start processing entities in the thousands or if you want a structured way to increase the level of detail kept about an entity (or just add more fields forever).</p>
 
-<h3>
-<a id="why-use-jalse" class="anchor" href="#why-use-jalse" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why use JALSE?</h3>
-
-<ol>
-<li>It's free and works right out of the box!</li>
-<li>You can create a self-managed living data model for your simulation (or game) easily.</li>
-<li>Entities are soft-typed (add and remove at runtime) and can be used as any type (without error).</li>
-<li>Entities can be filtered and processed easily (by type, ID or attributes).</li>
-<li>JALSE is backed by an ActionEngine that can schedule run-once and periodic tasks (several implementations).</li>
-</ol>
+<p>Founded by <a href="https://twitter.com/ellzord">Elliot Ford</a></p>
 
 <h3>
-<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting started</h3>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h3>
+
+<p>See the <a href="https://github.com/Ellzord/JALSE/wiki">Wiki</a> for full documentation, examples and project information.</p>
+
+<p>See the <a href="http://ellzord.github.io/JALSE/docs/">API docs</a>.</p>
+
+<h3>
+<a id="getting-the-latest-release" class="anchor" href="#getting-the-latest-release" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting the latest release</h3>
+
+<p>JALSE <a href="https://github.com/Ellzord/JALSE/releases">releases</a> and (SNAPSHOTS) are published to maven central (<a href="http://search.maven.org/">http://search.maven.org/</a>).</p>
+
+<p>Example for Maven:</p>
+
+<div class="highlight highlight-xml"><pre>&lt;<span class="pl-ent">dependency</span>&gt;
+    &lt;<span class="pl-ent">groupId</span>&gt;com.github.ellzord&lt;/<span class="pl-ent">groupId</span>&gt;
+    &lt;<span class="pl-ent">artifactId</span>&gt;JALSE&lt;/<span class="pl-ent">artifactId</span>&gt;
+    &lt;<span class="pl-ent">version</span>&gt;1.0.4&lt;/<span class="pl-ent">version</span>&gt;
+&lt;/<span class="pl-ent">dependency</span>&gt;</pre></div>
+
+<p>Example for Gradle:</p>
+
+<pre><code>compile 'com.github.ellzord:JALSE:1.0.4'
+</code></pre>
+
+<h3>
+<a id="links" class="anchor" href="#links" aria-hidden="true"><span class="octicon octicon-link"></span></a>Links</h3>
 
 <ul>
-<li>
-<a href="https://github.com/Ellzord/JALSE/releases">Download</a> or fork JALSE.</li>
-<li>Read the <a href="https://github.com/Ellzord/JALSE/wiki">Wiki</a>.</li>
-<li>Check out the example projects (<a href="https://github.com/Ellzord/JALSE-HappyCows">HappyCows</a> and <a href="https://github.com/Ellzord/JALSE-Messengers">Messengers</a>).</li>
-<li>Look up the relevant <a href="http://ellzord.github.io/JALSE/docs/">API docs</a>.</li>
+<li><a href="https://github.com/Ellzord/JALSE/wiki/Example-projects">Example projects</a></li>
+<li><a href="https://github.com/Ellzord/JALSE/wiki/Code-snippets">Code snippets</a></li>
+<li><a href="https://github.com/Ellzord/JALSE/wiki/How-to-contribute">How to contribute</a></li>
+<li><a href="https://github.com/Ellzord/JALSE/wiki/Have-bugs-or-questions%3F">Have bugs or questions?</a></li>
+<li><a href="https://github.com/Ellzord/JALSE/wiki/Class-diagram">Class diagram</a></li>
+<li><a href="https://github.com/Ellzord/JALSE/wiki/Technologies-we-use">Technologies we use</a></li>
+<li><a href="https://github.com/Ellzord/JALSE/wiki/Example-use-cases">Example use cases</a></li>
 </ul>
-
-<h3>
-<a id="code-snippets" class="anchor" href="#code-snippets" aria-hidden="true"><span class="octicon octicon-link"></span></a>Code Snippets</h3>
-
-<p>Creating and using a simple entity type:</p>
-
-<div class="highlight highlight-java"><pre><span class="pl-k">public</span> <span class="pl-k">interface</span> <span class="pl-en">Friend</span> <span class="pl-k">extends</span> <span class="pl-e">Entity</span> {
-
-  <span class="pl-k">@GetAttribute</span>(<span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>)
-  <span class="pl-smi">String</span> <span class="pl-en">getName</span>();
-
-  <span class="pl-k">@SetAttribute</span>(<span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>)
-  <span class="pl-k">void</span> <span class="pl-en">setName</span>(<span class="pl-smi">String</span> <span class="pl-v">name</span>);
-}
-
-<span class="pl-smi">Friend</span> f <span class="pl-k">=</span> jalse<span class="pl-k">.</span>newEntity(<span class="pl-smi">Friend</span><span class="pl-k">.</span>class);
-f<span class="pl-k">.</span>setName(<span class="pl-s"><span class="pl-pds">"</span>Ellzord<span class="pl-pds">"</span></span>);
-
-<span class="pl-smi">System</span><span class="pl-k">.</span>out<span class="pl-k">.</span>println(f<span class="pl-k">.</span>getName());</pre></div>
-
-<p>Feeding all animals (not just the birds):</p>
-
-<div class="highlight highlight-java"><pre><span class="pl-k">public</span> <span class="pl-k">interface</span> <span class="pl-en">Animal</span> <span class="pl-k">extends</span> <span class="pl-e">Entity</span>{}
-<span class="pl-k">public</span> <span class="pl-k">interface</span> <span class="pl-en">FlyingAnimal</span> <span class="pl-k">extends</span> <span class="pl-e">Animal</span>{}
-
-<span class="pl-c1">...</span>
-
-jalse<span class="pl-k">.</span>streamEntitiesOfType(<span class="pl-smi">Animal</span><span class="pl-k">.</span>class)<span class="pl-k">.</span>foreach(<span class="pl-c">/* Feed */</span>);</pre></div>
-
-<p>Replacing fallen enemies:</p>
-
-<div class="highlight highlight-java"><pre>jalse<span class="pl-k">.</span>addEntityListener(<span class="pl-k">new</span> <span class="pl-smi">EntityAdapter</span>() {
-
-  <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">entityKilled</span>(<span class="pl-smi">EntityEvent</span> <span class="pl-v">event</span>) {
-    <span class="pl-k">if</span> (event<span class="pl-k">.</span>getEntity()<span class="pl-k">.</span>isMarkedAsType(<span class="pl-smi">Evil</span><span class="pl-k">.</span>class)) {
-      <span class="pl-c">/* Spawn more */</span>
-    }
-  }
-});</pre></div>
-
-<p>Adrenaline when life is at risk:</p>
-
-<div class="highlight highlight-java"><pre>entity<span class="pl-k">.</span>addAttributeListener(<span class="pl-s"><span class="pl-pds">"</span>danger<span class="pl-pds">"</span></span>, <span class="pl-smi">Attributes</span><span class="pl-c1"><span class="pl-k">.</span>BOOLEAN_TYPE</span>, <span class="pl-k">new</span> <span class="pl-k">AttributeAdapter&lt;<span class="pl-smi">Boolean</span>&gt;</span>(){
-
-  <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">attributeAdded</span>(<span class="pl-k">AttributeEvent&lt;<span class="pl-smi">Boolean</span>&gt;</span> <span class="pl-v">event</span>) {
-    <span class="pl-k">if</span> (event<span class="pl-k">.</span>getValue()) {
-      <span class="pl-c">/* Run like hell */</span>
-    }
-  }
-});</pre></div>
-
-<p>Managing a crash landing:</p>
-
-<div class="highlight highlight-java"><pre><span class="pl-smi">StrandedSurvivors</span> living <span class="pl-k">=</span> jalse<span class="pl-k">.</span>newEntity(<span class="pl-smi">StrandedSurvivors</span><span class="pl-k">.</span>class);
-<span class="pl-k">for</span> (<span class="pl-k">int</span> i <span class="pl-k">=</span> <span class="pl-c1">0</span>; i <span class="pl-k">&lt;</span> <span class="pl-c1">10</span>; i<span class="pl-k">++</span>) {
-  living<span class="pl-k">.</span>newSurvivor();
-}
-
-living<span class="pl-k">.</span>scheduleForActor(<span class="pl-k">new</span> <span class="pl-k">Action&lt;<span class="pl-smi">StrandedSurvivors</span>&gt;</span>() {
-
-  <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">perform</span>(<span class="pl-k">ActionContext&lt;<span class="pl-smi">StrandedSurvivors</span>&gt;</span> <span class="pl-v">context</span>) {
-    context<span class="pl-k">.</span>getActor()<span class="pl-k">.</span>streamSurvivors()<span class="pl-k">.</span>foreach(<span class="pl-smi">Survivor</span><span class="pl-k">::</span>lookForFood);
-  }
-}, <span class="pl-c1">0</span>, <span class="pl-c1">1</span>, <span class="pl-smi">TimeUnit</span><span class="pl-c1"><span class="pl-k">.</span>SECONDS</span>);</pre></div>
-
-<p>On the fly values:</p>
-
-<div class="highlight highlight-java"><pre>entity<span class="pl-k">.</span>setAttribute(<span class="pl-s"><span class="pl-pds">"</span>falling<span class="pl-pds">"</span></span>, <span class="pl-smi">Attributes</span><span class="pl-c1"><span class="pl-k">.</span>BOOLEAN_TYPE</span>, <span class="pl-c1">true</span>);
-
-<span class="pl-c1">...</span>
-
-entity<span class="pl-k">.</span>removeAttribute(<span class="pl-s"><span class="pl-pds">"</span>falling<span class="pl-pds">"</span></span>, <span class="pl-smi">Attribute</span><span class="pl-c1"><span class="pl-k">.</span>BOOLEAN_TYPE</span>);
-entity<span class="pl-k">.</span>setAttribute(<span class="pl-s"><span class="pl-pds">"</span>death<span class="pl-pds">"</span></span>, <span class="pl-smi">Attributes</span><span class="pl-k">.</span>newTypeOf(<span class="pl-smi">Date</span><span class="pl-k">.</span>class), <span class="pl-k">new</span> <span class="pl-smi">Date</span>());</pre></div>
-
-<h3>
-<a id="going-forward" class="anchor" href="#going-forward" aria-hidden="true"><span class="octicon octicon-link"></span></a>Going forward</h3>
-
-<p>JALSE is still in development - to find out what is on the horizon see <a href="https://github.com/Ellzord/JALSE/wiki/Future-changes">Future changes</a>!</p>
 
 <h3>
 <a id="licence" class="anchor" href="#licence" aria-hidden="true"><span class="octicon octicon-link"></span></a>Licence</h3>
 
-<p>See <a href="https://github.com/Ellzord/JALSE/blob/master/LICENSE">LICENCE</a>.</p>
-
-<h3>
-<a id="shout-outs" class="anchor" href="#shout-outs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Shout-outs</h3>
-
-<p>I use <a href="http://www.ej-technologies.com/products/jprofiler/overview.html">JProfiler</a> for performance tuning.</p>
+<p>Code is under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache Licence v2</a>.</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/Ellzord/JALSE">JALSE</a> is maintained by <a href="https://github.com/Ellzord">Ellzord</a>.</span>
