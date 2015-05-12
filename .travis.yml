@@ -1,6 +1,9 @@
 language: java
 jdk: oraclejdk8
 sudo: required
+branches:
+  only:
+    - master
 install:
   # Use 1.8.0_45 (Travis default of 1.8.0_31 does not erase types correctly)
   - sudo apt-get update -qq
@@ -16,5 +19,5 @@ after_success:
   - test $TRAVIS_PULL_REQUEST == "false" && ./gradlew uploadArchives
 env:
   global:
-  - secure: "dQzQVqwB6EdD8z7o1SS/Ik/EUIWp/HtkK8SHUs69U5YT8tRSpNT/xFs8Het1uOoA7V25+NO+sRuYmqCKkmAaH2w7X3/Y+bUzYyageyfSgjOKj7awiPG0mVlCwA7/xMlF/AxfA7tPIV/14YeIzXCTzR/tlPZj9i4IYOQ9O4g4+68="
-  - secure: "SW6PZCDu7Z/Urfwp5mtJYcctH1Hmw6fr/Bmb8ln3fCycAd3IGFWFUR617Uhso2Fomn4m2tEIU5cVASRPJNUsu+piSyDPBAfTz+f1vCVDPoPG6/2Qt0L9IYItzC4n8yN52CzojZjUtM4vRkRWu+KgNpAZN2F2rezR5SwQXoiXPWM="
+    - secure: "dQzQVqwB6EdD8z7o1SS/Ik/EUIWp/HtkK8SHUs69U5YT8tRSpNT/xFs8Het1uOoA7V25+NO+sRuYmqCKkmAaH2w7X3/Y+bUzYyageyfSgjOKj7awiPG0mVlCwA7/xMlF/AxfA7tPIV/14YeIzXCTzR/tlPZj9i4IYOQ9O4g4+68="
+    - secure: "SW6PZCDu7Z/Urfwp5mtJYcctH1Hmw6fr/Bmb8ln3fCycAd3IGFWFUR617Uhso2Fomn4m2tEIU5cVASRPJNUsu+piSyDPBAfTz+f1vCVDPoPG6/2Qt0L9IYItzC4n8yN52CzojZjUtM4vRkRWu+KgNpAZN2F2rezR5SwQXoiXPWM="
