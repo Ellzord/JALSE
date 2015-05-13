@@ -4,111 +4,44 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.ellzord/JALSE/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.ellzord/JALSE/)
 [![License](http://img.shields.io/:license-apache-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-JALSE is a lightweight framework for simple simulation written in Java 8. The framework provides dynamic yet typed entities that can be processed concurrently. The underlying implementation is up to you - by default it's there but it can be replaced.
+JALSE is a lightweight entity framework for simulation written in Java 8. The framework is used to create a dynamic living data-model for your entity based simulation or game. By default all JALSE entities can have their attributes and child entities concurrently processed and mutated (no need for additional synchronisation).
+
+JALSE takes entities one step further by allowing the user to create Entity types. Unlike classic Java objects JALSE entities can have multiple types and 'casting' to another type causes no issues (just null fields). As well as making use of typing (```cow.isMooing()```) entities can be grouped and processed by entity type. Inheritance still is at play here so I can be sure to ```feed()``` every ```Animal``` but only ```moo()``` a ```Cow```!
+
+Use JALSE for when you need to start processing a large number of entities or if you want a structured way to increase the level of detail kept about an entity (rather than adding yet another field).
 
 Founded by [Elliot Ford](https://twitter.com/ellzord)
 
-### Why use JALSE?
-1. It's free and works right out of the box!
-2. You can create a self-managed living data model for your simulation (or game) easily.
-3. Entities are soft-typed (add and remove at runtime) and can be used as any type (without error).
-4. Entities can be filtered and processed easily (by type, ID or attributes).
-5. JALSE is backed by an ActionEngine that can schedule run-once and periodic tasks (several implementations).
+### Documentation
+See the [Wiki](https://github.com/Ellzord/JALSE/wiki) for full documentation, examples and project information.
 
-### Getting started
-* [Download](https://github.com/Ellzord/JALSE/releases) or fork JALSE.
-* Read the [Wiki](https://github.com/Ellzord/JALSE/wiki).
-* Check out the example projects ([HappyCows](https://github.com/Ellzord/JALSE-HappyCows) and [Messengers](https://github.com/Ellzord/JALSE-Messengers)).
-* Look up the relevant [API docs](http://ellzord.github.io/JALSE/docs/).
+See the [API docs](http://ellzord.github.io/JALSE/docs/).
 
-### Code Snippets
-Creating and using a simple entity type:
-```java
-public interface Friend extends Entity {
+### Getting the latest release
+JALSE [releases](https://github.com/Ellzord/JALSE/releases) and (SNAPSHOTS) are published to maven central (http://search.maven.org/).
 
-  @GetAttribute("name")
-  String getName();
-  
-  @SetAttribute("name")
-  void setName(String name);
-}
-
-Friend f = jalse.newEntity(Friend.class);
-f.setName("Ellzord");
-
-System.out.println(f.getName());
+Example for Maven:
+```xml
+<dependency>
+    <groupId>com.github.ellzord</groupId>
+    <artifactId>JALSE</artifactId>
+    <version>1.0.4</version>
+</dependency>
 ```
 
-Feeding all animals (not just the birds):
-```java
-public interface Animal extends Entity{}
-public interface FlyingAnimal extends Animal{}
-
-...
-
-jalse.streamEntitiesOfType(Animal.class).foreach(/* Feed */);
+Example for Gradle:
+```
+compile 'com.github.ellzord:JALSE:1.0.4'
 ```
 
-Replacing fallen enemies:
-```java
-jalse.addEntityListener(new EntityListener() {
-
-  public void entityKilled(EntityEvent event) {
-    if (event.getEntity().isMarkedAsType(Evil.class)) {
-      /* Spawn more */
-    }
-  }
-});
-```
-
-Adrenaline when life is at risk:
-```java
-entity.addAttributeListener("danger", Attributes.BOOLEAN_TYPE, new AttributeListener<Boolean>(){
-
-  public void attributeAdded(AttributeEvent<Boolean> event) {
-    if (event.getValue()) {
-      /* Run like hell */
-    }
-  }
-});
-```
-
-Managing a crash landing:
-```java
-StrandedSurvivors living = jalse.newEntity(StrandedSurvivors.class);
-for (int i = 0; i < 10; i++) {
-  living.newSurvivor();
-}
-
-living.scheduleForActor(new Action<StrandedSurvivors>() {
-
-  public void perform(ActionContext<StrandedSurvivors> context) {
-    context.getActor().streamSurvivors().foreach(Survivor::lookForFood);
-  }
-}, 0, 1, TimeUnit.SECONDS);
-```
-
-On the fly values:
-```java
-entity.setAttribute("falling", Attributes.BOOLEAN_TYPE, true);
-
-...
-
-entity.removeAttribute("falling", Attributes.BOOLEAN_TYPE);
-entity.setAttribute("death", Attributes.newTypeOf(Date.class), new Date());
-```
-
-### Model key
-![GitHub Logo](/jalse-model-key.png)
-
-### Model
-![GitHub Logo](/jalse-model.png)
-
-### Going forward
-JALSE is still in development - to find out what is on the horizon see [Future changes](https://github.com/Ellzord/JALSE/wiki/Future-changes)!
+### Links
+* [Example projects](https://github.com/Ellzord/JALSE/wiki/Example-projects)
+* [Code snippets](https://github.com/Ellzord/JALSE/wiki/Code-snippets)
+* [How to contribute](https://github.com/Ellzord/JALSE/wiki/How-to-contribute)
+* [Have bugs or questions?](https://github.com/Ellzord/JALSE/wiki/Have-bugs-or-questions%3F)
+* [Class diagram](https://github.com/Ellzord/JALSE/wiki/Class-diagram)
+* [Technologies we use](https://github.com/Ellzord/JALSE/wiki/Technologies-we-use)
+* [Example use cases](https://github.com/Ellzord/JALSE/wiki/Example-use-cases)
 
 ### Licence
-See [LICENCE](https://github.com/Ellzord/JALSE/blob/master/LICENSE).
-
-### Shout-outs
-I use [JProfiler](http://www.ej-technologies.com/products/jprofiler/overview.html) for performance tuning.
+Code is under the [Apache Licence v2](http://www.apache.org/licenses/LICENSE-2.0.html).
