@@ -18,7 +18,7 @@ See the [Wiki](https://github.com/Ellzord/JALSE/wiki) for full documentation, ex
 See the [API docs](http://ellzord.github.io/JALSE/docs/).
 
 ### Getting the latest release
-JALSE [releases](https://github.com/Ellzord/JALSE/releases) and (SNAPSHOTS) are published to maven central (http://search.maven.org/).
+JALSE [releases](https://github.com/Ellzord/JALSE/releases) and (SNAPSHOTs) are published to maven central (http://search.maven.org/).
 
 Example for Maven:
 ```xml
