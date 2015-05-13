@@ -27,24 +27,24 @@ public class DefaultEntityTest {
 	public void perform(final ActionContext<Entity> context) throws InterruptedException {}
     }
 
-    private class TestAttributeListener<T> implements AttributeListener<T> {
+    private class TestAttributeListener implements AttributeListener<Integer> {
 
 	public boolean present = false;
 	public int val = 0;
 
 	@Override
-	public void attributeAdded(final AttributeEvent<T> event) {
+	public void attributeAdded(final AttributeEvent<Integer> event) {
 	    present = true;
-	    val = (int) event.getValue();
+	    val = event.getValue();
 	}
 
 	@Override
-	public void attributeChanged(final AttributeEvent<T> event) {
-	    val = (int) event.getValue();
+	public void attributeChanged(final AttributeEvent<Integer> event) {
+	    val = event.getValue();
 	}
 
 	@Override
-	public void attributeRemoved(final AttributeEvent<T> event) {
+	public void attributeRemoved(final AttributeEvent<Integer> event) {
 	    present = false;
 	}
     }
@@ -77,7 +77,7 @@ public class DefaultEntityTest {
     public void attributeListenerTest() {
 	entity = createDefaultEntity();
 
-	final TestAttributeListener<Integer> testAttributeListener = new TestAttributeListener<Integer>();
+	final TestAttributeListener testAttributeListener = new TestAttributeListener();
 	Assert.assertFalse(testAttributeListener.present);
 
 	entity.addAttributeListener("test", Attributes.INTEGER_TYPE, testAttributeListener);
