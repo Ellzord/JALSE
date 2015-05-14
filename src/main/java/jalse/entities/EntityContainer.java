@@ -182,6 +182,17 @@ public interface EntityContainer {
     }
 
     /**
+     * Checks whether the container contains a particular listener.
+     *
+     * @param entityListener
+     *            The EntityListener to check for.
+     * @return Whether the container contains the given EntityListener.
+     */
+    default boolean hasEntityListener(final EntityListener entityListener) {
+	return getEntityListeners().contains(entityListener);
+    }
+
+    /**
      * Kills all entities.
      */
     void killEntities();

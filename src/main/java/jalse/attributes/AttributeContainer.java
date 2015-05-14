@@ -277,6 +277,58 @@ public interface AttributeContainer {
     }
 
     /**
+     * Checks whether the container contains a particular listener for a given attribute type.
+     *
+     * @param namedType
+     *            Named attribute type.
+     * @param listener
+     *            Listener to check presence of.
+     * @return Whether the attribute has any listeners.
+     */
+    default <T> boolean hasAttributeListener(final NamedAttributeType<T> namedType, final AttributeListener<T> listener) {
+	return hasAttributeListener(namedType.getName(), namedType.getType(), listener);
+    }
+
+    /**
+     * Checks whether the container contains a particular listener for a given attribute type.
+     *
+     * @param name
+     *            Attribute type name.
+     * @param type
+     *            Attribute type.
+     * @param listener
+     *            Listener to check presence of.
+     * @return Whether the attribute has any listeners.
+     */
+    default <T> boolean hasAttributeListener(final String name, final AttributeType<T> type, final AttributeListener<T> listener) {
+	return getAttributeListeners(name, type).contains(listener);
+    }
+
+    /**
+     * Checks whether the container contains any listeners for a given attribute type.
+     *
+     * @param namedType
+     *            Named attribute type.
+     * @return Whether the attribute has any listeners.
+     */
+    default <T> boolean hasAttributeListeners(final NamedAttributeType<T> namedType) {
+	return hasAttributeListeners(namedType.getName(), namedType.getType());
+    }
+
+    /**
+     * Checks whether the container contains any listeners for a given attribute type.
+     *
+     * @param name
+     *            Attribute type name.
+     * @param type
+     *            Attribute type.
+     * @return Whether the attribute has any listeners.
+     */
+    default <T> boolean hasAttributeListeners(final String name, final AttributeType<T> type) {
+	return !getAttributeListeners(name, type).isEmpty();
+    }
+
+    /**
      * Removes the attribute matching the supplied type.
      *
      * @param namedType
