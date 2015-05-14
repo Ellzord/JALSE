@@ -13,7 +13,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AttributeContainerTest {
+public class DefaultAttributeContainerTest {
 
     private class TestAttributeListener implements AttributeListener<Integer> {
 
