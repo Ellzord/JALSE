@@ -20,7 +20,7 @@ public interface EntityListener {
      * @param event
      *            The entity event for this trigger.
      */
-    default void entityCreated(EntityEvent event) {}
+    default void entityCreated(final EntityEvent event) {}
 
     /**
      * Triggered on entity death.
@@ -28,7 +28,7 @@ public interface EntityListener {
      * @param event
      *            The entity event for this trigger.
      */
-    default void entityKilled(EntityEvent event) {}
+    default void entityKilled(final EntityEvent event) {}
 
     /**
      * Triggered on entity being received.
@@ -36,7 +36,7 @@ public interface EntityListener {
      * @param event
      *            The entity event for this trigger.
      */
-    default void entityReceived(EntityEvent event) {}
+    default void entityReceived(final EntityEvent event) {}
 
     /**
      * Triggered on entity transfer.
@@ -44,5 +44,5 @@ public interface EntityListener {
      * @param event
      *            The entity event for this trigger.
      */
-    default void entityTransferred(EntityEvent event) {}
+    default void entityTransferred(final EntityEvent event) {}
 }
