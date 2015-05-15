@@ -13,7 +13,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DefaultEntityContainerTest {
+public class EntityContainerTest {
 
     private interface TestEntity extends Entity {}
 
