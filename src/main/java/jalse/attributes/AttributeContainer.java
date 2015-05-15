@@ -268,6 +268,15 @@ public interface AttributeContainer {
     }
 
     /**
+     * Checks whether the container has any attributes.
+     *
+     * @return Is the container is not empty.
+     */
+    default boolean hasAttributes() {
+	return getAttributeCount() > 0;
+    }
+
+    /**
      * Checks whether the container contains a particular listener for a given attribute type.
      *
      * @param namedType
@@ -291,8 +300,7 @@ public interface AttributeContainer {
      *            Listener to check presence of.
      * @return Whether the attribute has any listeners.
      */
-    default <T> boolean hasAttributeListener(final String name, final AttributeType<T> type,
-	    final AttributeListener<T> listener) {
+    default <T> boolean hasAttributeListener(final String name, final AttributeType<T> type, final AttributeListener<T> listener) {
 	return getAttributeListeners(name, type).contains(listener);
     }
 
@@ -318,15 +326,6 @@ public interface AttributeContainer {
      */
     default <T> boolean hasAttributeListeners(final String name, final AttributeType<T> type) {
 	return !getAttributeListeners(name, type).isEmpty();
-    }
-
-    /**
-     * Checks whether the container has any attributes.
-     *
-     * @return Is the container is not empty.
-     */
-    default boolean hasAttributes() {
-	return getAttributeCount() > 0;
     }
 
     /**
