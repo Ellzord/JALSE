@@ -57,7 +57,6 @@ public class DefaultEntityContainerTest {
     public void addEntityTwiceTest() {
 	container = new DefaultEntityContainer();
 	final UUID id = new UUID(0, 0);
-	// Assert.assertFalse(container.hasEntities());
 	container.newEntity(id);
 	container.newEntity(id);
     }
