@@ -1,4 +1,4 @@
-package attributes;
+package jalse.attributes;
 
 import jalse.attributes.Attributes;
 import jalse.attributes.DefaultAttributeContainer;
