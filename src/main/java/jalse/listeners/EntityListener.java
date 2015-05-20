@@ -31,6 +31,14 @@ public interface EntityListener {
     default void entityKilled(final EntityEvent event) {}
 
     /**
+     * Triggered on entity marked as type
+     *
+     * @param event
+     *            The entity event for this trigger.
+     */
+    default void entityMarkedAsType(final EntityEvent event) {}
+
+    /**
      * Triggered on entity being received.
      *
      * @param event
@@ -45,4 +53,12 @@ public interface EntityListener {
      *            The entity event for this trigger.
      */
     default void entityTransferred(final EntityEvent event) {}
+
+    /**
+     * Triggered on entity unmarked as type
+     *
+     * @param event
+     *            The entity event for this trigger.
+     */
+    default void entityUnmarkedAsType(final EntityEvent event) {}
 }

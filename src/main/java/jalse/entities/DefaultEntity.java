@@ -11,6 +11,7 @@ import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
 import jalse.attributes.DefaultAttributeContainer;
 import jalse.listeners.AttributeListener;
+import jalse.listeners.EntityEvent;
 import jalse.listeners.EntityListener;
 import jalse.misc.AbstractIdentifiable;
 import jalse.misc.Identifiable;
@@ -248,6 +249,10 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	     * Add entire tree
 	     */
 	    Entities.getTypeAncestry(type).stream().map(EntityType::new).forEach(tags::add);
+	    final Set<? extends EntityListener> listeners = container.getEntityListeners();
+	    for (final EntityListener l : listeners) {
+		l.entityMarkedAsType(new EntityEvent(container, this, type));
+	    }
 	    return true;
 	}
 
@@ -382,6 +387,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	 * Remove subclasses of the type (up tree)
 	 */
 	descendants.forEach(tags::remove);
+
+	final Set<? extends EntityListener> listeners = container.getEntityListeners();
+	for (final EntityListener l : listeners) {
+	    l.entityUnmarkedAsType(new EntityEvent(container, this, type));
+	}
 
 	return !descendants.isEmpty();
     }
