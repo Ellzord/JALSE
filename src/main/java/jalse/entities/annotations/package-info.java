@@ -1,7 +1,7 @@
 /**
  * This package provides many {@link java.lang.annotation.Annotation} to be used by
- * {@link jalse.entities.EntityProxies}. This are needed to create an {@link jalse.entities.Entity}
- * type.
+ * {@link jalse.entities.functions.EntityMethodFunction}. These are needed to create dynamic
+ * {@link jalse.entities.Entity} types.
  */
 package jalse.entities.annotations;
 

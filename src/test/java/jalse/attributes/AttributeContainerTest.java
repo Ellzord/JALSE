@@ -1,8 +1,5 @@
 package jalse.attributes;
 
-import jalse.attributes.Attributes;
-import jalse.attributes.DefaultAttributeContainer;
-import jalse.attributes.NamedAttributeType;
 import jalse.listeners.AttributeEvent;
 import jalse.listeners.AttributeListener;
 

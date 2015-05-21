@@ -5,7 +5,6 @@ import jalse.actions.ActionEngine;
 import jalse.attributes.AttributeType;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
-import jalse.entities.EntityProxies;
 
 import java.util.function.Supplier;
 
@@ -42,15 +41,6 @@ public final class JALSEExceptions {
      */
     public static final Supplier<RuntimeException> ENTITY_LIMIT_REACHED = () -> new IllegalStateException(
 	    "Entity limit has been reached");
-
-    /**
-     * Runtime exception supplier for when an {@code interface} without {@link Entity} as a parent
-     * is being used as an entity type.
-     *
-     * @see EntityProxies
-     */
-    public static final Supplier<RuntimeException> INVALID_ENTITY_TYPE = () -> new IllegalArgumentException(
-	    "Entity type is invalid");
 
     /**
      * Runtime exception supplier for creation operations are done against an entity that is no

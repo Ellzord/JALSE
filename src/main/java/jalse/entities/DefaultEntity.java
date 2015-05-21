@@ -1,6 +1,6 @@
 package jalse.entities;
 
-import static jalse.entities.Entities.isOrTypeDescendant;
+import static jalse.entities.Entities.isOrSubtype;
 import static jalse.misc.JALSEExceptions.ENTITY_NOT_ALIVE;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
@@ -200,7 +200,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public boolean isMarkedAsType(final Class<? extends Entity> type) {
-	return tags.getOfType(EntityType.class).stream().anyMatch(at -> isOrTypeDescendant(at.getType(), type));
+	return tags.getOfType(EntityType.class).stream().anyMatch(at -> isOrSubtype(at.getType(), type));
     }
 
     @Override
@@ -376,7 +376,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public boolean unmarkAsType(final Class<? extends Entity> type) {
 	final Set<EntityType> descendants = tags.getOfType(EntityType.class).stream()
-		.filter(at -> isOrTypeDescendant(at.getType(), type)).collect(Collectors.toSet());
+		.filter(at -> isOrSubtype(at.getType(), type)).collect(Collectors.toSet());
 
 	/*
 	 * Remove subclasses of the type (up tree)
