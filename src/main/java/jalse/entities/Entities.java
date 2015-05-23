@@ -1,7 +1,6 @@
 package jalse.entities;
 
 import jalse.entities.EntityVisitor.EntityVisitResult;
-import jalse.misc.JALSEExceptions;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -22,8 +22,7 @@ import java.util.stream.StreamSupport;
  * A utility for {@link Entity} related functionality (specifically around entity types).<br>
  * <br>
  * An Entity type allows entities to be used in an Object-Oriented way (get/set). It does this by
- * providing a number of annotations that specify to the proxy its behaviour. Entity types also
- * support default methods allowing some logic to be defined.<br>
+ * providing a number of annotations that specify to the proxy its behaviour.<br>
  * <br>
  * Entity types are soft types - any entity can be 'cast' ({@link #asType(Entity, Class)}) to
  * another entity type even if it does not have the defining data. This does not set the entity as
@@ -36,7 +35,7 @@ import java.util.stream.StreamSupport;
  *
  * @author Elliot Ford
  *
- * @see EntityProxies
+ * @see DefaultEntityProxyFactory
  * @see #walkEntities(EntityContainer)
  * @see #walkEntityTree(EntityContainer, EntityVisitor)
  */
@@ -51,6 +50,9 @@ public final class Entities {
      * An empty EntityFactory.
      */
     public static EntityFactory EMPTY_ENTITYFACTORY = new UnmodifiableDelegateEntityFactory(null);
+
+    private static AtomicReference<EntityProxyFactory> proxyFactory = new AtomicReference<>(
+	    new DefaultEntityProxyFactory());
 
     @SuppressWarnings("unchecked")
     private static void addDirectTypeAncestors(final Set<Class<? extends Entity>> ancestry, final Class<?> type) {
@@ -92,7 +94,7 @@ public final class Entities {
 
     /**
      * Wraps an Entity as the supplied Entity type. This is a convenience method for
-     * {@link EntityProxies#proxyOfEntity(Entity, Class)}.
+     * {@link EntityProxyFactory#proxyOfEntity(Entity, Class)}.
      *
      * @param entity
      *            Entity to wrap.
@@ -100,16 +102,10 @@ public final class Entities {
      *            Entity type to wrap to.
      * @return The wrapped Entity.
      *
-     * @throws NullPointerException
-     *             If the Entity or Entity type are null.
-     * @throws IllegalArgumentException
-     *             If the Entity type does not meet the criteria defined above.
-     *
-     * @see EntityProxies
-     * @see JALSEExceptions#INVALID_ENTITY_TYPE
+     * @see #getProxyFactory()
      */
     public static <T extends Entity> T asType(final Entity entity, final Class<T> type) {
-	return EntityProxies.proxyOfEntity(entity, type);
+	return getProxyFactory().proxyOfEntity(entity, type);
     }
 
     /**
@@ -215,6 +211,10 @@ public final class Entities {
 	return container;
     }
 
+    public static EntityProxyFactory getProxyFactory() {
+	return proxyFactory.get();
+    }
+
     /**
      * Gets all ancestors for the specified descendant type (not including {@link Entity}).
      *
@@ -225,14 +225,36 @@ public final class Entities {
      * @throws IllegalArgumentException
      *             If the Entity type is invalid
      *
-     * @see JALSEExceptions#INVALID_ENTITY_TYPE
+     * @see #validateType(Class)
      */
     public static Set<Class<? extends Entity>> getTypeAncestry(final Class<? extends Entity> type) {
-	EntityProxies.validateEntityType(type);
+	validateType(type);
 
 	final Set<Class<? extends Entity>> ancestry = new HashSet<>();
 	addDirectTypeAncestors(ancestry, type);
 	return ancestry;
+    }
+
+    /**
+     * Checks whether the type is an entity subtype.
+     *
+     * @param type
+     *            Type to check.
+     * @return Whether the type is a descendant of entity.
+     */
+    public static boolean isEntityOrSubtype(final Class<?> type) {
+	return Entity.class.isAssignableFrom(type);
+    }
+
+    /**
+     * Checks whether the type is an entity subtype.
+     *
+     * @param type
+     *            Type to check.
+     * @return Whether the type is a descendant of entity.
+     */
+    public static boolean isEntitySubtype(final Class<?> type) {
+	return !Entity.class.equals(type) && Entity.class.isAssignableFrom(type);
     }
 
     /**
@@ -255,8 +277,7 @@ public final class Entities {
      *            Ancestor type.
      * @return Whether the descendant is equal or descended from the ancestor type.
      */
-    public static boolean isOrTypeDescendant(final Class<? extends Entity> descendant,
-	    final Class<? extends Entity> ancestor) {
+    public static boolean isOrSubtype(final Class<? extends Entity> descendant, final Class<? extends Entity> ancestor) {
 	return ancestor.isAssignableFrom(descendant);
     }
 
@@ -283,6 +304,10 @@ public final class Entities {
 		.findFirst();
     }
 
+    public static void setProxyFactory(final EntityProxyFactory newFactory) {
+	proxyFactory.set(Objects.requireNonNull(newFactory));
+    }
+
     /**
      * Creates an immutable read-only delegate entity container for the supplied container.
      *
@@ -303,6 +328,19 @@ public final class Entities {
      */
     public static EntityFactory unmodifiableEntityFactory(final EntityFactory factory) {
 	return new UnmodifiableDelegateEntityFactory(Objects.requireNonNull(factory));
+    }
+
+    /**
+     * Validates the entity type. This is a convenience method for
+     * {@link EntityProxyFactory#validateType(Class)}.
+     *
+     * @param type
+     *            Type to validate.
+     *
+     * @see #getProxyFactory()
+     */
+    public static void validateType(final Class<? extends Entity> type) {
+	getProxyFactory().validateType(type);
     }
 
     /**

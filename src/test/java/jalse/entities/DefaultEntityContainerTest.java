@@ -124,25 +124,6 @@ public class DefaultEntityContainerTest {
 	otherContainer.addEntityListener(entityListener);
 	Assert.assertEquals(container, otherContainer);
     }
-    
-    @Test
-    public void hashCodeTest() {
-	container = new DefaultEntityContainer();
-
-	final DefaultEntityContainer otherContainer = new DefaultEntityContainer();
-	Assert.assertEquals(container.hashCode(), otherContainer.hashCode());
-
-	final UUID id = new UUID(0, 0);
-	container.newEntity(id);
-	otherContainer.newEntity(id);
-	Assert.assertEquals(container.hashCode(), otherContainer.hashCode());
-
-	final TestEntityListener entityListener = new TestEntityListener();
-	container.addEntityListener(entityListener);
-	Assert.assertNotEquals(container.hashCode(), otherContainer.hashCode());
-	otherContainer.addEntityListener(entityListener);
-	Assert.assertEquals(container.hashCode(), otherContainer.hashCode());
-    }
 
     @Test(expected = IllegalStateException.class)
     public void exportButNotTransferTest() {
@@ -164,6 +145,25 @@ public class DefaultEntityContainerTest {
 	container = new DefaultEntityContainer(entityFactory, null);
 
 	Assert.assertEquals(entityFactory, container.getFactory());
+    }
+
+    @Test
+    public void hashCodeTest() {
+	container = new DefaultEntityContainer();
+
+	final DefaultEntityContainer otherContainer = new DefaultEntityContainer();
+	Assert.assertEquals(container.hashCode(), otherContainer.hashCode());
+
+	final UUID id = new UUID(0, 0);
+	container.newEntity(id);
+	otherContainer.newEntity(id);
+	Assert.assertEquals(container.hashCode(), otherContainer.hashCode());
+
+	final TestEntityListener entityListener = new TestEntityListener();
+	container.addEntityListener(entityListener);
+	Assert.assertNotEquals(container.hashCode(), otherContainer.hashCode());
+	otherContainer.addEntityListener(entityListener);
+	Assert.assertEquals(container.hashCode(), otherContainer.hashCode());
     }
 
     @Test

@@ -201,8 +201,6 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	    de.killEntities(); // Kill tree
 
-	    EntityProxies.removeProxiesOfEntity(de); // Force clean-up
-
 	    return true;
 	} finally {
 	    write.unlock();
