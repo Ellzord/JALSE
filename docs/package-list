@@ -3,6 +3,8 @@ jalse.actions
 jalse.attributes
 jalse.entities
 jalse.entities.annotations
+jalse.entities.functions
+jalse.entities.methods
 jalse.listeners
 jalse.misc
 jalse.tags
