@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
  * This is a method function for {@link MarkAsType} annotation. It will resolve an
  * {@link MarkAsTypeMethod} to be used by the entity typing system.<br>
  * <br>
- * The next example signatures will resolve to {@link Entity#MarkAsType(Class)()}.
+ * The next example signatures will resolve to {@link Entity#markAsType(Class)}.
  *
  * <pre>
  * <code>

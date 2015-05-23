@@ -208,7 +208,7 @@ public class DefaultEntityProxyFactory implements EntityProxyFactory {
      * @see GetAttributeFunction
      * @see SetAttributeFunction
      * @see NewEntityFunction
-     * @See GetEntityFunction
+     * @see GetEntityFunction
      * @see StreamEntitiesFunction
      * @see GetEntitiesFunction
      * @see KillEntityFunction

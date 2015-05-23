@@ -38,8 +38,6 @@ public class GetEntityMethod implements EntityMethod {
      *            Entity type.
      * @param optional
      *            Whether is opt.
-     * @param idParam
-     *            Whether the ID is required as param.
      */
     public GetEntityMethod(final Class<? extends Entity> type, final boolean optional) {
 	this.type = Objects.requireNonNull(type);

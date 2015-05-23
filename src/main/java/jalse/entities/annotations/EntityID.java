@@ -41,8 +41,7 @@ public @interface EntityID {
     public static final String DEFAULT_NAME = "";
 
     /**
-     * Default random ({@code false).
-
+     * Default random ({@code false}).
      */
     public static final boolean DEFAULT_RANDOM = false;
 

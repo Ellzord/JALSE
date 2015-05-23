@@ -16,7 +16,7 @@ import java.lang.reflect.Method;
  * This is a method function for {@link UnmarkAsType} annotation. It will resolve an
  * {@link UnmarkAsTypeMethod} to be used by the entity typing system.<br>
  * <br>
- * The next example signatures will resolve to {@link Entity#UnmarkAsType(Class)()}.
+ * The next example signatures will resolve to {@link Entity#unmarkAsType(Class)}.
  *
  * <pre>
  * <code>

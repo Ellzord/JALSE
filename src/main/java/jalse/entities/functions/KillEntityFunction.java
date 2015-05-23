@@ -4,6 +4,7 @@ import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.hasReturnType;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import jalse.entities.DefaultEntityProxyFactory;
+import jalse.entities.EntityContainer;
 import jalse.entities.annotations.EntityID;
 import jalse.entities.annotations.KillEntity;
 import jalse.entities.methods.KillEntityMethod;
@@ -16,7 +17,7 @@ import java.util.function.Supplier;
  * This is a method function for {@link KillEntity} annotation. It will resolve an
  * {@link KillEntityMethod} to be used by the entity typing system.<br>
  * <br>
- * The next example signatures will resolve to {@link EntityContainer#killEntity(UUID)()}.
+ * The next example signatures will resolve to {@link EntityContainer#killEntity(UUID)}.
  *
  * <pre>
  * <code>

@@ -20,8 +20,8 @@ import java.util.Optional;
  * {@link SetAttributeMethod} to be used by the entity typing system.<br>
  * <br>
  * The next example signatures will resolve to
- * {@link AttributeContainer#setAttribute(String, jalse.attributes.AttributeType)} supplied with the
- * name {@code scary}, type {@code Boolean} and the specified input.
+ * {@link AttributeContainer#setAttribute(String, jalse.attributes.AttributeType, Object)} supplied
+ * with the name {@code scary}, type {@code Boolean} and the specified input.
  *
  * <pre>
  * <code>
@@ -34,8 +34,8 @@ import java.util.Optional;
  * </pre>
  *
  * The next example signature will resolve to
- * {@link AttributeContainer#setOptAttribute(String, jalse.attributes.AttributeType)} supplied with
- * the name {@code scary}, type {@code Boolean} and the specified input.
+ * {@link AttributeContainer#setOptAttribute(String, jalse.attributes.AttributeType, Object)}
+ * supplied with the name {@code scary}, type {@code Boolean} and the specified input.
  *
  * <pre>
  * <code>
