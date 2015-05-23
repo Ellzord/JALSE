@@ -126,8 +126,6 @@ public class EntityContainerTest {
 	Assert.assertFalse(container.hasEntities());
 
 	otherContainer.transferEntities(p -> !p.getID().equals(new UUID(0, 0)), container);
-	System.out.println(otherContainer.getEntityIDs());
-	System.out.println(container.getEntityIDs());
 	Assert.assertTrue(otherContainer.getEntityIDs().contains(new UUID(0, 0)));
 	Assert.assertFalse(otherContainer.getEntityIDs().contains(new UUID(0, 1)));
 	Assert.assertFalse(container.getEntityIDs().contains(new UUID(0, 0)));

@@ -1,9 +1,10 @@
 package jalse.entities.functions;
 
 import static jalse.attributes.Attributes.newUnknownType;
+import static jalse.entities.functions.Functions.checkHasReturnType;
+import static jalse.entities.functions.Functions.checkNoParams;
+import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.firstGenericTypeArg;
-import static jalse.entities.functions.Functions.hasParams;
-import static jalse.entities.functions.Functions.hasReturnType;
 import static jalse.entities.functions.Functions.isPrimitive;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import jalse.attributes.AttributeContainer;
@@ -70,13 +71,9 @@ public class GetAttributeFunction implements EntityMethodFunction {
 	}
 
 	// Basic check method signature
-	if (!hasReturnType(m)) {
-	    throw new IllegalArgumentException("Must have a return type");
-	} else if (hasParams(m)) {
-	    throw new IllegalArgumentException("Must have params");
-	} else if (m.isDefault()) {
-	    throw new IllegalArgumentException("Cannot be default");
-	}
+	checkHasReturnType(m);
+	checkNotDefault(m);
+	checkNoParams(m);
 
 	// Work out attribute name
 	String name = annonation.name();

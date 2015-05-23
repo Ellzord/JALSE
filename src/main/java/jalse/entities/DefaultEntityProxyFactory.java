@@ -8,9 +8,14 @@ import jalse.entities.functions.EntityMethodFunction;
 import jalse.entities.functions.GetAttributeFunction;
 import jalse.entities.functions.GetEntitiesFunction;
 import jalse.entities.functions.GetEntityFunction;
+import jalse.entities.functions.KillEntitiesFunction;
+import jalse.entities.functions.KillEntityFunction;
+import jalse.entities.functions.MarkAsTypeFunction;
 import jalse.entities.functions.NewEntityFunction;
+import jalse.entities.functions.ScheduleForActorFunction;
 import jalse.entities.functions.SetAttributeFunction;
 import jalse.entities.functions.StreamEntitiesFunction;
+import jalse.entities.functions.UnmarkAsTypeFunction;
 import jalse.entities.methods.EntityMethod;
 
 import java.lang.ref.WeakReference;
@@ -187,6 +192,8 @@ public class DefaultEntityProxyFactory implements EntityProxyFactory {
 
     /**
      * Creates a new DefaultEntityProxyFactory.
+     *
+     * @see #addResolverFunctions()
      */
     public DefaultEntityProxyFactory() {
 	resolver = new EntityFunctionResolver();
@@ -204,6 +211,11 @@ public class DefaultEntityProxyFactory implements EntityProxyFactory {
      * @See GetEntityFunction
      * @see StreamEntitiesFunction
      * @see GetEntitiesFunction
+     * @see KillEntityFunction
+     * @see KillEntitiesFunction
+     * @see MarkAsTypeFunction
+     * @see UnmarkAsTypeFunction
+     * @see ScheduleForActorFunction
      */
     protected void addResolverFunctions() {
 	resolver.addMethodFunction(new DefaultFunction());
@@ -213,6 +225,11 @@ public class DefaultEntityProxyFactory implements EntityProxyFactory {
 	resolver.addMethodFunction(new GetEntityFunction());
 	resolver.addMethodFunction(new StreamEntitiesFunction());
 	resolver.addMethodFunction(new GetEntitiesFunction());
+	resolver.addMethodFunction(new KillEntityFunction());
+	resolver.addMethodFunction(new KillEntitiesFunction());
+	resolver.addMethodFunction(new MarkAsTypeFunction());
+	resolver.addMethodFunction(new UnmarkAsTypeFunction());
+	resolver.addMethodFunction(new ScheduleForActorFunction());
     }
 
     @Override

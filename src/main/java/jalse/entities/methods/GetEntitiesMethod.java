@@ -36,21 +36,21 @@ public class GetEntitiesMethod implements EntityMethod {
     private final Predicate<Entity> idFilter;
 
     /**
-     * Creates a stream entities method.
+     * Creates a get entities method.
      *
      * @param type
      *            Entity type.
-     * @param ofType
-     *            Whether filtering of type.
      * @param idSuppliers
      *            Entity ID suppliers for filtering.
+     * @param ofType
+     *            Whether filtering of type.
      */
-    public GetEntitiesMethod(final Class<? extends Entity> type, final boolean ofType,
-	    final Set<Supplier<UUID>> idSuppliers) {
+    public GetEntitiesMethod(final Class<? extends Entity> type, final Set<Supplier<UUID>> idSuppliers,
+	    final boolean ofType) {
 	this.type = Objects.requireNonNull(type);
-	this.ofType = ofType;
 	this.idSuppliers = Objects.requireNonNull(idSuppliers);
 	entityType = Entity.class.equals(type);
+	this.ofType = ofType;
 	// Create filter
 	idFilter = newIDFilter();
     }

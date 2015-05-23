@@ -91,7 +91,7 @@ public class GetEntitiesFunctionTest {
 	function = null;
     }
 
-    public Method newTestMethod(final Class<?> clazz, final Class<?>... params) {
+    public Method getTestMethod(final Class<?> clazz, final Class<?>... params) {
 	Method m = null;
 	try {
 	    m = clazz.getDeclaredMethod("getTest", params);
@@ -105,7 +105,7 @@ public class GetEntitiesFunctionTest {
     public void testInvalid() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestInvalidEntity.class);
+	final Method m = getTestMethod(TestInvalidEntity.class);
 
 	final GetEntitiesMethod gem = function.apply(m);
 	assertNull(gem);
@@ -115,7 +115,7 @@ public class GetEntitiesFunctionTest {
     public void testInvalid2() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestInvalidEntity2.class);
+	final Method m = getTestMethod(TestInvalidEntity2.class);
 
 	function.apply(m);
     }
@@ -124,7 +124,7 @@ public class GetEntitiesFunctionTest {
     public void testInvalid3() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestInvalidEntity3.class);
+	final Method m = getTestMethod(TestInvalidEntity3.class);
 
 	function.apply(m);
     }
@@ -133,7 +133,7 @@ public class GetEntitiesFunctionTest {
     public void testInvalid4() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestInvalidEntity4.class, String.class);
+	final Method m = getTestMethod(TestInvalidEntity4.class, String.class);
 
 	function.apply(m);
     }
@@ -142,7 +142,7 @@ public class GetEntitiesFunctionTest {
     public void testInvalid5() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestInvalidEntity5.class);
+	final Method m = getTestMethod(TestInvalidEntity5.class);
 
 	function.apply(m);
     }
@@ -151,7 +151,7 @@ public class GetEntitiesFunctionTest {
     public void testValid() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestValidEntity.class);
+	final Method m = getTestMethod(TestValidEntity.class);
 
 	final GetEntitiesMethod gem = function.apply(m);
 	assertNotNull(gem);
@@ -165,7 +165,7 @@ public class GetEntitiesFunctionTest {
     public void testValid2() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestValidEntity2.class);
+	final Method m = getTestMethod(TestValidEntity2.class);
 
 	final GetEntitiesMethod gem = function.apply(m);
 	assertNotNull(gem);
@@ -179,7 +179,7 @@ public class GetEntitiesFunctionTest {
     public void testValid3() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestValidEntity3.class);
+	final Method m = getTestMethod(TestValidEntity3.class);
 
 	final GetEntitiesMethod gem = function.apply(m);
 	assertNotNull(gem);
@@ -193,7 +193,7 @@ public class GetEntitiesFunctionTest {
     public void testValid4() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestValidEntity4.class);
+	final Method m = getTestMethod(TestValidEntity4.class);
 
 	final GetEntitiesMethod gem = function.apply(m);
 	assertNotNull(gem);
@@ -207,7 +207,7 @@ public class GetEntitiesFunctionTest {
     public void testValid5() {
 	function = new GetEntitiesFunction();
 
-	final Method m = newTestMethod(TestValidEntity5.class);
+	final Method m = getTestMethod(TestValidEntity5.class);
 
 	final GetEntitiesMethod gem = function.apply(m);
 	assertNotNull(gem);

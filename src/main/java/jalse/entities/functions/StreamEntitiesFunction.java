@@ -1,11 +1,13 @@
 package jalse.entities.functions;
 
 import static jalse.entities.Entities.isEntityOrSubtype;
+import static jalse.entities.functions.Functions.checkHasReturnType;
+import static jalse.entities.functions.Functions.checkNoParams;
+import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.firstGenericTypeArg;
-import static jalse.entities.functions.Functions.hasReturnType;
+import static jalse.entities.functions.Functions.getIDSuppliers;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import static jalse.entities.functions.Functions.toClass;
-import static jalse.entities.functions.Functions.toIDSupplier;
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
@@ -15,7 +17,6 @@ import jalse.entities.methods.StreamEntitiesMethod;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -88,19 +89,12 @@ public class StreamEntitiesFunction implements EntityMethodFunction {
 	}
 
 	// Basic check method signature
-	if (!hasReturnType(m)) {
-	    throw new IllegalArgumentException("Must have a return type");
-	} else if (m.getParameterCount() != 0) {
-	    throw new IllegalArgumentException("Cannot have any params");
-	} else if (m.isDefault()) {
-	    throw new IllegalArgumentException("Cannot be default");
-	}
+	checkHasReturnType(m);
+	checkNoParams(m);
+	checkNotDefault(m);
 
-	// Check only has one ID max
-	final Set<Supplier<UUID>> idSuppliers = new HashSet<>();
-	for (final EntityID entityID : m.getAnnotationsByType(EntityID.class)) {
-	    idSuppliers.add(toIDSupplier(entityID));
-	}
+	// Create ID suppliers
+	final Set<Supplier<UUID>> idSuppliers = getIDSuppliers(m);
 
 	// Check stream
 	if (!returnTypeIs(m, Stream.class)) {
@@ -116,6 +110,6 @@ public class StreamEntitiesFunction implements EntityMethodFunction {
 	}
 
 	// Create stream entities method
-	return new StreamEntitiesMethod((Class<? extends Entity>) entityType, annonation.ofType(), idSuppliers);
+	return new StreamEntitiesMethod((Class<? extends Entity>) entityType, idSuppliers, annonation.ofType());
     }
 }

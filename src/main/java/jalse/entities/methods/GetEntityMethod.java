@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 public class GetEntityMethod implements EntityMethod {
 
     private final Class<? extends Entity> type;
-    private final Supplier<UUID> idSupplier;
+    private Supplier<UUID> idSupplier;
     private final boolean optional;
     private final boolean entityType;
 
@@ -38,16 +38,14 @@ public class GetEntityMethod implements EntityMethod {
      *            Entity type.
      * @param optional
      *            Whether is opt.
-     * @param idSupplier
-     *            Entity ID supplier.
      * @param idParam
      *            Whether the ID is required as param.
      */
-    public GetEntityMethod(final Class<? extends Entity> type, final boolean optional, final Supplier<UUID> idSupplier) {
+    public GetEntityMethod(final Class<? extends Entity> type, final boolean optional) {
 	this.type = Objects.requireNonNull(type);
-	this.optional = optional;
-	this.idSupplier = idSupplier;
 	entityType = Entity.class.equals(type);
+	this.optional = optional;
+	idSupplier = null;
     }
 
     @Override
@@ -92,5 +90,14 @@ public class GetEntityMethod implements EntityMethod {
      */
     public boolean isOptional() {
 	return optional;
+    }
+
+    /**
+     * Sets the entity ID supplier.
+     * 
+     * @param idSupplier
+     */
+    public void setIDSupplier(final Supplier<UUID> idSupplier) {
+	this.idSupplier = idSupplier;
     }
 }

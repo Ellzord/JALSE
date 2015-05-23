@@ -30,7 +30,7 @@ public class GetEntityFunctionTest {
     interface TestInvalidEntity2 extends Entity {
 
 	@GetEntity
-	void getTest();
+	Entity getTest();
     }
 
     interface TestInvalidEntity3 extends Entity {

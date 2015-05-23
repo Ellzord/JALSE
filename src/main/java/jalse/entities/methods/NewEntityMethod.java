@@ -34,33 +34,23 @@ import java.util.function.Supplier;
 public class NewEntityMethod implements EntityMethod {
 
     private final Class<? extends Entity> type;
-    private final Supplier<UUID> idSupplier;
-    private final boolean idParam;
-    private final boolean containerParam;
     private final boolean entityType;
+    private Supplier<UUID> idSupplier;
+    private boolean idParam;
+    private boolean containerParam;
 
     /**
      * Creates a new entity method.
      *
      * @param type
      *            Entity type.
-     * @param idSupplier
-     *            Entity ID supplier.
-     * @param idParam
-     *            Whether the ID is required as param.
-     * @param containerParam
-     *            Whether the container is required as param.
      */
-    public NewEntityMethod(final Class<? extends Entity> type, final Supplier<UUID> idSupplier, final boolean idParam,
-	    final boolean containerParam) {
-	if (idSupplier != null && idParam) {
-	    throw new IllegalArgumentException();
-	}
+    public NewEntityMethod(final Class<? extends Entity> type) {
 	this.type = Objects.requireNonNull(type);
-	this.idSupplier = idSupplier;
-	this.idParam = idParam;
-	this.containerParam = containerParam;
 	entityType = Entity.class.equals(type);
+	idParam = false;
+	containerParam = false;
+	idSupplier = null;
     }
 
     @Override
@@ -132,5 +122,35 @@ public class NewEntityMethod implements EntityMethod {
      */
     public boolean requiresIDParam() {
 	return idParam;
+    }
+
+    /**
+     * Set the entity ID supplier.
+     *
+     * @param idSupplier
+     *            Entity ID supplier.
+     */
+    public void setIDSupplier(final Supplier<UUID> idSupplier) {
+	this.idSupplier = idSupplier;
+    }
+
+    /**
+     * Set whether the method requires container param.
+     *
+     * @param containerParam
+     *            Whether the container is required.
+     */
+    public void setRequiresContainerParam(final boolean containerParam) {
+	this.containerParam = containerParam;
+    }
+
+    /**
+     * Set whether the method requires ID param.
+     *
+     * @param idParam
+     *            Whether the ID param is required.
+     */
+    public void setRequiresIDParam(final boolean idParam) {
+	this.idParam = idParam;
     }
 }

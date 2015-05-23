@@ -1,11 +1,12 @@
 package jalse.entities.functions;
 
 import static jalse.entities.Entities.isEntityOrSubtype;
+import static jalse.entities.functions.Functions.checkHasReturnType;
+import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.firstGenericTypeArg;
-import static jalse.entities.functions.Functions.hasReturnType;
+import static jalse.entities.functions.Functions.getSingleIDSupplier;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import static jalse.entities.functions.Functions.toClass;
-import static jalse.entities.functions.Functions.toIDSupplier;
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
@@ -96,25 +97,14 @@ public class GetEntityFunction implements EntityMethodFunction {
 	}
 
 	// Basic check method signature
-	if (!hasReturnType(m)) {
-	    throw new IllegalArgumentException("Must have a return type");
-	} else if (m.getParameterCount() > 1) {
+	checkHasReturnType(m);
+	checkNotDefault(m);
+	if (m.getParameterCount() > 1) {
 	    throw new IllegalArgumentException("Cannot have over one param");
-	} else if (m.isDefault()) {
-	    throw new IllegalArgumentException("Cannot be default");
-	}
-
-	// Check only has one ID max
-	final EntityID[] entityIDs = m.getAnnotationsByType(EntityID.class);
-	if (entityIDs.length > 1) {
-	    throw new IllegalArgumentException("Cannot have more than one entity ID");
 	}
 
 	// Get and validate ID
-	Supplier<UUID> idSupplier = null;
-	if (entityIDs.length == 1) {
-	    idSupplier = toIDSupplier(entityIDs[0]);
-	}
+	Supplier<UUID> idSupplier = getSingleIDSupplier(m);
 
 	// Check ID param
 	final Class<?>[] params = m.getParameterTypes();
@@ -126,6 +116,11 @@ public class GetEntityFunction implements EntityMethodFunction {
 	// Check duplicate ID definitions
 	if (idParam && idSupplier != null) {
 	    throw new IllegalArgumentException(String.format("Cannot have %s annotation and ID param", EntityID.class));
+	}
+
+	// Check ID
+	if (!idParam && idSupplier == null) {
+	    throw new IllegalArgumentException("Must provide ID via param or annotation");
 	}
 
 	Type entityType = m.getGenericReturnType();
@@ -142,6 +137,10 @@ public class GetEntityFunction implements EntityMethodFunction {
 	}
 
 	// Create get entity method
-	return new GetEntityMethod((Class<? extends Entity>) entityType, optional, idSupplier);
+	final GetEntityMethod gem = new GetEntityMethod((Class<? extends Entity>) entityType, optional);
+	if (!idParam) {
+	    gem.setIDSupplier(idSupplier);
+	}
+	return gem;
     }
 }

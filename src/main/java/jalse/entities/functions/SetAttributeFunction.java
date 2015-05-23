@@ -1,6 +1,7 @@
 package jalse.entities.functions;
 
 import static jalse.attributes.Attributes.newUnknownType;
+import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.firstGenericTypeArg;
 import static jalse.entities.functions.Functions.hasReturnType;
 import static jalse.entities.functions.Functions.isPrimitive;
@@ -67,10 +68,9 @@ public class SetAttributeFunction implements EntityMethodFunction {
 	}
 
 	// Basic check method signature
+	checkNotDefault(m);
 	if (m.getParameterCount() != 1) {
 	    throw new IllegalArgumentException("Must have only one param");
-	} else if (m.isDefault()) {
-	    throw new IllegalArgumentException("Cannot be default");
 	}
 
 	// Work out attribute name

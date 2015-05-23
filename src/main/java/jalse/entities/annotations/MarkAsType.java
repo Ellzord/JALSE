@@ -1,6 +1,8 @@
 package jalse.entities.annotations;
 
 import jalse.entities.Entity;
+import jalse.entities.functions.MarkAsTypeFunction;
+import jalse.entities.methods.MarkAsTypeMethod;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

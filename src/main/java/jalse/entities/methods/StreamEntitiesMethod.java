@@ -40,13 +40,13 @@ public class StreamEntitiesMethod implements EntityMethod {
      *
      * @param type
      *            Entity type.
-     * @param ofType
-     *            Whether filtering of type.
      * @param idSuppliers
      *            Entity ID suppliers for filtering.
+     * @param ofType
+     *            Whether filtering of type.
      */
-    public StreamEntitiesMethod(final Class<? extends Entity> type, final boolean ofType,
-	    final Set<Supplier<UUID>> idSuppliers) {
+    public StreamEntitiesMethod(final Class<? extends Entity> type, final Set<Supplier<UUID>> idSuppliers,
+	    final boolean ofType) {
 	this.type = Objects.requireNonNull(type);
 	this.ofType = ofType;
 	this.idSuppliers = Objects.requireNonNull(idSuppliers);

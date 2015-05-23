@@ -31,8 +31,6 @@ public @interface GetAttribute {
 
     /**
      * Default name ({@code ""}).
-     *
-     * @see #name()
      */
     public static final String DEFAULT_NAME = "";
 
@@ -40,6 +38,8 @@ public @interface GetAttribute {
      * Attribute type name.
      *
      * @return Name.
+     *
+     * @see GetAttribute#DEFAULT_NAME
      */
     String name() default DEFAULT_NAME;
 }

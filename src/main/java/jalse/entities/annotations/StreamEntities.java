@@ -32,8 +32,6 @@ public @interface StreamEntities {
 
     /**
      * Default type filtering ({@code true}).
-     *
-     * @see #ofType()
      */
     public static final boolean DEFAULT_OF_TYPE = true;
 
@@ -41,6 +39,8 @@ public @interface StreamEntities {
      * Whether filtering of type is performed.
      *
      * @return Filter of type.
+     *
+     * @see StreamEntities#DEFAULT_OF_TYPE
      */
     boolean ofType() default DEFAULT_OF_TYPE;
 }

@@ -17,7 +17,7 @@ import java.util.UUID;
  *
  * @author Elliot
  *
- * @see Functions#toUUID(EntityID)
+ * @see Functions#toIDSupplier(EntityID)
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -27,29 +27,22 @@ public @interface EntityID {
 
     /**
      * Default last significant bits ({@code 0L}).
-     *
-     * @see #leastSigBits()
      */
     public static final long DEFAULT_LEAST_SIG_BITS = 0L;
 
     /**
      * Default most significant bits ({@code 0L}).
-     *
-     * @see #mostSigBits()
      */
     public static final long DEFAULT_MOST_SIG_BITS = 0L;
 
     /**
      * Default name ({@code ""}).
-     *
-     * @see #name()
      */
     public static final String DEFAULT_NAME = "";
 
-/**
+    /**
      * Default random ({@code false).
-     *
-     * @see #random()
+
      */
     public static final boolean DEFAULT_RANDOM = false;
 
@@ -57,6 +50,8 @@ public @interface EntityID {
      * The least significant bits.
      *
      * @return Least significant bits.
+     *
+     * @see EntityID#DEFAULT_LEAST_SIG_BITS
      */
     long leastSigBits() default DEFAULT_LEAST_SIG_BITS;
 
@@ -64,6 +59,8 @@ public @interface EntityID {
      * The most significant bits.
      *
      * @return most significant bits.
+     *
+     * @see EntityID#DEFAULT_MOST_SIG_BITS
      */
     long mostSigBits() default DEFAULT_MOST_SIG_BITS;
 
@@ -71,6 +68,8 @@ public @interface EntityID {
      * String representation of the ID.
      *
      * @return String representation.
+     *
+     * @see EntityID#DEFAULT_NAME
      */
     String name() default DEFAULT_NAME;
 
@@ -78,6 +77,8 @@ public @interface EntityID {
      * Whether the ID should be random.
      *
      * @return Random ID.
+     *
+     * @see EntityID#DEFAULT_RANDOM
      */
     boolean random() default DEFAULT_RANDOM;
 }

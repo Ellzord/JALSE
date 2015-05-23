@@ -3,6 +3,8 @@ package jalse.entities.annotations;
 import jalse.actions.Action;
 import jalse.actions.ActionScheduler;
 import jalse.entities.Entity;
+import jalse.entities.functions.ScheduleForActorFunction;
+import jalse.entities.methods.ScheduleForActorMethod;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,12 +13,9 @@ import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
 
 /**
- * An {@link Entity} type annotation for:
- * <ul>
- * <li>{@link ActionScheduler#scheduleForActor(Action)}</li>
- * <li>{@link ActionScheduler#scheduleForActor(Action, long, TimeUnit)}</li>
- * <li>{@link ActionScheduler#scheduleForActor(Action, long, long, TimeUnit)}</li>
- * </ul>
+ * An {@link Entity} type annotation for
+ * {@link ActionScheduler#scheduleForActor(Action, long, long, TimeUnit)}. <br>
+ * <br>
  * See {@link ScheduleForActorFunction} for acceptable method signatures.
  *
  * @author Elliot Ford
@@ -30,22 +29,16 @@ public @interface ScheduleForActor {
 
     /**
      * Default initial delay ({@code 0L}).
-     *
-     * @see #initialDelay()
      */
     public static final long DEFAULT_INITIAL_DELAY = 0L;
 
     /**
      * Default repeat period ({@code 0L}).
-     *
-     * @see #period()
      */
     public static final long DEFAULT_PERIOD = 0L;
 
     /**
      * Default time unit (nanoseconds).
-     *
-     * @see #unit()
      */
     public static final TimeUnit DEFAULT_TIMEUNIT = TimeUnit.NANOSECONDS;
 
@@ -53,6 +46,7 @@ public @interface ScheduleForActor {
      * Action to schedule.
      *
      * @return Action type.
+     *
      */
     Class<? extends Action<Entity>> action();
 
@@ -60,6 +54,8 @@ public @interface ScheduleForActor {
      * Initial delay before executing.
      *
      * @return Initial delay.
+     *
+     * @see ScheduleForActor#DEFAULT_INITIAL_DELAY
      */
     long initialDelay() default DEFAULT_INITIAL_DELAY;
 
@@ -67,6 +63,8 @@ public @interface ScheduleForActor {
      * Repeat period.
      *
      * @return Period.
+     *
+     * @see ScheduleForActor#DEFAULT_PERIOD
      */
     long period() default DEFAULT_PERIOD;
 
@@ -74,6 +72,8 @@ public @interface ScheduleForActor {
      * Time unit for scheduling information.
      *
      * @return Time unit.
+     *
+     * @see ScheduleForActor#DEFAULT_TIMEUNIT
      */
     TimeUnit unit() default TimeUnit.NANOSECONDS;
 }
