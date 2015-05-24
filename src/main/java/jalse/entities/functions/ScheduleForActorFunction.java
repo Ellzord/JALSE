@@ -7,7 +7,7 @@ import static jalse.entities.functions.Functions.hasReturnType;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import static jalse.entities.functions.Functions.toClass;
 import jalse.actions.Action;
-import jalse.actions.MutableActionContext;
+import jalse.actions.ActionContext;
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.Entity;
 import jalse.entities.annotations.ScheduleForActor;
@@ -102,8 +102,8 @@ public class ScheduleForActorFunction implements EntityMethodFunction {
 	// Check return type
 	if (hasReturnType(m)) {
 	    // Check context
-	    if (!returnTypeIs(m, MutableActionContext.class)) {
-		throw new IllegalArgumentException("Return type must be void or mutable context");
+	    if (!returnTypeIs(m, ActionContext.class)) {
+		throw new IllegalArgumentException("Return type must be void or context");
 	    }
 	    // Check context type
 	    final Type contextType = firstGenericTypeArg(m.getGenericReturnType());

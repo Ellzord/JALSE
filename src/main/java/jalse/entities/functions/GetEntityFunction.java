@@ -104,7 +104,7 @@ public class GetEntityFunction implements EntityMethodFunction {
 	}
 
 	// Get and validate ID
-	Supplier<UUID> idSupplier = getSingleIDSupplier(m);
+	final Supplier<UUID> idSupplier = getSingleIDSupplier(m);
 
 	// Check ID param
 	final Class<?>[] params = m.getParameterTypes();

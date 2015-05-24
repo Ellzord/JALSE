@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import jalse.actions.Action;
 import jalse.actions.ActionContext;
-import jalse.actions.MutableActionContext;
 import jalse.entities.Entity;
 import jalse.entities.annotations.ScheduleForActor;
 import jalse.entities.methods.ScheduleForActorMethod;
@@ -23,12 +22,12 @@ public class ScheduleForActorFunctionTest {
     public static class TestAction implements Action<Entity> {
 
 	@Override
-	public void perform(ActionContext<Entity> context) throws InterruptedException {}
+	public void perform(final ActionContext<Entity> context) throws InterruptedException {}
     }
 
     interface TestInvalidEntity extends Entity {
 
-	MutableActionContext<Entity> scheduleTest();
+	ActionContext<Entity> scheduleTest();
     }
 
     interface TestInvalidEntity2 extends Entity {
@@ -40,7 +39,7 @@ public class ScheduleForActorFunctionTest {
     interface TestInvalidEntity3 extends Entity {
 
 	@ScheduleForActor(action = TestAction.class)
-	MutableActionContext<Boolean> scheduleTest();
+	ActionContext<Boolean> scheduleTest();
     }
 
     interface TestInvalidEntity4 extends Entity {
@@ -58,7 +57,7 @@ public class ScheduleForActorFunctionTest {
     interface TestValidEntity extends Entity {
 
 	@ScheduleForActor(action = TestAction.class)
-	MutableActionContext<Entity> scheduleTest();
+	ActionContext<Entity> scheduleTest();
     }
 
     interface TestValidEntity2 extends Entity {
@@ -86,6 +85,16 @@ public class ScheduleForActorFunctionTest {
 	function = null;
     }
 
+    public Method scheduleTestMethod(final Class<?> clazz, final Class<?>... params) {
+	Method m = null;
+	try {
+	    m = clazz.getDeclaredMethod("scheduleTest", params);
+	} catch (NoSuchMethodException | SecurityException e) {
+	    fail("Could not get method reference");
+	}
+	return m;
+    }
+
     @Test
     public void testInvalid() {
 	function = new ScheduleForActorFunction();
@@ -104,7 +113,7 @@ public class ScheduleForActorFunctionTest {
 
 	function.apply(m);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testInvalid3() {
 	function = new ScheduleForActorFunction();
@@ -113,7 +122,7 @@ public class ScheduleForActorFunctionTest {
 
 	function.apply(m);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testInvalid4() {
 	function = new ScheduleForActorFunction();
@@ -122,7 +131,7 @@ public class ScheduleForActorFunctionTest {
 
 	function.apply(m);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testInvalid5() {
 	function = new ScheduleForActorFunction();
@@ -145,7 +154,7 @@ public class ScheduleForActorFunctionTest {
 	assertTrue(sfam.getPeriod() == 0L);
 	assertEquals(sfam.getUnit(), TimeUnit.NANOSECONDS);
     }
-    
+
     @Test
     public void testValid2() {
 	function = new ScheduleForActorFunction();
@@ -159,7 +168,7 @@ public class ScheduleForActorFunctionTest {
 	assertTrue(sfam.getPeriod() == 0L);
 	assertEquals(sfam.getUnit(), TimeUnit.NANOSECONDS);
     }
-    
+
     @Test
     public void testValid3() {
 	function = new ScheduleForActorFunction();
@@ -173,7 +182,7 @@ public class ScheduleForActorFunctionTest {
 	assertTrue(sfam.getPeriod() == 0L);
 	assertEquals(sfam.getUnit(), TimeUnit.MILLISECONDS);
     }
-    
+
     @Test
     public void testValid4() {
 	function = new ScheduleForActorFunction();
@@ -186,16 +195,5 @@ public class ScheduleForActorFunctionTest {
 	assertTrue(sfam.getInitialDelay() == 50L);
 	assertTrue(sfam.getPeriod() == 200L);
 	assertEquals(sfam.getUnit(), TimeUnit.MILLISECONDS);
-    }
-
-
-    public Method scheduleTestMethod(final Class<?> clazz, final Class<?>... params) {
-	Method m = null;
-	try {
-	    m = clazz.getDeclaredMethod("scheduleTest", params);
-	} catch (NoSuchMethodException | SecurityException e) {
-	    fail("Could not get method reference");
-	}
-	return m;
     }
 }

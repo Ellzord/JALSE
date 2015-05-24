@@ -105,7 +105,7 @@ public class NewEntityFunction implements EntityMethodFunction {
 	}
 
 	// Get and validate ID
-	Supplier<UUID> idSupplier = Functions.getSingleIDSupplier(m);
+	final Supplier<UUID> idSupplier = Functions.getSingleIDSupplier(m);
 
 	// Work out method type
 	final Class<?>[] params = m.getParameterTypes();

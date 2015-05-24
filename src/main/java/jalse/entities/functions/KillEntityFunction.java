@@ -63,7 +63,7 @@ public class KillEntityFunction implements EntityMethodFunction {
 	}
 
 	// Get and validate ID
-	Supplier<UUID> idSupplier = Functions.getSingleIDSupplier(m);
+	final Supplier<UUID> idSupplier = Functions.getSingleIDSupplier(m);
 
 	// Check ID param
 	final Class<?>[] params = m.getParameterTypes();

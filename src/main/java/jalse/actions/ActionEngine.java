@@ -96,7 +96,7 @@ public interface ActionEngine {
      *            Action to schedule.
      * @return Context associated to action (immutable).
      */
-    default MutableActionContext<?> schedule(final Action<?> action) {
+    default ActionContext<?> schedule(final Action<?> action) {
 	return schedule(action, null);
     }
 
@@ -109,7 +109,7 @@ public interface ActionEngine {
      *            Actor to reference.
      * @return Context associated to action (immutable).
      */
-    default <T> MutableActionContext<T> schedule(final Action<T> action, final T actor) {
+    default <T> ActionContext<T> schedule(final Action<T> action, final T actor) {
 	if (isStopped()) {
 	    return Actions.emptyActionContext(); // Case of post cancel scheduling
 	}

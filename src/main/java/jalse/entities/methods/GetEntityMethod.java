@@ -92,7 +92,7 @@ public class GetEntityMethod implements EntityMethod {
 
     /**
      * Sets the entity ID supplier.
-     * 
+     *
      * @param idSupplier
      */
     public void setIDSupplier(final Supplier<UUID> idSupplier) {

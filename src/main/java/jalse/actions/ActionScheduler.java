@@ -22,13 +22,22 @@ public interface ActionScheduler<T> {
     void cancelAllScheduledForActor();
 
     /**
+     * Creates a new mutable context for the supplied action and this actor.
+     *
+     * @param action
+     *            Action to create context for.
+     * @return Context bound to the action and actor.
+     */
+    MutableActionContext<T> newContextForActor(Action<T> action);
+
+    /**
      * Schedules an action for immediate execution.
      *
      * @param action
      *            Action to schedule.
      * @return Context associated with the action (immutable).
      */
-    default MutableActionContext<T> scheduleForActor(final Action<T> action) {
+    default ActionContext<T> scheduleForActor(final Action<T> action) {
 	return scheduleForActor(action, 0L, TimeUnit.NANOSECONDS);
     }
 
@@ -45,7 +54,7 @@ public interface ActionScheduler<T> {
      *            Time unit of initial delay and period.
      * @return Context associated with the action (immutable).
      */
-    MutableActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
+    ActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
 	    final TimeUnit unit);
 
     /**
@@ -59,8 +68,7 @@ public interface ActionScheduler<T> {
      *            TimeUnit of the delay.
      * @return Context associated with the action (immutable).
      */
-    default MutableActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay,
-	    final TimeUnit unit) {
+    default ActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final TimeUnit unit) {
 	return scheduleForActor(action, initialDelay, 0L, unit);
     }
 }
