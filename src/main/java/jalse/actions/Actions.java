@@ -129,6 +129,17 @@ public final class Actions {
     }
 
     /**
+     * Creates an {@link MutableActionContext} which the actor cannot be changed.
+     * 
+     * @param context
+     *            Context to wrap.
+     * @return Immutable context for actor.
+     */
+    public static <T> MutableActionContext<T> unmodifiableActorActionContext(final MutableActionContext<T> context) {
+	return new UnmodifiableActorDelegateActionContext<>(Objects.requireNonNull(context));
+    }
+
+    /**
      * Creates an immutable {@link ActionEngine}.
      *
      * @param engine

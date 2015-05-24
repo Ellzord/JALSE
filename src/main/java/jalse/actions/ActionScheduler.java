@@ -26,7 +26,7 @@ public interface ActionScheduler<T> {
      *
      * @param action
      *            Action to create context for.
-     * @return Context bound to the action and actor.
+     * @return Context bound to the action and actor (immutable for actor).
      */
     MutableActionContext<T> newContextForActor(Action<T> action);
 
