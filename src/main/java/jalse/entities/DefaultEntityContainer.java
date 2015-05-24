@@ -1,14 +1,14 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.asType;
-import static jalse.listeners.Listeners.newEntityListenerSet;
+import static jalse.listeners.Listeners.newEntityContainerListenerSet;
 import static jalse.misc.JALSEExceptions.CANNOT_SELF_TRANSFER;
 import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
 import static jalse.misc.JALSEExceptions.ENTITY_EXPORT_NO_TRANSFER;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.attributes.AttributeContainer;
-import jalse.listeners.EntityEvent;
-import jalse.listeners.EntityListener;
+import jalse.listeners.EntityContainerEvent;
+import jalse.listeners.EntityContainerListener;
 import jalse.listeners.ListenerSet;
 
 import java.util.Collections;
@@ -27,8 +27,8 @@ import java.util.stream.Stream;
  * An DefaultEntityContainer is a thread-safe implementation of {@link EntityContainer}. <br>
  * <br>
  *
- * DefaultEntityContainer can take a delegate container to supply to {@link EntityEvent}. Entity
- * updates will trigger these events using {@link EntityListener}.<br>
+ * DefaultEntityContainer can take a delegate container to supply to {@link EntityContainerEvent}.
+ * Entity updates will trigger these events using {@link EntityContainerListener}.<br>
  * <br>
  *
  * By default DefaultEntityContainer will use {@link DefaultEntityFactory} with no delegate
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 public class DefaultEntityContainer implements EntityContainer {
 
     private final ConcurrentMap<UUID, Entity> entities;
-    private final ListenerSet<EntityListener> listeners;
+    private final ListenerSet<EntityContainerListener> listeners;
     private final EntityFactory factory;
     private final EntityContainer delegateContainer;
     private final Lock read;
@@ -66,14 +66,14 @@ public class DefaultEntityContainer implements EntityContainer {
 	this.factory = factory != null ? factory : new DefaultEntityFactory();
 	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
 	entities = new ConcurrentHashMap<>();
-	listeners = newEntityListenerSet();
+	listeners = newEntityContainerListenerSet();
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
 	write = rwLock.writeLock();
     }
 
     @Override
-    public boolean addEntityListener(final EntityListener listener) {
+    public boolean addEntityContainerListener(final EntityContainerListener listener) {
 	Objects.requireNonNull(listener);
 
 	read.lock();
@@ -120,6 +120,11 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
+    public Set<? extends EntityContainerListener> getEntityContainerListeners() {
+	return Collections.unmodifiableSet(listeners);
+    }
+
+    @Override
     public int getEntityCount() {
 	return entities.size();
     }
@@ -127,11 +132,6 @@ public class DefaultEntityContainer implements EntityContainer {
     @Override
     public Set<UUID> getEntityIDs() {
 	return Collections.unmodifiableSet(entities.keySet());
-    }
-
-    @Override
-    public Set<? extends EntityListener> getEntityListeners() {
-	return Collections.unmodifiableSet(listeners);
     }
 
     /**
@@ -174,7 +174,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	    }
 
 	    entities.remove(id);
-	    listeners.getProxy().entityKilled(new EntityEvent(delegateContainer, e));
+	    listeners.getProxy().entityKilled(new EntityContainerEvent(delegateContainer, e));
 
 	    return true;
 	} finally {
@@ -212,7 +212,7 @@ public class DefaultEntityContainer implements EntityContainer {
 
 	    e.addAll(sourceContainer);
 
-	    listeners.getProxy().entityCreated(new EntityEvent(delegateContainer, e));
+	    listeners.getProxy().entityCreated(new EntityContainerEvent(delegateContainer, e));
 
 	    return e;
 	} finally {
@@ -244,7 +244,7 @@ public class DefaultEntityContainer implements EntityContainer {
 
 	    entities.put(id, e);
 	    if (imported) { // Otherwise transfer is triggered.
-		listeners.getProxy().entityReceived(new EntityEvent(delegateContainer, e));
+		listeners.getProxy().entityReceived(new EntityContainerEvent(delegateContainer, e));
 	    }
 
 	    return true;
@@ -254,7 +254,7 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
-    public boolean removeEntityListener(final EntityListener listener) {
+    public boolean removeEntityContainerListener(final EntityContainerListener listener) {
 	write.lock();
 	try {
 	    return listeners.remove(listener);
@@ -264,7 +264,7 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
-    public void removeEntityListeners() {
+    public void removeEntityContainerListeners() {
 	read.lock();
 	try {
 	    listeners.clear();
@@ -311,7 +311,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	    }
 
 	    entities.remove(id);
-	    listeners.getProxy().entityTransferred(new EntityEvent(delegateContainer, e, destination));
+	    listeners.getProxy().entityTransferred(new EntityContainerEvent(delegateContainer, e, destination));
 
 	    return true;
 	} finally {

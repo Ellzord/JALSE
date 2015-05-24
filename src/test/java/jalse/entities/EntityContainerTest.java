@@ -1,8 +1,8 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.asType;
-import jalse.listeners.EntityEvent;
-import jalse.listeners.EntityListener;
+import jalse.listeners.EntityContainerEvent;
+import jalse.listeners.EntityContainerListener;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -17,19 +17,19 @@ public class EntityContainerTest {
 
     private interface TestEntity extends Entity {}
 
-    private class TestEntityListener implements EntityListener {
+    private class TestEntityContainerListener implements EntityContainerListener {
 
 	@Override
-	public void entityCreated(final EntityEvent event) {}
+	public void entityCreated(final EntityContainerEvent event) {}
 
 	@Override
-	public void entityKilled(final EntityEvent event) {}
+	public void entityKilled(final EntityContainerEvent event) {}
 
 	@Override
-	public void entityReceived(final EntityEvent event) {}
+	public void entityReceived(final EntityContainerEvent event) {}
 
 	@Override
-	public void entityTransferred(final EntityEvent event) {}
+	public void entityTransferred(final EntityContainerEvent event) {}
     }
 
     EntityContainer container = null;
@@ -93,17 +93,17 @@ public class EntityContainerTest {
     }
 
     @Test
-    public void entityListenerTest() {
+    public void entityContainerListenerTest() {
 	container = new DefaultEntityContainer();
 
 	final UUID id = new UUID(0, 0);
 	container.newEntity(id);
 
-	final TestEntityListener entityListener = new TestEntityListener();
-	Assert.assertFalse(container.hasEntityListener(entityListener));
+	final TestEntityContainerListener entityContainerListener = new TestEntityContainerListener();
+	Assert.assertFalse(container.hasEntityContainerListener(entityContainerListener));
 
-	container.addEntityListener(entityListener);
-	Assert.assertTrue(container.hasEntityListener(entityListener));
+	container.addEntityContainerListener(entityContainerListener);
+	Assert.assertTrue(container.hasEntityContainerListener(entityContainerListener));
     }
 
     @Test

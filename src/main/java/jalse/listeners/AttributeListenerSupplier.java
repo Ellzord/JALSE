@@ -7,7 +7,7 @@ import jalse.entities.Entity;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-class AttributeListenerSupplier<T> implements EntityListener {
+class AttributeListenerSupplier<T> implements EntityContainerListener {
 
     private final String name;
     private final AttributeType<T> type;
@@ -23,10 +23,10 @@ class AttributeListenerSupplier<T> implements EntityListener {
     }
 
     @Override
-    public void entityCreated(final EntityEvent event) {
+    public void entityCreated(final EntityContainerEvent event) {
 	final Entity e = event.getEntity();
 	if (deep) { // Recursive
-	    e.addEntityListener(this);
+	    e.addEntityContainerListener(this);
 	}
 	e.addAttributeListener(name, type, supplier.get());
     }
