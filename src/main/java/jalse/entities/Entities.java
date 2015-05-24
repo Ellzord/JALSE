@@ -282,6 +282,19 @@ public final class Entities {
     }
 
     /**
+     * Checks if the specified type is a descendant from the specified ancestor type.
+     *
+     * @param descendant
+     *            Descendant type.
+     * @param ancestor
+     *            Ancestor type.
+     * @return Whether the descendant is descended from the ancestor type.
+     */
+    public static boolean isSubtype(final Class<? extends Entity> descendant, final Class<? extends Entity> ancestor) {
+	return !ancestor.equals(descendant) && ancestor.isAssignableFrom(descendant);
+    }
+
+    /**
      * Checks to see if the entity has not been tagged with the type.
      *
      * @param type

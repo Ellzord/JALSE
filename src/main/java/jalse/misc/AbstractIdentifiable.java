@@ -22,6 +22,15 @@ public abstract class AbstractIdentifiable implements Identifiable {
     protected final UUID id;
 
     /**
+     * Creates a new instance of AbstractIdentifiable with a random ID.
+     *
+     * @see UUID#randomUUID()
+     */
+    protected AbstractIdentifiable() {
+	this(UUID.randomUUID());
+    }
+
+    /**
      * Creates a new instance of AbstractIdentifiable with the supplied ID.
      *
      * @param id

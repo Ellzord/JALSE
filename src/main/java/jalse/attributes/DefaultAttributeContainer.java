@@ -145,12 +145,22 @@ public class DefaultAttributeContainer implements AttributeContainer {
 
     @Override
     public int getAttributeCount() {
-	return attributes.values().stream().mapToInt(Map::size).sum();
+	read.lock();
+	try {
+	    return attributes.values().stream().mapToInt(Map::size).sum();
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
     public Set<String> getAttributeListenerNames() {
-	return Collections.unmodifiableSet(listeners.keySet());
+	read.lock();
+	try {
+	    return new HashSet<>(listeners.keySet());
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
@@ -161,7 +171,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	    @SuppressWarnings("unchecked")
 	    final Set<? extends AttributeListener<T>> ls = (Set<? extends AttributeListener<T>>) getAttributeListeners0(
 		    name, type);
-	    return ls != null ? Collections.unmodifiableSet(ls) : Collections.emptySet();
+	    return ls != null ? new HashSet<>(ls) : Collections.emptySet();
 	} finally {
 	    read.unlock();
 	}
@@ -179,7 +189,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	read.lock();
 	try {
 	    final Map<AttributeType<?>, ListenerSet<?>> ls = listeners.get(name);
-	    return ls != null ? Collections.unmodifiableSet(ls.keySet()) : Collections.emptySet();
+	    return ls != null ? new HashSet<>(ls.keySet()) : Collections.emptySet();
 	} finally {
 	    read.unlock();
 	}
@@ -187,7 +197,12 @@ public class DefaultAttributeContainer implements AttributeContainer {
 
     @Override
     public Set<String> getAttributeNames() {
-	return Collections.unmodifiableSet(attributes.keySet());
+	read.lock();
+	try {
+	    return new HashSet<>(attributes.keySet());
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
@@ -197,7 +212,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	read.lock();
 	try {
 	    final Map<AttributeType<?>, Object> atrn = attributes.get(name);
-	    return atrn != null ? Collections.unmodifiableSet(atrn.keySet()) : Collections.emptySet();
+	    return atrn != null ? new HashSet<>(atrn.keySet()) : Collections.emptySet();
 	} finally {
 	    read.unlock();
 	}
@@ -358,6 +373,11 @@ public class DefaultAttributeContainer implements AttributeContainer {
 
     @Override
     public Stream<?> streamAttributes() {
-	return attributes.values().stream().flatMap(m -> m.values().stream());
+	read.lock();
+	try {
+	    return new HashSet<>(attributes.values()).stream().flatMap(m -> m.values().stream());
+	} finally {
+	    read.unlock();
+	}
     }
 }

@@ -4,8 +4,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashSet;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * @param <T>
  *            Listener {@code interface}.
  */
-public class ListenerSet<T> extends CopyOnWriteArraySet<T> implements InvocationHandler {
+public class ListenerSet<T> extends HashSet<T> implements InvocationHandler {
 
     private static final Logger logger = Logger.getLogger(ListenerSet.class.getName());
 

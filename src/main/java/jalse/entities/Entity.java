@@ -5,10 +5,13 @@ import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.EntityContainerListener;
+import jalse.listeners.EntityListener;
+import jalse.listeners.ListenerSet;
 import jalse.misc.Identifiable;
 import jalse.tags.Taggable;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Entity plays the greatest role in the overall data model. An entity is representative of a single
@@ -52,6 +55,21 @@ import java.util.Optional;
 public interface Entity extends EntityContainer, Identifiable, AttributeContainer, Taggable, ActionScheduler<Entity> {
 
     /**
+     * Adds a listener for the entity.
+     *
+     * @param listener
+     *            Listener to add.
+     *
+     * @return {@code true} if container did not already contain this listener.
+     * @throws NullPointerException
+     *             if listener is null.
+     *
+     * @see ListenerSet#add(Object)
+     *
+     */
+    boolean addEntityListener(EntityListener listener);
+
+    /**
      * Convenience method for wrapping the entity to a different type.
      *
      * @param type
@@ -72,6 +90,20 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
     EntityContainer getContainer();
 
     /**
+     * Gets all the entity listeners.
+     *
+     * @return All the entity listeners.
+     */
+    Set<? extends EntityListener> getEntityListeners();
+
+    /**
+     * Gets the types this entity has been marked as.
+     *
+     * @return Marked types.
+     */
+    Set<Class<? extends Entity>> getMarkedTypes();
+
+    /**
      * This is a convenience method for getting the container (optional).
      *
      * @return Optional containing the container or else empty optional if the entity is not alive.
@@ -87,6 +119,17 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      */
     default boolean hasContainer() {
 	return getContainer() != null;
+    }
+
+    /**
+     * Checks whether the container contains a particular listener.
+     *
+     * @param listener
+     *            The EntityContainerListener to check for.
+     * @return Whether the container contains the given EntityContainerListener.
+     */
+    default boolean hasEntityListener(final EntityListener listener) {
+	return getEntityListeners().contains(listener);
     }
 
     /**
@@ -121,6 +164,26 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      * @return Whether the type was not associated to the entity.
      */
     boolean markAsType(Class<? extends Entity> type);
+
+    /**
+     * Removes a entity listener.
+     *
+     * @param listener
+     *            Listener to remove.
+     *
+     * @return {@code true} if the listener was removed.
+     * @throws NullPointerException
+     *             if listener is null.
+     *
+     * @see ListenerSet#remove(Object)
+     *
+     */
+    boolean removeEntityListener(EntityListener listener);
+
+    /**
+     * Removes all listeners for entities.
+     */
+    void removeEntityListeners();
 
     /**
      * Transfers this entity to the specified destination container.

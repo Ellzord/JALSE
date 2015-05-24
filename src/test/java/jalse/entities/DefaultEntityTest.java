@@ -9,7 +9,8 @@ import jalse.listeners.AttributeEvent;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.EntityContainerEvent;
 import jalse.listeners.EntityContainerListener;
-import jalse.tags.EntityType;
+import jalse.listeners.EntityEvent;
+import jalse.listeners.EntityListener;
 
 import java.util.Set;
 import java.util.UUID;
@@ -64,6 +65,23 @@ public class DefaultEntityTest {
 
 	@Override
 	public void entityTransferred(final EntityContainerEvent event) {}
+    }
+
+    private class TestEntityListener implements EntityListener {
+
+	boolean unmark = false;
+
+	boolean mark = false;
+
+	@Override
+	public void entityMarkedAsType(final EntityEvent event) {
+	    mark = true;
+	}
+
+	@Override
+	public void entityUnmarkedAsType(final EntityEvent event) {
+	    unmark = true;
+	}
     }
 
     DefaultEntity entity = null;
@@ -177,6 +195,22 @@ public class DefaultEntityTest {
     }
 
     @Test
+    public void entityListenerTest() {
+	entity = createDefaultEntity();
+	final TestEntityListener testEntityListener = new TestEntityListener();
+
+	entity.addEntityListener(testEntityListener);
+	Assert.assertTrue(entity.getEntityListeners().contains(testEntityListener));
+	entity.removeEntityListener(testEntityListener);
+	Assert.assertFalse(entity.getEntityListeners().contains(testEntityListener));
+
+	entity.addEntityListener(testEntityListener);
+	Assert.assertTrue(entity.getEntityListeners().contains(testEntityListener));
+	entity.removeEntityListeners();
+	Assert.assertFalse(entity.getEntityListeners().contains(testEntityListener));
+    }
+
+    @Test
     public void getEntityTest() {
 	entity = createDefaultEntity();
 	entity.markAsAlive();
@@ -230,14 +264,21 @@ public class DefaultEntityTest {
     @Test
     public void markAsTypeTest() {
 	entity = createDefaultEntity();
-	Assert.assertTrue(entity.markAsType(TestEntity.class));
+	final TestEntityListener listener = new TestEntityListener();
+	entity.addEntityListener(listener);
 
-	Assert.assertTrue(entity.getTags().contains(new EntityType(TestEntity.class)));
+	Assert.assertTrue(entity.markAsType(TestEntity.class));
+	Assert.assertTrue(listener.mark);
+
+	Assert.assertTrue(entity.getMarkedTypes().contains(TestEntity.class));
+	Assert.assertTrue(entity.isMarkedAsType(TestEntity.class));
 
 	Assert.assertFalse(entity.markAsType(TestEntity.class));
 
 	entity.unmarkAsType(TestEntity.class);
-	Assert.assertFalse(entity.getTags().contains(new EntityType(TestEntity.class)));
+	Assert.assertFalse(entity.getMarkedTypes().contains(TestEntity.class));
+	Assert.assertFalse(entity.isMarkedAsType(TestEntity.class));
+	Assert.assertTrue(listener.unmark);
     }
 
     @Test(expected = IllegalStateException.class)

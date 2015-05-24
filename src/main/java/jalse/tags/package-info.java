@@ -3,7 +3,6 @@
  * can change during runtime.
  *
  * @see jalse.tags.TagTypeSet
- * @see jalse.tags.EntityType
  * @see jalse.tags.Parent
  */
 package jalse.tags;
