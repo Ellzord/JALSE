@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import jalse.actions.Action;
 import jalse.actions.ActionContext;
-import jalse.actions.MutableActionContext;
 import jalse.entities.Entity;
 import jalse.entities.annotations.ScheduleForActor;
 import jalse.entities.methods.ScheduleForActorMethod;
@@ -28,7 +27,7 @@ public class ScheduleForActorFunctionTest {
 
     interface TestInvalidEntity extends Entity {
 
-	MutableActionContext<Entity> scheduleTest();
+	ActionContext<Entity> scheduleTest();
     }
 
     interface TestInvalidEntity2 extends Entity {
@@ -40,7 +39,7 @@ public class ScheduleForActorFunctionTest {
     interface TestInvalidEntity3 extends Entity {
 
 	@ScheduleForActor(action = TestAction.class)
-	MutableActionContext<Boolean> scheduleTest();
+	ActionContext<Boolean> scheduleTest();
     }
 
     interface TestInvalidEntity4 extends Entity {
@@ -58,7 +57,7 @@ public class ScheduleForActorFunctionTest {
     interface TestValidEntity extends Entity {
 
 	@ScheduleForActor(action = TestAction.class)
-	MutableActionContext<Entity> scheduleTest();
+	ActionContext<Entity> scheduleTest();
     }
 
     interface TestValidEntity2 extends Entity {
