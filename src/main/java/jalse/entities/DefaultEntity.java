@@ -4,6 +4,7 @@ import static jalse.entities.Entities.isOrSubtype;
 import static jalse.misc.JALSEExceptions.ENTITY_NOT_ALIVE;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
+import jalse.actions.ActionContext;
 import jalse.actions.ActionEngine;
 import jalse.actions.DefaultActionScheduler;
 import jalse.actions.MutableActionContext;
@@ -255,6 +256,14 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public MutableActionContext<Entity> newContextForActor(final Action<Entity> action) {
+	if (!isAlive()) {
+	    throwRE(ENTITY_NOT_ALIVE);
+	}
+	return scheduler.newContextForActor(action);
+    }
+
+    @Override
     public Entity newEntity(final UUID id, final AttributeContainer sourceContainer) {
 	if (!isAlive()) {
 	    throwRE(ENTITY_NOT_ALIVE);
@@ -314,12 +323,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public MutableActionContext<Entity> scheduleForActor(final Action<Entity> action, final long initialDelay,
+    public ActionContext<Entity> scheduleForActor(final Action<Entity> action, final long initialDelay,
 	    final long period, final TimeUnit unit) {
 	if (!isAlive()) {
 	    throwRE(ENTITY_NOT_ALIVE);
 	}
-
 	return scheduler.scheduleForActor(action, initialDelay, period, unit);
     }
 

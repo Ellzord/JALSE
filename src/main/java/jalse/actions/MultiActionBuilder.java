@@ -95,7 +95,7 @@ public final class MultiActionBuilder<T> {
      *            Engine to schedule with.
      * @return Context for the action.
      */
-    public MutableActionContext<?> buildAndSchedule(final ActionEngine engine) {
+    public ActionContext<?> buildAndSchedule(final ActionEngine engine) {
 	return buildAndSchedule(engine, null);
     }
 
@@ -109,7 +109,7 @@ public final class MultiActionBuilder<T> {
      *            Actor to reference.
      * @return Context for the action.
      */
-    public MutableActionContext<T> buildAndSchedule(final ActionEngine engine, final T actor) {
+    public ActionContext<T> buildAndSchedule(final ActionEngine engine, final T actor) {
 	return engine.schedule(build(), actor);
     }
 

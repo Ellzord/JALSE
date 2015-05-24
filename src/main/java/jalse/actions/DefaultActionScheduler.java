@@ -75,22 +75,31 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     }
 
     @Override
-    public MutableActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
-	    final TimeUnit unit) {
+    public MutableActionContext<T> newContextForActor(final Action<T> action) {
 	if (engine.isStopped()) {
 	    return Actions.emptyActionContext(); // Case of post cancel scheduling
 	}
 
+	// Create new context
 	final MutableActionContext<T> context = engine.newContext(action);
 	context.setActor(actor);
-	context.setInitialDelay(initialDelay, unit);
-	context.setPeriod(period, unit);
-	context.schedule();
 
+	// Add then purge
 	synchronized (contexts) {
 	    contexts.add(context);
 	    contexts.removeIf(ActionContext<T>::isDone);
 	}
+
+	return context;
+    }
+
+    @Override
+    public ActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
+	    final TimeUnit unit) {
+	final MutableActionContext<T> context = newContextForActor(action);
+	context.setInitialDelay(initialDelay, unit);
+	context.setPeriod(period, unit);
+	context.schedule();
 
 	return unmodifiableActionContext(context); // Don't allow for mutation (it's running)
     }

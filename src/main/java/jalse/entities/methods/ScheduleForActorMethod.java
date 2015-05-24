@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * This is used for mapping calls to
  * {@link ActionScheduler#scheduleForActor(Action, long, long, TimeUnit)}.
- * 
+ *
  * @author Elliot Ford
  *
  * @see ScheduleForActor
@@ -32,7 +32,7 @@ public class ScheduleForActorMethod implements EntityMethod {
      *
      * @param constructor
      *            Action constructor.
-     * 
+     *
      * @param initialDelay
      *            Initial delay before running action.
      * @param period
@@ -40,7 +40,8 @@ public class ScheduleForActorMethod implements EntityMethod {
      * @param unit
      *            Time unit for action.
      */
-    public ScheduleForActorMethod(final Constructor<?> constructor, long initialDelay, long period, TimeUnit unit) {
+    public ScheduleForActorMethod(final Constructor<?> constructor, final long initialDelay, final long period,
+	    final TimeUnit unit) {
 	this.constructor = Objects.requireNonNull(constructor);
 	this.initialDelay = initialDelay;
 	this.period = period;

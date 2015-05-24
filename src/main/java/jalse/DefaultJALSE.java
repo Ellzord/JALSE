@@ -2,6 +2,7 @@ package jalse;
 
 import static jalse.actions.Actions.requireNotStopped;
 import jalse.actions.Action;
+import jalse.actions.ActionContext;
 import jalse.actions.ActionEngine;
 import jalse.actions.DefaultActionScheduler;
 import jalse.actions.ForkJoinActionEngine;
@@ -185,6 +186,11 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
+    public MutableActionContext<JALSE> newContextForActor(final Action<JALSE> action) {
+	return scheduler.newContextForActor(action);
+    }
+
+    @Override
     public Entity newEntity(final UUID id, final AttributeContainer sourceContainer) {
 	return entities.newEntity(id, sourceContainer);
     }
@@ -220,7 +226,7 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public MutableActionContext<JALSE> scheduleForActor(final Action<JALSE> action, final long initialDelay,
+    public ActionContext<JALSE> scheduleForActor(final Action<JALSE> action, final long initialDelay,
 	    final long period, final TimeUnit unit) {
 	return scheduler.scheduleForActor(action, initialDelay, period, unit);
     }
