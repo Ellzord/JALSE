@@ -9,15 +9,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Entity change event for {@link EntityListener}. This is a unique event that contains the relevant
- * {@link Entity} and it's parent {@link EntityContainer} (even if the Entity has been killed).
+ * Entity change event for {@link EntityContainerListener}. This is a unique event that contains the
+ * relevant {@link Entity} and it's parent {@link EntityContainer} (even if the Entity has been
+ * killed).
  *
  * @author Elliot Ford
  *
  * @see EntityContainer
  *
  */
-public class EntityEvent extends AbstractIdentifiable {
+public class EntityContainerEvent extends AbstractIdentifiable {
 
     private final Entity entity;
     private final EntityContainer container;
@@ -31,7 +32,7 @@ public class EntityEvent extends AbstractIdentifiable {
      * @param entity
      *            Entity the event is for.
      */
-    public EntityEvent(final EntityContainer container, final Entity entity) {
+    public EntityContainerEvent(final EntityContainer container, final Entity entity) {
 	this(container, entity, null);
     }
 
@@ -45,7 +46,7 @@ public class EntityEvent extends AbstractIdentifiable {
      * @param destination
      *            Destination container for transfer events (can be null).
      */
-    public EntityEvent(final EntityContainer container, final Entity entity, final EntityContainer destination) {
+    public EntityContainerEvent(final EntityContainer container, final Entity entity, final EntityContainer destination) {
 	super(UUID.randomUUID());
 	this.container = Objects.requireNonNull(container);
 	this.entity = Objects.requireNonNull(entity);

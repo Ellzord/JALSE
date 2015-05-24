@@ -3,8 +3,8 @@ package jalse.entities;
 import static jalse.attributes.Attributes.EMPTY_ATTRIBUTECONTAINER;
 import static jalse.entities.Entities.asType;
 import jalse.attributes.AttributeContainer;
-import jalse.listeners.EntityEvent;
-import jalse.listeners.EntityListener;
+import jalse.listeners.EntityContainerEvent;
+import jalse.listeners.EntityContainerListener;
 import jalse.listeners.ListenerSet;
 import jalse.misc.JALSEExceptions;
 
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 /**
  * This is an {@link Entity} collection. Entities can only be added to a container by creating them
  * and remove them by killing them. Entity creation and death can be listened for using
- * {@link EntityListener} and {@link EntityEvent}.
+ * {@link EntityContainerListener} and {@link EntityContainerEvent}.
  *
  * @author Elliot Ford
  *
@@ -44,7 +44,7 @@ public interface EntityContainer {
      * @see ListenerSet#add(Object)
      *
      */
-    boolean addEntityListener(EntityListener listener);
+    boolean addEntityContainerListener(EntityContainerListener listener);
 
     /**
      * Gets all the entities within the containers.
@@ -110,6 +110,13 @@ public interface EntityContainer {
     }
 
     /**
+     * Gets all the entity listeners.
+     *
+     * @return All the entity listeners.
+     */
+    Set<? extends EntityContainerListener> getEntityContainerListeners();
+
+    /**
      * Gets the direct entity count.
      *
      * @return Direct child entity count.
@@ -122,13 +129,6 @@ public interface EntityContainer {
      * @return Set of all entity identifiers.
      */
     Set<UUID> getEntityIDs();
-
-    /**
-     * Gets all the entity listeners.
-     *
-     * @return All the entity listeners.
-     */
-    Set<? extends EntityListener> getEntityListeners();
 
     /**
      * This is a convenience method for getting an entity (optional).
@@ -184,12 +184,12 @@ public interface EntityContainer {
     /**
      * Checks whether the container contains a particular listener.
      *
-     * @param entityListener
-     *            The EntityListener to check for.
-     * @return Whether the container contains the given EntityListener.
+     * @param listener
+     *            The EntityContainerListener to check for.
+     * @return Whether the container contains the given EntityContainerListener.
      */
-    default boolean hasEntityListener(final EntityListener entityListener) {
-	return getEntityListeners().contains(entityListener);
+    default boolean hasEntityContainerListener(final EntityContainerListener listener) {
+	return getEntityContainerListeners().contains(listener);
     }
 
     /**
@@ -386,12 +386,12 @@ public interface EntityContainer {
      * @see ListenerSet#remove(Object)
      *
      */
-    boolean removeEntityListener(EntityListener listener);
+    boolean removeEntityContainerListener(EntityContainerListener listener);
 
     /**
      * Removes all listeners for entities.
      */
-    void removeEntityListeners();
+    void removeEntityContainerListeners();
 
     /**
      * Provides a stream of entities from the container.

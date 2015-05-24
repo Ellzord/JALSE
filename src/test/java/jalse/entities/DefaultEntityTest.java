@@ -7,8 +7,8 @@ import jalse.attributes.Attributes;
 import jalse.attributes.DefaultAttributeContainer;
 import jalse.listeners.AttributeEvent;
 import jalse.listeners.AttributeListener;
-import jalse.listeners.EntityEvent;
-import jalse.listeners.EntityListener;
+import jalse.listeners.EntityContainerEvent;
+import jalse.listeners.EntityContainerListener;
 import jalse.tags.EntityType;
 
 import java.util.Set;
@@ -51,19 +51,19 @@ public class DefaultEntityTest {
 
     private interface TestEntity extends Entity {}
 
-    private class TestEntityListener implements EntityListener {
+    private class TestEntityContainerListener implements EntityContainerListener {
 
 	@Override
-	public void entityCreated(final EntityEvent event) {}
+	public void entityCreated(final EntityContainerEvent event) {}
 
 	@Override
-	public void entityKilled(final EntityEvent event) {}
+	public void entityKilled(final EntityContainerEvent event) {}
 
 	@Override
-	public void entityReceived(final EntityEvent event) {}
+	public void entityReceived(final EntityContainerEvent event) {}
 
 	@Override
-	public void entityTransferred(final EntityEvent event) {}
+	public void entityTransferred(final EntityContainerEvent event) {}
     }
 
     DefaultEntity entity = null;
@@ -161,19 +161,19 @@ public class DefaultEntityTest {
     }
 
     @Test
-    public void entityListenerTest() {
+    public void entityContainerListenerTest() {
 	entity = createDefaultEntity();
-	final TestEntityListener testEntityListener = new TestEntityListener();
+	final TestEntityContainerListener testEntityContainerListener = new TestEntityContainerListener();
 
-	entity.addEntityListener(testEntityListener);
-	Assert.assertTrue(entity.getEntityListeners().contains(testEntityListener));
-	entity.removeEntityListener(testEntityListener);
-	Assert.assertFalse(entity.getEntityListeners().contains(testEntityListener));
+	entity.addEntityContainerListener(testEntityContainerListener);
+	Assert.assertTrue(entity.getEntityContainerListeners().contains(testEntityContainerListener));
+	entity.removeEntityContainerListener(testEntityContainerListener);
+	Assert.assertFalse(entity.getEntityContainerListeners().contains(testEntityContainerListener));
 
-	entity.addEntityListener(testEntityListener);
-	Assert.assertTrue(entity.getEntityListeners().contains(testEntityListener));
-	entity.removeEntityListeners();
-	Assert.assertFalse(entity.getEntityListeners().contains(testEntityListener));
+	entity.addEntityContainerListener(testEntityContainerListener);
+	Assert.assertTrue(entity.getEntityContainerListeners().contains(testEntityContainerListener));
+	entity.removeEntityContainerListeners();
+	Assert.assertFalse(entity.getEntityContainerListeners().contains(testEntityContainerListener));
     }
 
     @Test

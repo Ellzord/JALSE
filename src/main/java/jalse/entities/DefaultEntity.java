@@ -12,7 +12,7 @@ import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
 import jalse.attributes.DefaultAttributeContainer;
 import jalse.listeners.AttributeListener;
-import jalse.listeners.EntityListener;
+import jalse.listeners.EntityContainerListener;
 import jalse.misc.AbstractIdentifiable;
 import jalse.misc.Identifiable;
 import jalse.tags.EntityType;
@@ -99,8 +99,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public boolean addEntityListener(final EntityListener listener) {
-	return entities.addEntityListener(listener);
+    public boolean addEntityContainerListener(final EntityContainerListener listener) {
+	return entities.addEntityContainerListener(listener);
     }
 
     private void addParentTag() {
@@ -175,6 +175,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public Set<? extends EntityContainerListener> getEntityContainerListeners() {
+	return entities.getEntityContainerListeners();
+    }
+
+    @Override
     public int getEntityCount() {
 	return entities.getEntityCount();
     }
@@ -182,11 +187,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public Set<UUID> getEntityIDs() {
 	return entities.getEntityIDs();
-    }
-
-    @Override
-    public Set<? extends EntityListener> getEntityListeners() {
-	return entities.getEntityListeners();
     }
 
     @Override
@@ -313,13 +313,13 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public boolean removeEntityListener(final EntityListener listener) {
-	return entities.removeEntityListener(listener);
+    public boolean removeEntityContainerListener(final EntityContainerListener listener) {
+	return entities.removeEntityContainerListener(listener);
     }
 
     @Override
-    public void removeEntityListeners() {
-	entities.removeEntityListeners();
+    public void removeEntityContainerListeners() {
+	entities.removeEntityContainerListeners();
     }
 
     @Override

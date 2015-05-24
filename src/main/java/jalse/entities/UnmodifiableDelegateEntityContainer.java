@@ -1,7 +1,7 @@
 package jalse.entities;
 
 import jalse.attributes.AttributeContainer;
-import jalse.listeners.EntityListener;
+import jalse.listeners.EntityContainerListener;
 
 import java.util.Collections;
 import java.util.Set;
@@ -17,13 +17,18 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     }
 
     @Override
-    public boolean addEntityListener(final EntityListener listener) {
+    public boolean addEntityContainerListener(final EntityContainerListener listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
     public Entity getEntity(final UUID id) {
 	return delegate != null ? delegate.getEntity(id) : null;
+    }
+
+    @Override
+    public Set<? extends EntityContainerListener> getEntityContainerListeners() {
+	return delegate != null ? delegate.getEntityContainerListeners() : Collections.emptySet();
     }
 
     @Override
@@ -34,11 +39,6 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     @Override
     public Set<UUID> getEntityIDs() {
 	return delegate != null ? delegate.getEntityIDs() : Collections.emptySet();
-    }
-
-    @Override
-    public Set<? extends EntityListener> getEntityListeners() {
-	return delegate != null ? delegate.getEntityListeners() : Collections.emptySet();
     }
 
     @Override
@@ -67,12 +67,12 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     }
 
     @Override
-    public boolean removeEntityListener(final EntityListener listener) {
+    public boolean removeEntityContainerListener(final EntityContainerListener listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public void removeEntityListeners() {
+    public void removeEntityContainerListeners() {
 	throw new UnsupportedOperationException();
     }
 

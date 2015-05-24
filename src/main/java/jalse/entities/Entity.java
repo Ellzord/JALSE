@@ -4,7 +4,7 @@ import jalse.actions.ActionScheduler;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
 import jalse.listeners.AttributeListener;
-import jalse.listeners.EntityListener;
+import jalse.listeners.EntityContainerListener;
 import jalse.misc.Identifiable;
 import jalse.tags.Taggable;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
  * entity or group of entities with a defined identities. Entities have {@link AttributeType} as
  * well as {@link AttributeListener} for trigger code upon add, removal or change of those
  * attributes. Entities can create and kill other entities (tree-like structure) these events can be
- * accessed by adding {@link EntityListener}. <br>
+ * accessed by adding {@link EntityContainerListener}. <br>
  * <br>
  * Entities can be wrapped and marked as specific entity types as long as the inheriting interface
  * follows what is outlined in {@link Entities}. Entity have can have a number of types (subclasses
@@ -44,7 +44,7 @@ import java.util.Optional;
  *
  * @see EntityContainer
  * @see DefaultEntityContainer
- * @see EntityListener
+ * @see EntityContainerListener
  * @see EntityFactory
  * @see Entities#asType(Entity, Class)
  *
