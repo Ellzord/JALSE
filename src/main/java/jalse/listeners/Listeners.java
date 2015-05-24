@@ -36,7 +36,7 @@ public final class Listeners {
      *
      * @param supplier
      *            AttributeListener supplier.
-     * @return AttributeListener that adds supplied AttributeListeners to descendants.
+     * @return EntityContainerListener that adds supplied AttributeListeners to descendants.
      */
     public static <T> EntityContainerListener newAttributeListenerSupplier(final NamedAttributeType<T> namedType,
 	    final Supplier<AttributeListener<T>> supplier) {
@@ -55,7 +55,7 @@ public final class Listeners {
      *
      * @param supplier
      *            AttributeListener supplier.
-     * @return AttributeListener that adds supplied AttributeListeners to descendants.
+     * @return EntityContainerListener that adds supplied AttributeListeners to descendants.
      */
     public static <T> EntityContainerListener newAttributeListenerSupplier(final String name,
 	    final AttributeType<T> type, final Supplier<AttributeListener<T>> supplier) {
@@ -77,11 +77,32 @@ public final class Listeners {
      *
      * @param supplier
      *            EntityContainerListener supplier.
-     * @return EntityLitener that adds supplied EntityContainerListener to descendants.
+     * @return EntityContainerListener that adds supplied EntityContainerListener to descendants.
      */
     public static EntityContainerListener newEntityContainerListenerSupplier(
 	    final Supplier<EntityContainerListener> supplier) {
 	return new EntityContainerListenerSupplier(supplier, false);
+    }
+
+    /**
+     * Creates a ListenerSet for EntityListener.
+     *
+     * @return New EntityListener ListenerSet.
+     */
+    public static ListenerSet<EntityListener> newEntityListenerSet() {
+	return new ListenerSet<>(EntityListener.class);
+    }
+
+    /**
+     * Creates an EntityListener supplier that will supply an EntityListener to all newly created
+     * direct Entity descendants.
+     *
+     * @param supplier
+     *            EntityListener supplier.
+     * @return EntityContainerListener that adds supplied EntityListener to descendants.
+     */
+    public static EntityContainerListener newEntityListenerSupplier(final Supplier<EntityListener> supplier) {
+	return new EntityListenerSupplier(supplier, false);
     }
 
     /**
@@ -93,7 +114,7 @@ public final class Listeners {
      *
      * @param supplier
      *            AttributeListener supplier.
-     * @return AttributeListener that adds supplied AttributeListeners to descendants.
+     * @return EntityContainerListener that adds supplied AttributeListeners to descendants.
      */
     public static <T> EntityContainerListener newRecursiveAttributeListenerSupplier(
 	    final NamedAttributeType<T> namedType, final Supplier<AttributeListener<T>> supplier) {
@@ -112,7 +133,7 @@ public final class Listeners {
      *
      * @param supplier
      *            AttributeListener supplier.
-     * @return AttributeListener that adds supplied AttributeListeners to descendants.
+     * @return EntityContainerListener that adds supplied AttributeListeners to descendants.
      */
     public static <T> EntityContainerListener newRecursiveAttributeListenerSupplier(final String name,
 	    final AttributeType<T> type, final Supplier<AttributeListener<T>> supplier) {
@@ -125,11 +146,23 @@ public final class Listeners {
      *
      * @param supplier
      *            EntityContainerListener supplier.
-     * @return EntityLitener that adds supplied EntityContainerListeners to descendants.
+     * @return EntityContainerListener that adds supplied EntityContainerListeners to descendants.
      */
     public static EntityContainerListener newRecursiveEntityContainerListenerSupplier(
 	    final Supplier<EntityContainerListener> supplier) {
 	return new EntityContainerListenerSupplier(supplier, true);
+    }
+
+    /**
+     * Creates an EntityListener supplier that will supply an EntityListener to all newly created
+     * Entities and their descendants recursively.
+     *
+     * @param supplier
+     *            EntityListener supplier.
+     * @return EntityContainerListener that adds supplied EntityListeners to descendants.
+     */
+    public static EntityContainerListener newRecursiveEntityListenerSupplier(final Supplier<EntityListener> supplier) {
+	return new EntityListenerSupplier(supplier, true);
     }
 
     private Listeners() {

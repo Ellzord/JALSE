@@ -6,7 +6,6 @@ import jalse.misc.AbstractIdentifiable;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Entity change event for {@link EntityContainerListener}. This is a unique event that contains the
@@ -25,7 +24,7 @@ public class EntityContainerEvent extends AbstractIdentifiable {
     private final EntityContainer destination;
 
     /**
-     * Creates a new EntityEvent with a random ID.
+     * Creates a new EntityContainerEvent with a random ID.
      *
      * @param container
      *            Parent container for the Entity.
@@ -37,7 +36,7 @@ public class EntityContainerEvent extends AbstractIdentifiable {
     }
 
     /**
-     * Creates a new EntityEvent with a random ID.
+     * Creates a new EntityContainerEvent with a random ID.
      *
      * @param container
      *            Parent container for the entity.
@@ -47,7 +46,6 @@ public class EntityContainerEvent extends AbstractIdentifiable {
      *            Destination container for transfer events (can be null).
      */
     public EntityContainerEvent(final EntityContainer container, final Entity entity, final EntityContainer destination) {
-	super(UUID.randomUUID());
 	this.container = Objects.requireNonNull(container);
 	this.entity = Objects.requireNonNull(entity);
 	this.destination = destination;

@@ -8,7 +8,6 @@ import jalse.misc.AbstractIdentifiable;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Attribute change event for {@link AttributeListener}. This is a unique event that contains the
@@ -64,7 +63,6 @@ public class AttributeEvent<T> extends AbstractIdentifiable {
      */
     public AttributeEvent(final AttributeContainer container, final String name, final AttributeType<T> type,
 	    final T value, final T replacedValue) {
-	super(UUID.randomUUID());
 	this.name = requireNotEmpty(name);
 	this.container = Objects.requireNonNull(container);
 	this.type = Objects.requireNonNull(type);

@@ -11,13 +11,12 @@ import jalse.listeners.EntityContainerEvent;
 import jalse.listeners.EntityContainerListener;
 import jalse.listeners.ListenerSet;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -39,7 +38,7 @@ import java.util.stream.Stream;
  */
 public class DefaultEntityContainer implements EntityContainer {
 
-    private final ConcurrentMap<UUID, Entity> entities;
+    private final Map<UUID, Entity> entities;
     private final ListenerSet<EntityContainerListener> listeners;
     private final EntityFactory factory;
     private final EntityContainer delegateContainer;
@@ -65,7 +64,7 @@ public class DefaultEntityContainer implements EntityContainer {
     public DefaultEntityContainer(final EntityFactory factory, final EntityContainer delegateContainer) {
 	this.factory = factory != null ? factory : new DefaultEntityFactory();
 	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
-	entities = new ConcurrentHashMap<>();
+	entities = new HashMap<>();
 	listeners = newEntityContainerListenerSet();
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
@@ -76,11 +75,11 @@ public class DefaultEntityContainer implements EntityContainer {
     public boolean addEntityContainerListener(final EntityContainerListener listener) {
 	Objects.requireNonNull(listener);
 
-	read.lock();
+	write.lock();
 	try {
 	    return listeners.add(listener);
 	} finally {
-	    read.unlock();
+	    write.unlock();
 	}
     }
 
@@ -121,17 +120,32 @@ public class DefaultEntityContainer implements EntityContainer {
 
     @Override
     public Set<? extends EntityContainerListener> getEntityContainerListeners() {
-	return Collections.unmodifiableSet(listeners);
+	read.lock();
+	try {
+	    return new HashSet<>(listeners);
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
     public int getEntityCount() {
-	return entities.size();
+	read.lock();
+	try {
+	    return entities.size();
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
     public Set<UUID> getEntityIDs() {
-	return Collections.unmodifiableSet(entities.keySet());
+	read.lock();
+	try {
+	    return new HashSet<>(entities.keySet());
+	} finally {
+	    read.unlock();
+	}
     }
 
     /**
@@ -265,17 +279,22 @@ public class DefaultEntityContainer implements EntityContainer {
 
     @Override
     public void removeEntityContainerListeners() {
-	read.lock();
+	write.lock();
 	try {
 	    listeners.clear();
 	} finally {
-	    read.unlock();
+	    write.unlock();
 	}
     }
 
     @Override
     public Stream<Entity> streamEntities() {
-	return entities.values().stream();
+	read.lock();
+	try {
+	    return new HashSet<>(entities.values()).stream();
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override

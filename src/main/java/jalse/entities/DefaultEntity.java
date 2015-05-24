@@ -1,6 +1,9 @@
 package jalse.entities;
 
+import static jalse.entities.Entities.getTypeAncestry;
 import static jalse.entities.Entities.isOrSubtype;
+import static jalse.entities.Entities.isSubtype;
+import static jalse.listeners.Listeners.newEntityListenerSet;
 import static jalse.misc.JALSEExceptions.ENTITY_NOT_ALIVE;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
@@ -13,20 +16,25 @@ import jalse.attributes.AttributeType;
 import jalse.attributes.DefaultAttributeContainer;
 import jalse.listeners.AttributeListener;
 import jalse.listeners.EntityContainerListener;
+import jalse.listeners.EntityEvent;
+import jalse.listeners.EntityListener;
+import jalse.listeners.ListenerSet;
 import jalse.misc.AbstractIdentifiable;
 import jalse.misc.Identifiable;
-import jalse.tags.EntityType;
 import jalse.tags.Parent;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
 /**
@@ -70,7 +78,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      */
     protected final TagTypeSet tags;
 
+    private final ListenerSet<EntityListener> listeners;
+    private final Set<Class<? extends Entity>> types;
     private final AtomicBoolean alive;
+    private final Lock read;
+    private final Lock write;
 
     /**
      * Creates a new default entity instance.
@@ -89,7 +101,12 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	attributes = new DefaultAttributeContainer(this);
 	tags = new TagTypeSet();
 	scheduler = new DefaultActionScheduler<>(this);
+	listeners = newEntityListenerSet();
+	types = new HashSet<>();
 	alive = new AtomicBoolean();
+	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	read = rwLock.readLock();
+	write = rwLock.writeLock();
     }
 
     @Override
@@ -101,6 +118,18 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public boolean addEntityContainerListener(final EntityContainerListener listener) {
 	return entities.addEntityContainerListener(listener);
+    }
+
+    @Override
+    public boolean addEntityListener(final EntityListener listener) {
+	Objects.requireNonNull(listener);
+
+	write.lock();
+	try {
+	    return listeners.add(listener);
+	} finally {
+	    write.unlock();
+	}
     }
 
     private void addParentTag() {
@@ -190,6 +219,26 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public Set<? extends EntityListener> getEntityListeners() {
+	read.lock();
+	try {
+	    return new HashSet<>(listeners);
+	} finally {
+	    read.unlock();
+	}
+    }
+
+    @Override
+    public Set<Class<? extends Entity>> getMarkedTypes() {
+	read.lock();
+	try {
+	    return new HashSet<>(types);
+	} finally {
+	    read.unlock();
+	}
+    }
+
+    @Override
     public Set<Tag> getTags() {
 	return Collections.unmodifiableSet(tags);
     }
@@ -201,7 +250,12 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public boolean isMarkedAsType(final Class<? extends Entity> type) {
-	return tags.getOfType(EntityType.class).stream().anyMatch(at -> isOrSubtype(at.getType(), type));
+	read.lock();
+	try {
+	    return types.stream().anyMatch(t -> isOrSubtype(t, type));
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
@@ -236,23 +290,36 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      */
     protected boolean markAsDead() {
 	tags.removeOfType(Parent.class);
-
 	return alive.getAndSet(false);
     }
 
     @Override
     public boolean markAsType(final Class<? extends Entity> type) {
-	if (!isMarkedAsType(type)) {
-	    tags.add(new EntityType(type));
+	Objects.requireNonNull(type);
 
-	    /*
-	     * Add entire tree
-	     */
-	    Entities.getTypeAncestry(type).stream().map(EntityType::new).forEach(tags::add);
+	write.lock();
+	try {
+	    // Add target type
+	    if (!types.add(type)) {
+		return false;
+	    }
+
+	    // Add missing ancestors
+	    final Set<Class<? extends Entity>> addedAncestors = new HashSet<>();
+	    for (final Class<? extends Entity> at : getTypeAncestry(type)) {
+		if (types.add(at)) {
+		    // Missing ancestor
+		    addedAncestors.add(at);
+		}
+	    }
+
+	    // Trigger change
+	    listeners.getProxy().entityMarkedAsType(new EntityEvent(this, type, addedAncestors));
+
 	    return true;
+	} finally {
+	    write.unlock();
 	}
-
-	return false;
     }
 
     @Override
@@ -323,6 +390,28 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public boolean removeEntityListener(final EntityListener listener) {
+	Objects.requireNonNull(listener);
+
+	write.lock();
+	try {
+	    return listeners.remove(listener);
+	} finally {
+	    write.unlock();
+	}
+    }
+
+    @Override
+    public void removeEntityListeners() {
+	write.lock();
+	try {
+	    listeners.clear();
+	} finally {
+	    write.unlock();
+	}
+    }
+
+    @Override
     public ActionContext<Entity> scheduleForActor(final Action<Entity> action, final long initialDelay,
 	    final long period, final TimeUnit unit) {
 	if (!isAlive()) {
@@ -383,14 +472,30 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public boolean unmarkAsType(final Class<? extends Entity> type) {
-	final Set<EntityType> descendants = tags.getOfType(EntityType.class).stream()
-		.filter(at -> isOrSubtype(at.getType(), type)).collect(Collectors.toSet());
+	Objects.requireNonNull(type);
 
-	/*
-	 * Remove subclasses of the type (up tree)
-	 */
-	descendants.forEach(tags::remove);
+	write.lock();
+	try {
+	    // Remove target type
+	    if (!types.remove(type)) {
+		return false;
+	    }
 
-	return !descendants.isEmpty();
+	    // Remove descendants
+	    final Set<Class<? extends Entity>> removedDescendants = new HashSet<>();
+	    for (final Class<? extends Entity> dt : types) {
+		if (isSubtype(dt, type) && tags.remove(dt)) {
+		    // Removed descendant
+		    removedDescendants.add(dt);
+		}
+	    }
+
+	    // Trigger change
+	    listeners.getProxy().entityUnmarkedAsType(new EntityEvent(this, type, removedDescendants));
+
+	    return true;
+	} finally {
+	    write.unlock();
+	}
     }
 }
