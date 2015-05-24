@@ -5,8 +5,8 @@ import jalse.actions.ActionContext;
 import jalse.actions.DefaultActionScheduler;
 import jalse.attributes.Attributes;
 import jalse.attributes.DefaultAttributeContainer;
-import jalse.listeners.AttributeEvent;
-import jalse.listeners.AttributeListener;
+import jalse.listeners.AttributeContainerEvent;
+import jalse.listeners.AttributeContainerListener;
 import jalse.listeners.EntityContainerEvent;
 import jalse.listeners.EntityContainerListener;
 import jalse.listeners.EntityEvent;
@@ -28,24 +28,24 @@ public class DefaultEntityTest {
 	public void perform(final ActionContext<Entity> context) throws InterruptedException {}
     }
 
-    private class TestAttributeListener implements AttributeListener<Integer> {
+    private class TestAttributeContainerListener implements AttributeContainerListener<Integer> {
 
 	public boolean present = false;
 	public int val = 0;
 
 	@Override
-	public void attributeAdded(final AttributeEvent<Integer> event) {
+	public void attributeAdded(final AttributeContainerEvent<Integer> event) {
 	    present = true;
 	    val = event.getValue();
 	}
 
 	@Override
-	public void attributeChanged(final AttributeEvent<Integer> event) {
+	public void attributeChanged(final AttributeContainerEvent<Integer> event) {
 	    val = event.getValue();
 	}
 
 	@Override
-	public void attributeRemoved(final AttributeEvent<Integer> event) {
+	public void attributeRemoved(final AttributeContainerEvent<Integer> event) {
 	    present = false;
 	}
     }
@@ -92,43 +92,46 @@ public class DefaultEntityTest {
     }
 
     @Test
-    public void attributeListenerTest() {
+    public void attributeContainerListenerTest() {
 	entity = createDefaultEntity();
 
-	final TestAttributeListener testAttributeListener = new TestAttributeListener();
-	Assert.assertFalse(testAttributeListener.present);
+	final TestAttributeContainerListener testAttributeContainerListener = new TestAttributeContainerListener();
+	Assert.assertFalse(testAttributeContainerListener.present);
 
-	entity.addAttributeListener("test", Attributes.INTEGER_TYPE, testAttributeListener);
-	Assert.assertTrue(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
-	Assert.assertTrue(entity.getAttributeListenerNames().contains("test"));
-	Assert.assertTrue(entity.getAttributeListenerTypes("test").contains(Attributes.INTEGER_TYPE));
+	entity.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, testAttributeContainerListener);
+	Assert.assertTrue(entity.getAttributeContainerListeners("test", Attributes.INTEGER_TYPE).contains(
+		testAttributeContainerListener));
+	Assert.assertTrue(entity.getAttributeContainerListenerNames().contains("test"));
+	Assert.assertTrue(entity.getAttributeContainerListenerTypes("test").contains(Attributes.INTEGER_TYPE));
 
 	entity.setAttribute("test", Attributes.INTEGER_TYPE, 10);
-	Assert.assertTrue(testAttributeListener.present);
-	Assert.assertEquals(10, testAttributeListener.val);
+	Assert.assertTrue(testAttributeContainerListener.present);
+	Assert.assertEquals(10, testAttributeContainerListener.val);
 
 	entity.setAttribute("test", Attributes.INTEGER_TYPE, 42);
 	entity.fireAttributeChanged("test", Attributes.INTEGER_TYPE);
-	Assert.assertEquals(42, testAttributeListener.val);
+	Assert.assertEquals(42, testAttributeContainerListener.val);
 
 	entity.removeAttribute("test", Attributes.INTEGER_TYPE);
-	Assert.assertFalse(testAttributeListener.present);
+	Assert.assertFalse(testAttributeContainerListener.present);
 
-	entity.removeAttributeListener("test", Attributes.INTEGER_TYPE, testAttributeListener);
-	Assert.assertFalse(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE)
-		.contains(testAttributeListener));
+	entity.removeAttributeContainerListener("test", Attributes.INTEGER_TYPE, testAttributeContainerListener);
+	Assert.assertFalse(entity.getAttributeContainerListeners("test", Attributes.INTEGER_TYPE).contains(
+		testAttributeContainerListener));
 
-	entity.addAttributeListener("test", Attributes.INTEGER_TYPE, testAttributeListener);
-	Assert.assertTrue(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
-	entity.removeAttributeListeners("test", Attributes.INTEGER_TYPE);
-	Assert.assertFalse(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE)
-		.contains(testAttributeListener));
+	entity.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, testAttributeContainerListener);
+	Assert.assertTrue(entity.getAttributeContainerListeners("test", Attributes.INTEGER_TYPE).contains(
+		testAttributeContainerListener));
+	entity.removeAttributeContainerListeners("test", Attributes.INTEGER_TYPE);
+	Assert.assertFalse(entity.getAttributeContainerListeners("test", Attributes.INTEGER_TYPE).contains(
+		testAttributeContainerListener));
 
-	entity.addAttributeListener("test", Attributes.INTEGER_TYPE, testAttributeListener);
-	Assert.assertTrue(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
-	entity.removeAttributeListeners();
-	Assert.assertFalse(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE)
-		.contains(testAttributeListener));
+	entity.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, testAttributeContainerListener);
+	Assert.assertTrue(entity.getAttributeContainerListeners("test", Attributes.INTEGER_TYPE).contains(
+		testAttributeContainerListener));
+	entity.removeAttributeContainerListeners();
+	Assert.assertFalse(entity.getAttributeContainerListeners("test", Attributes.INTEGER_TYPE).contains(
+		testAttributeContainerListener));
     }
 
     @Test

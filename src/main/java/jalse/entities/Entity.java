@@ -3,7 +3,7 @@ package jalse.entities;
 import jalse.actions.ActionScheduler;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
-import jalse.listeners.AttributeListener;
+import jalse.listeners.AttributeContainerListener;
 import jalse.listeners.EntityContainerListener;
 import jalse.listeners.EntityListener;
 import jalse.listeners.ListenerSet;
@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * Entity plays the greatest role in the overall data model. An entity is representative of a single
  * entity or group of entities with a defined identities. Entities have {@link AttributeType} as
- * well as {@link AttributeListener} for trigger code upon add, removal or change of those
+ * well as {@link AttributeContainerListener} for trigger code upon add, removal or change of those
  * attributes. Entities can create and kill other entities (tree-like structure) these events can be
  * accessed by adding {@link EntityContainerListener}. <br>
  * <br>

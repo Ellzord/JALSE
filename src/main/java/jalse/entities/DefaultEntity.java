@@ -14,7 +14,7 @@ import jalse.actions.MutableActionContext;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
 import jalse.attributes.DefaultAttributeContainer;
-import jalse.listeners.AttributeListener;
+import jalse.listeners.AttributeContainerListener;
 import jalse.listeners.EntityContainerListener;
 import jalse.listeners.EntityEvent;
 import jalse.listeners.EntityListener;
@@ -110,9 +110,9 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
-	    final AttributeListener<T> listener) {
-	return attributes.addAttributeListener(name, type, listener);
+    public <T> boolean addAttributeContainerListener(final String name, final AttributeType<T> type,
+	    final AttributeContainerListener<T> listener) {
+	return attributes.addAttributeContainerListener(name, type, listener);
     }
 
     @Override
@@ -154,23 +154,24 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public Set<String> getAttributeContainerListenerNames() {
+	return attributes.getAttributeContainerListenerNames();
+    }
+
+    @Override
+    public <T> Set<? extends AttributeContainerListener<T>> getAttributeContainerListeners(final String name,
+	    final AttributeType<T> type) {
+	return attributes.getAttributeContainerListeners(name, type);
+    }
+
+    @Override
+    public Set<AttributeType<?>> getAttributeContainerListenerTypes(final String name) {
+	return attributes.getAttributeContainerListenerTypes(name);
+    }
+
+    @Override
     public int getAttributeCount() {
 	return attributes.getAttributeCount();
-    }
-
-    @Override
-    public Set<String> getAttributeListenerNames() {
-	return attributes.getAttributeListenerNames();
-    }
-
-    @Override
-    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
-	return attributes.getAttributeListeners(name, type);
-    }
-
-    @Override
-    public Set<AttributeType<?>> getAttributeListenerTypes(final String name) {
-	return attributes.getAttributeListenerTypes(name);
     }
 
     @Override
@@ -359,19 +360,19 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
-	    final AttributeListener<T> listener) {
-	return attributes.removeAttributeListener(name, type, listener);
+    public <T> boolean removeAttributeContainerListener(final String name, final AttributeType<T> type,
+	    final AttributeContainerListener<T> listener) {
+	return attributes.removeAttributeContainerListener(name, type, listener);
     }
 
     @Override
-    public void removeAttributeListeners() {
-	attributes.removeAttributeListeners();
+    public void removeAttributeContainerListeners() {
+	attributes.removeAttributeContainerListeners();
     }
 
     @Override
-    public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
-	attributes.removeAttributeListeners(name, type);
+    public <T> void removeAttributeContainerListeners(final String name, final AttributeType<T> type) {
+	attributes.removeAttributeContainerListeners(name, type);
     }
 
     @Override

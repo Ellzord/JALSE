@@ -1,6 +1,6 @@
 package jalse.attributes;
 
-import jalse.listeners.AttributeListener;
+import jalse.listeners.AttributeContainerListener;
 
 import java.util.Collections;
 import java.util.Set;
@@ -15,8 +15,8 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
-	    final AttributeListener<T> listener) {
+    public <T> boolean addAttributeContainerListener(final String name, final AttributeType<T> type,
+	    final AttributeContainerListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
 
@@ -31,23 +31,24 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
+    public Set<String> getAttributeContainerListenerNames() {
+	return delegate != null ? delegate.getAttributeContainerListenerNames() : Collections.emptySet();
+    }
+
+    @Override
+    public <T> Set<? extends AttributeContainerListener<T>> getAttributeContainerListeners(final String name,
+	    final AttributeType<T> type) {
+	return delegate != null ? delegate.getAttributeContainerListeners(name, type) : Collections.emptySet();
+    }
+
+    @Override
+    public Set<AttributeType<?>> getAttributeContainerListenerTypes(final String name) {
+	return delegate != null ? delegate.getAttributeContainerListenerTypes(name) : Collections.emptySet();
+    }
+
+    @Override
     public int getAttributeCount() {
 	return delegate != null ? delegate.getAttributeCount() : 0;
-    }
-
-    @Override
-    public Set<String> getAttributeListenerNames() {
-	return delegate != null ? delegate.getAttributeListenerNames() : Collections.emptySet();
-    }
-
-    @Override
-    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
-	return delegate != null ? delegate.getAttributeListeners(name, type) : Collections.emptySet();
-    }
-
-    @Override
-    public Set<AttributeType<?>> getAttributeListenerTypes(final String name) {
-	return delegate != null ? delegate.getAttributeListenerTypes(name) : Collections.emptySet();
     }
 
     @Override
@@ -71,18 +72,18 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
-	    final AttributeListener<T> listener) {
+    public <T> boolean removeAttributeContainerListener(final String name, final AttributeType<T> type,
+	    final AttributeContainerListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public void removeAttributeListeners() {
+    public void removeAttributeContainerListeners() {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
+    public <T> void removeAttributeContainerListeners(final String name, final AttributeType<T> type) {
 	throw new UnsupportedOperationException();
     }
 
