@@ -9,20 +9,20 @@ import org.junit.Test;
 
 public class AttributeContainerTest {
 
-    private class TestAttributeContainerListener implements AttributeContainerListener<Integer> {
+    private class TestAttributeListener implements AttributeListener<Integer> {
 
 	public boolean changed = false;
 
 	@Override
-	public void attributeAdded(final AttributeContainerEvent<Integer> event) {}
+	public void attributeAdded(final AttributeEvent<Integer> event) {}
 
 	@Override
-	public void attributeChanged(final AttributeContainerEvent<Integer> event) {
+	public void attributeChanged(final AttributeEvent<Integer> event) {
 	    changed = true;
 	}
 
 	@Override
-	public void attributeRemoved(final AttributeContainerEvent<Integer> event) {}
+	public void attributeRemoved(final AttributeEvent<Integer> event) {}
     }
 
     DefaultAttributeContainer container = null;
@@ -31,24 +31,22 @@ public class AttributeContainerTest {
     public void addFromContainerTest() {
 	final NamedAttributeType<Integer> namedAttributeType = new NamedAttributeType<Integer>("test",
 		Attributes.INTEGER_TYPE);
-	final TestAttributeContainerListener attributeContainerListener = new TestAttributeContainerListener();
+	final TestAttributeListener attributeListener = new TestAttributeListener();
 	container = new DefaultAttributeContainer();
 
 	container.setAttribute(namedAttributeType, 10);
-	container.addAttributeContainerListener(namedAttributeType, attributeContainerListener);
+	container.addAttributeListener(namedAttributeType, attributeListener);
 
 	DefaultAttributeContainer otherContainer = new DefaultAttributeContainer();
 	otherContainer.addAllAttributes(container);
 	Assert.assertTrue(otherContainer.getAttributes().contains(10));
-	otherContainer.addAllAttributeContainerListeners(container);
-	Assert.assertTrue(otherContainer.getAttributeContainerListeners(namedAttributeType).contains(
-		attributeContainerListener));
+	otherContainer.addAllAttributeListeners(container);
+	Assert.assertTrue(otherContainer.getAttributeListeners(namedAttributeType).contains(attributeListener));
 
 	otherContainer = new DefaultAttributeContainer();
 	otherContainer.addAll(container);
 	Assert.assertTrue(otherContainer.getAttributes().contains(10));
-	Assert.assertTrue(otherContainer.getAttributeContainerListeners(namedAttributeType).contains(
-		attributeContainerListener));
+	Assert.assertTrue(otherContainer.getAttributeListeners(namedAttributeType).contains(attributeListener));
     }
 
     @After
@@ -57,40 +55,37 @@ public class AttributeContainerTest {
     }
 
     @Test
-    public void attributeContainerListenerTest() {
+    public void attributeListenerTest() {
 	final NamedAttributeType<Integer> namedAttributeType = new NamedAttributeType<Integer>("test",
 		Attributes.INTEGER_TYPE);
-	final TestAttributeContainerListener attributeContainerListener = new TestAttributeContainerListener();
+	final TestAttributeListener attributeListener = new TestAttributeListener();
 	container = new DefaultAttributeContainer();
 
-	container.addAttributeContainerListener(namedAttributeType, attributeContainerListener);
-	Assert.assertTrue(container.hasAttributeContainerListeners(namedAttributeType));
-	Assert.assertTrue(container.hasAttributeContainerListeners(namedAttributeType.getName(),
-		namedAttributeType.getType()));
-	Assert.assertTrue(container.hasAttributeContainerListener(namedAttributeType, attributeContainerListener));
-	Assert.assertTrue(container.hasAttributeContainerListener(namedAttributeType.getName(),
-		namedAttributeType.getType(), attributeContainerListener));
+	container.addAttributeListener(namedAttributeType, attributeListener);
+	Assert.assertTrue(container.hasAttributeListeners(namedAttributeType));
+	Assert.assertTrue(container.hasAttributeListeners(namedAttributeType.getName(), namedAttributeType.getType()));
+	Assert.assertTrue(container.hasAttributeListener(namedAttributeType, attributeListener));
+	Assert.assertTrue(container.hasAttributeListener(namedAttributeType.getName(), namedAttributeType.getType(),
+		attributeListener));
 
-	Assert.assertEquals(1, container.getAttributeContainerListeners(namedAttributeType).size());
-	Assert.assertTrue(container.getAttributeContainerListeners(namedAttributeType).contains(
-		attributeContainerListener));
+	Assert.assertEquals(1, container.getAttributeListeners(namedAttributeType).size());
+	Assert.assertTrue(container.getAttributeListeners(namedAttributeType).contains(attributeListener));
 
 	container.setAttribute(namedAttributeType, 10);
-	Assert.assertFalse(attributeContainerListener.changed);
+	Assert.assertFalse(attributeListener.changed);
 	container.fireAttributeChanged(namedAttributeType);
-	Assert.assertTrue(attributeContainerListener.changed);
+	Assert.assertTrue(attributeListener.changed);
 
-	container.removeAttributeContainerListener(namedAttributeType, attributeContainerListener);
-	Assert.assertFalse(container.hasAttributeContainerListeners(namedAttributeType));
-	Assert.assertFalse(container.hasAttributeContainerListeners(namedAttributeType.getName(),
-		namedAttributeType.getType()));
-	Assert.assertFalse(container.hasAttributeContainerListener(namedAttributeType, attributeContainerListener));
-	Assert.assertFalse(container.hasAttributeContainerListener(namedAttributeType.getName(),
-		namedAttributeType.getType(), attributeContainerListener));
+	container.removeAttributeListener(namedAttributeType, attributeListener);
+	Assert.assertFalse(container.hasAttributeListeners(namedAttributeType));
+	Assert.assertFalse(container.hasAttributeListeners(namedAttributeType.getName(), namedAttributeType.getType()));
+	Assert.assertFalse(container.hasAttributeListener(namedAttributeType, attributeListener));
+	Assert.assertFalse(container.hasAttributeListener(namedAttributeType.getName(), namedAttributeType.getType(),
+		attributeListener));
 
-	container.addAttributeContainerListener(namedAttributeType, attributeContainerListener);
-	container.removeAttributeContainerListeners(namedAttributeType);
-	Assert.assertFalse(container.hasAttributeContainerListeners(namedAttributeType));
+	container.addAttributeListener(namedAttributeType, attributeListener);
+	container.removeAttributeListeners(namedAttributeType);
+	Assert.assertFalse(container.hasAttributeListeners(namedAttributeType));
     }
 
     @Test

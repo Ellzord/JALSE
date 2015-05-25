@@ -7,8 +7,8 @@ import jalse.actions.ThreadPoolActionEngine;
 import jalse.attributes.DefaultAttributeContainer;
 import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
-import jalse.entities.EntityContainerEvent;
-import jalse.entities.EntityContainerListener;
+import jalse.entities.EntityEvent;
+import jalse.entities.EntityListener;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -32,26 +32,26 @@ public class DefaultJALSETest {
 
     private interface TestEntity extends Entity {}
 
-    private class TestEntityContainerListener implements EntityContainerListener {
+    private class TestEntityListener implements EntityListener {
 
 	public boolean created = false;
 	public boolean killed = false;
 
 	@Override
-	public void entityCreated(final EntityContainerEvent event) {
+	public void entityCreated(final EntityEvent event) {
 	    created = true;
 	}
 
 	@Override
-	public void entityKilled(final EntityContainerEvent event) {
+	public void entityKilled(final EntityEvent event) {
 	    killed = true;
 	}
 
 	@Override
-	public void entityReceived(final EntityContainerEvent event) {}
+	public void entityReceived(final EntityEvent event) {}
 
 	@Override
-	public void entityTransferred(final EntityContainerEvent event) {}
+	public void entityTransferred(final EntityEvent event) {}
     }
 
     JALSE jalse = null;
@@ -86,12 +86,12 @@ public class DefaultJALSETest {
     }
 
     @Test
-    public void entityContainerListenerTest() {
+    public void entityListenerTest() {
 	jalse = new DefaultJALSE(new UUID(0, 0));
-	final TestEntityContainerListener listener = new TestEntityContainerListener();
+	final TestEntityListener listener = new TestEntityListener();
 
-	jalse.addEntityContainerListener(listener);
-	Assert.assertTrue(jalse.getEntityContainerListeners().contains(listener));
+	jalse.addEntityListener(listener);
+	Assert.assertTrue(jalse.getEntityListeners().contains(listener));
 
 	Assert.assertFalse(listener.created);
 	Assert.assertFalse(listener.killed);
@@ -102,13 +102,13 @@ public class DefaultJALSETest {
 	jalse.killEntity(new UUID(0, 1));
 	Assert.assertTrue(listener.killed);
 
-	jalse.removeEntityContainerListener(listener);
-	Assert.assertFalse(jalse.getEntityContainerListeners().contains(listener));
+	jalse.removeEntityListener(listener);
+	Assert.assertFalse(jalse.getEntityListeners().contains(listener));
 
-	jalse.addEntityContainerListener(new TestEntityContainerListener());
-	jalse.addEntityContainerListener(new TestEntityContainerListener());
-	jalse.removeEntityContainerListeners();
-	Assert.assertTrue(jalse.getEntityContainerListeners().isEmpty());
+	jalse.addEntityListener(new TestEntityListener());
+	jalse.addEntityListener(new TestEntityListener());
+	jalse.removeEntityListeners();
+	Assert.assertTrue(jalse.getEntityListeners().isEmpty());
     }
 
     @Test

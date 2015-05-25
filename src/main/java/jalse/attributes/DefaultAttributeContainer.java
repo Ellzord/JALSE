@@ -20,8 +20,8 @@ import java.util.stream.Stream;
  * <br>
  *
  * DefaultAttributeContainer can take a delegate AttributeContainer to supply to
- * {@link AttributeContainerEvent}. Attribute updates will trigger these events using
- * {@link AttributeContainerListener}.
+ * {@link AttributeEvent}. Attribute updates will trigger these events using
+ * {@link AttributeListener}.
  *
  * @author Elliot Ford
  *
@@ -62,8 +62,8 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> boolean addAttributeContainerListener(final String name, final AttributeType<T> type,
-	    final AttributeContainerListener<T> listener) {
+    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
 	checkNameAndType(name, type);
 	Objects.requireNonNull(listener);
 
@@ -73,9 +73,9 @@ public class DefaultAttributeContainer implements AttributeContainer {
 		    k -> new ConcurrentHashMap<>());
 
 	    @SuppressWarnings({ "unchecked" })
-	    final ListenerSet<AttributeContainerListener<T>> lst = (ListenerSet<AttributeContainerListener<T>>) lsn
-		    .computeIfAbsent(type, k -> {
-			return new ListenerSet<>(AttributeContainerListener.class);
+	    final ListenerSet<AttributeListener<T>> lst = (ListenerSet<AttributeListener<T>>) lsn.computeIfAbsent(type,
+		    k -> {
+			return new ListenerSet<>(AttributeListener.class);
 		    });
 
 	    return lst.add(listener);
@@ -116,10 +116,10 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	    }
 
 	    @SuppressWarnings("unchecked")
-	    final ListenerSet<AttributeContainerListener<T>> ls = (ListenerSet<AttributeContainerListener<T>>) getAttributeContainerListeners0(
+	    final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getAttributeListeners0(
 		    name, type);
 	    if (ls != null) {
-		ls.getProxy().attributeChanged(new AttributeContainerEvent<>(delegateContainer, name, type, current));
+		ls.getProxy().attributeChanged(new AttributeEvent<>(delegateContainer, name, type, current));
 	    }
 	} finally {
 	    read.unlock();
@@ -141,7 +141,17 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public Set<String> getAttributeContainerListenerNames() {
+    public int getAttributeCount() {
+	read.lock();
+	try {
+	    return attributes.values().stream().mapToInt(Map::size).sum();
+	} finally {
+	    read.unlock();
+	}
+    }
+
+    @Override
+    public Set<String> getAttributeListenerNames() {
 	read.lock();
 	try {
 	    return new HashSet<>(listeners.keySet());
@@ -151,13 +161,12 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> Set<? extends AttributeContainerListener<T>> getAttributeContainerListeners(final String name,
-	    final AttributeType<T> type) {
+    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
 	checkNameAndType(name, type);
 	read.lock();
 	try {
 	    @SuppressWarnings("unchecked")
-	    final Set<? extends AttributeContainerListener<T>> ls = (Set<? extends AttributeContainerListener<T>>) getAttributeContainerListeners0(
+	    final Set<? extends AttributeListener<T>> ls = (Set<? extends AttributeListener<T>>) getAttributeListeners0(
 		    name, type);
 	    return ls != null ? new HashSet<>(ls) : Collections.emptySet();
 	} finally {
@@ -165,29 +174,19 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	}
     }
 
-    private ListenerSet<?> getAttributeContainerListeners0(final String name, final AttributeType<?> type) {
+    private ListenerSet<?> getAttributeListeners0(final String name, final AttributeType<?> type) {
 	final Map<AttributeType<?>, ListenerSet<?>> ls = listeners.get(name);
 	return ls != null ? ls.get(type) : null;
     }
 
     @Override
-    public Set<AttributeType<?>> getAttributeContainerListenerTypes(final String name) {
+    public Set<AttributeType<?>> getAttributeListenerTypes(final String name) {
 	requireNotEmpty(name);
 
 	read.lock();
 	try {
 	    final Map<AttributeType<?>, ListenerSet<?>> ls = listeners.get(name);
 	    return ls != null ? new HashSet<>(ls.keySet()) : Collections.emptySet();
-	} finally {
-	    read.unlock();
-	}
-    }
-
-    @Override
-    public int getAttributeCount() {
-	read.lock();
-	try {
-	    return attributes.values().stream().mapToInt(Map::size).sum();
 	} finally {
 	    read.unlock();
 	}
@@ -252,10 +251,10 @@ public class DefaultAttributeContainer implements AttributeContainer {
 		attributes.computeIfPresent(name, (k, v) -> v.isEmpty() ? null : v);
 
 		@SuppressWarnings("unchecked")
-		final ListenerSet<AttributeContainerListener<T>> ls = (ListenerSet<AttributeContainerListener<T>>) getAttributeContainerListeners0(
+		final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getAttributeListeners0(
 			name, type);
 		if (ls != null) {
-		    ls.getProxy().attributeRemoved(new AttributeContainerEvent<>(delegateContainer, name, type, prev));
+		    ls.getProxy().attributeRemoved(new AttributeEvent<>(delegateContainer, name, type, prev));
 		}
 	    }
 
@@ -266,8 +265,8 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> boolean removeAttributeContainerListener(final String name, final AttributeType<T> type,
-	    final AttributeContainerListener<T> listener) {
+    public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
 	checkNameAndType(name, type);
 	Objects.requireNonNull(listener);
 
@@ -279,8 +278,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	    }
 
 	    @SuppressWarnings("unchecked")
-	    final ListenerSet<AttributeContainerListener<T>> lst = (ListenerSet<AttributeContainerListener<T>>) lsn
-		    .get(type);
+	    final ListenerSet<AttributeListener<T>> lst = (ListenerSet<AttributeListener<T>>) lsn.get(type);
 	    if (lst == null) {
 		return false;
 	    }
@@ -299,7 +297,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public void removeAttributeContainerListeners() {
+    public void removeAttributeListeners() {
 	write.lock();
 	try {
 	    listeners.clear();
@@ -309,7 +307,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> void removeAttributeContainerListeners(final String name, final AttributeType<T> type) {
+    public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
 	checkNameAndType(name, type);
 
 	write.lock();
@@ -358,10 +356,10 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	    final T prev = (T) atrn.put(type, attr);
 
 	    @SuppressWarnings("unchecked")
-	    final ListenerSet<AttributeContainerListener<T>> ls = (ListenerSet<AttributeContainerListener<T>>) getAttributeContainerListeners0(
+	    final ListenerSet<AttributeListener<T>> ls = (ListenerSet<AttributeListener<T>>) getAttributeListeners0(
 		    name, type);
 	    if (ls != null) {
-		ls.getProxy().attributeAdded(new AttributeContainerEvent<>(delegateContainer, name, type, attr, prev));
+		ls.getProxy().attributeAdded(new AttributeEvent<>(delegateContainer, name, type, attr, prev));
 	    }
 
 	    return prev;

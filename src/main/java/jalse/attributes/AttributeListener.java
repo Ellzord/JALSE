@@ -3,8 +3,8 @@ package jalse.attributes;
 /**
  * Listener for {@link AttributeType} value manipulation. When attributes are added, updated or
  * removed the suitable defined method will be triggered. A change is a manual fire of the trigger
- * to denote a internal state change of the attribute. Unique {@link AttributeContainerEvent} will
- * be supplied for each trigger.
+ * to denote a internal state change of the attribute. Unique {@link AttributeEvent} will be
+ * supplied for each trigger.
  *
  * @author Elliot Ford
  * @param <T>
@@ -14,7 +14,7 @@ package jalse.attributes;
  * @see DefaultAttributeContainer
  *
  */
-public interface AttributeContainerListener<T> {
+public interface AttributeListener<T> {
 
     /**
      * Triggered when an attribute has been added. If the attribute was replaced this will be
@@ -23,7 +23,7 @@ public interface AttributeContainerListener<T> {
      * @param event
      *            The attribute event for this trigger.
      */
-    default void attributeAdded(final AttributeContainerEvent<T> event) {}
+    default void attributeAdded(final AttributeEvent<T> event) {}
 
     /**
      * Triggered when an attribute has been changed (either replacement by another attribute or an
@@ -32,7 +32,7 @@ public interface AttributeContainerListener<T> {
      * @param event
      *            The attribute event for this trigger.
      */
-    default void attributeChanged(final AttributeContainerEvent<T> event) {}
+    default void attributeChanged(final AttributeEvent<T> event) {}
 
     /**
      * Triggered when an attribute has been removed.
@@ -40,5 +40,5 @@ public interface AttributeContainerListener<T> {
      * @param event
      *            The attribute event for this trigger.
      */
-    default void attributeRemoved(final AttributeContainerEvent<T> event) {}
+    default void attributeRemoved(final AttributeEvent<T> event) {}
 }

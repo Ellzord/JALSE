@@ -14,8 +14,8 @@ import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entities;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
-import jalse.entities.EntityContainerListener;
 import jalse.entities.EntityFactory;
+import jalse.entities.EntityListener;
 import jalse.misc.AbstractIdentifiable;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
@@ -111,8 +111,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public boolean addEntityContainerListener(final EntityContainerListener listener) {
-	return entities.addEntityContainerListener(listener);
+    public boolean addEntityListener(final EntityListener listener) {
+	return entities.addEntityListener(listener);
     }
 
     @Override
@@ -131,11 +131,6 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public Set<? extends EntityContainerListener> getEntityContainerListeners() {
-	return entities.getEntityContainerListeners();
-    }
-
-    @Override
     public int getEntityCount() {
 	return entities.getEntityCount();
     }
@@ -143,6 +138,11 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     @Override
     public Set<UUID> getEntityIDs() {
 	return entities.getEntityIDs();
+    }
+
+    @Override
+    public Set<? extends EntityListener> getEntityListeners() {
+	return entities.getEntityListeners();
     }
 
     @Override
@@ -211,13 +211,13 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public boolean removeEntityContainerListener(final EntityContainerListener listener) {
-	return entities.removeEntityContainerListener(listener);
+    public boolean removeEntityListener(final EntityListener listener) {
+	return entities.removeEntityListener(listener);
     }
 
     @Override
-    public void removeEntityContainerListeners() {
-	entities.removeEntityContainerListeners();
+    public void removeEntityListeners() {
+	entities.removeEntityListeners();
     }
 
     @Override

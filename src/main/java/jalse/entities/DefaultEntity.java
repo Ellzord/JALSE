@@ -9,7 +9,7 @@ import jalse.actions.ActionEngine;
 import jalse.actions.DefaultActionScheduler;
 import jalse.actions.MutableActionContext;
 import jalse.attributes.AttributeContainer;
-import jalse.attributes.AttributeContainerListener;
+import jalse.attributes.AttributeListener;
 import jalse.attributes.AttributeType;
 import jalse.attributes.DefaultAttributeContainer;
 import jalse.misc.AbstractIdentifiable;
@@ -72,7 +72,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      */
     protected final TagTypeSet tags;
 
-    private final ListenerSet<EntityListener> listeners;
+    private final ListenerSet<EntityTypeListener> listeners;
     private final Set<Class<? extends Entity>> types;
     private final AtomicBoolean alive;
     private final Lock read;
@@ -95,7 +95,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	attributes = new DefaultAttributeContainer(this);
 	tags = new TagTypeSet();
 	scheduler = new DefaultActionScheduler<>(this);
-	listeners = new ListenerSet<>(EntityListener.class);
+	listeners = new ListenerSet<>(EntityTypeListener.class);
 	types = new HashSet<>();
 	alive = new AtomicBoolean();
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -104,18 +104,18 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> boolean addAttributeContainerListener(final String name, final AttributeType<T> type,
-	    final AttributeContainerListener<T> listener) {
-	return attributes.addAttributeContainerListener(name, type, listener);
-    }
-
-    @Override
-    public boolean addEntityContainerListener(final EntityContainerListener listener) {
-	return entities.addEntityContainerListener(listener);
+    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
+	return attributes.addAttributeListener(name, type, listener);
     }
 
     @Override
     public boolean addEntityListener(final EntityListener listener) {
+	return entities.addEntityListener(listener);
+    }
+
+    @Override
+    public boolean addEntityTypeListener(final EntityTypeListener listener) {
 	Objects.requireNonNull(listener);
 
 	write.lock();
@@ -154,24 +154,23 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Set<String> getAttributeContainerListenerNames() {
-	return attributes.getAttributeContainerListenerNames();
-    }
-
-    @Override
-    public <T> Set<? extends AttributeContainerListener<T>> getAttributeContainerListeners(final String name,
-	    final AttributeType<T> type) {
-	return attributes.getAttributeContainerListeners(name, type);
-    }
-
-    @Override
-    public Set<AttributeType<?>> getAttributeContainerListenerTypes(final String name) {
-	return attributes.getAttributeContainerListenerTypes(name);
-    }
-
-    @Override
     public int getAttributeCount() {
 	return attributes.getAttributeCount();
+    }
+
+    @Override
+    public Set<String> getAttributeListenerNames() {
+	return attributes.getAttributeListenerNames();
+    }
+
+    @Override
+    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
+	return attributes.getAttributeListeners(name, type);
+    }
+
+    @Override
+    public Set<AttributeType<?>> getAttributeListenerTypes(final String name) {
+	return attributes.getAttributeListenerTypes(name);
     }
 
     @Override
@@ -205,11 +204,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Set<? extends EntityContainerListener> getEntityContainerListeners() {
-	return entities.getEntityContainerListeners();
-    }
-
-    @Override
     public int getEntityCount() {
 	return entities.getEntityCount();
     }
@@ -221,6 +215,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Set<? extends EntityListener> getEntityListeners() {
+	return entities.getEntityListeners();
+    }
+
+    @Override
+    public Set<? extends EntityTypeListener> getEntityTypeListeners() {
 	read.lock();
 	try {
 	    return new HashSet<>(listeners);
@@ -315,7 +314,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	    }
 
 	    // Trigger change
-	    listeners.getProxy().entityMarkedAsType(new EntityEvent(this, type, addedAncestors));
+	    listeners.getProxy().entityMarkedAsType(new EntityTypeEvent(this, type, addedAncestors));
 
 	    return true;
 	} finally {
@@ -352,19 +351,19 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> boolean removeAttributeContainerListener(final String name, final AttributeType<T> type,
-	    final AttributeContainerListener<T> listener) {
-	return attributes.removeAttributeContainerListener(name, type, listener);
+    public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
+	    final AttributeListener<T> listener) {
+	return attributes.removeAttributeListener(name, type, listener);
     }
 
     @Override
-    public void removeAttributeContainerListeners() {
-	attributes.removeAttributeContainerListeners();
+    public void removeAttributeListeners() {
+	attributes.removeAttributeListeners();
     }
 
     @Override
-    public <T> void removeAttributeContainerListeners(final String name, final AttributeType<T> type) {
-	attributes.removeAttributeContainerListeners(name, type);
+    public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
+	attributes.removeAttributeListeners(name, type);
     }
 
     @Override
@@ -373,17 +372,17 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public boolean removeEntityContainerListener(final EntityContainerListener listener) {
-	return entities.removeEntityContainerListener(listener);
-    }
-
-    @Override
-    public void removeEntityContainerListeners() {
-	entities.removeEntityContainerListeners();
-    }
-
-    @Override
     public boolean removeEntityListener(final EntityListener listener) {
+	return entities.removeEntityListener(listener);
+    }
+
+    @Override
+    public void removeEntityListeners() {
+	entities.removeEntityListeners();
+    }
+
+    @Override
+    public boolean removeEntityTypeListener(final EntityTypeListener listener) {
 	Objects.requireNonNull(listener);
 
 	write.lock();
@@ -395,7 +394,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public void removeEntityListeners() {
+    public void removeEntityTypeListeners() {
 	write.lock();
 	try {
 	    listeners.clear();
@@ -482,7 +481,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	    }
 
 	    // Trigger change
-	    listeners.getProxy().entityUnmarkedAsType(new EntityEvent(this, type, removedDescendants));
+	    listeners.getProxy().entityUnmarkedAsType(new EntityTypeEvent(this, type, removedDescendants));
 
 	    return true;
 	} finally {

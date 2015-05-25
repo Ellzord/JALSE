@@ -15,19 +15,19 @@ public class EntityContainerTest {
 
     private interface TestEntity extends Entity {}
 
-    private class TestEntityContainerListener implements EntityContainerListener {
+    private class TestEntityListener implements EntityListener {
 
 	@Override
-	public void entityCreated(final EntityContainerEvent event) {}
+	public void entityCreated(final EntityEvent event) {}
 
 	@Override
-	public void entityKilled(final EntityContainerEvent event) {}
+	public void entityKilled(final EntityEvent event) {}
 
 	@Override
-	public void entityReceived(final EntityContainerEvent event) {}
+	public void entityReceived(final EntityEvent event) {}
 
 	@Override
-	public void entityTransferred(final EntityContainerEvent event) {}
+	public void entityTransferred(final EntityEvent event) {}
     }
 
     EntityContainer container = null;
@@ -91,17 +91,17 @@ public class EntityContainerTest {
     }
 
     @Test
-    public void entityContainerListenerTest() {
+    public void entityListenerTest() {
 	container = new DefaultEntityContainer();
 
 	final UUID id = new UUID(0, 0);
 	container.newEntity(id);
 
-	final TestEntityContainerListener entityContainerListener = new TestEntityContainerListener();
-	Assert.assertFalse(container.hasEntityContainerListener(entityContainerListener));
+	final TestEntityListener entityListener = new TestEntityListener();
+	Assert.assertFalse(container.hasEntityListener(entityListener));
 
-	container.addEntityContainerListener(entityContainerListener);
-	Assert.assertTrue(container.hasEntityContainerListener(entityContainerListener));
+	container.addEntityListener(entityListener);
+	Assert.assertTrue(container.hasEntityListener(entityListener));
     }
 
     @Test
