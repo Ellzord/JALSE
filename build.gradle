@@ -7,7 +7,7 @@ apply plugin: 'com.github.kt3k.coveralls'
 
 group = "com.github.ellzord"
 archivesBaseName = "JALSE"
-version = "1.0.6-SNAPSHOT"
+version = "1.0.6"
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 sourceCompatibility = 1.8
