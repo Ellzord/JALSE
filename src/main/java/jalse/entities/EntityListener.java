@@ -1,6 +1,4 @@
-package jalse.listeners;
-
-import jalse.entities.Entity;
+package jalse.entities;
 
 /**
  * Listener for {@link Entity} type changes and death. Unique {@link EntityEvent} will be supplied

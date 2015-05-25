@@ -3,10 +3,8 @@ package jalse.entities;
 import static jalse.attributes.Attributes.EMPTY_ATTRIBUTECONTAINER;
 import static jalse.entities.Entities.asType;
 import jalse.attributes.AttributeContainer;
-import jalse.listeners.EntityContainerEvent;
-import jalse.listeners.EntityContainerListener;
-import jalse.listeners.ListenerSet;
 import jalse.misc.JALSEExceptions;
+import jalse.misc.ListenerSet;
 
 import java.util.HashSet;
 import java.util.Objects;

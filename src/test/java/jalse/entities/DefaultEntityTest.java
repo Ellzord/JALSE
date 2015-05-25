@@ -3,14 +3,10 @@ package jalse.entities;
 import jalse.actions.Action;
 import jalse.actions.ActionContext;
 import jalse.actions.DefaultActionScheduler;
+import jalse.attributes.AttributeContainerEvent;
+import jalse.attributes.AttributeContainerListener;
 import jalse.attributes.Attributes;
 import jalse.attributes.DefaultAttributeContainer;
-import jalse.listeners.AttributeContainerEvent;
-import jalse.listeners.AttributeContainerListener;
-import jalse.listeners.EntityContainerEvent;
-import jalse.listeners.EntityContainerListener;
-import jalse.listeners.EntityEvent;
-import jalse.listeners.EntityListener;
 
 import java.util.Set;
 import java.util.UUID;

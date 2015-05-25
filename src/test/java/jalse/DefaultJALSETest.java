@@ -7,8 +7,8 @@ import jalse.actions.ThreadPoolActionEngine;
 import jalse.attributes.DefaultAttributeContainer;
 import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
-import jalse.listeners.EntityContainerEvent;
-import jalse.listeners.EntityContainerListener;
+import jalse.entities.EntityContainerEvent;
+import jalse.entities.EntityContainerListener;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;

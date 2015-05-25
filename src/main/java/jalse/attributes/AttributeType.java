@@ -2,7 +2,6 @@ package jalse.attributes;
 
 import static jalse.misc.JALSEExceptions.INVALID_ATTRTYPE_SUBTYPE;
 import static jalse.misc.JALSEExceptions.throwRE;
-import jalse.listeners.AttributeContainerListener;
 import jalse.misc.JALSEExceptions;
 
 import java.lang.reflect.ParameterizedType;

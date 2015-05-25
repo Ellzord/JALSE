@@ -1,4 +1,4 @@
-package jalse.listeners;
+package jalse.misc;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;

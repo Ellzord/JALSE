@@ -2,12 +2,10 @@ package jalse.entities;
 
 import jalse.actions.ActionScheduler;
 import jalse.attributes.AttributeContainer;
+import jalse.attributes.AttributeContainerListener;
 import jalse.attributes.AttributeType;
-import jalse.listeners.AttributeContainerListener;
-import jalse.listeners.EntityContainerListener;
-import jalse.listeners.EntityListener;
-import jalse.listeners.ListenerSet;
 import jalse.misc.Identifiable;
+import jalse.misc.ListenerSet;
 import jalse.tags.Taggable;
 
 import java.util.Optional;
