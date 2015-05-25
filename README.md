@@ -25,13 +25,13 @@ Example for Maven:
 <dependency>
     <groupId>com.github.ellzord</groupId>
     <artifactId>JALSE</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
 </dependency>
 ```
 
 Example for Gradle:
 ```
-compile 'com.github.ellzord:JALSE:1.0.5'
+compile 'com.github.ellzord:JALSE:1.0.6'
 ```
 
 ### Links
