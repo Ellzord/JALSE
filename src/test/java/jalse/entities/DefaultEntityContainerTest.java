@@ -13,23 +13,23 @@ public class DefaultEntityContainerTest {
 
     private interface TestEntity extends Entity {}
 
-    private class TestEntityContainerListener implements EntityContainerListener {
+    private class TestEntityListener implements EntityListener {
 
 	public boolean killed = false;
 
 	@Override
-	public void entityCreated(final EntityContainerEvent event) {}
+	public void entityCreated(final EntityEvent event) {}
 
 	@Override
-	public void entityKilled(final EntityContainerEvent event) {
+	public void entityKilled(final EntityEvent event) {
 	    killed = true;
 	}
 
 	@Override
-	public void entityReceived(final EntityContainerEvent event) {}
+	public void entityReceived(final EntityEvent event) {}
 
 	@Override
-	public void entityTransferred(final EntityContainerEvent event) {}
+	public void entityTransferred(final EntityEvent event) {}
     }
 
     DefaultEntityContainer container = null;
@@ -83,23 +83,23 @@ public class DefaultEntityContainerTest {
     }
 
     @Test
-    public void entityContainerListenerTest() {
+    public void entityListenerTest() {
 	container = new DefaultEntityContainer();
 
 	final UUID id = new UUID(0, 0);
 	container.newEntity(id);
 
-	final TestEntityContainerListener entityContainerListener = new TestEntityContainerListener();
-	container.addEntityContainerListener(entityContainerListener);
+	final TestEntityListener entityListener = new TestEntityListener();
+	container.addEntityListener(entityListener);
 
-	Assert.assertTrue(container.getEntityContainerListeners().contains(entityContainerListener));
+	Assert.assertTrue(container.getEntityListeners().contains(entityListener));
 
-	container.removeEntityContainerListener(entityContainerListener);
-	Assert.assertFalse(container.getEntityContainerListeners().contains(entityContainerListener));
+	container.removeEntityListener(entityListener);
+	Assert.assertFalse(container.getEntityListeners().contains(entityListener));
 
-	container.addEntityContainerListener(entityContainerListener);
-	container.removeEntityContainerListeners();
-	Assert.assertFalse(container.getEntityContainerListeners().contains(entityContainerListener));
+	container.addEntityListener(entityListener);
+	container.removeEntityListeners();
+	Assert.assertFalse(container.getEntityListeners().contains(entityListener));
     }
 
     @Test
@@ -116,10 +116,10 @@ public class DefaultEntityContainerTest {
 	otherContainer.newEntity(id);
 	Assert.assertEquals(container, otherContainer);
 
-	final TestEntityContainerListener entityContainerListener = new TestEntityContainerListener();
-	container.addEntityContainerListener(entityContainerListener);
+	final TestEntityListener entityListener = new TestEntityListener();
+	container.addEntityListener(entityListener);
 	Assert.assertNotEquals(container, otherContainer);
-	otherContainer.addEntityContainerListener(entityContainerListener);
+	otherContainer.addEntityListener(entityListener);
 	Assert.assertEquals(container, otherContainer);
     }
 
@@ -157,10 +157,10 @@ public class DefaultEntityContainerTest {
 	otherContainer.newEntity(id);
 	Assert.assertEquals(container.hashCode(), otherContainer.hashCode());
 
-	final TestEntityContainerListener entityContainerListener = new TestEntityContainerListener();
-	container.addEntityContainerListener(entityContainerListener);
+	final TestEntityListener entityListener = new TestEntityListener();
+	container.addEntityListener(entityListener);
 	Assert.assertNotEquals(container.hashCode(), otherContainer.hashCode());
-	otherContainer.addEntityContainerListener(entityContainerListener);
+	otherContainer.addEntityListener(entityListener);
 	Assert.assertEquals(container.hashCode(), otherContainer.hashCode());
     }
 
@@ -170,10 +170,10 @@ public class DefaultEntityContainerTest {
 
 	container.newEntity(new UUID(0, 0));
 
-	TestEntityContainerListener entityContainerListener = new TestEntityContainerListener();
-	container.addEntityContainerListener(entityContainerListener);
+	TestEntityListener entityListener = new TestEntityListener();
+	container.addEntityListener(entityListener);
 
-	Assert.assertFalse(entityContainerListener.killed);
+	Assert.assertFalse(entityListener.killed);
 	Assert.assertTrue(container.killEntity(new UUID(0, 0)));
 
 	// Try killing the same entity twice.
@@ -181,16 +181,16 @@ public class DefaultEntityContainerTest {
 
 	// Try killing an entity that's not in the container.
 	Assert.assertFalse(container.killEntity(new UUID(0, 1)));
-	Assert.assertTrue(entityContainerListener.killed);
+	Assert.assertTrue(entityListener.killed);
 
 	container = new DefaultEntityContainer();
 	container.newEntity(new UUID(0, 0));
-	entityContainerListener = new TestEntityContainerListener();
-	container.addEntityContainerListener(entityContainerListener);
+	entityListener = new TestEntityListener();
+	container.addEntityListener(entityListener);
 
-	Assert.assertFalse(entityContainerListener.killed);
+	Assert.assertFalse(entityListener.killed);
 	container.killEntities();
-	Assert.assertTrue(entityContainerListener.killed);
+	Assert.assertTrue(entityListener.killed);
     }
 
     @Test

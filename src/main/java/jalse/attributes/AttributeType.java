@@ -8,8 +8,7 @@ import java.util.Objects;
 /**
  * AttributeTypes and their values can be considered the core data of the JALSE model. AttributeType
  * defines what type the data must be. {@link AttributeContainer} is an attribute container where
- * attributes can be stored and {@link AttributeContainerListener} can be set to trigger on value
- * updates.<br>
+ * attributes can be stored and {@link AttributeListener} can be set to trigger on value updates.<br>
  * <br>
  * For simple value types (no type arguments) {@link Attributes#newTypeOf(Class)} can be used:
  *
@@ -43,7 +42,7 @@ import java.util.Objects;
  *            Value type.
  *
  * @see AttributeContainer
- * @see AttributeContainerListener
+ * @see AttributeListener
  * @see DefaultAttributeContainer
  * @see Attributes
  *

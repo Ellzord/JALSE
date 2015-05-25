@@ -7,10 +7,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Attribute change event for {@link AttributeContainerListener}. This is a unique event that
- * contains the relevant {@link AttributeType} value and it's parent {@link AttributeContainer}
- * (even if the Attribute has been removed). When an attribute is replaced the previous attribute is
- * also contained within the event.
+ * Attribute change event for {@link AttributeListener}. This is a unique event that contains the
+ * relevant {@link AttributeType} value and it's parent {@link AttributeContainer} (even if the
+ * Attribute has been removed). When an attribute is replaced the previous attribute is also
+ * contained within the event.
  *
  * @author Elliot Ford
  * @param <T>
@@ -19,7 +19,7 @@ import java.util.Optional;
  * @see AttributeContainer
  *
  */
-public class AttributeContainerEvent<T> extends AbstractIdentifiable {
+public class AttributeEvent<T> extends AbstractIdentifiable {
 
     private final AttributeContainer container;
     private final String name;
@@ -39,7 +39,7 @@ public class AttributeContainerEvent<T> extends AbstractIdentifiable {
      * @param value
      *            Attribute the event is for.
      */
-    public AttributeContainerEvent(final AttributeContainer container, final String name, final AttributeType<T> type,
+    public AttributeEvent(final AttributeContainer container, final String name, final AttributeType<T> type,
 	    final T value) {
 	this(container, name, type, value, null);
     }
@@ -58,7 +58,7 @@ public class AttributeContainerEvent<T> extends AbstractIdentifiable {
      * @param replacedValue
      *            The previous attribute that has been replaced by this Attribute (can be null).
      */
-    public AttributeContainerEvent(final AttributeContainer container, final String name, final AttributeType<T> type,
+    public AttributeEvent(final AttributeContainer container, final String name, final AttributeType<T> type,
 	    final T value, final T replacedValue) {
 	this.name = requireNotEmpty(name);
 	this.container = Objects.requireNonNull(container);

@@ -19,8 +19,8 @@ import java.util.stream.Stream;
  * An DefaultEntityContainer is a thread-safe implementation of {@link EntityContainer}. <br>
  * <br>
  *
- * DefaultEntityContainer can take a delegate container to supply to {@link EntityContainerEvent}.
- * Entity updates will trigger these events using {@link EntityContainerListener}.<br>
+ * DefaultEntityContainer can take a delegate container to supply to {@link EntityEvent}. Entity
+ * updates will trigger these events using {@link EntityListener}.<br>
  * <br>
  *
  * By default DefaultEntityContainer will use {@link DefaultEntityFactory} with no delegate
@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 public class DefaultEntityContainer implements EntityContainer {
 
     private final Map<UUID, Entity> entities;
-    private final ListenerSet<EntityContainerListener> listeners;
+    private final ListenerSet<EntityListener> listeners;
     private final EntityFactory factory;
     private final EntityContainer delegateContainer;
     private final Lock read;
@@ -58,14 +58,14 @@ public class DefaultEntityContainer implements EntityContainer {
 	this.factory = factory != null ? factory : new DefaultEntityFactory();
 	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
 	entities = new HashMap<>();
-	listeners = new ListenerSet<>(EntityContainerListener.class);
+	listeners = new ListenerSet<>(EntityListener.class);
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
 	write = rwLock.writeLock();
     }
 
     @Override
-    public boolean addEntityContainerListener(final EntityContainerListener listener) {
+    public boolean addEntityListener(final EntityListener listener) {
 	Objects.requireNonNull(listener);
 
 	write.lock();
@@ -112,16 +112,6 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
-    public Set<? extends EntityContainerListener> getEntityContainerListeners() {
-	read.lock();
-	try {
-	    return new HashSet<>(listeners);
-	} finally {
-	    read.unlock();
-	}
-    }
-
-    @Override
     public int getEntityCount() {
 	read.lock();
 	try {
@@ -136,6 +126,16 @@ public class DefaultEntityContainer implements EntityContainer {
 	read.lock();
 	try {
 	    return new HashSet<>(entities.keySet());
+	} finally {
+	    read.unlock();
+	}
+    }
+
+    @Override
+    public Set<? extends EntityListener> getEntityListeners() {
+	read.lock();
+	try {
+	    return new HashSet<>(listeners);
 	} finally {
 	    read.unlock();
 	}
@@ -181,7 +181,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	    }
 
 	    entities.remove(id);
-	    listeners.getProxy().entityKilled(new EntityContainerEvent(delegateContainer, e));
+	    listeners.getProxy().entityKilled(new EntityEvent(delegateContainer, e));
 
 	    return true;
 	} finally {
@@ -219,7 +219,7 @@ public class DefaultEntityContainer implements EntityContainer {
 
 	    e.addAll(sourceContainer);
 
-	    listeners.getProxy().entityCreated(new EntityContainerEvent(delegateContainer, e));
+	    listeners.getProxy().entityCreated(new EntityEvent(delegateContainer, e));
 
 	    return e;
 	} finally {
@@ -251,7 +251,7 @@ public class DefaultEntityContainer implements EntityContainer {
 
 	    entities.put(id, e);
 	    if (imported) { // Otherwise transfer is triggered.
-		listeners.getProxy().entityReceived(new EntityContainerEvent(delegateContainer, e));
+		listeners.getProxy().entityReceived(new EntityEvent(delegateContainer, e));
 	    }
 
 	    return true;
@@ -261,7 +261,7 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
-    public boolean removeEntityContainerListener(final EntityContainerListener listener) {
+    public boolean removeEntityListener(final EntityListener listener) {
 	write.lock();
 	try {
 	    return listeners.remove(listener);
@@ -271,7 +271,7 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
-    public void removeEntityContainerListeners() {
+    public void removeEntityListeners() {
 	write.lock();
 	try {
 	    listeners.clear();
@@ -323,7 +323,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	    }
 
 	    entities.remove(id);
-	    listeners.getProxy().entityTransferred(new EntityContainerEvent(delegateContainer, e, destination));
+	    listeners.getProxy().entityTransferred(new EntityEvent(delegateContainer, e, destination));
 
 	    return true;
 	} finally {

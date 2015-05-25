@@ -2,7 +2,7 @@ package jalse.entities;
 
 import jalse.actions.ActionScheduler;
 import jalse.attributes.AttributeContainer;
-import jalse.attributes.AttributeContainerListener;
+import jalse.attributes.AttributeListener;
 import jalse.attributes.AttributeType;
 import jalse.misc.Identifiable;
 import jalse.misc.ListenerSet;
@@ -14,9 +14,9 @@ import java.util.Set;
 /**
  * Entity plays the greatest role in the overall data model. An entity is representative of a single
  * entity or group of entities with a defined identities. Entities have {@link AttributeType} as
- * well as {@link AttributeContainerListener} for trigger code upon add, removal or change of those
+ * well as {@link AttributeListener} for trigger code upon add, removal or change of those
  * attributes. Entities can create and kill other entities (tree-like structure) these events can be
- * accessed by adding {@link EntityContainerListener}. <br>
+ * accessed by adding {@link EntityListener}. <br>
  * <br>
  * Entities can be wrapped and marked as specific entity types as long as the inheriting interface
  * follows what is outlined in {@link Entities}. Entity have can have a number of types (subclasses
@@ -45,7 +45,7 @@ import java.util.Set;
  *
  * @see EntityContainer
  * @see DefaultEntityContainer
- * @see EntityContainerListener
+ * @see EntityListener
  * @see EntityFactory
  * @see Entities#asType(Entity, Class)
  *
@@ -65,7 +65,7 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      * @see ListenerSet#add(Object)
      *
      */
-    boolean addEntityListener(EntityListener listener);
+    boolean addEntityTypeListener(EntityTypeListener listener);
 
     /**
      * Convenience method for wrapping the entity to a different type.
@@ -92,7 +92,7 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      *
      * @return All the entity listeners.
      */
-    Set<? extends EntityListener> getEntityListeners();
+    Set<? extends EntityTypeListener> getEntityTypeListeners();
 
     /**
      * Gets the types this entity has been marked as.
@@ -123,11 +123,11 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      * Checks whether the container contains a particular listener.
      *
      * @param listener
-     *            The EntityContainerListener to check for.
-     * @return Whether the container contains the given EntityContainerListener.
+     *            The EntityListener to check for.
+     * @return Whether the container contains the given EntityListener.
      */
-    default boolean hasEntityListener(final EntityListener listener) {
-	return getEntityListeners().contains(listener);
+    default boolean hasEntityTypeListener(final EntityTypeListener listener) {
+	return getEntityTypeListeners().contains(listener);
     }
 
     /**
@@ -176,12 +176,12 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      * @see ListenerSet#remove(Object)
      *
      */
-    boolean removeEntityListener(EntityListener listener);
+    boolean removeEntityTypeListener(EntityTypeListener listener);
 
     /**
      * Removes all listeners for entities.
      */
-    void removeEntityListeners();
+    void removeEntityTypeListeners();
 
     /**
      * Transfers this entity to the specified destination container.
