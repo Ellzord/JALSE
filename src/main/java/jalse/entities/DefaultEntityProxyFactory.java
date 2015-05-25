@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 /**
  * This is the default {@link EntityProxyFactory} implementation for JALSE. This proxy factory will
@@ -114,6 +115,7 @@ public class DefaultEntityProxyFactory implements EntityProxyFactory {
 	}
 
 	private Object newEntityProxy(final Entity e, final Class<?> type) {
+	    logger.fine(String.format("Creating proxy of type %s for entity %s", type, e.getID()));
 	    return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { type },
 		    new EntityProxyHandler(e));
 	}
@@ -179,6 +181,8 @@ public class DefaultEntityProxyFactory implements EntityProxyFactory {
 	    return entityMethod.invoke(proxy, entity, args);
 	}
     }
+
+    private static final Logger logger = Logger.getLogger(DefaultEntityProxyFactory.class.getName());
 
     /**
      * Resolver for entity types.

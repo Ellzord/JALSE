@@ -1,9 +1,5 @@
 package jalse.attributes;
 
-import static jalse.misc.JALSEExceptions.INVALID_ATTRTYPE_SUBTYPE;
-import static jalse.misc.JALSEExceptions.throwRE;
-import jalse.misc.JALSEExceptions;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -61,10 +57,8 @@ public abstract class AttributeType<T> {
 
     /**
      * Creates a new instance of Attribute type (using generic type information).
-     *
-     * @see JALSEExceptions#INVALID_ATTRTYPE_SUBTYPE
      */
-    public AttributeType() {
+    public AttributeType() throws IllegalStateException {
 	/*
 	 * Get direct superclass of AttributeType.
 	 */
@@ -79,7 +73,8 @@ public abstract class AttributeType<T> {
 	final Type typeArg = genericSuperType.getActualTypeArguments()[0]; // T
 
 	if (typeArg instanceof TypeVariable<?>) { // Could not get generic type argument.
-	    throwRE(INVALID_ATTRTYPE_SUBTYPE);
+	    throw new IllegalStateException(
+		    "AttributeType must be initialised in a way that provides generic type information: new AttributeType<String>{}");
 	}
 
 	this.valueType = typeArg;

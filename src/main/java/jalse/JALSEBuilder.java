@@ -105,7 +105,7 @@ public final class JALSEBuilder {
      *
      * @return Newly created JALSE.
      */
-    public JALSE build() {
+    public JALSE build() throws IllegalStateException {
 	if (id == null) {
 	    throw new IllegalStateException("ID cannot be null");
 	}
@@ -124,13 +124,15 @@ public final class JALSEBuilder {
 	    break;
 	case THREADPOOL:
 	    if (parallelism < MINIMUM_PARALLALISM) {
-		throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
+		throw new IllegalStateException(String.format("Parallelism for ThreadPool must be %d or above",
+			MINIMUM_PARALLALISM));
 	    }
 	    engine = new ThreadPoolActionEngine(parallelism);
 	    break;
 	case FORKJOIN:
 	    if (parallelism < MINIMUM_PARALLALISM) {
-		throw new IllegalStateException("Parallelism must be above one for ThreadPool or ForkJoin engines");
+		throw new IllegalStateException(String.format("Parallelism for ForkJoin must be %d or above",
+			MINIMUM_PARALLALISM));
 	    }
 	    engine = new ForkJoinActionEngine(parallelism);
 	    break;

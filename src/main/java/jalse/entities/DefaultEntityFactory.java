@@ -1,9 +1,6 @@
 package jalse.entities;
 
 import static jalse.actions.Actions.requireNotStopped;
-import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
-import static jalse.misc.JALSEExceptions.ENTITY_LIMIT_REACHED;
-import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.ActionEngine;
 import jalse.actions.Actions;
 import jalse.actions.ForkJoinActionEngine;
@@ -15,6 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.logging.Logger;
 
 /**
  * A {@link EntityFactory} implementation that creates/kills {@link DefaultEntity}. Default entity
@@ -30,6 +28,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  */
 public class DefaultEntityFactory implements EntityFactory {
+
+    private static final Logger logger = Logger.getLogger(DefaultEntityFactory.class.getName());
 
     private final int entityLimit;
     private final Set<UUID> entityIDs;
@@ -66,10 +66,12 @@ public class DefaultEntityFactory implements EntityFactory {
 
     @Override
     public void exportEntity(final Entity e) {
+	final UUID eID = e.getID();
+
 	write.lock();
 	try {
-	    if (!entityIDs.remove(e.getID())) {
-		throw new IllegalArgumentException("Does not know if this entity");
+	    if (!entityIDs.remove(eID)) {
+		throw new IllegalArgumentException(String.format("Does not know of entity %s", eID));
 	    }
 	} finally {
 	    write.unlock();
@@ -86,6 +88,8 @@ public class DefaultEntityFactory implements EntityFactory {
 	    ce.cancelAllScheduledForActor();
 	    ce.setEngine(emptyEngine);
 	});
+
+	logger.fine(String.format("Entity %s exported", eID));
     }
 
     /**
@@ -133,11 +137,12 @@ public class DefaultEntityFactory implements EntityFactory {
 	write.lock();
 	try {
 	    if (entityCount >= entityLimit) {
-		throwRE(ENTITY_LIMIT_REACHED);
+		throw new IllegalStateException(String.format("Entity limit of %d has been reached", entityLimit));
 	    }
 
-	    if (!entityIDs.add(id)) { // Unique only
-		throwRE(ENTITY_ALREADY_ASSOCIATED);
+	    // Unique only
+	    if (!entityIDs.add(id)) {
+		throw new IllegalArgumentException(String.format("Entity %s is already associated", id));
 	    }
 
 	    final DefaultEntity e = new DefaultEntity(id, this, target);
@@ -145,6 +150,8 @@ public class DefaultEntityFactory implements EntityFactory {
 	    e.markAsAlive();
 
 	    entityCount++;
+
+	    logger.fine(String.format("Entity %s created", id));
 
 	    return e;
 	} finally {
@@ -154,8 +161,11 @@ public class DefaultEntityFactory implements EntityFactory {
 
     @Override
     public void setEngine(final ActionEngine engine) {
+	Objects.requireNonNull(engine);
+
 	write.lock();
 	try {
+	    logger.fine(String.format("Switching engine type %s to %s", this.engine.getClass(), engine.getClass()));
 	    this.engine = requireNotStopped(engine);
 	} finally {
 	    write.unlock();
@@ -164,9 +174,11 @@ public class DefaultEntityFactory implements EntityFactory {
 
     @Override
     public boolean tryImportEntity(final Entity e, final EntityContainer target) {
+	final UUID eID = e.getID();
+
 	write.lock();
 	try {
-	    if (!entityIDs.add(e.getID())) {
+	    if (!entityIDs.add(eID)) {
 		return false;
 	    }
 
@@ -177,6 +189,8 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	    Entities.walkEntities(de).map(DefaultEntity.class::cast).forEach(ve -> ve.setEngine(engine));
 
+	    logger.fine(String.format("Entity %s imported", eID));
+
 	    return true;
 	} finally {
 	    write.unlock();
@@ -185,11 +199,13 @@ public class DefaultEntityFactory implements EntityFactory {
 
     @Override
     public boolean tryKillEntity(final Entity e) {
+	final UUID eID = e.getID();
+
 	write.lock();
 	try {
 	    final DefaultEntity de = (DefaultEntity) e;
 
-	    if (!entityIDs.remove(de.getID()) || !de.isAlive()) { // Kill only those in need
+	    if (!entityIDs.remove(eID) || !de.isAlive()) { // Kill only those in need
 		return false;
 	    }
 
@@ -201,6 +217,8 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	    de.killEntities(); // Kill tree
 
+	    logger.fine(String.format("Entity %s killed", eID));
+
 	    return true;
 	} finally {
 	    write.unlock();
@@ -209,13 +227,17 @@ public class DefaultEntityFactory implements EntityFactory {
 
     @Override
     public boolean tryTakeFromTree(final Entity e, final EntityContainer target) {
+	final UUID eID = e.getID();
+
 	write.lock();
 	try {
-	    if (!entityIDs.contains(e.getID())) {
+	    if (!entityIDs.contains(eID)) {
 		return false;
 	    }
 
 	    ((DefaultEntity) e).setContainer(target);
+
+	    logger.fine(String.format("Entity %s taken from tree", eID));
 
 	    return true;
 	} finally {

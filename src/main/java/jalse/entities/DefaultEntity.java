@@ -3,8 +3,6 @@ package jalse.entities;
 import static jalse.entities.Entities.getTypeAncestry;
 import static jalse.entities.Entities.isOrSubtype;
 import static jalse.entities.Entities.isSubtype;
-import static jalse.misc.JALSEExceptions.ENTITY_NOT_ALIVE;
-import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.actions.Action;
 import jalse.actions.ActionContext;
 import jalse.actions.ActionEngine;
@@ -137,6 +135,12 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public void cancelAllScheduledForActor() {
 	scheduler.cancelAllScheduledForActor();
+    }
+
+    private void checkAlive() {
+	if (!isAlive()) {
+	    throw new IllegalStateException(String.format("Entity %s is no longer alive", id));
+	}
     }
 
     @Override
@@ -321,27 +325,19 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public MutableActionContext<Entity> newContextForActor(final Action<Entity> action) {
-	if (!isAlive()) {
-	    throwRE(ENTITY_NOT_ALIVE);
-	}
+	checkAlive();
 	return scheduler.newContextForActor(action);
     }
 
     @Override
     public Entity newEntity(final UUID id, final AttributeContainer sourceContainer) {
-	if (!isAlive()) {
-	    throwRE(ENTITY_NOT_ALIVE);
-	}
-
+	checkAlive();
 	return entities.newEntity(id, sourceContainer);
     }
 
     @Override
     public <T extends Entity> T newEntity(final UUID id, final Class<T> type, final AttributeContainer sourceContainer) {
-	if (!isAlive()) {
-	    throwRE(ENTITY_NOT_ALIVE);
-	}
-
+	checkAlive();
 	return entities.newEntity(id, type, sourceContainer);
     }
 
@@ -411,9 +407,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public ActionContext<Entity> scheduleForActor(final Action<Entity> action, final long initialDelay,
 	    final long period, final TimeUnit unit) {
-	if (!isAlive()) {
-	    throwRE(ENTITY_NOT_ALIVE);
-	}
+	checkAlive();
 	return scheduler.scheduleForActor(action, initialDelay, period, unit);
     }
 
