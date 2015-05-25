@@ -3,7 +3,6 @@ package jalse.entities;
 import static jalse.attributes.Attributes.EMPTY_ATTRIBUTECONTAINER;
 import static jalse.entities.Entities.asType;
 import jalse.attributes.AttributeContainer;
-import jalse.misc.JALSEExceptions;
 import jalse.misc.ListenerSet;
 
 import java.util.HashSet;
@@ -212,7 +211,6 @@ public interface EntityContainer {
      *             If the entity limit has been reached.
      *
      * @see UUID#randomUUID()
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
      */
     default Entity newEntity() {
 	return newEntity(EMPTY_ATTRIBUTECONTAINER);
@@ -229,7 +227,6 @@ public interface EntityContainer {
      *             If the entity limit has been reached.
      *
      * @see UUID#randomUUID()
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
      */
     default Entity newEntity(final AttributeContainer sourceContainer) {
 	return newEntity(UUID.randomUUID(), sourceContainer);
@@ -246,7 +243,6 @@ public interface EntityContainer {
      *             If the entity limit has been reached.
      *
      * @see UUID#randomUUID()
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
      * @see Entity#markAsType(Class)
      * @see Entities#asType(Entity, Class)
      */
@@ -267,7 +263,6 @@ public interface EntityContainer {
      *             If the entity limit has been reached.
      *
      * @see UUID#randomUUID()
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
      * @see Entity#markAsType(Class)
      * @see Entities#asType(Entity, Class)
      */
@@ -285,9 +280,6 @@ public interface EntityContainer {
      *             If the entity limit has been reached.
      * @throws IllegalArgumentException
      *             If the entity ID is already assigned.
-     *
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
-     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
      */
     default Entity newEntity(final UUID id) {
 	return newEntity(id, EMPTY_ATTRIBUTECONTAINER);
@@ -305,9 +297,6 @@ public interface EntityContainer {
      *             If the entity limit has been reached.
      * @throws IllegalArgumentException
      *             If the entity ID is already assigned.
-     *
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
-     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
      */
     Entity newEntity(UUID id, AttributeContainer sourceContainer);
 
@@ -326,8 +315,6 @@ public interface EntityContainer {
      * @throws IllegalArgumentException
      *             If the entity ID is already assigned.
      *
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
-     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
      * @see Entity#markAsType(Class)
      * @see Entities#asType(Entity, Class)
      */
@@ -352,8 +339,6 @@ public interface EntityContainer {
      * @throws IllegalArgumentException
      *             If the entity ID is already assigned.
      *
-     * @see JALSEExceptions#ENTITY_LIMIT_REACHED
-     * @see JALSEExceptions#ENTITY_ALREADY_ASSOCIATED
      * @see Entity#markAsType(Class)
      * @see Entities#asType(Entity, Class)
      */

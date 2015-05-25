@@ -1,9 +1,5 @@
 package jalse.actions;
 
-import static jalse.misc.JALSEExceptions.ENGINE_SHUTDOWN;
-import static jalse.misc.JALSEExceptions.throwRE;
-import jalse.misc.JALSEExceptions;
-
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -96,11 +92,10 @@ public final class Actions {
      *            Engine to check.
      * @return The engine.
      *
-     * @see JALSEExceptions#ENGINE_SHUTDOWN
      */
-    public static ActionEngine requireNotStopped(final ActionEngine engine) {
+    public static ActionEngine requireNotStopped(final ActionEngine engine) throws IllegalStateException {
 	if (engine.isStopped()) {
-	    throwRE(ENGINE_SHUTDOWN);
+	    throw new IllegalStateException("Engine has already been stopped");
 	}
 	return engine;
     }

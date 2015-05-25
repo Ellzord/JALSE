@@ -1,7 +1,6 @@
 package jalse.actions;
 
 import static jalse.actions.Actions.unmodifiableActionContext;
-import jalse.misc.JALSEExceptions;
 
 /**
  * An engine for scheduling {@link Action} for execution. Work can be scheduled immediately or with
@@ -49,8 +48,6 @@ public interface ActionEngine {
 
     /**
      * Pauses action processing.
-     *
-     * @see JALSEExceptions#ENGINE_SHUTDOWN
      */
     void pause();
 
@@ -84,8 +81,6 @@ public interface ActionEngine {
 
     /**
      * Resumes performing actions.
-     *
-     * @see JALSEExceptions#ENGINE_SHUTDOWN
      */
     void resume();
 
@@ -124,8 +119,6 @@ public interface ActionEngine {
     /**
      * Permanently stops the engine. All work that has not yet been executed will be cancelled and
      * all work currently executing will may be interrupted.
-     *
-     * @see JALSEExceptions#ENGINE_SHUTDOWN
      *
      */
     void stop();

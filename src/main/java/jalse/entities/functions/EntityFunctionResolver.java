@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.logging.Logger;
 
 /**
  * This is a resolver for {@link Entity} types. It can be given a number of
@@ -30,6 +31,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
  *
  */
 public class EntityFunctionResolver {
+
+    private static final Logger logger = Logger.getLogger(EntityFunctionResolver.class.getName());
 
     private final Map<Class<? extends Entity>, EntityFunction> resolved;
     private final Set<EntityMethodFunction> functions;
@@ -125,6 +128,9 @@ public class EntityFunctionResolver {
 	    return resolvedType;
 	}
 
+	// Log type
+	logger.info(String.format("Resolving type %s", type));
+
 	// Check not entity
 	if (Entity.class.equals(type)) {
 	    throw new IllegalArgumentException("Entity is not a valid Entity subclass");
@@ -145,6 +151,8 @@ public class EntityFunctionResolver {
 	final Set<Class<? extends Entity>> totalDependencies = new HashSet<>();
 	for (final Method m : type.getDeclaredMethods()) {
 	    for (final EntityMethodFunction methodFunction : functions) {
+		// Log method
+		logger.fine(String.format("Resolving method %s with function %s", m, methodFunction.getClass()));
 		// Resolve method
 		final EntityMethod em = methodFunction.apply(m);
 		if (em != null) {

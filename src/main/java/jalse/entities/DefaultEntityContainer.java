@@ -1,10 +1,6 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.asType;
-import static jalse.misc.JALSEExceptions.CANNOT_SELF_TRANSFER;
-import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
-import static jalse.misc.JALSEExceptions.ENTITY_EXPORT_NO_TRANSFER;
-import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.attributes.AttributeContainer;
 import jalse.misc.ListenerSet;
 
@@ -211,7 +207,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	try {
 	    Entity e = entities.get(id);
 	    if (e != null) {
-		throwRE(ENTITY_ALREADY_ASSOCIATED);
+		throw new IllegalArgumentException(String.format("Entity %s is already associated", id));
 	    }
 
 	    e = factory.newEntity(id, delegateContainer);
@@ -234,7 +230,7 @@ public class DefaultEntityContainer implements EntityContainer {
     @Override
     public boolean receiveEntity(final Entity e) {
 	if (Objects.equals(delegateContainer, Objects.requireNonNull(e))) {
-	    throwRE(CANNOT_SELF_TRANSFER);
+	    throw new IllegalArgumentException(String.format("Cannot transfer %s to itself", e.getID()));
 	}
 
 	write.lock();
@@ -299,7 +295,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	Objects.requireNonNull(id);
 
 	if (Objects.equals(delegateContainer, Objects.requireNonNull(destination))) {
-	    throwRE(CANNOT_SELF_TRANSFER);
+	    throw new IllegalArgumentException(String.format("Cannot transfer %s to the same container", id));
 	}
 
 	write.lock();
@@ -310,7 +306,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	    }
 
 	    if (Objects.equals(e, destination)) {
-		throwRE(CANNOT_SELF_TRANSFER);
+		throw new IllegalArgumentException(String.format("Cannot transfer %s to itself", id));
 	    }
 
 	    boolean exported = false;
@@ -321,7 +317,7 @@ public class DefaultEntityContainer implements EntityContainer {
 
 	    if (!destination.receiveEntity(e)) {
 		if (exported) {
-		    throwRE(ENTITY_EXPORT_NO_TRANSFER);
+		    throw new IllegalStateException(String.format("Entity %s exported but not transfered", id));
 		}
 		return false;
 	    }
