@@ -1,7 +1,6 @@
 package jalse.entities;
 
 import jalse.attributes.AttributeContainer;
-import jalse.listeners.EntityContainerListener;
 
 import java.util.Collections;
 import java.util.Set;

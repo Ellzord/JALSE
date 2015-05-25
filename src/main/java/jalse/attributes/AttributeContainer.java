@@ -1,7 +1,5 @@
 package jalse.attributes;
 
-import jalse.listeners.AttributeContainerListener;
-
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;

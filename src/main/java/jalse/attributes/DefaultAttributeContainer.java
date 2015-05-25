@@ -1,10 +1,7 @@
 package jalse.attributes;
 
 import static jalse.attributes.Attributes.requireNotEmpty;
-import jalse.listeners.AttributeContainerEvent;
-import jalse.listeners.AttributeContainerListener;
-import jalse.listeners.ListenerSet;
-import jalse.listeners.Listeners;
+import jalse.misc.ListenerSet;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,7 +75,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	    @SuppressWarnings({ "unchecked" })
 	    final ListenerSet<AttributeContainerListener<T>> lst = (ListenerSet<AttributeContainerListener<T>>) lsn
 		    .computeIfAbsent(type, k -> {
-			return Listeners.<T> newAttributeContainerListenerSet();
+			return new ListenerSet<>(AttributeContainerListener.class);
 		    });
 
 	    return lst.add(listener);

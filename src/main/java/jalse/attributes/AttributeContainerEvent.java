@@ -1,9 +1,6 @@
-package jalse.listeners;
+package jalse.attributes;
 
 import static jalse.attributes.Attributes.requireNotEmpty;
-import jalse.attributes.AttributeContainer;
-import jalse.attributes.AttributeType;
-import jalse.attributes.NamedAttributeType;
 import jalse.misc.AbstractIdentifiable;
 
 import java.util.Objects;

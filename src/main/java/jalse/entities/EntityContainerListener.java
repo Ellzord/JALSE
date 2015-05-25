@@ -1,7 +1,4 @@
-package jalse.listeners;
-
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
+package jalse.entities;
 
 /**
  * Listener for {@link Entity} creation and death. Unique {@link EntityContainerEvent} will be

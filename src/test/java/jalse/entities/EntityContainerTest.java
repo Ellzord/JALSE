@@ -1,8 +1,6 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.asType;
-import jalse.listeners.EntityContainerEvent;
-import jalse.listeners.EntityContainerListener;
 
 import java.util.HashSet;
 import java.util.Optional;

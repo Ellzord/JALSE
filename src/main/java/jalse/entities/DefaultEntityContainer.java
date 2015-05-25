@@ -1,15 +1,12 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.asType;
-import static jalse.listeners.Listeners.newEntityContainerListenerSet;
 import static jalse.misc.JALSEExceptions.CANNOT_SELF_TRANSFER;
 import static jalse.misc.JALSEExceptions.ENTITY_ALREADY_ASSOCIATED;
 import static jalse.misc.JALSEExceptions.ENTITY_EXPORT_NO_TRANSFER;
 import static jalse.misc.JALSEExceptions.throwRE;
 import jalse.attributes.AttributeContainer;
-import jalse.listeners.EntityContainerEvent;
-import jalse.listeners.EntityContainerListener;
-import jalse.listeners.ListenerSet;
+import jalse.misc.ListenerSet;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,7 +62,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	this.factory = factory != null ? factory : new DefaultEntityFactory();
 	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
 	entities = new HashMap<>();
-	listeners = newEntityContainerListenerSet();
+	listeners = new ListenerSet<>(EntityContainerListener.class);
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
 	write = rwLock.writeLock();

@@ -1,8 +1,5 @@
 package jalse.attributes;
 
-import jalse.listeners.AttributeContainerEvent;
-import jalse.listeners.AttributeContainerListener;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;

@@ -1,8 +1,5 @@
 package jalse.attributes;
 
-import jalse.listeners.AttributeContainerEvent;
-import jalse.listeners.AttributeContainerListener;
-
 import java.util.HashSet;
 import java.util.Optional;
 

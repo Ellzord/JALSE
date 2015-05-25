@@ -1,8 +1,6 @@
 package jalse.entities;
 
 import jalse.attributes.DefaultAttributeContainer;
-import jalse.listeners.EntityContainerEvent;
-import jalse.listeners.EntityContainerListener;
 
 import java.util.UUID;
 import java.util.stream.Stream;

@@ -1,8 +1,4 @@
-package jalse.listeners;
-
-import jalse.attributes.AttributeContainer;
-import jalse.attributes.AttributeType;
-import jalse.attributes.DefaultAttributeContainer;
+package jalse.attributes;
 
 /**
  * Listener for {@link AttributeType} value manipulation. When attributes are added, updated or

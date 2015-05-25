@@ -1,7 +1,5 @@
-package jalse.listeners;
+package jalse.entities;
 
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
 import jalse.misc.AbstractIdentifiable;
 
 import java.util.Objects;
