@@ -1,5 +1,6 @@
 package jalse.actions;
 
+import static jalse.actions.Actions.emptyActionContext;
 import static jalse.actions.Actions.unmodifiableActionContext;
 import static jalse.actions.Actions.unmodifiableActorActionContext;
 
@@ -77,16 +78,16 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 
     @Override
     public MutableActionContext<T> newContextForActor(final Action<T> action) {
-	// Immutable for actor
-	return unmodifiableActorActionContext(newContextForActor0(action));
+	// Check engine running
+	if (engine.isStopped()) {
+	    return emptyActionContext();
+	} else {
+	    // New context for actor
+	    return unmodifiableActorActionContext(newContextForActor0(action));
+	}
     }
 
     private MutableActionContext<T> newContextForActor0(final Action<T> action) {
-	// Case of post cancel scheduling
-	if (engine.isStopped()) {
-	    return Actions.emptyActionContext();
-	}
-
 	// Create new context
 	final MutableActionContext<T> context = engine.newContext(action);
 	context.setActor(actor);
@@ -103,6 +104,12 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     @Override
     public ActionContext<T> scheduleForActor(final Action<T> action, final long initialDelay, final long period,
 	    final TimeUnit unit) {
+	// Check engine running
+	if (engine.isStopped()) {
+	    return emptyActionContext();
+	}
+
+	// Create new actor context
 	final MutableActionContext<T> context = newContextForActor0(action);
 	context.setInitialDelay(initialDelay, unit);
 	context.setPeriod(period, unit);
