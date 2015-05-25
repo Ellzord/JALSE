@@ -1,7 +1,7 @@
 package jalse.attributes;
 
-import jalse.listeners.AttributeEvent;
-import jalse.listeners.AttributeListener;
+import jalse.listeners.AttributeContainerEvent;
+import jalse.listeners.AttributeContainerListener;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -9,24 +9,24 @@ import org.junit.Test;
 
 public class DefaultAttributeContainerTest {
 
-    private class TestAttributeListener implements AttributeListener<Integer> {
+    private class TestAttributeContainerListener implements AttributeContainerListener<Integer> {
 
 	public boolean added = false;
 	public boolean changed = false;
 	public boolean removed = false;
 
 	@Override
-	public void attributeAdded(final AttributeEvent<Integer> event) {
+	public void attributeAdded(final AttributeContainerEvent<Integer> event) {
 	    added = true;
 	}
 
 	@Override
-	public void attributeChanged(final AttributeEvent<Integer> event) {
+	public void attributeChanged(final AttributeContainerEvent<Integer> event) {
 	    changed = true;
 	}
 
 	@Override
-	public void attributeRemoved(final AttributeEvent<Integer> event) {
+	public void attributeRemoved(final AttributeContainerEvent<Integer> event) {
 	    removed = true;
 	}
     }
@@ -39,26 +39,27 @@ public class DefaultAttributeContainerTest {
     }
 
     @Test
-    public void attributeListenerTest() {
-	final TestAttributeListener attributeListener = new TestAttributeListener();
+    public void attributeContainerListenerTest() {
+	final TestAttributeContainerListener attributeContainerListener = new TestAttributeContainerListener();
 	container = new DefaultAttributeContainer();
 
-	Assert.assertTrue(container.getAttributeListenerNames().isEmpty());
-	Assert.assertTrue(container.getAttributeListenerTypes("test").isEmpty());
-	Assert.assertTrue(container.getAttributeListeners("test", Attributes.INTEGER_TYPE).isEmpty());
+	Assert.assertTrue(container.getAttributeContainerListenerNames().isEmpty());
+	Assert.assertTrue(container.getAttributeContainerListenerTypes("test").isEmpty());
+	Assert.assertTrue(container.getAttributeContainerListeners("test", Attributes.INTEGER_TYPE).isEmpty());
 
-	container.addAttributeListener("test", Attributes.INTEGER_TYPE, attributeListener);
-	Assert.assertTrue(container.getAttributeListenerNames().contains("test"));
-	Assert.assertTrue(container.getAttributeListenerTypes("test").contains(Attributes.INTEGER_TYPE));
-	Assert.assertTrue(container.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(attributeListener));
+	container.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, attributeContainerListener);
+	Assert.assertTrue(container.getAttributeContainerListenerNames().contains("test"));
+	Assert.assertTrue(container.getAttributeContainerListenerTypes("test").contains(Attributes.INTEGER_TYPE));
+	Assert.assertTrue(container.getAttributeContainerListeners("test", Attributes.INTEGER_TYPE).contains(
+		attributeContainerListener));
 
-	Assert.assertFalse(attributeListener.added);
+	Assert.assertFalse(attributeContainerListener.added);
 	container.setAttribute("test", Attributes.INTEGER_TYPE, 10);
-	Assert.assertTrue(attributeListener.added);
+	Assert.assertTrue(attributeContainerListener.added);
 
-	Assert.assertFalse(attributeListener.changed);
+	Assert.assertFalse(attributeContainerListener.changed);
 	container.fireAttributeChanged("test", Attributes.INTEGER_TYPE);
-	Assert.assertTrue(attributeListener.changed);
+	Assert.assertTrue(attributeContainerListener.changed);
 
 	// Nothing happens.
 	container.fireAttributeChanged("test", Attributes.DOUBLE_TYPE);
@@ -68,24 +69,26 @@ public class DefaultAttributeContainerTest {
 	container.setAttribute("test2", Attributes.DOUBLE_TYPE, 3.14);
 	container.fireAttributeChanged("test2", Attributes.DOUBLE_TYPE);
 
-	Assert.assertFalse(attributeListener.removed);
+	Assert.assertFalse(attributeContainerListener.removed);
 	container.removeAttribute("test", Attributes.INTEGER_TYPE);
-	Assert.assertTrue(attributeListener.removed);
+	Assert.assertTrue(attributeContainerListener.removed);
 
-	Assert.assertTrue(container.getAttributeListenerTypes("test").contains(Attributes.INTEGER_TYPE));
-	Assert.assertTrue(container.removeAttributeListener("test", Attributes.INTEGER_TYPE, attributeListener));
-	Assert.assertTrue(container.getAttributeListenerTypes("test").isEmpty());
+	Assert.assertTrue(container.getAttributeContainerListenerTypes("test").contains(Attributes.INTEGER_TYPE));
+	Assert.assertTrue(container.removeAttributeContainerListener("test", Attributes.INTEGER_TYPE,
+		attributeContainerListener));
+	Assert.assertTrue(container.getAttributeContainerListenerTypes("test").isEmpty());
 
 	// Try to remove the same listener twice.
-	Assert.assertFalse(container.removeAttributeListener("test", Attributes.INTEGER_TYPE, attributeListener));
+	Assert.assertFalse(container.removeAttributeContainerListener("test", Attributes.INTEGER_TYPE,
+		attributeContainerListener));
 
-	container.addAttributeListener("test", Attributes.INTEGER_TYPE, attributeListener);
-	container.removeAttributeListeners("test", Attributes.INTEGER_TYPE);
-	Assert.assertTrue(container.getAttributeListenerTypes("test").isEmpty());
+	container.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, attributeContainerListener);
+	container.removeAttributeContainerListeners("test", Attributes.INTEGER_TYPE);
+	Assert.assertTrue(container.getAttributeContainerListenerTypes("test").isEmpty());
 
-	container.addAttributeListener("test", Attributes.INTEGER_TYPE, attributeListener);
-	container.removeAttributeListeners();
-	Assert.assertTrue(container.getAttributeListenerTypes("test").isEmpty());
+	container.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, attributeContainerListener);
+	container.removeAttributeContainerListeners();
+	Assert.assertTrue(container.getAttributeContainerListenerTypes("test").isEmpty());
     }
 
     @Test
@@ -133,11 +136,11 @@ public class DefaultAttributeContainerTest {
 	Assert.assertNotEquals(container, otherContainer);
 	otherContainer.setAttribute("test", Attributes.INTEGER_TYPE, 10);
 
-	final TestAttributeListener attributeListener = new TestAttributeListener();
-	container.addAttributeListener("test", Attributes.INTEGER_TYPE, attributeListener);
+	final TestAttributeContainerListener attributeContainerListener = new TestAttributeContainerListener();
+	container.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, attributeContainerListener);
 	Assert.assertNotEquals(container, otherContainer);
 
-	otherContainer.addAttributeListener("test", Attributes.INTEGER_TYPE, attributeListener);
+	otherContainer.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, attributeContainerListener);
 	Assert.assertEquals(container, otherContainer);
     }
 
@@ -151,11 +154,11 @@ public class DefaultAttributeContainerTest {
 	Assert.assertNotEquals(container.hashCode(), otherContainer.hashCode());
 	otherContainer.setAttribute("test", Attributes.INTEGER_TYPE, 10);
 
-	final TestAttributeListener attributeListener = new TestAttributeListener();
-	container.addAttributeListener("test", Attributes.INTEGER_TYPE, attributeListener);
+	final TestAttributeContainerListener attributeContainerListener = new TestAttributeContainerListener();
+	container.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, attributeContainerListener);
 	Assert.assertNotEquals(container.hashCode(), otherContainer.hashCode());
 
-	otherContainer.addAttributeListener("test", Attributes.INTEGER_TYPE, attributeListener);
+	otherContainer.addAttributeContainerListener("test", Attributes.INTEGER_TYPE, attributeContainerListener);
 	Assert.assertEquals(container.hashCode(), otherContainer.hashCode());
     }
 }

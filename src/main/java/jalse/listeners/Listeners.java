@@ -12,40 +12,41 @@ import java.util.function.Supplier;
  *
  * @see EntityContainerListener
  * @see EntityContainerEvent
- * @see AttributeListener
- * @see AttributeEvent
+ * @see AttributeContainerListener
+ * @see AttributeContainerEvent
  *
  */
 public final class Listeners {
 
     /**
-     * Creates a ListenerSet for AttributeListener.
+     * Creates a ListenerSet for AttributeContainerListener.
      *
-     * @return New AttributeListener ListenerSet.
+     * @return New AttributeContainerListener ListenerSet.
      */
-    public static <T> ListenerSet<AttributeListener<T>> newAttributeListenerSet() {
-	return new ListenerSet<>(AttributeListener.class);
+    public static <T> ListenerSet<AttributeContainerListener<T>> newAttributeContainerListenerSet() {
+	return new ListenerSet<>(AttributeContainerListener.class);
     }
 
     /**
-     * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
-     * created direct Entity descendants.
+     * Creates an AttributeContainerListener supplier that will supply an AttributeContainerListener
+     * to all newly created direct Entity descendants.
      *
      * @param namedType
      *            Named attribute name.
      *
      * @param supplier
-     *            AttributeListener supplier.
-     * @return EntityContainerListener that adds supplied AttributeListeners to descendants.
+     *            AttributeContainerListener supplier.
+     * @return EntityContainerListener that adds supplied AttributeContainerListeners to
+     *         descendants.
      */
-    public static <T> EntityContainerListener newAttributeListenerSupplier(final NamedAttributeType<T> namedType,
-	    final Supplier<AttributeListener<T>> supplier) {
-	return newAttributeListenerSupplier(namedType.getName(), namedType.getType(), supplier);
+    public static <T> EntityContainerListener newAttributeContainerListenerSupplier(
+	    final NamedAttributeType<T> namedType, final Supplier<AttributeContainerListener<T>> supplier) {
+	return newAttributeContainerListenerSupplier(namedType.getName(), namedType.getType(), supplier);
     }
 
     /**
-     * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
-     * created direct Entity descendants.
+     * Creates an AttributeContainerListener supplier that will supply an AttributeContainerListener
+     * to all newly created direct Entity descendants.
      *
      * @param name
      *            Attribute name.
@@ -54,12 +55,13 @@ public final class Listeners {
      *            Attribute type.
      *
      * @param supplier
-     *            AttributeListener supplier.
-     * @return EntityContainerListener that adds supplied AttributeListeners to descendants.
+     *            AttributeContainerListener supplier.
+     * @return EntityContainerListener that adds supplied AttributeContainerListeners to
+     *         descendants.
      */
-    public static <T> EntityContainerListener newAttributeListenerSupplier(final String name,
-	    final AttributeType<T> type, final Supplier<AttributeListener<T>> supplier) {
-	return new AttributeListenerSupplier<>(name, type, supplier, false);
+    public static <T> EntityContainerListener newAttributeContainerListenerSupplier(final String name,
+	    final AttributeType<T> type, final Supplier<AttributeContainerListener<T>> supplier) {
+	return new AttributeContainerListenerSupplier<>(name, type, supplier, false);
     }
 
     /**
@@ -106,24 +108,25 @@ public final class Listeners {
     }
 
     /**
-     * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
-     * created Entities and their descendants recursively.
+     * Creates an AttributeContainerListener supplier that will supply an AttributeContainerListener
+     * to all newly created Entities and their descendants recursively.
      *
      * @param namedType
      *            Named attribute type.
      *
      * @param supplier
-     *            AttributeListener supplier.
-     * @return EntityContainerListener that adds supplied AttributeListeners to descendants.
+     *            AttributeContainerListener supplier.
+     * @return EntityContainerListener that adds supplied AttributeContainerListeners to
+     *         descendants.
      */
-    public static <T> EntityContainerListener newRecursiveAttributeListenerSupplier(
-	    final NamedAttributeType<T> namedType, final Supplier<AttributeListener<T>> supplier) {
-	return newRecursiveAttributeListenerSupplier(namedType.getName(), namedType.getType(), supplier);
+    public static <T> EntityContainerListener newRecursiveAttributeContainerListenerSupplier(
+	    final NamedAttributeType<T> namedType, final Supplier<AttributeContainerListener<T>> supplier) {
+	return newRecursiveAttributeContainerListenerSupplier(namedType.getName(), namedType.getType(), supplier);
     }
 
     /**
-     * Creates an AttributeListener supplier that will supply an AttributeListener to all newly
-     * created Entities and their descendants recursively.
+     * Creates an AttributeContainerListener supplier that will supply an AttributeContainerListener
+     * to all newly created Entities and their descendants recursively.
      *
      * @param name
      *            Attribute name.
@@ -132,12 +135,13 @@ public final class Listeners {
      *            Attribute type.
      *
      * @param supplier
-     *            AttributeListener supplier.
-     * @return EntityContainerListener that adds supplied AttributeListeners to descendants.
+     *            AttributeContainerListener supplier.
+     * @return EntityContainerListener that adds supplied AttributeContainerListeners to
+     *         descendants.
      */
-    public static <T> EntityContainerListener newRecursiveAttributeListenerSupplier(final String name,
-	    final AttributeType<T> type, final Supplier<AttributeListener<T>> supplier) {
-	return new AttributeListenerSupplier<>(name, type, supplier, true);
+    public static <T> EntityContainerListener newRecursiveAttributeContainerListenerSupplier(final String name,
+	    final AttributeType<T> type, final Supplier<AttributeContainerListener<T>> supplier) {
+	return new AttributeContainerListenerSupplier<>(name, type, supplier, true);
     }
 
     /**

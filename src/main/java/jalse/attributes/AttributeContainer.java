@@ -1,6 +1,6 @@
 package jalse.attributes;
 
-import jalse.listeners.AttributeListener;
+import jalse.listeners.AttributeContainerListener;
 
 import java.util.Optional;
 import java.util.Set;
@@ -10,9 +10,9 @@ import java.util.stream.Stream;
 /**
  * This is an attribute collection. This attribute collections works more like a set but using the
  * {@link AttributeType} to determine uniqueness (only one of each attribute type can be added).
- * {@link AttributeListener} can be added for an attribute type, trigger code will fire upon add,
- * update or removal of attributes of that type. Each collection manipulation method returns
- * {@code Optional} of the attribute (may be empty if none matching are found).
+ * {@link AttributeContainerListener} can be added for an attribute type, trigger code will fire
+ * upon add, update or removal of attributes of that type. Each collection manipulation method
+ * returns {@code Optional} of the attribute (may be empty if none matching are found).
  *
  * @author Elliot Ford
  *
@@ -32,7 +32,7 @@ public interface AttributeContainer {
      */
     default void addAll(final AttributeContainer sourceContainer) {
 	addAllAttributes(sourceContainer);
-	addAllAttributeListeners(sourceContainer);
+	addAllAttributeContainerListeners(sourceContainer);
     }
 
     /**
@@ -42,11 +42,13 @@ public interface AttributeContainer {
      *            Source attribute container.
      */
     @SuppressWarnings("unchecked")
-    default void addAllAttributeListeners(final AttributeContainer sourceContainer) {
-	for (final String name : sourceContainer.getAttributeListenerNames()) {
-	    for (final AttributeType<?> type : sourceContainer.getAttributeListenerTypes(name)) {
-		for (final AttributeListener<?> listener : sourceContainer.getAttributeListeners(name, type)) {
-		    addAttributeListener(name, (AttributeType<Object>) type, (AttributeListener<Object>) listener);
+    default void addAllAttributeContainerListeners(final AttributeContainer sourceContainer) {
+	for (final String name : sourceContainer.getAttributeContainerListenerNames()) {
+	    for (final AttributeType<?> type : sourceContainer.getAttributeContainerListenerTypes(name)) {
+		for (final AttributeContainerListener<?> listener : sourceContainer.getAttributeContainerListeners(
+			name, type)) {
+		    addAttributeContainerListener(name, (AttributeType<Object>) type,
+			    (AttributeContainerListener<Object>) listener);
 		}
 	    }
 	}
@@ -79,8 +81,9 @@ public interface AttributeContainer {
      *            Listener to add.
      * @return Whether the listener was not already assigned.
      */
-    default <T> boolean addAttributeListener(final NamedAttributeType<T> namedType, final AttributeListener<T> listener) {
-	return addAttributeListener(namedType.getName(), namedType.getType(), listener);
+    default <T> boolean addAttributeContainerListener(final NamedAttributeType<T> namedType,
+	    final AttributeContainerListener<T> listener) {
+	return addAttributeContainerListener(namedType.getName(), namedType.getType(), listener);
     }
 
     /**
@@ -95,7 +98,7 @@ public interface AttributeContainer {
      *            Listener to add.
      * @return Whether the listener was not already assigned.
      */
-    <T> boolean addAttributeListener(String name, AttributeType<T> type, AttributeListener<T> listener);
+    <T> boolean addAttributeContainerListener(String name, AttributeType<T> type, AttributeContainerListener<T> listener);
 
     /**
      * Manually fires an attribute change for the supplied attribute type. This is used for mutable
@@ -144,18 +147,11 @@ public interface AttributeContainer {
     <T> T getAttribute(String name, final AttributeType<T> type);
 
     /**
-     * Gets the number of total attributes within the container.
-     *
-     * @return Attribute count.
-     */
-    int getAttributeCount();
-
-    /**
      * Gets the attribute type names with listeners associated.
      *
      * @return Associated attribute type names to listeners.
      */
-    Set<String> getAttributeListenerNames();
+    Set<String> getAttributeContainerListenerNames();
 
     /**
      * Gets all attribute listeners associated to the supplied named attribute type.
@@ -164,8 +160,9 @@ public interface AttributeContainer {
      *            Named attribute type to check for.
      * @return Set of attribute listeners or an empty set if none were found.
      */
-    default <T> Set<? extends AttributeListener<T>> getAttributeListeners(final NamedAttributeType<T> namedType) {
-	return getAttributeListeners(namedType.getName(), namedType.getType());
+    default <T> Set<? extends AttributeContainerListener<T>> getAttributeContainerListeners(
+	    final NamedAttributeType<T> namedType) {
+	return getAttributeContainerListeners(namedType.getName(), namedType.getType());
     }
 
     /**
@@ -178,7 +175,7 @@ public interface AttributeContainer {
      *            Attribute type to check for.
      * @return Set of attribute listeners or an empty set if none were found.
      */
-    <T> Set<? extends AttributeListener<T>> getAttributeListeners(String name, AttributeType<T> type);
+    <T> Set<? extends AttributeContainerListener<T>> getAttributeContainerListeners(String name, AttributeType<T> type);
 
     /**
      * Gets all the attribute listener types.
@@ -188,7 +185,14 @@ public interface AttributeContainer {
      *
      * @return Set of the types attribute listeners are for or an empty set if none were found.
      */
-    Set<AttributeType<?>> getAttributeListenerTypes(String name);
+    Set<AttributeType<?>> getAttributeContainerListenerTypes(String name);
+
+    /**
+     * Gets the number of total attributes within the container.
+     *
+     * @return Attribute count.
+     */
+    int getAttributeCount();
 
     /**
      * Gets all the attribute type names assigned to attributes.
@@ -276,8 +280,9 @@ public interface AttributeContainer {
      *            Listener to check presence of.
      * @return Whether the attribute has any listeners.
      */
-    default <T> boolean hasAttributeListener(final NamedAttributeType<T> namedType, final AttributeListener<T> listener) {
-	return hasAttributeListener(namedType.getName(), namedType.getType(), listener);
+    default <T> boolean hasAttributeContainerListener(final NamedAttributeType<T> namedType,
+	    final AttributeContainerListener<T> listener) {
+	return hasAttributeContainerListener(namedType.getName(), namedType.getType(), listener);
     }
 
     /**
@@ -291,9 +296,9 @@ public interface AttributeContainer {
      *            Listener to check presence of.
      * @return Whether the attribute has any listeners.
      */
-    default <T> boolean hasAttributeListener(final String name, final AttributeType<T> type,
-	    final AttributeListener<T> listener) {
-	return getAttributeListeners(name, type).contains(listener);
+    default <T> boolean hasAttributeContainerListener(final String name, final AttributeType<T> type,
+	    final AttributeContainerListener<T> listener) {
+	return getAttributeContainerListeners(name, type).contains(listener);
     }
 
     /**
@@ -303,8 +308,8 @@ public interface AttributeContainer {
      *            Named attribute type.
      * @return Whether the attribute has any listeners.
      */
-    default <T> boolean hasAttributeListeners(final NamedAttributeType<T> namedType) {
-	return hasAttributeListeners(namedType.getName(), namedType.getType());
+    default <T> boolean hasAttributeContainerListeners(final NamedAttributeType<T> namedType) {
+	return hasAttributeContainerListeners(namedType.getName(), namedType.getType());
     }
 
     /**
@@ -316,8 +321,8 @@ public interface AttributeContainer {
      *            Attribute type.
      * @return Whether the attribute has any listeners.
      */
-    default <T> boolean hasAttributeListeners(final String name, final AttributeType<T> type) {
-	return !getAttributeListeners(name, type).isEmpty();
+    default <T> boolean hasAttributeContainerListeners(final String name, final AttributeType<T> type) {
+	return !getAttributeContainerListeners(name, type).isEmpty();
     }
 
     /**
@@ -362,9 +367,9 @@ public interface AttributeContainer {
      *            Listener to remove.
      * @return Whether the listener was assigned.
      */
-    default <T> boolean removeAttributeListener(final NamedAttributeType<T> namedType,
-	    final AttributeListener<T> listener) {
-	return removeAttributeListener(namedType.getName(), namedType.getType(), listener);
+    default <T> boolean removeAttributeContainerListener(final NamedAttributeType<T> namedType,
+	    final AttributeContainerListener<T> listener) {
+	return removeAttributeContainerListener(namedType.getName(), namedType.getType(), listener);
     }
 
     /**
@@ -378,12 +383,13 @@ public interface AttributeContainer {
      *            Listener to remove.
      * @return Whether the listener was assigned.
      */
-    <T> boolean removeAttributeListener(String name, AttributeType<T> type, AttributeListener<T> listener);
+    <T> boolean removeAttributeContainerListener(String name, AttributeType<T> type,
+	    AttributeContainerListener<T> listener);
 
     /**
      * Removes all listeners.
      */
-    void removeAttributeListeners();
+    void removeAttributeContainerListeners();
 
     /**
      * Removes all listeners for the supplied attribute types.
@@ -391,8 +397,8 @@ public interface AttributeContainer {
      * @param namedType
      *            Named attribute type.
      */
-    default <T> void removeAttributeListeners(final NamedAttributeType<T> namedType) {
-	removeAttributeListeners(namedType.getName(), namedType.getType());
+    default <T> void removeAttributeContainerListeners(final NamedAttributeType<T> namedType) {
+	removeAttributeContainerListeners(namedType.getName(), namedType.getType());
     }
 
     /**
@@ -403,7 +409,7 @@ public interface AttributeContainer {
      * @param type
      *            Attribute type.
      */
-    <T> void removeAttributeListeners(String name, AttributeType<T> type);
+    <T> void removeAttributeContainerListeners(String name, AttributeType<T> type);
 
     /**
      * Removes all attributes within the container (firing removal events).
