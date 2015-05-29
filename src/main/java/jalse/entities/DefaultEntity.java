@@ -229,7 +229,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Set<Class<? extends Entity>> getMarkedTypes() {
+    public Set<Class<? extends Entity>> getMarkedAsTypes() {
 	read.lock();
 	try {
 	    return new HashSet<>(types);
@@ -484,6 +484,16 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	    listeners.getProxy().entityUnmarkedAsType(new EntityTypeEvent(this, type, removedDescendants));
 
 	    return true;
+	} finally {
+	    write.unlock();
+	}
+    }
+
+    @Override
+    public void unmarkAsAllTypes() {
+	write.lock();
+	try {
+	    new HashSet<>(types).forEach(this::unmarkAsType);
 	} finally {
 	    write.unlock();
 	}
