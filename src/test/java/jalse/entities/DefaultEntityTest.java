@@ -266,15 +266,19 @@ public class DefaultEntityTest {
 	Assert.assertTrue(entity.markAsType(TestEntity.class));
 	Assert.assertTrue(listener.mark);
 
-	Assert.assertTrue(entity.getMarkedTypes().contains(TestEntity.class));
+	Assert.assertTrue(entity.getMarkedAsTypes().contains(TestEntity.class));
 	Assert.assertTrue(entity.isMarkedAsType(TestEntity.class));
 
 	Assert.assertFalse(entity.markAsType(TestEntity.class));
 
 	entity.unmarkAsType(TestEntity.class);
-	Assert.assertFalse(entity.getMarkedTypes().contains(TestEntity.class));
+	Assert.assertFalse(entity.getMarkedAsTypes().contains(TestEntity.class));
 	Assert.assertFalse(entity.isMarkedAsType(TestEntity.class));
 	Assert.assertTrue(listener.unmark);
+
+	Assert.assertTrue(entity.markAsType(TestEntity.class));
+	entity.unmarkAsAllTypes();
+	Assert.assertTrue(entity.getMarkedAsTypes().isEmpty());
     }
 
     @Test(expected = IllegalStateException.class)

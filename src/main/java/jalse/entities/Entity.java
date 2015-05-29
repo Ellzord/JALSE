@@ -99,7 +99,7 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      *
      * @return Marked types.
      */
-    Set<Class<? extends Entity>> getMarkedTypes();
+    Set<Class<? extends Entity>> getMarkedAsTypes();
 
     /**
      * This is a convenience method for getting the container (optional).
@@ -192,6 +192,11 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      *
      */
     boolean transfer(EntityContainer destination);
+
+    /**
+     * Removes all the types from the entity.
+     */
+    void unmarkAsAllTypes();
 
     /**
      * Removes the specified type from the entity. If this type is the ancestor of any other types
