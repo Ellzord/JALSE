@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * An DefaultAttributeContainer is a thread-safe implementation of {@link AttributeContainer}.<br>
@@ -203,6 +203,16 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
+    public Set<?> getAttributes() {
+	read.lock();
+	try {
+	    return attributes.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toSet());
+	} finally {
+	    read.unlock();
+	}
+    }
+
+    @Override
     public Set<AttributeType<?>> getAttributeTypes(final String name) {
 	requireNotEmpty(name);
 
@@ -365,16 +375,6 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	    return prev;
 	} finally {
 	    write.unlock();
-	}
-    }
-
-    @Override
-    public Stream<?> streamAttributes() {
-	read.lock();
-	try {
-	    return new HashSet<>(attributes.values()).stream().flatMap(m -> m.values().stream());
-	} finally {
-	    read.unlock();
 	}
     }
 }

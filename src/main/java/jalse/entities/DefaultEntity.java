@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Stream;
 
 /**
  * A simple yet fully featured {@link Entity} implementation.<br>
@@ -179,6 +178,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public Set<?> getAttributes() {
+	return attributes.getAttributes();
+    }
+
+    @Override
     public Set<AttributeType<?>> getAttributeTypes(final String name) {
 	return attributes.getAttributeTypes(name);
     }
@@ -196,6 +200,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      */
     protected ActionEngine getEngine() {
 	return scheduler.getEngine();
+    }
+
+    @Override
+    public Set<Entity> getEntities() {
+	return entities.getEntities();
     }
 
     @Override
@@ -441,16 +450,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Stream<?> streamAttributes() {
-	return attributes.streamAttributes();
-    }
-
-    @Override
-    public Stream<Entity> streamEntities() {
-	return entities.streamEntities();
-    }
-
-    @Override
     public boolean transfer(final EntityContainer destination) {
 	return container.transferEntity(id, destination);
     }
@@ -458,6 +457,16 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     @Override
     public boolean transferEntity(final UUID id, final EntityContainer destination) {
 	return entities.transferEntity(id, destination);
+    }
+
+    @Override
+    public void unmarkAsAllTypes() {
+	write.lock();
+	try {
+	    new HashSet<>(types).forEach(this::unmarkAsType);
+	} finally {
+	    write.unlock();
+	}
     }
 
     @Override
@@ -484,16 +493,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	    listeners.getProxy().entityUnmarkedAsType(new EntityTypeEvent(this, type, removedDescendants));
 
 	    return true;
-	} finally {
-	    write.unlock();
-	}
-    }
-
-    @Override
-    public void unmarkAsAllTypes() {
-	write.lock();
-	try {
-	    new HashSet<>(types).forEach(this::unmarkAsType);
 	} finally {
 	    write.unlock();
 	}

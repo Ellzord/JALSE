@@ -47,12 +47,8 @@ public interface EntityContainer {
      * Gets all the entities within the containers.
      *
      * @return Gets all entities or an empty set if none were found.
-     *
-     * @see #streamEntities()
      */
-    default Set<Entity> getEntities() {
-	return streamEntities().collect(Collectors.toSet());
-    }
+    Set<Entity> getEntities();
 
     /**
      * Gets all the entities as the specified type.
@@ -380,8 +376,11 @@ public interface EntityContainer {
      * Provides a stream of entities from the container.
      *
      * @return A stream of entities in the container.
+     * @see #getEntities()
      */
-    Stream<Entity> streamEntities();
+    default Stream<Entity> streamEntities() {
+	return getEntities().stream();
+    }
 
     /**
      * Gets a stream of as the specified type.
@@ -410,6 +409,15 @@ public interface EntityContainer {
      */
     default <T extends Entity> Stream<T> streamEntitiesOfType(final Class<T> type) {
 	return streamEntities().filter(e -> e.isMarkedAsType(type)).map(e -> asType(e, type));
+    }
+
+    /**
+     * Streams IDs of all the entities within the container.
+     *
+     * @return Stream of all entity identifiers.
+     */
+    default Stream<UUID> streamEntityIDs() {
+	return getEntityIDs().stream();
     }
 
     /**
