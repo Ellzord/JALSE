@@ -214,6 +214,7 @@ public class DefaultEntityTest {
 	entity.newEntity(new UUID(0, 1), new DefaultAttributeContainer());
 	Assert.assertEquals(1, entity.getEntityCount());
 	Assert.assertTrue(entity.getEntityIDs().contains(new UUID(0, 1)));
+	Assert.assertTrue(entity.streamEntityIDs().iterator().hasNext());
 	Assert.assertNotNull(entity.getEntity(new UUID(0, 1)));
     }
 
@@ -279,6 +280,7 @@ public class DefaultEntityTest {
 	Assert.assertTrue(entity.markAsType(TestEntity.class));
 	entity.unmarkAsAllTypes();
 	Assert.assertTrue(entity.getMarkedAsTypes().isEmpty());
+	Assert.assertFalse(entity.streamMarkedAsTypes().iterator().hasNext());
     }
 
     @Test(expected = IllegalStateException.class)

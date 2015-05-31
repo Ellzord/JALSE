@@ -10,6 +10,7 @@ import jalse.tags.Taggable;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Entity plays the greatest role in the overall data model. An entity is representative of a single
@@ -182,6 +183,18 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      * Removes all listeners for entities.
      */
     void removeEntityTypeListeners();
+
+    /**
+     * Streams the types this entity has been marked as.
+     *
+     * @return Stream of marked types.
+     *
+     * @see #getMarkedAsTypes()
+     *
+     */
+    default Stream<Class<? extends Entity>> streamMarkedAsTypes() {
+	return getMarkedAsTypes().stream();
+    }
 
     /**
      * Transfers this entity to the specified destination container.

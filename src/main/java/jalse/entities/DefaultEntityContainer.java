@@ -13,7 +13,6 @@ import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Stream;
 
 /**
  * An DefaultEntityContainer is a thread-safe implementation of {@link EntityContainer}. <br>
@@ -97,6 +96,16 @@ public class DefaultEntityContainer implements EntityContainer {
      */
     public EntityContainer getDelegateContainer() {
 	return delegateContainer;
+    }
+
+    @Override
+    public Set<Entity> getEntities() {
+	read.lock();
+	try {
+	    return new HashSet<>(entities.values());
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
@@ -277,16 +286,6 @@ public class DefaultEntityContainer implements EntityContainer {
 	    listeners.clear();
 	} finally {
 	    write.unlock();
-	}
-    }
-
-    @Override
-    public Stream<Entity> streamEntities() {
-	read.lock();
-	try {
-	    return new HashSet<>(entities.values()).stream();
-	} finally {
-	    read.unlock();
 	}
     }
 

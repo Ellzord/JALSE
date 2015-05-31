@@ -126,6 +126,11 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
+    public Set<Entity> getEntities() {
+	return entities.getEntities();
+    }
+
+    @Override
     public Entity getEntity(final UUID id) {
 	return entities.getEntity(id);
     }
@@ -234,11 +239,6 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     @Override
     public void stop() {
 	engine.stop();
-    }
-
-    @Override
-    public Stream<Entity> streamEntities() {
-	return entities.streamEntities();
     }
 
     @Override
