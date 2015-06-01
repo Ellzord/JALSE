@@ -1,8 +1,8 @@
 package jalse.entities.functions;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import jalse.entities.Entity;
 import jalse.entities.methods.DefaultMethod;
@@ -14,12 +14,12 @@ import org.junit.Test;
 
 public class DefaultFunctionTest {
 
-    interface TestInvalidEntity extends Entity {
+    public interface TestInvalidEntity extends Entity {
 
 	void testMethod();
     }
 
-    interface TestValidEntity extends Entity {
+    public interface TestValidEntity extends Entity {
 
 	default void testMethod() {}
     }
@@ -60,6 +60,7 @@ public class DefaultFunctionTest {
 	final DefaultMethod dm = function.apply(m);
 	assertNotNull(dm);
 
-	assertEquals(dm.getMethod(), m);
+	assertNotNull(dm.getHandle());
+	assertTrue(dm.getArgCount() == 0);
     }
 }

@@ -3,6 +3,7 @@ package jalse.entities.functions;
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.methods.DefaultMethod;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -37,6 +38,8 @@ public class DefaultFunction implements EntityMethodFunction {
 	    return null;
 	}
 
+	final Class<?> declaringClazz = m.getDeclaringClass();
+
 	// Create lookup
 	Lookup lookup;
 	try {
@@ -45,7 +48,15 @@ public class DefaultFunction implements EntityMethodFunction {
 	    throw new RuntimeException(e);
 	}
 
+	// Get handle
+	MethodHandle handle;
+	try {
+	    handle = lookup.unreflectSpecial(m, declaringClazz);
+	} catch (final IllegalAccessException e) {
+	    throw new RuntimeException(e);
+	}
+
 	// Create default method
-	return new DefaultMethod(m, lookup);
+	return new DefaultMethod(handle, m.getParameterCount());
     }
 }
