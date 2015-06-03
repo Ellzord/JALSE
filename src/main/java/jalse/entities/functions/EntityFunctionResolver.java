@@ -5,6 +5,7 @@ import jalse.entities.methods.EntityMethod;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -121,6 +122,7 @@ public class EntityFunctionResolver {
      *            Type to resolve.
      * @return New (or cached) resolved mapped type.
      */
+    @SuppressWarnings("unchecked")
     public EntityFunction resolveType(final Class<? extends Entity> type) {
 	// Check already resolved
 	EntityFunction resolvedType = resolved.get(Objects.requireNonNull(type));
@@ -150,6 +152,12 @@ public class EntityFunctionResolver {
 	final Map<Method, EntityMethod> methodMap = new HashMap<>();
 	final Set<Class<? extends Entity>> totalDependencies = new HashSet<>();
 	for (final Method m : type.getDeclaredMethods()) {
+	    // Check static
+	    if (Modifier.isStatic(m.getModifiers())) {
+		// Ignore static methods as not invoked on instance
+		continue;
+	    }
+	    // Process functions
 	    for (final EntityMethodFunction methodFunction : functions) {
 		// Log method
 		logger.fine(String.format("Resolving method %s with function %s", m, methodFunction.getClass()));
@@ -180,7 +188,7 @@ public class EntityFunctionResolver {
 
 	// Resolve parents
 	for (final Class<?> parent : type.getInterfaces()) {
-	    // Ingore if entity
+	    // Ignore if entity
 	    if (Entity.class.equals(parent)) {
 		continue;
 	    }
@@ -192,7 +200,7 @@ public class EntityFunctionResolver {
 	    }
 
 	    // Resolve dependency
-	    resolveType(type);
+	    resolveType((Class<? extends Entity>) parent);
 	}
 
 	return resolvedType;
