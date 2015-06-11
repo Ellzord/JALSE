@@ -47,7 +47,7 @@ public class JALSEBuilderTest {
 
     @Test(expected = IllegalStateException.class)
     public void buildTest3() {
-	final JALSEBuilder builder = JALSEBuilder.newBuilder().setDummyID().setNoEntityLimit()
+	final JALSEBuilder builder = JALSEBuilder.newBuilder().setRandomID().setNoEntityLimit()
 		.setParallelismToProcessors();
 	jalse = builder.build();
     }
@@ -55,7 +55,7 @@ public class JALSEBuilderTest {
     @Test(expected = IllegalStateException.class)
     public void buildTest4() {
 	final JALSEBuilder builder = JALSEBuilder.newBuilder();
-	builder.setForkJoinEngine().setDummyID().setParallelism(2);
+	builder.setForkJoinEngine().setRandomID().setParallelism(2);
 	jalse = builder.build();
     }
 
@@ -69,20 +69,20 @@ public class JALSEBuilderTest {
     @Test(expected = IllegalStateException.class)
     public void buildTest6() {
 	final JALSEBuilder builder = JALSEBuilder.newBuilder();
-	builder.setThreadPoolEngine().setDummyID().setNoEntityLimit();
+	builder.setThreadPoolEngine().setRandomID().setNoEntityLimit();
 	jalse = builder.build();
     }
 
     @Test(expected = IllegalStateException.class)
     public void buildTest7() {
 	final JALSEBuilder builder = JALSEBuilder.newBuilder();
-	builder.setForkJoinEngine().setDummyID().setNoEntityLimit();
+	builder.setForkJoinEngine().setRandomID().setNoEntityLimit();
 	jalse = builder.build();
     }
 
     @Test
     public void buildTest8() {
-	final JALSEBuilder builder = JALSEBuilder.newBuilder().setDummyID().setNoEntityLimit()
+	final JALSEBuilder builder = JALSEBuilder.newBuilder().setRandomID().setNoEntityLimit()
 		.setParallelismToProcessors().setForkJoinEngine();
 	jalse = builder.build();
 	Assert.assertNotNull(jalse);
