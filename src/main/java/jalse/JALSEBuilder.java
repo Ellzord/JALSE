@@ -1,13 +1,11 @@
 package jalse;
 
-import static jalse.misc.Identifiable.DUMMY_ID;
 import jalse.actions.ActionEngine;
 import jalse.actions.ForkJoinActionEngine;
 import jalse.actions.ManualActionEngine;
 import jalse.actions.ThreadPoolActionEngine;
 import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
-import jalse.misc.Identifiable;
 
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
@@ -20,7 +18,7 @@ import java.util.concurrent.ForkJoinPool;
  * By default this builder will throw {@link IllegalStateException} as the values must be built. <br>
  * <br>
  * If {@link Entity} must be transfered externally (between two {@link JALSE} instances) then unique
- * IDs should be set ({@link UUID#randomUUID()} is used by default).
+ * IDs should be set.
  *
  * @author Elliot Ford
  *
@@ -154,17 +152,6 @@ public final class JALSEBuilder {
     public JALSEBuilder setCommonPoolEngine() {
 	engineType = EngineType.COMMON;
 	return this;
-    }
-
-    /**
-     * Sets the unique ID for JALSE to a dummy ID.
-     *
-     * @return This builder.
-     *
-     * @see Identifiable#DUMMY_ID
-     */
-    public JALSEBuilder setDummyID() {
-	return setID(DUMMY_ID);
     }
 
     /**

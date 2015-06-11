@@ -14,12 +14,6 @@ import java.util.function.Predicate;
 public interface Identifiable {
 
     /**
-     * A hard-coded dummy ID that can be used to identify an Identifiable that does not need to be
-     * unique (not advised). ID = {@code 00000000-0000-0000-0000-000000000000}.
-     */
-    UUID DUMMY_ID = new UUID(0, 0);
-
-    /**
      * Checks if the two identifiable objects are equals using their unique identifiers.
      *
      * @param a
