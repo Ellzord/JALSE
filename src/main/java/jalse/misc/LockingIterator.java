@@ -95,5 +95,4 @@ public class LockingIterator<E> implements Iterator<E> {
 	    lock.unlock();
 	}
     }
-
 }
