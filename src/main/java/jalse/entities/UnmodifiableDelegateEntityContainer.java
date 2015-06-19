@@ -5,6 +5,7 @@ import jalse.attributes.AttributeContainer;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 class UnmodifiableDelegateEntityContainer implements EntityContainer {
 
@@ -17,11 +18,6 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     @Override
     public boolean addEntityListener(final EntityListener listener) {
 	throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Set<Entity> getEntities() {
-	return delegate != null ? delegate.getEntities() : Collections.emptySet();
     }
 
     @Override
@@ -77,6 +73,11 @@ class UnmodifiableDelegateEntityContainer implements EntityContainer {
     @Override
     public void removeEntityListeners() {
 	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Stream<Entity> streamEntities() {
+	return delegate != null ? delegate.streamEntities() : Stream.empty();
     }
 
     @Override

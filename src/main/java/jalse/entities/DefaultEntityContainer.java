@@ -3,16 +3,19 @@ package jalse.entities;
 import static jalse.entities.Entities.asType;
 import jalse.attributes.AttributeContainer;
 import jalse.misc.ListenerSet;
+import jalse.misc.LockingIterator;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Stream;
 
 /**
  * An DefaultEntityContainer is a thread-safe implementation of {@link EntityContainer}. <br>
@@ -56,7 +59,7 @@ public class DefaultEntityContainer implements EntityContainer {
     public DefaultEntityContainer(final EntityFactory factory, final EntityContainer delegateContainer) {
 	this.factory = factory != null ? factory : new DefaultEntityFactory();
 	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
-	entities = new HashMap<>();
+	entities = new ConcurrentHashMap<>();
 	listeners = new ListenerSet<>(EntityListener.class);
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
@@ -96,16 +99,6 @@ public class DefaultEntityContainer implements EntityContainer {
      */
     public EntityContainer getDelegateContainer() {
 	return delegateContainer;
-    }
-
-    @Override
-    public Set<Entity> getEntities() {
-	read.lock();
-	try {
-	    return new HashSet<>(entities.values());
-	} finally {
-	    read.unlock();
-	}
     }
 
     @Override
@@ -287,6 +280,12 @@ public class DefaultEntityContainer implements EntityContainer {
 	} finally {
 	    write.unlock();
 	}
+    }
+
+    @Override
+    public Stream<Entity> streamEntities() {
+	final Iterator<Entity> it = entities.values().iterator();
+	return LockingIterator.lockingStream(it, read, entities.size());
     }
 
     @Override

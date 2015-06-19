@@ -2,6 +2,7 @@ package jalse.attributes;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Stream;
 
 class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
 
@@ -53,11 +54,6 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public Set<?> getAttributes() {
-	return delegate != null ? delegate.getAttributes() : Collections.emptySet();
-    }
-
-    @Override
     public Set<AttributeType<?>> getAttributeTypes(final String name) {
 	return delegate != null ? delegate.getAttributeTypes(name) : Collections.emptySet();
     }
@@ -91,5 +87,10 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     @Override
     public <T> T setAttribute(final String name, final AttributeType<T> type, final T attr) {
 	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Stream<?> streamAttributes() {
+	return delegate != null ? delegate.streamAttributes() : Stream.empty();
     }
 }

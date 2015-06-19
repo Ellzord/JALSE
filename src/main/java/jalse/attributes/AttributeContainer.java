@@ -2,6 +2,7 @@ package jalse.attributes;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -198,8 +199,12 @@ public interface AttributeContainer {
      * Gets all of the attributes within the container.
      *
      * @return All of the attributes or an empty set if none were found.
+     *
+     * @see #streamAttributes()
      */
-    Set<?> getAttributes();
+    default Set<?> getAttributes() {
+	return streamAttributes().collect(Collectors.toSet());
+    }
 
     /**
      * Gets all of the attribute types within the container.
@@ -491,10 +496,6 @@ public interface AttributeContainer {
      * Streams all of the attributes within the container.
      *
      * @return Stream of all attributes.
-     *
-     * @see #getAttributes()
      */
-    default Stream<?> streamAttributes() {
-	return getAttributes().stream();
-    }
+    Stream<?> streamAttributes();
 }
