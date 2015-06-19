@@ -2,10 +2,12 @@ package jalse.attributes;
 
 import static jalse.attributes.Attributes.requireNotEmpty;
 import jalse.misc.ListenerSet;
+import jalse.misc.LockingIterator;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -13,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An DefaultAttributeContainer is a thread-safe implementation of {@link AttributeContainer}.<br>
@@ -55,7 +57,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
     public DefaultAttributeContainer(final AttributeContainer delegateContainer) {
 	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
 	attributes = new ConcurrentHashMap<>();
-	listeners = new ConcurrentHashMap<>();
+	listeners = new HashMap<>();
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
 	write = rwLock.writeLock();
@@ -69,8 +71,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
 
 	write.lock();
 	try {
-	    final Map<AttributeType<?>, ListenerSet<?>> lsn = listeners.computeIfAbsent(name,
-		    k -> new ConcurrentHashMap<>());
+	    final Map<AttributeType<?>, ListenerSet<?>> lsn = listeners.computeIfAbsent(name, k -> new HashMap<>());
 
 	    @SuppressWarnings({ "unchecked" })
 	    final ListenerSet<AttributeListener<T>> lst = (ListenerSet<AttributeListener<T>>) lsn.computeIfAbsent(type,
@@ -144,10 +145,14 @@ public class DefaultAttributeContainer implements AttributeContainer {
     public int getAttributeCount() {
 	read.lock();
 	try {
-	    return attributes.values().stream().mapToInt(Map::size).sum();
+	    return getAttributeCount0();
 	} finally {
 	    read.unlock();
 	}
+    }
+
+    private int getAttributeCount0() {
+	return attributes.values().stream().mapToInt(Map::size).sum();
     }
 
     @Override
@@ -197,16 +202,6 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	read.lock();
 	try {
 	    return new HashSet<>(attributes.keySet());
-	} finally {
-	    read.unlock();
-	}
-    }
-
-    @Override
-    public Set<?> getAttributes() {
-	read.lock();
-	try {
-	    return attributes.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toSet());
 	} finally {
 	    read.unlock();
 	}
@@ -376,5 +371,11 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	} finally {
 	    write.unlock();
 	}
+    }
+
+    @Override
+    public Stream<?> streamAttributes() {
+	final Iterator<?> it = attributes.values().stream().flatMap(m -> m.values().stream()).iterator();
+	return LockingIterator.lockingStream(it, read, getAttributeCount0());
     }
 }

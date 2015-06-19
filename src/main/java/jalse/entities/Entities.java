@@ -394,7 +394,9 @@ public final class Entities {
 		return walker.walk();
 	    }
 	};
-	return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.DISTINCT), false);
+
+	final int characteristics = Spliterator.CONCURRENT | Spliterator.NONNULL | Spliterator.DISTINCT;
+	return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, characteristics), false);
     }
 
     /**

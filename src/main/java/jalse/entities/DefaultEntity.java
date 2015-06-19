@@ -15,20 +15,24 @@ import jalse.attributes.DefaultAttributeContainer;
 import jalse.misc.AbstractIdentifiable;
 import jalse.misc.Identifiable;
 import jalse.misc.ListenerSet;
+import jalse.misc.LockingIterator;
 import jalse.tags.Parent;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Stream;
 
 /**
  * A simple yet fully featured {@link Entity} implementation.<br>
@@ -95,7 +99,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	tags = new TagTypeSet();
 	scheduler = new DefaultActionScheduler<>(this);
 	listeners = new ListenerSet<>(EntityTypeListener.class);
-	types = new HashSet<>();
+	types = Collections.newSetFromMap(new ConcurrentHashMap<>());
 	alive = new AtomicBoolean();
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
@@ -178,11 +182,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Set<?> getAttributes() {
-	return attributes.getAttributes();
-    }
-
-    @Override
     public Set<AttributeType<?>> getAttributeTypes(final String name) {
 	return attributes.getAttributeTypes(name);
     }
@@ -200,11 +199,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      */
     protected ActionEngine getEngine() {
 	return scheduler.getEngine();
-    }
-
-    @Override
-    public Set<Entity> getEntities() {
-	return entities.getEntities();
     }
 
     @Override
@@ -232,16 +226,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	read.lock();
 	try {
 	    return new HashSet<>(listeners);
-	} finally {
-	    read.unlock();
-	}
-    }
-
-    @Override
-    public Set<Class<? extends Entity>> getMarkedAsTypes() {
-	read.lock();
-	try {
-	    return new HashSet<>(types);
 	} finally {
 	    read.unlock();
 	}
@@ -447,6 +431,22 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      */
     protected void setEngine(final ActionEngine engine) {
 	scheduler.setEngine(engine);
+    }
+
+    @Override
+    public Stream<?> streamAttributes() {
+	return attributes.streamAttributes();
+    }
+
+    @Override
+    public Stream<Entity> streamEntities() {
+	return entities.streamEntities();
+    }
+
+    @Override
+    public Stream<Class<? extends Entity>> streamMarkedAsTypes() {
+	final Iterator<Class<? extends Entity>> it = types.iterator();
+	return LockingIterator.lockingStream(it, read, types.size());
     }
 
     @Override

@@ -73,23 +73,23 @@ public class DefaultEntityFactory implements EntityFactory {
 	    if (!entityIDs.remove(eID)) {
 		throw new IllegalArgumentException(String.format("Does not know of entity %s", eID));
 	    }
+
+	    final ActionEngine emptyEngine = Actions.emptyActionEngine();
+
+	    final DefaultEntity de = (DefaultEntity) e;
+	    de.cancelAllScheduledForActor();
+	    de.setEngine(emptyEngine);
+	    de.setContainer(null); // Remove parent reference.
+
+	    Entities.walkEntities(e).map(DefaultEntity.class::cast).forEach(ce -> {
+		ce.cancelAllScheduledForActor();
+		ce.setEngine(emptyEngine);
+	    });
+
+	    logger.fine(String.format("Entity %s exported", eID));
 	} finally {
 	    write.unlock();
 	}
-
-	final ActionEngine emptyEngine = Actions.emptyActionEngine();
-
-	final DefaultEntity de = (DefaultEntity) e;
-	de.cancelAllScheduledForActor();
-	de.setEngine(emptyEngine);
-	de.setContainer(null); // Remove parent reference.
-
-	Entities.walkEntities(e).map(DefaultEntity.class::cast).forEach(ce -> {
-	    ce.cancelAllScheduledForActor();
-	    ce.setEngine(emptyEngine);
-	});
-
-	logger.fine(String.format("Entity %s exported", eID));
     }
 
     /**

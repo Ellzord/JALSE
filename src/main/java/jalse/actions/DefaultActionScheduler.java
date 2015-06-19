@@ -5,9 +5,9 @@ import static jalse.actions.Actions.unmodifiableActionContext;
 import static jalse.actions.Actions.unmodifiableActorActionContext;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,7 +38,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     public DefaultActionScheduler(final T actor) {
 	this.actor = Objects.requireNonNull(actor);
 	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
-	contexts = new HashSet<>();
+	contexts = new CopyOnWriteArraySet<>();
     }
 
     /**
@@ -46,16 +46,15 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
      */
     @Override
     public void cancelAllScheduledForActor() {
-	synchronized (contexts) {
-	    final Iterator<ActionContext<T>> it = contexts.iterator();
-	    while (it.hasNext()) {
-		final ActionContext<T> cxt = it.next();
-		if (!cxt.isDone()) {
-		    cxt.cancel();
-		}
-		it.remove();
+	final Set<ActionContext<T>> toCancel = new HashSet<>(contexts);
+	contexts.clear();
+
+	// Cancel all
+	toCancel.forEach(cxt -> {
+	    if (!cxt.isDone()) {
+		cxt.cancel();
 	    }
-	}
+	});
     }
 
     /**
@@ -81,10 +80,9 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	// Check engine running
 	if (engine.isStopped()) {
 	    return emptyActionContext();
-	} else {
-	    // New context for actor
-	    return unmodifiableActorActionContext(newContextForActor0(action));
 	}
+	// New context for actor
+	return unmodifiableActorActionContext(newContextForActor0(action));
     }
 
     private MutableActionContext<T> newContextForActor0(final Action<T> action) {
@@ -93,10 +91,8 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	context.setActor(actor);
 
 	// Add then purge
-	synchronized (contexts) {
-	    contexts.add(context);
-	    contexts.removeIf(ActionContext<T>::isDone);
-	}
+	contexts.add(context);
+	contexts.removeIf(ActionContext<T>::isDone);
 
 	return context;
     }
@@ -127,9 +123,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
      */
     public void setEngine(final ActionEngine engine) {
 	if (!Objects.equals(this.engine, engine)) { // Only if changed
-	    synchronized (contexts) {
-		contexts.clear();
-	    }
+	    contexts.clear();
 	}
 	this.engine = engine;
     }

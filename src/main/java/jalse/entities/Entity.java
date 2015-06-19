@@ -10,6 +10,7 @@ import jalse.tags.Taggable;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -99,8 +100,12 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      * Gets the types this entity has been marked as.
      *
      * @return Marked types.
+     *
+     * @see #streamMarkedAsTypes()
      */
-    Set<Class<? extends Entity>> getMarkedAsTypes();
+    default Set<Class<? extends Entity>> getMarkedAsTypes() {
+	return streamMarkedAsTypes().collect(Collectors.toSet());
+    }
 
     /**
      * This is a convenience method for getting the container (optional).
@@ -189,12 +194,8 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      *
      * @return Stream of marked types.
      *
-     * @see #getMarkedAsTypes()
-     *
      */
-    default Stream<Class<? extends Entity>> streamMarkedAsTypes() {
-	return getMarkedAsTypes().stream();
-    }
+    Stream<Class<? extends Entity>> streamMarkedAsTypes();
 
     /**
      * Transfers this entity to the specified destination container.
