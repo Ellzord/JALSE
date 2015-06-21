@@ -1,13 +1,10 @@
 package jalse.misc;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides a thread-safe way to store and process listeners. Listener set takes in the defining
@@ -22,8 +19,6 @@ import java.util.logging.Logger;
  *            Listener {@code interface}.
  */
 public class ListenerSet<T> extends HashSet<T> implements InvocationHandler {
-
-    private static final Logger logger = Logger.getLogger(ListenerSet.class.getName());
 
     private static final long serialVersionUID = 1437345792255852480L;
 
@@ -57,11 +52,7 @@ public class ListenerSet<T> extends HashSet<T> implements InvocationHandler {
     @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
 	for (final T t : this) {
-	    try {
-		method.invoke(t, args);
-	    } catch (final InvocationTargetException e) {
-		logger.log(Level.WARNING, "Error in listener", e.getCause());
-	    }
+	    method.invoke(t, args);
 	}
 	return null;
     }
