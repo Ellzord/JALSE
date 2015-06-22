@@ -67,7 +67,7 @@ public class SetAttributeMethod implements EntityMethod {
     @Override
     public Object invoke(final Object proxy, final Entity entity, final Object[] args) throws Throwable {
 	// Check no args
-	if (args == null || args.length != 1) {
+	if (args.length != 1) {
 	    throw new IllegalArgumentException("Should have 1 argument");
 	}
 	if (optional) {

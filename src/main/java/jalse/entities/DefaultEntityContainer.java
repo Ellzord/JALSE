@@ -289,6 +289,11 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
+    public String toString() {
+	return "DefaultEntityContainer [entityIDs=" + getEntityIDs() + "]";
+    }
+
+    @Override
     public boolean transferEntity(final UUID id, final EntityContainer destination) {
 	Objects.requireNonNull(id);
 

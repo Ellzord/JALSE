@@ -173,6 +173,11 @@ public class DefaultEntityFactory implements EntityFactory {
     }
 
     @Override
+    public String toString() {
+	return "DefaultEntityFactory [entityLimit=" + entityLimit + ", entityCount=" + entityCount + "]";
+    }
+
+    @Override
     public boolean tryImportEntity(final Entity e, final EntityContainer target) {
 	final UUID eID = e.getID();
 

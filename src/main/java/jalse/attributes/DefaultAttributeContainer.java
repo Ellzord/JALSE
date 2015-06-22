@@ -229,6 +229,31 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	return delegateContainer;
     }
 
+    private Map<NamedAttributeType<?>, Object> getNamedTypeMap() {
+	read.lock();
+	try {
+	    final Map<NamedAttributeType<?>, Object> namedTypesToValues = new HashMap<>();
+
+	    // All names
+	    for (final String name : getAttributeNames()) {
+		// All types for name
+		for (final AttributeType<?> type : getAttributeTypes(name)) {
+		    if (type != null) {
+			// Value for name type key
+			final Object value = getAttribute(name, type);
+			if (value != null) {
+			    namedTypesToValues.put(new NamedAttributeType<>(name, type), value);
+			}
+		    }
+		}
+	    }
+
+	    return namedTypesToValues;
+	} finally {
+	    read.unlock();
+	}
+    }
+
     @Override
     public int hashCode() {
 	final int prime = 31;
@@ -377,5 +402,10 @@ public class DefaultAttributeContainer implements AttributeContainer {
     public Stream<?> streamAttributes() {
 	final Iterator<?> it = attributes.values().stream().flatMap(m -> m.values().stream()).iterator();
 	return LockingIterator.lockingStream(it, read, getAttributeCount0());
+    }
+
+    @Override
+    public String toString() {
+	return "DefaultAttributeContainer [namedTypeMap=" + getNamedTypeMap() + "]";
     }
 }

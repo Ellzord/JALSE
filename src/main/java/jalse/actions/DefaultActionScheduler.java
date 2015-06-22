@@ -7,7 +7,6 @@ import static jalse.actions.Actions.unmodifiableActorActionContext;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,7 +37,7 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     public DefaultActionScheduler(final T actor) {
 	this.actor = Objects.requireNonNull(actor);
 	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
-	contexts = new CopyOnWriteArraySet<>();
+	contexts = new HashSet<>();
     }
 
     /**
@@ -46,8 +45,11 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
      */
     @Override
     public void cancelAllScheduledForActor() {
-	final Set<ActionContext<T>> toCancel = new HashSet<>(contexts);
-	contexts.clear();
+	final Set<ActionContext<T>> toCancel;
+	synchronized (contexts) {
+	    toCancel = new HashSet<>(contexts);
+	    contexts.clear();
+	}
 
 	// Cancel all
 	toCancel.forEach(cxt -> {
@@ -91,8 +93,10 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	context.setActor(actor);
 
 	// Add then purge
-	contexts.add(context);
-	contexts.removeIf(ActionContext<T>::isDone);
+	synchronized (contexts) {
+	    contexts.add(context);
+	    contexts.removeIf(ActionContext<T>::isDone);
+	}
 
 	return context;
     }
@@ -123,7 +127,9 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
      */
     public void setEngine(final ActionEngine engine) {
 	if (!Objects.equals(this.engine, engine)) { // Only if changed
-	    contexts.clear();
+	    synchronized (contexts) {
+		contexts.clear();
+	    }
 	}
 	this.engine = engine;
     }
