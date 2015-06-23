@@ -227,4 +227,89 @@ public class DefaultJALSETest {
 	Assert.assertFalse(jalse.getEntityIDs().contains(id));
 	Assert.assertTrue(otherJALSE.getEntityIDs().contains(id));
     }
+
+    @Test
+    public void buildCommonPoolWithDefaultsTest() {
+	jalse = DefaultJALSE.buildCommonPoolWithDefaults();
+	Assert.assertNotNull(jalse);
+    }
+
+    @Test
+    public void buildManualWithDefaultsTests() {
+	jalse = DefaultJALSE.buildManualWithDefaults();
+	Assert.assertNotNull(jalse);
+    }
+
+    @Test
+    public void buildSingleThreadedWithDefaultsTest() {
+	jalse = DefaultJALSE.buildSingleThreadedWithDefaults();
+	Assert.assertNotNull(jalse);
+    }
+
+    public static class BuilderTest {
+
+	JALSE jalse = null;
+
+	@After
+	public void after() {
+	    jalse = null;
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void buildTest1() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
+	    builder.setForkJoinEngine();
+	    jalse = builder.build();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void buildTest2() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
+	    builder.setThreadPoolEngine();
+	    jalse = builder.build();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void buildTest3() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setRandomID().setNoEntityLimit()
+		    .setParallelismToProcessors();
+	    jalse = builder.build();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void buildTest4() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
+	    builder.setForkJoinEngine().setRandomID().setParallelism(2);
+	    jalse = builder.build();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void buildTest5() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
+	    builder.setForkJoinEngine().setParallelismToProcessors();
+	    jalse = builder.build();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void buildTest6() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
+	    builder.setThreadPoolEngine().setRandomID().setNoEntityLimit();
+	    jalse = builder.build();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void buildTest7() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
+	    builder.setForkJoinEngine().setRandomID().setNoEntityLimit();
+	    jalse = builder.build();
+	}
+
+	@Test
+	public void buildTest8() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setRandomID().setNoEntityLimit()
+		    .setParallelismToProcessors().setForkJoinEngine();
+	    jalse = builder.build();
+	    Assert.assertNotNull(jalse);
+	}
+    }
 }

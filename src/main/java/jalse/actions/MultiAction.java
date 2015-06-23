@@ -21,6 +21,7 @@ import java.util.Objects;
  *
  * @see ForkJoinActionEngine
  * @see ThreadPoolActionEngine
+ * @see ManualActionEngine
  */
 public final class MultiAction<T> implements Action<T> {
 
@@ -229,15 +230,6 @@ public final class MultiAction<T> implements Action<T> {
 	return new Builder<S>().thenPerform(actions).build();
     }
 
-    /**
-     * Creates a new Builder instance.
-     *
-     * @return New builder instance.
-     */
-    public static <T> Builder<T> builder() {
-	return new Builder<>();
-    }
-
     private final List<ActionOperation<T>> operations;
 
     /**
@@ -251,6 +243,12 @@ public final class MultiAction<T> implements Action<T> {
 	this.operations = new ArrayList<>(operations);
     }
 
+    /**
+     * Adds an operation to the multi-action.
+     * 
+     * @param operation
+     *            Operation to add.
+     */
     public void addOperation(final ActionOperation<T> operation) {
 	operations.add(Objects.requireNonNull(operation));
     }
