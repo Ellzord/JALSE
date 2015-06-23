@@ -30,6 +30,37 @@ import java.util.stream.Stream;
  */
 public class DefaultAttributeContainer implements AttributeContainer {
 
+    public static final class Builder {
+
+	public Builder() {
+
+	}
+
+	public Builder setDelegateContainer(AttributeContainer container) {
+	    return this;
+	}
+
+	public <T> Builder addListener(String name, AttributeType<T> type, AttributeListener<T> listener) {
+	    return addListener(new NamedAttributeType<>(name, type), listener);
+	}
+
+	public <T> Builder addListener(NamedAttributeType<T> namedType, AttributeListener<T> listener) {
+	    return this;
+	}
+
+	public <T> Builder setAttribute(String name, AttributeType<T> type, T value) {
+	    return setAttribute(new NamedAttributeType<>(name, type), value);
+	}
+
+	public <T> Builder setAttribute(NamedAttributeType<T> namedType, T value) {
+	    return this;
+	}
+
+	public DefaultAttributeContainer build() {
+	    return null;
+	}
+    }
+
     private static void checkNameAndType(final String name, final AttributeType<?> type) {
 	requireNotEmpty(name);
 	Objects.requireNonNull(type);
