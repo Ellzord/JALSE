@@ -3,15 +3,14 @@ package jalse.entities;
 import static jalse.entities.Entities.asType;
 import jalse.attributes.AttributeContainer;
 import jalse.misc.ListenerSet;
-import jalse.misc.LockingIterator;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -59,7 +58,7 @@ public class DefaultEntityContainer implements EntityContainer {
     public DefaultEntityContainer(final EntityFactory factory, final EntityContainer delegateContainer) {
 	this.factory = factory != null ? factory : new DefaultEntityFactory();
 	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
-	entities = new ConcurrentHashMap<>();
+	entities = new HashMap<>();
 	listeners = new ListenerSet<>(EntityListener.class);
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
@@ -198,12 +197,14 @@ public class DefaultEntityContainer implements EntityContainer {
 
     @Override
     public <T extends Entity> T newEntity(final UUID id, final Class<T> type, final AttributeContainer sourceContainer) {
+	Objects.requireNonNull(type);
 	return asType(newEntity0(id, type, sourceContainer), type);
     }
 
     private Entity newEntity0(final UUID id, final Class<? extends Entity> type,
 	    final AttributeContainer sourceContainer) {
 	Objects.requireNonNull(id);
+	Objects.requireNonNull(sourceContainer);
 
 	write.lock();
 	try {
@@ -284,8 +285,12 @@ public class DefaultEntityContainer implements EntityContainer {
 
     @Override
     public Stream<Entity> streamEntities() {
-	final Iterator<Entity> it = entities.values().iterator();
-	return LockingIterator.lockingStream(it, read, entities.size());
+	read.lock();
+	try {
+	    return new ArrayList<>(entities.values()).stream();
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override

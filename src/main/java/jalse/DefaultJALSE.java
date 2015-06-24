@@ -43,46 +43,6 @@ import java.util.stream.Stream;
 public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 
     /**
-     * Builds a manually ticked DefaultJALSE instance (with a random ID and no entity limit).
-     *
-     * @return Manual tick DefaultJALSE.
-     *
-     * @see Builder#setRandomID()
-     * @see Builder#setManualEngine()
-     * @see Builder#setNoEntityLimit()
-     */
-    public static DefaultJALSE buildManualWithDefaults() {
-	return new Builder().setRandomID().setNoEntityLimit().setManualEngine().build();
-    }
-
-    /**
-     * Builds a single threaded DefaultJALSE instance (with a random ID and no entity limit).
-     *
-     * @return Single threaded DefaultJALSE instance.
-     *
-     * @see Builder#setRandomID()
-     * @see Builder#setSingleThread()
-     * @see Builder#setThreadPoolEngine()
-     * @see Builder#setNoEntityLimit()
-     */
-    public static DefaultJALSE buildSingleThreadedWithDefaults() {
-	return new Builder().setRandomID().setNoEntityLimit().setSingleThread().setThreadPoolEngine().build();
-    }
-
-    /**
-     * Creates a common pool DefaultJALSE instance (with a random ID and no entity limit).
-     *
-     * @return Default parallelism DefaultJALSE instance.
-     *
-     * @see Builder#setRandomID()
-     * @see Builder#setCommonPoolEngine()
-     * @see Builder#setNoEntityLimit()
-     */
-    public static DefaultJALSE buildCommonPoolWithDefaults() {
-	return new Builder().setRandomID().setNoEntityLimit().setCommonPoolEngine().build();
-    }
-
-    /**
      * A {@link DefaultJALSE} instance builder that uses the defined {@link ActionEngine}
      * implementation with {@link DefaultEntityFactory}.<br>
      * <br>
@@ -287,6 +247,46 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	    this.totalEntityLimit = totalEntityLimit;
 	    return this;
 	}
+    }
+
+    /**
+     * Creates a common pool DefaultJALSE instance (with a random ID and no entity limit).
+     *
+     * @return Default parallelism DefaultJALSE instance.
+     *
+     * @see Builder#setRandomID()
+     * @see Builder#setCommonPoolEngine()
+     * @see Builder#setNoEntityLimit()
+     */
+    public static DefaultJALSE buildCommonPoolWithDefaults() {
+	return new Builder().setRandomID().setNoEntityLimit().setCommonPoolEngine().build();
+    }
+
+    /**
+     * Builds a manually ticked DefaultJALSE instance (with a random ID and no entity limit).
+     *
+     * @return Manual tick DefaultJALSE.
+     *
+     * @see Builder#setRandomID()
+     * @see Builder#setManualEngine()
+     * @see Builder#setNoEntityLimit()
+     */
+    public static DefaultJALSE buildManualWithDefaults() {
+	return new Builder().setRandomID().setNoEntityLimit().setManualEngine().build();
+    }
+
+    /**
+     * Builds a single threaded DefaultJALSE instance (with a random ID and no entity limit).
+     *
+     * @return Single threaded DefaultJALSE instance.
+     *
+     * @see Builder#setRandomID()
+     * @see Builder#setSingleThread()
+     * @see Builder#setThreadPoolEngine()
+     * @see Builder#setNoEntityLimit()
+     */
+    public static DefaultJALSE buildSingleThreadedWithDefaults() {
+	return new Builder().setRandomID().setNoEntityLimit().setSingleThread().setThreadPoolEngine().build();
     }
 
     /**

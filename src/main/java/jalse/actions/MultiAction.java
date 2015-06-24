@@ -245,7 +245,7 @@ public final class MultiAction<T> implements Action<T> {
 
     /**
      * Adds an operation to the multi-action.
-     * 
+     *
      * @param operation
      *            Operation to add.
      */
