@@ -41,13 +41,13 @@ public final class MultiAction<T> implements Action<T> {
 	/**
 	 * Creates a new operation.
 	 *
-	 * @param operation
+	 * @param type
 	 *            Operation type.
 	 * @param action
 	 *            Action to execute.
 	 */
-	public ActionOperation(final OperationType operation, final Action<T> action) {
-	    this(operation, Collections.singleton(Objects.requireNonNull(action)));
+	public ActionOperation(final OperationType type, final Action<T> action) {
+	    this(type, Collections.singleton(Objects.requireNonNull(action)));
 	}
 
 	/**
@@ -60,7 +60,10 @@ public final class MultiAction<T> implements Action<T> {
 	 */
 	public ActionOperation(final OperationType type, final Collection<? extends Action<T>> actions) {
 	    this.type = Objects.requireNonNull(type);
-	    this.actions = Objects.requireNonNull(actions);
+	    if (actions.isEmpty()) {
+		throw new IllegalArgumentException();
+	    }
+	    this.actions = actions;
 	}
 
 	/**
@@ -102,22 +105,13 @@ public final class MultiAction<T> implements Action<T> {
 	}
 
 	/**
-	 * Builds the multi-action.
-	 *
-	 * @return The multi-action.
-	 */
-	public MultiAction<T> build() {
-	    return new MultiAction<>(builderOperations);
-	}
-
-	/**
 	 * Adds an action to be performed next.
 	 *
 	 * @param action
 	 *            Action to perform next.
 	 * @return This builder.
 	 */
-	public Builder<T> thenPerform(final Action<T> action) {
+	public Builder<T> addPerform(final Action<T> action) {
 	    builderOperations.add(new ActionOperation<>(OperationType.PERFORM, action));
 	    return this;
 	}
@@ -129,7 +123,7 @@ public final class MultiAction<T> implements Action<T> {
 	 *            Actions to perform.
 	 * @return This builder.
 	 */
-	public Builder<T> thenPerform(final List<? extends Action<T>> actions) {
+	public Builder<T> addPerform(final List<? extends Action<T>> actions) {
 	    builderOperations.add(new ActionOperation<>(OperationType.PERFORM, actions));
 	    return this;
 	}
@@ -141,7 +135,7 @@ public final class MultiAction<T> implements Action<T> {
 	 *            Action to schedule.
 	 * @return This builder.
 	 */
-	public Builder<T> thenSchedule(final Action<T> action) {
+	public Builder<T> addSchedule(final Action<T> action) {
 	    builderOperations.add(new ActionOperation<>(OperationType.SCHEDULE, action));
 	    return this;
 	}
@@ -153,7 +147,7 @@ public final class MultiAction<T> implements Action<T> {
 	 *            Actions to schedule.
 	 * @return This builder.
 	 */
-	public Builder<T> thenSchedule(final Collection<? extends Action<T>> actions) {
+	public Builder<T> addSchedule(final Collection<? extends Action<T>> actions) {
 	    builderOperations.add(new ActionOperation<>(OperationType.SCHEDULE, actions));
 	    return this;
 	}
@@ -165,7 +159,7 @@ public final class MultiAction<T> implements Action<T> {
 	 *            Action to schedule and await.
 	 * @return This builder.
 	 */
-	public Builder<T> thenScheduleAndAwait(final Action<T> action) {
+	public Builder<T> addScheduleAndAwait(final Action<T> action) {
 	    builderOperations.add(new ActionOperation<>(OperationType.SCHEDULE_AWAIT, action));
 	    return this;
 	}
@@ -177,9 +171,20 @@ public final class MultiAction<T> implements Action<T> {
 	 *            Actions to schedule and await.
 	 * @return This builder.
 	 */
-	public Builder<T> thenScheduleAndAwait(final Collection<? extends Action<T>> actions) {
+	public Builder<T> addScheduleAndAwait(final Collection<? extends Action<T>> actions) {
 	    builderOperations.add(new ActionOperation<>(OperationType.SCHEDULE_AWAIT, actions));
 	    return this;
+	}
+
+	/**
+	 * Builds the multi-action.
+	 *
+	 * @return The multi-action.
+	 */
+	public MultiAction<T> build() {
+	    final MultiAction<T> ma = new MultiAction<>();
+	    ma.addOperations(builderOperations);
+	    return ma;
 	}
     }
 
@@ -227,7 +232,7 @@ public final class MultiAction<T> implements Action<T> {
      * @return Chain action.
      */
     public static <S> MultiAction<S> buildChain(final List<? extends Action<S>> actions) {
-	return new Builder<S>().thenPerform(actions).build();
+	return new Builder<S>().addPerform(actions).build();
     }
 
     private final List<ActionOperation<T>> operations;
@@ -239,10 +244,6 @@ public final class MultiAction<T> implements Action<T> {
 	operations = new ArrayList<>();
     }
 
-    private MultiAction(final List<ActionOperation<T>> operations) {
-	this.operations = new ArrayList<>(operations);
-    }
-
     /**
      * Adds an operation to the multi-action.
      *
@@ -251,6 +252,10 @@ public final class MultiAction<T> implements Action<T> {
      */
     public void addOperation(final ActionOperation<T> operation) {
 	operations.add(Objects.requireNonNull(operation));
+    }
+
+    private void addOperations(final List<ActionOperation<T>> operations) {
+	this.operations.addAll(operations);
     }
 
     /**
