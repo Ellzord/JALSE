@@ -1,6 +1,6 @@
 package jalse.entities.functions;
 
-import static jalse.attributes.Attributes.newUnknownType;
+import static jalse.attributes.Attributes.newNamedUnknownType;
 import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.firstGenericTypeArg;
 import static jalse.entities.functions.Functions.hasReturnType;
@@ -115,6 +115,6 @@ public class SetAttributeFunction implements EntityMethodFunction {
 	}
 
 	// Create set attribute method
-	return new SetAttributeMethod(name, newUnknownType(attrType), optional);
+	return new SetAttributeMethod(newNamedUnknownType(name, attrType), optional);
     }
 }
