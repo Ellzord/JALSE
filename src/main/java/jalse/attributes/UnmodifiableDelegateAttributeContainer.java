@@ -29,7 +29,7 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
 
     @Override
     public int getAttributeCount() {
-	return delegate != null ? delegate.getAttributeCount() : null;
+	return delegate != null ? delegate.getAttributeCount() : 0;
     }
 
     @Override

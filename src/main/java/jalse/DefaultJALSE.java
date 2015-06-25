@@ -104,6 +104,11 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	    case FORKJOIN:
 		engine = new ForkJoinActionEngine(parallelism);
 		break;
+	    default:
+		/*
+		 * Engine must not be null.
+		 */
+		throw new IllegalStateException();
 	    }
 
 	    return new DefaultJALSE(idSupplier.get(), engine, new DefaultEntityFactory(totalEntityLimit));
