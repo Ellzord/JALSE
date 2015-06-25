@@ -94,7 +94,12 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	 * @return The new container.
 	 */
 	public DefaultAttributeContainer build() {
-	    return new DefaultAttributeContainer(builderDelegateContainer, builderAttributes, builderListeners);
+	    final DefaultAttributeContainer container = new DefaultAttributeContainer(builderAttributes,
+		    builderListeners);
+	    if (builderDelegateContainer != null) {
+		container.setDelegateContainer(builderDelegateContainer);
+	    }
+	    return container;
 	}
 
 	/**
@@ -138,14 +143,14 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	 * @return This builder.
 	 */
 	public Builder setDelegateContainer(final AttributeContainer builderDelegateContainer) {
-	    this.builderDelegateContainer = builderDelegateContainer;
+	    this.builderDelegateContainer = Objects.requireNonNull(builderDelegateContainer);
 	    return this;
 	}
     }
 
     private final Map<NamedAttributeType<?>, ListenerSet<?>> listeners;
     private final Map<NamedAttributeType<?>, Object> attributes;
-    private final AttributeContainer delegateContainer;
+    private AttributeContainer delegateContainer;
     private final Lock read;
     private final Lock write;
 
@@ -153,7 +158,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
      * Creates a new instance of DefaultAttributeContainer with no delegate container (self).
      */
     public DefaultAttributeContainer() {
-	this(null);
+	this(null, null);
     }
 
     /**
@@ -163,13 +168,13 @@ public class DefaultAttributeContainer implements AttributeContainer {
      *            Delegate AttributeContainer for events.
      */
     public DefaultAttributeContainer(final AttributeContainer delegateContainer) {
-	this(delegateContainer, null, null);
+	this(null, null);
+	setDelegateContainer(delegateContainer);
     }
 
-    private DefaultAttributeContainer(final AttributeContainer delegateContainer,
-	    final Map<NamedAttributeType<?>, Object> attributes,
+    private DefaultAttributeContainer(final Map<NamedAttributeType<?>, Object> attributes,
 	    final Map<NamedAttributeType<?>, Set<AttributeListener<?>>> listeners) {
-	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
+	delegateContainer = this;
 	this.attributes = new HashMap<>();
 	this.listeners = new HashMap<>();
 
@@ -424,6 +429,10 @@ public class DefaultAttributeContainer implements AttributeContainer {
 	} finally {
 	    write.unlock();
 	}
+    }
+
+    private void setDelegateContainer(final AttributeContainer delegateContainer) {
+	this.delegateContainer = Objects.requireNonNull(delegateContainer);
     }
 
     @Override

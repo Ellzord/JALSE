@@ -29,49 +29,49 @@ public class DefaultJALSETest {
 	    jalse = null;
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void buildTest1() {
 	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
 	    builder.setForkJoinEngine();
 	    jalse = builder.build();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void buildTest2() {
 	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
 	    builder.setThreadPoolEngine();
 	    jalse = builder.build();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void buildTest3() {
 	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setRandomID().setNoEntityLimit()
 		    .setParallelismToProcessors();
 	    jalse = builder.build();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void buildTest4() {
 	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
 	    builder.setForkJoinEngine().setRandomID().setParallelism(2);
 	    jalse = builder.build();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void buildTest5() {
 	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
 	    builder.setForkJoinEngine().setParallelismToProcessors();
 	    jalse = builder.build();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void buildTest6() {
 	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
 	    builder.setThreadPoolEngine().setRandomID().setNoEntityLimit();
 	    jalse = builder.build();
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void buildTest7() {
 	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder();
 	    builder.setForkJoinEngine().setRandomID().setNoEntityLimit();
@@ -130,49 +130,25 @@ public class DefaultJALSETest {
 
     @Test
     public void bindingsTest() {
-	jalse = new DefaultJALSE(new UUID(0, 0));
+	jalse = new DefaultJALSE(new UUID(0, 0), ForkJoinActionEngine.commonPoolEngine(), new DefaultEntityFactory());
 	Assert.assertTrue(jalse.getBindings().toMap().isEmpty());
     }
 
     @Test
-    public void buildCommonPoolWithDefaultsTest() {
-	jalse = DefaultJALSE.buildCommonPoolWithDefaults();
-	Assert.assertNotNull(jalse);
-    }
-
-    @Test
-    public void buildManualWithDefaultsTests() {
-	jalse = DefaultJALSE.buildManualWithDefaults();
-	Assert.assertNotNull(jalse);
-    }
-
-    @Test
-    public void buildSingleThreadedWithDefaultsTest() {
-	jalse = DefaultJALSE.buildSingleThreadedWithDefaults();
-	Assert.assertNotNull(jalse);
-    }
-
-    @Test
     public void contextTest() {
-	jalse = new DefaultJALSE(new UUID(0, 1));
+	jalse = new DefaultJALSE(new UUID(0, 0), ForkJoinActionEngine.commonPoolEngine(), new DefaultEntityFactory());
 	Assert.assertNotNull(jalse.newContext(new TestAction()));
     }
 
     @Test
     public void contructorTest() {
-	jalse = new DefaultJALSE(new UUID(0, 0));
-	Assert.assertNotNull(jalse);
-
-	jalse = new DefaultJALSE(new UUID(0, 0), new ForkJoinActionEngine());
-	Assert.assertNotNull(jalse);
-
 	jalse = new DefaultJALSE(new UUID(0, 0), new ForkJoinActionEngine(), new DefaultEntityFactory());
 	Assert.assertNotNull(jalse);
     }
 
     @Test
     public void entityListenerTest() {
-	jalse = new DefaultJALSE(new UUID(0, 0));
+	jalse = new DefaultJALSE(new UUID(0, 0), ForkJoinActionEngine.commonPoolEngine(), new DefaultEntityFactory());
 	final TestEntityListener listener = new TestEntityListener();
 
 	jalse.addEntityListener(listener);
@@ -198,7 +174,7 @@ public class DefaultJALSETest {
 
     @Test
     public void killEntityTest() {
-	jalse = new DefaultJALSE(new UUID(0, 1));
+	jalse = new DefaultJALSE(new UUID(0, 0), ForkJoinActionEngine.commonPoolEngine(), new DefaultEntityFactory());
 
 	final Entity entity1 = jalse.newEntity(new UUID(0, 1));
 	final Entity entity2 = jalse.newEntity(new UUID(0, 2));
@@ -221,7 +197,7 @@ public class DefaultJALSETest {
 
     @Test
     public void newEntityTest() {
-	jalse = new DefaultJALSE(new UUID(0, 0));
+	jalse = new DefaultJALSE(new UUID(0, 0), ForkJoinActionEngine.commonPoolEngine(), new DefaultEntityFactory());
 
 	final UUID id = new UUID(0, 1);
 	final Entity entity = jalse.newEntity(id, TestEntity.class, new DefaultAttributeContainer());
@@ -237,7 +213,8 @@ public class DefaultJALSETest {
 	Assert.assertTrue(jalse.getIDsInTree().contains(otherID));
 
 	final UUID thirdID = new UUID(0, 3);
-	final DefaultJALSE jalse2 = new DefaultJALSE(new UUID(0, 1));
+	final DefaultJALSE jalse2 = new DefaultJALSE(new UUID(0, 1), ForkJoinActionEngine.commonPoolEngine(),
+		new DefaultEntityFactory());
 	final Entity otherEntity = jalse2.newEntity(thirdID);
 
 	jalse.receiveEntity(otherEntity);
@@ -264,7 +241,7 @@ public class DefaultJALSETest {
 
     @Test
     public void scheduleTest() {
-	jalse = new DefaultJALSE(new UUID(0, 0));
+	jalse = new DefaultJALSE(new UUID(0, 0), ForkJoinActionEngine.commonPoolEngine(), new DefaultEntityFactory());
 	final TestAction action = new TestAction();
 	jalse.scheduleForActor(action, 0, 1, TimeUnit.MILLISECONDS);
 	try {
@@ -296,14 +273,15 @@ public class DefaultJALSETest {
 
     @Test
     public void tagTest() {
-	jalse = new DefaultJALSE(new UUID(0, 0));
+	jalse = new DefaultJALSE(new UUID(0, 0), ForkJoinActionEngine.commonPoolEngine(), new DefaultEntityFactory());
 	Assert.assertTrue(jalse.getTags().isEmpty());
     }
 
     @Test
     public void transferEntityTest() {
-	jalse = new DefaultJALSE(new UUID(0, 0));
-	final DefaultJALSE otherJALSE = new DefaultJALSE(new UUID(0, 1));
+	jalse = new DefaultJALSE(new UUID(0, 0), ForkJoinActionEngine.commonPoolEngine(), new DefaultEntityFactory());
+	final DefaultJALSE otherJALSE = new DefaultJALSE(new UUID(0, 1), ForkJoinActionEngine.commonPoolEngine(),
+		new DefaultEntityFactory());
 
 	final UUID id = new UUID(0, 2);
 	jalse.newEntity(id);

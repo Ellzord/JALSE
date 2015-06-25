@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -46,7 +47,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
      * A {@link DefaultJALSE} instance builder that uses the defined {@link ActionEngine}
      * implementation with {@link DefaultEntityFactory}.<br>
      * <br>
-     * By default this builder will throw {@link IllegalStateException} as the values must be built. <br>
+     * By default this builder uses the common pool ({@link ForkJoinActionEngine#commonPoolEngine()}
+     * ), has a random ID and has no entity limit.
      *
      * @author Elliot Ford
      *
@@ -58,15 +60,17 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
      */
     public static final class Builder {
 
-	private enum EngineType {
-
-	    COMMON, FORKJOIN, MANUAL, NONE, THREADPOOL
-	}
-
 	private static final int MINIMUM_PARALLALISM = 1;
 
+	private static final Supplier<UUID> RANDOM_ID_SUPPLIER = UUID::randomUUID;
+
+	private enum EngineType {
+
+	    COMMON, FORKJOIN, MANUAL, THREADPOOL
+	}
+
 	private EngineType engineType;
-	private UUID id;
+	private Supplier<UUID> idSupplier;
 	private int parallelism;
 	private int totalEntityLimit;
 
@@ -74,10 +78,10 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * Creates a new Builder instance.
 	 */
 	public Builder() {
-	    id = null;
-	    parallelism = 0;
-	    totalEntityLimit = 0;
-	    engineType = EngineType.NONE;
+	    idSupplier = RANDOM_ID_SUPPLIER;
+	    parallelism = MINIMUM_PARALLALISM;
+	    totalEntityLimit = Integer.MAX_VALUE;
+	    engineType = EngineType.COMMON;
 	}
 
 	/**
@@ -86,14 +90,6 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * @return Newly created JALSE instance.
 	 */
 	public DefaultJALSE build() throws IllegalStateException {
-	    if (id == null) {
-		throw new IllegalStateException("ID cannot be null");
-	    }
-
-	    if (totalEntityLimit < 1) {
-		throw new IllegalStateException("Entity limit must be above one");
-	    }
-
 	    ActionEngine engine = null;
 	    switch (engineType) {
 	    case COMMON:
@@ -103,24 +99,14 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 		engine = new ManualActionEngine();
 		break;
 	    case THREADPOOL:
-		if (parallelism < MINIMUM_PARALLALISM) {
-		    throw new IllegalStateException(String.format("Parallelism for ThreadPool must be %d or above",
-			    MINIMUM_PARALLALISM));
-		}
 		engine = new ThreadPoolActionEngine(parallelism);
 		break;
 	    case FORKJOIN:
-		if (parallelism < MINIMUM_PARALLALISM) {
-		    throw new IllegalStateException(String.format("Parallelism for ForkJoin must be %d or above",
-			    MINIMUM_PARALLALISM));
-		}
 		engine = new ForkJoinActionEngine(parallelism);
 		break;
-	    default: // Assume engineType = EngineType.NONE;
-		throw new IllegalStateException("No engine selected");
 	    }
 
-	    return new DefaultJALSE(id, engine, new DefaultEntityFactory(totalEntityLimit));
+	    return new DefaultJALSE(idSupplier.get(), engine, new DefaultEntityFactory(totalEntityLimit));
 	}
 
 	/**
@@ -156,7 +142,7 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * @return This builder.
 	 */
 	public Builder setID(final UUID id) {
-	    this.id = id;
+	    this.idSupplier = () -> id;
 	    return this;
 	}
 
@@ -178,7 +164,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * @see Integer#MAX_VALUE
 	 */
 	public Builder setNoEntityLimit() {
-	    return setTotalEntityLimit(Integer.MAX_VALUE);
+	    totalEntityLimit = Integer.MAX_VALUE;
+	    return this;
 	}
 
 	/**
@@ -187,8 +174,13 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * @param parallelism
 	 *            Thread parallelism.
 	 * @return This builder.
+	 * @throws IllegalArgumentException
 	 */
 	public Builder setParallelism(final int parallelism) {
+	    if (parallelism < MINIMUM_PARALLALISM) {
+		throw new IllegalArgumentException(
+			String.format("Parallelism must be %d or above", MINIMUM_PARALLALISM));
+	    }
 	    this.parallelism = parallelism;
 	    return this;
 	}
@@ -201,7 +193,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * @see Runtime#availableProcessors()
 	 */
 	public Builder setParallelismToProcessors() {
-	    return setParallelism(Runtime.getRuntime().availableProcessors());
+	    parallelism = Runtime.getRuntime().availableProcessors();
+	    return this;
 	}
 
 	/**
@@ -212,7 +205,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * @see UUID#randomUUID()
 	 */
 	public Builder setRandomID() {
-	    return setID(UUID.randomUUID());
+	    idSupplier = RANDOM_ID_SUPPLIER;
+	    return this;
 	}
 
 	/**
@@ -221,7 +215,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * @return This builder.
 	 */
 	public Builder setSingleThread() {
-	    return setParallelism(1);
+	    parallelism = MINIMUM_PARALLALISM;
+	    return this;
 	}
 
 	/**
@@ -242,51 +237,15 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * @param totalEntityLimit
 	 *            Maximum entity limited.
 	 * @return This builder.
+	 * @throws IllegalArgumentException
 	 */
 	public Builder setTotalEntityLimit(final int totalEntityLimit) {
+	    if (totalEntityLimit <= 0) {
+		throw new IllegalArgumentException("Total entity limit must be positive");
+	    }
 	    this.totalEntityLimit = totalEntityLimit;
 	    return this;
 	}
-    }
-
-    /**
-     * Creates a common pool DefaultJALSE instance (with a random ID and no entity limit).
-     *
-     * @return Default parallelism DefaultJALSE instance.
-     *
-     * @see Builder#setRandomID()
-     * @see Builder#setCommonPoolEngine()
-     * @see Builder#setNoEntityLimit()
-     */
-    public static DefaultJALSE buildCommonPoolWithDefaults() {
-	return new Builder().setRandomID().setNoEntityLimit().setCommonPoolEngine().build();
-    }
-
-    /**
-     * Builds a manually ticked DefaultJALSE instance (with a random ID and no entity limit).
-     *
-     * @return Manual tick DefaultJALSE.
-     *
-     * @see Builder#setRandomID()
-     * @see Builder#setManualEngine()
-     * @see Builder#setNoEntityLimit()
-     */
-    public static DefaultJALSE buildManualWithDefaults() {
-	return new Builder().setRandomID().setNoEntityLimit().setManualEngine().build();
-    }
-
-    /**
-     * Builds a single threaded DefaultJALSE instance (with a random ID and no entity limit).
-     *
-     * @return Single threaded DefaultJALSE instance.
-     *
-     * @see Builder#setRandomID()
-     * @see Builder#setSingleThread()
-     * @see Builder#setThreadPoolEngine()
-     * @see Builder#setNoEntityLimit()
-     */
-    public static DefaultJALSE buildSingleThreadedWithDefaults() {
-	return new Builder().setRandomID().setNoEntityLimit().setSingleThread().setThreadPoolEngine().build();
     }
 
     /**
@@ -313,29 +272,6 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
      * Current state information.
      */
     protected final TagTypeSet tags;
-
-    /**
-     * Creates a new instance of DefaultJALSE using the common pool engine and default entity
-     * factory (no limit).
-     *
-     * @param id
-     *            The ID used to identify between JALSE instances.
-     */
-    public DefaultJALSE(final UUID id) {
-	this(id, ForkJoinActionEngine.commonPoolEngine());
-    }
-
-    /**
-     * Creates a new instance of DefaultJALSE using the default entity factory (no limit).
-     *
-     * @param id
-     *            The ID used to identify between JALSE instances.
-     * @param engine
-     *            Action engine to associate to factory and schedule actions.
-     */
-    public DefaultJALSE(final UUID id, final ActionEngine engine) {
-	this(id, engine, new DefaultEntityFactory());
-    }
 
     /**
      * Creates a new instance of DefaultJALSE with the supplied engine and factory.
