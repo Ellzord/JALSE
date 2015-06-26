@@ -1,7 +1,6 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.getTypeAncestry;
-import static jalse.entities.Entities.isOrSubtype;
 import static jalse.entities.Entities.isSubtype;
 import jalse.actions.Action;
 import jalse.actions.ActionContext;
@@ -20,8 +19,8 @@ import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -219,8 +218,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Set<Tag> getTags() {
-	return Collections.unmodifiableSet(tags);
+    public Stream<Tag> streamTags() {
+	return tags.stream();
     }
 
     @Override
@@ -232,7 +231,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     public boolean isMarkedAsType(final Class<? extends Entity> type) {
 	read.lock();
 	try {
-	    return types.stream().anyMatch(t -> isOrSubtype(t, type));
+	    return types.contains(type);
 	} finally {
 	    read.unlock();
 	}
@@ -454,7 +453,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     public void unmarkAsAllTypes() {
 	write.lock();
 	try {
-	    new HashSet<>(types).forEach(this::unmarkAsType);
+	    new ArrayList<>(types).forEach(this::unmarkAsType);
 	} finally {
 	    write.unlock();
 	}
@@ -473,10 +472,13 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
 	    // Remove descendants
 	    final Set<Class<? extends Entity>> removedDescendants = new HashSet<>();
-	    for (final Class<? extends Entity> dt : types) {
-		if (isSubtype(dt, type) && tags.remove(dt)) {
+	    Iterator<Class<? extends Entity>> it = types.iterator();
+	    while (it.hasNext()) {
+		Class<? extends Entity> dt = it.next();
+		if (isSubtype(dt, type)) {
 		    // Removed descendant
 		    removedDescendants.add(dt);
+		    it.remove();
 		}
 	    }
 

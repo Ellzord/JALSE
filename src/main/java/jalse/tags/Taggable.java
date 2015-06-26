@@ -1,6 +1,7 @@
 package jalse.tags;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -15,15 +16,17 @@ public interface Taggable {
      * Gets all tag state information.
      *
      * @return All tags or an empty set if none are found.
+     * 
+     * @see #streamTags()
      */
-    Set<Tag> getTags();
+    default Set<Tag> getTags() {
+	return streamTags().collect(Collectors.toSet());
+    }
 
     /**
      * Streams all tag state information.
      *
      * @return Stream of all tags.
      */
-    default Stream<Tag> streamTags() {
-	return getTags().stream();
-    }
+    Stream<Tag> streamTags();
 }
