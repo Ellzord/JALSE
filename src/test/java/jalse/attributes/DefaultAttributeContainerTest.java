@@ -6,7 +6,52 @@ import org.junit.Test;
 
 public class DefaultAttributeContainerTest {
 
-    private class TestAttributeListener implements AttributeListener<Integer> {
+    public static class BuilderTest {
+
+	DefaultAttributeContainer container = null;
+
+	@After
+	public void after() {
+	    container = null;
+	}
+
+	@Test
+	public void attributeBuildTest() {
+	    container = new DefaultAttributeContainer.Builder().setAttribute(Attributes.newNamedBooleanType("scary"),
+		    true).build();
+	}
+
+	@Test
+	public void attributeBuildTest2() {
+	    container = new DefaultAttributeContainer.Builder().setAttribute("scary", Attributes.BOOLEAN_TYPE, true)
+		    .build();
+	}
+
+	@Test
+	public void buildTest() {
+	    container = new DefaultAttributeContainer.Builder().build();
+	}
+
+	@Test
+	public void delegateBuildTest() {
+	    container = new DefaultAttributeContainer.Builder().setDelegateContainer(new DefaultAttributeContainer())
+		    .build();
+	}
+
+	@Test
+	public void listenerBuilderTest() {
+	    container = new DefaultAttributeContainer.Builder().addListener(Attributes.newNamedIntegerType("score"),
+		    new TestAttributeListener()).build();
+	}
+
+	@Test
+	public void listenerBuilderTest2() {
+	    container = new DefaultAttributeContainer.Builder().addListener("score", Attributes.INTEGER_TYPE,
+		    new TestAttributeListener()).build();
+	}
+    }
+
+    private static class TestAttributeListener implements AttributeListener<Integer> {
 
 	public boolean added = false;
 	public boolean changed = false;

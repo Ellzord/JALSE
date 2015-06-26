@@ -13,19 +13,18 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
-	    final AttributeListener<T> listener) {
+    public <T> boolean addAttributeListener(final NamedAttributeType<T> namedType, final AttributeListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> void fireAttributeChanged(final String name, final AttributeType<T> type) {
+    public <T> void fireAttributeChanged(final NamedAttributeType<T> namedType) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> T getAttribute(final String name, final AttributeType<T> type) {
-	return delegate != null ? delegate.getAttribute(name, type) : null;
+    public <T> T getAttribute(final NamedAttributeType<T> namedType) {
+	return delegate != null ? delegate.getAttribute(namedType) : null;
     }
 
     @Override
@@ -34,37 +33,27 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public Set<String> getAttributeListenerNames() {
-	return delegate != null ? delegate.getAttributeListenerNames() : Collections.emptySet();
+    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final NamedAttributeType<T> namedType) {
+	return delegate != null ? delegate.getAttributeListeners(namedType) : Collections.emptySet();
     }
 
     @Override
-    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
-	return delegate != null ? delegate.getAttributeListeners(name, type) : Collections.emptySet();
+    public Set<NamedAttributeType<?>> getAttributeListenerTypes() {
+	return delegate != null ? delegate.getAttributeListenerTypes() : Collections.emptySet();
     }
 
     @Override
-    public Set<AttributeType<?>> getAttributeListenerTypes(final String name) {
-	return delegate != null ? delegate.getAttributeListenerTypes(name) : Collections.emptySet();
+    public Set<NamedAttributeType<?>> getAttributeTypes() {
+	return delegate != null ? delegate.getAttributeTypes() : Collections.emptySet();
     }
 
     @Override
-    public Set<String> getAttributeNames() {
-	return delegate != null ? delegate.getAttributeNames() : Collections.emptySet();
-    }
-
-    @Override
-    public Set<AttributeType<?>> getAttributeTypes(final String name) {
-	return delegate != null ? delegate.getAttributeTypes(name) : Collections.emptySet();
-    }
-
-    @Override
-    public <T> T removeAttribute(final String name, final AttributeType<T> type) {
+    public <T> T removeAttribute(final NamedAttributeType<T> namedType) {
 	throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
+    public <T> boolean removeAttributeListener(final NamedAttributeType<T> namedType,
 	    final AttributeListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
@@ -75,7 +64,7 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
+    public <T> void removeAttributeListeners(final NamedAttributeType<T> namedType) {
 	throw new UnsupportedOperationException();
     }
 
@@ -85,7 +74,7 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> T setAttribute(final String name, final AttributeType<T> type, final T attr) {
+    public <T> T setAttribute(final NamedAttributeType<T> namedType, final T attr) {
 	throw new UnsupportedOperationException();
     }
 

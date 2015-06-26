@@ -1,8 +1,8 @@
 package jalse.entities.methods;
 
-import static jalse.attributes.Attributes.requireNotEmpty;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
+import jalse.attributes.NamedAttributeType;
 import jalse.entities.Entity;
 import jalse.entities.annotations.GetAttribute;
 import jalse.entities.functions.GetAttributeFunction;
@@ -24,23 +24,19 @@ import java.util.Objects;
  */
 public class GetAttributeMethod implements EntityMethod {
 
-    private final String name;
-    private final AttributeType<Object> type;
+    private final NamedAttributeType<Object> namedType;
     private final boolean optional;
 
     /**
      * Creates a new get attribute method.
      *
-     * @param name
-     *            Attribute name.
-     * @param type
-     *            Attribute type.
+     * @param namedType
+     *            Named attribute type.
      * @param optional
      *            Optional return type.
      */
-    public GetAttributeMethod(final String name, final AttributeType<Object> type, final boolean optional) {
-	this.name = requireNotEmpty(name);
-	this.type = Objects.requireNonNull(type);
+    public GetAttributeMethod(final NamedAttributeType<Object> namedType, final boolean optional) {
+	this.namedType = Objects.requireNonNull(namedType);
 	this.optional = optional;
     }
 
@@ -50,7 +46,16 @@ public class GetAttributeMethod implements EntityMethod {
      * @return Attribute name.
      */
     public String getName() {
-	return name;
+	return namedType.getName();
+    }
+
+    /**
+     * Gets the named attribute type.
+     *
+     * @return Named attribute type.
+     */
+    public NamedAttributeType<Object> getNamedType() {
+	return namedType;
     }
 
     /**
@@ -58,8 +63,8 @@ public class GetAttributeMethod implements EntityMethod {
      *
      * @return Attribute type.
      */
-    public AttributeType<Object> getType() {
-	return type;
+    public AttributeType<?> getType() {
+	return namedType.getType();
     }
 
     @Override
@@ -69,9 +74,9 @@ public class GetAttributeMethod implements EntityMethod {
 	    throw new IllegalArgumentException("Should have no arguments");
 	}
 	if (optional) {
-	    return entity.getOptAttribute(name, type);
+	    return entity.getOptAttribute(namedType);
 	} else {
-	    return entity.getAttribute(name, type);
+	    return entity.getAttribute(namedType);
 	}
     }
 

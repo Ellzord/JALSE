@@ -18,7 +18,9 @@ import java.util.concurrent.ConcurrentMap;
 public class DefaultActionBindings implements MutableActionBindings {
 
     private static void validateKey(final String key) {
-	if (key == null || key.length() == 0) {
+	if (key == null) {
+	    throw new NullPointerException();
+	} else if (key.length() == 0) {
 	    throw new IllegalArgumentException();
 	}
     }
@@ -87,5 +89,10 @@ public class DefaultActionBindings implements MutableActionBindings {
     @Override
     public Map<String, ?> toMap() {
 	return new HashMap<>(bindings);
+    }
+
+    @Override
+    public String toString() {
+	return "DefaultActionBindings [bindings=" + bindings + "]";
     }
 }

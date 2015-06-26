@@ -1,6 +1,5 @@
 package jalse.attributes;
 
-import static jalse.attributes.Attributes.requireNotEmpty;
 import jalse.misc.AbstractIdentifiable;
 
 import java.util.Objects;
@@ -22,8 +21,7 @@ import java.util.Optional;
 public class AttributeEvent<T> extends AbstractIdentifiable {
 
     private final AttributeContainer container;
-    private final String name;
-    private final AttributeType<T> type;
+    private final NamedAttributeType<T> namedType;
     private final T value;
     private final T replacedValue;
 
@@ -32,16 +30,13 @@ public class AttributeEvent<T> extends AbstractIdentifiable {
      *
      * @param container
      *            Parent container for the Attribute.
-     * @param name
-     *            Attribute name.
-     * @param type
-     *            Attribute type.
+     * @param namedType
+     *            Named attribute type.
      * @param value
      *            Attribute the event is for.
      */
-    public AttributeEvent(final AttributeContainer container, final String name, final AttributeType<T> type,
-	    final T value) {
-	this(container, name, type, value, null);
+    public AttributeEvent(final AttributeContainer container, final NamedAttributeType<T> namedType, final T value) {
+	this(container, namedType, value, null);
     }
 
     /**
@@ -49,20 +44,17 @@ public class AttributeEvent<T> extends AbstractIdentifiable {
      *
      * @param container
      *            Parent container for the Attribute.
-     * @param name
-     *            Attribute name.
-     * @param type
-     *            Attribute type.
+     * @param namedType
+     *            Named attribute type.
      * @param value
      *            Attribute the event is for.
      * @param replacedValue
      *            The previous attribute that has been replaced by this Attribute (can be null).
      */
-    public AttributeEvent(final AttributeContainer container, final String name, final AttributeType<T> type,
-	    final T value, final T replacedValue) {
-	this.name = requireNotEmpty(name);
+    public AttributeEvent(final AttributeContainer container, final NamedAttributeType<T> namedType, final T value,
+	    final T replacedValue) {
 	this.container = Objects.requireNonNull(container);
-	this.type = Objects.requireNonNull(type);
+	this.namedType = Objects.requireNonNull(namedType);
 	this.value = Objects.requireNonNull(value);
 	this.replacedValue = replacedValue;
     }
@@ -82,7 +74,7 @@ public class AttributeEvent<T> extends AbstractIdentifiable {
      * @return Attribute name.
      */
     public String getName() {
-	return name;
+	return namedType.getName();
     }
 
     /**
@@ -91,7 +83,7 @@ public class AttributeEvent<T> extends AbstractIdentifiable {
      * @return Named attribute type.
      */
     public NamedAttributeType<T> getNamedType() {
-	return new NamedAttributeType<>(name, type);
+	return namedType;
     }
 
     /**
@@ -118,7 +110,7 @@ public class AttributeEvent<T> extends AbstractIdentifiable {
      * @return Attribute type.
      */
     public AttributeType<T> getType() {
-	return type;
+	return namedType.getType();
     }
 
     /**

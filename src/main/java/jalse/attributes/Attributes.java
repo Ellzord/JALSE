@@ -267,8 +267,8 @@ public final class Attributes {
      *             If the string was null or empty.
      *
      */
-    public static String requireNotEmpty(final String str) throws IllegalArgumentException {
-	if (str == null || str.length() == 0) {
+    public static String requireNotEmpty(final String str) throws NullPointerException, IllegalArgumentException {
+	if (str.length() == 0) {
 	    throw new IllegalArgumentException();
 	}
 	return str;

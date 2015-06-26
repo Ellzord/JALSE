@@ -140,7 +140,7 @@ public class DefaultEntityContainerTest {
     @Test
     public void factoryTest() {
 	final DefaultEntityFactory entityFactory = new DefaultEntityFactory();
-	container = new DefaultEntityContainer(entityFactory, null);
+	container = new DefaultEntityContainer(entityFactory);
 
 	Assert.assertEquals(entityFactory, container.getFactory());
     }

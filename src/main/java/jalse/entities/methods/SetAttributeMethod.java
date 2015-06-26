@@ -1,8 +1,8 @@
 package jalse.entities.methods;
 
-import static jalse.attributes.Attributes.requireNotEmpty;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
+import jalse.attributes.NamedAttributeType;
 import jalse.entities.Entity;
 import jalse.entities.annotations.SetAttribute;
 import jalse.entities.functions.SetAttributeFunction;
@@ -26,23 +26,19 @@ import java.util.Objects;
  */
 public class SetAttributeMethod implements EntityMethod {
 
-    private final String name;
-    private final AttributeType<Object> type;
+    private final NamedAttributeType<Object> namedType;
     private final boolean optional;
 
     /**
      * Creates a new set method
      *
-     * @param name
-     *            Attribute name
-     * @param type
-     *            Attribute type
+     * @param namedType
+     *            Named attribute type.
      * @param optional
      *            Optional return type.
      */
-    public SetAttributeMethod(final String name, final AttributeType<Object> type, final boolean optional) {
-	this.name = requireNotEmpty(name);
-	this.type = Objects.requireNonNull(type);
+    public SetAttributeMethod(final NamedAttributeType<Object> namedType, final boolean optional) {
+	this.namedType = Objects.requireNonNull(namedType);
 	this.optional = optional;
     }
 
@@ -52,7 +48,16 @@ public class SetAttributeMethod implements EntityMethod {
      * @return Attribute name.
      */
     public String getName() {
-	return name;
+	return namedType.getName();
+    }
+
+    /**
+     * Gets the named attribute type.
+     *
+     * @return Named attribute type.
+     */
+    public NamedAttributeType<?> getNamedType() {
+	return namedType;
     }
 
     /**
@@ -60,20 +65,20 @@ public class SetAttributeMethod implements EntityMethod {
      *
      * @return Attribute type.
      */
-    public AttributeType<Object> getType() {
-	return type;
+    public AttributeType<?> getType() {
+	return namedType.getType();
     }
 
     @Override
     public Object invoke(final Object proxy, final Entity entity, final Object[] args) throws Throwable {
 	// Check no args
-	if (args == null || args.length != 1) {
+	if (args.length != 1) {
 	    throw new IllegalArgumentException("Should have 1 argument");
 	}
 	if (optional) {
-	    return entity.setOptAttribute(name, type, args[0]);
+	    return entity.setOptAttribute(namedType, args[0]);
 	} else {
-	    return entity.setAttribute(name, type, args[0]);
+	    return entity.setAttribute(namedType, args[0]);
 	}
     }
 

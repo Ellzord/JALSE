@@ -1,7 +1,5 @@
 package jalse.tags;
 
-import jalse.misc.LockingIterator;
-
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Collections;
@@ -11,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * A tag set is a thread-safe {@link Set} implementation for {@link Tag}. A tag set will allow
@@ -122,11 +120,12 @@ public class TagTypeSet extends AbstractSet<Tag> implements Serializable {
 
     @Override
     public Iterator<Tag> iterator() {
-	return new LockingIterator<Tag>(iterator0(), read);
-    }
-
-    private Iterator<Tag> iterator0() {
-	return tags.values().stream().flatMap(Set::stream).iterator();
+	read.lock();
+	try {
+	    return tags.values().stream().flatMap(Set::stream).collect(Collectors.toList()).iterator();
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override
@@ -168,18 +167,9 @@ public class TagTypeSet extends AbstractSet<Tag> implements Serializable {
     public int size() {
 	read.lock();
 	try {
-	    return size0();
+	    return tags.values().stream().mapToInt(Set::size).sum();
 	} finally {
 	    read.unlock();
 	}
-    }
-
-    private int size0() {
-	return tags.values().stream().mapToInt(Set::size).sum();
-    }
-
-    @Override
-    public Stream<Tag> stream() {
-	return LockingIterator.lockingStream(iterator0(), read, size0());
     }
 }

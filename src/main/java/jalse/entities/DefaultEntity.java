@@ -10,23 +10,21 @@ import jalse.actions.DefaultActionScheduler;
 import jalse.actions.MutableActionContext;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeListener;
-import jalse.attributes.AttributeType;
 import jalse.attributes.DefaultAttributeContainer;
+import jalse.attributes.NamedAttributeType;
 import jalse.misc.AbstractIdentifiable;
 import jalse.misc.Identifiable;
 import jalse.misc.ListenerSet;
-import jalse.misc.LockingIterator;
 import jalse.tags.Parent;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
@@ -99,7 +97,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	tags = new TagTypeSet();
 	scheduler = new DefaultActionScheduler<>(this);
 	listeners = new ListenerSet<>(EntityTypeListener.class);
-	types = Collections.newSetFromMap(new ConcurrentHashMap<>());
+	types = new HashSet<>();
 	alive = new AtomicBoolean();
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
@@ -107,9 +105,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> boolean addAttributeListener(final String name, final AttributeType<T> type,
-	    final AttributeListener<T> listener) {
-	return attributes.addAttributeListener(name, type, listener);
+    public <T> boolean addAttributeListener(final NamedAttributeType<T> namedType, final AttributeListener<T> listener) {
+	return attributes.addAttributeListener(namedType, listener);
     }
 
     @Override
@@ -147,13 +144,13 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> void fireAttributeChanged(final String name, final AttributeType<T> type) {
-	attributes.fireAttributeChanged(name, type);
+    public <T> void fireAttributeChanged(final NamedAttributeType<T> namedType) {
+	attributes.fireAttributeChanged(namedType);
     }
 
     @Override
-    public <T> T getAttribute(final String name, final AttributeType<T> type) {
-	return attributes.getAttribute(name, type);
+    public <T> T getAttribute(final NamedAttributeType<T> namedType) {
+	return attributes.getAttribute(namedType);
     }
 
     @Override
@@ -162,28 +159,18 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Set<String> getAttributeListenerNames() {
-	return attributes.getAttributeListenerNames();
+    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final NamedAttributeType<T> namedType) {
+	return attributes.getAttributeListeners(namedType);
     }
 
     @Override
-    public <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
-	return attributes.getAttributeListeners(name, type);
+    public Set<NamedAttributeType<?>> getAttributeListenerTypes() {
+	return attributes.getAttributeListenerTypes();
     }
 
     @Override
-    public Set<AttributeType<?>> getAttributeListenerTypes(final String name) {
-	return attributes.getAttributeListenerTypes(name);
-    }
-
-    @Override
-    public Set<String> getAttributeNames() {
-	return attributes.getAttributeNames();
-    }
-
-    @Override
-    public Set<AttributeType<?>> getAttributeTypes(final String name) {
-	return attributes.getAttributeTypes(name);
+    public Set<NamedAttributeType<?>> getAttributeTypes() {
+	return attributes.getAttributeTypes();
     }
 
     @Override
@@ -339,14 +326,14 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> T removeAttribute(final String name, final AttributeType<T> type) {
-	return attributes.removeAttribute(name, type);
+    public <T> T removeAttribute(final NamedAttributeType<T> namedType) {
+	return attributes.removeAttribute(namedType);
     }
 
     @Override
-    public <T> boolean removeAttributeListener(final String name, final AttributeType<T> type,
+    public <T> boolean removeAttributeListener(final NamedAttributeType<T> namedType,
 	    final AttributeListener<T> listener) {
-	return attributes.removeAttributeListener(name, type, listener);
+	return attributes.removeAttributeListener(namedType, listener);
     }
 
     @Override
@@ -355,8 +342,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> void removeAttributeListeners(final String name, final AttributeType<T> type) {
-	attributes.removeAttributeListeners(name, type);
+    public <T> void removeAttributeListeners(final NamedAttributeType<T> namedType) {
+	attributes.removeAttributeListeners(namedType);
     }
 
     @Override
@@ -404,8 +391,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> T setAttribute(final String name, final AttributeType<T> type, final T attr) {
-	return attributes.setAttribute(name, type, attr);
+    public <T> T setAttribute(final NamedAttributeType<T> namedType, final T attr) {
+	return attributes.setAttribute(namedType, attr);
     }
 
     /**
@@ -445,8 +432,12 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Stream<Class<? extends Entity>> streamMarkedAsTypes() {
-	final Iterator<Class<? extends Entity>> it = types.iterator();
-	return LockingIterator.lockingStream(it, read, types.size());
+	read.lock();
+	try {
+	    return new ArrayList<>(types).stream();
+	} finally {
+	    read.unlock();
+	}
     }
 
     @Override

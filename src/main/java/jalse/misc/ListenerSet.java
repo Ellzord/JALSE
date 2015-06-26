@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Provides a thread-safe way to store and process listeners. Listener set takes in the defining
@@ -30,9 +31,24 @@ public class ListenerSet<T> extends HashSet<T> implements InvocationHandler {
      * @param clazz
      *            Listener type to store.
      */
-    @SuppressWarnings("unchecked")
     public ListenerSet(final Class<? super T> clazz) {
+	this(clazz, null);
+    }
+
+    /**
+     * Creates a new instance of listener set for the supplied listener type.
+     *
+     * @param clazz
+     *            Listener type to store.
+     * @param listeners
+     *            Starting listeners.
+     */
+    @SuppressWarnings("unchecked")
+    public ListenerSet(final Class<? super T> clazz, final Set<? extends T> listeners) {
 	proxy = (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { clazz }, this);
+	if (listeners != null) {
+	    addAll(listeners);
+	}
     }
 
     @Override
