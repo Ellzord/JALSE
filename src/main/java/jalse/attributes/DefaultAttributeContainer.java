@@ -403,7 +403,7 @@ public class DefaultAttributeContainer implements AttributeContainer {
     public void removeAttributes() {
 	write.lock();
 	try {
-	    new HashSet<>(attributes.keySet()).forEach(this::removeAttribute);
+	    new ArrayList<>(attributes.keySet()).forEach(this::removeAttribute);
 	} finally {
 	    write.unlock();
 	}

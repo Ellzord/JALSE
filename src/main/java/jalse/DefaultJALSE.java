@@ -22,7 +22,6 @@ import jalse.misc.AbstractIdentifiable;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -342,8 +341,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public Set<Tag> getTags() {
-	return Collections.unmodifiableSet(tags);
+    public Stream<Tag> streamTags() {
+	return tags.stream();
     }
 
     @Override

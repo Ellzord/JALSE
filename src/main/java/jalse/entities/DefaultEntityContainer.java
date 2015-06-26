@@ -175,7 +175,7 @@ public class DefaultEntityContainer implements EntityContainer {
     public void killEntities() {
 	write.lock();
 	try {
-	    new HashSet<>(entities.keySet()).forEach(this::killEntity);
+	    new ArrayList<>(entities.keySet()).forEach(this::killEntity);
 	} finally {
 	    write.unlock();
 	}

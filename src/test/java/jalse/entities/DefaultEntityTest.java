@@ -48,6 +48,8 @@ public class DefaultEntityTest {
 
     private interface TestEntity extends Entity {}
 
+    private interface TestEntity2 extends TestEntity {}
+
     private class TestEntityListener implements EntityListener {
 
 	@Override
@@ -264,12 +266,15 @@ public class DefaultEntityTest {
 	final TestEntityTypeListener listener = new TestEntityTypeListener();
 	entity.addEntityTypeListener(listener);
 
-	Assert.assertTrue(entity.markAsType(TestEntity.class));
+	Assert.assertTrue(entity.markAsType(TestEntity2.class));
 	Assert.assertTrue(listener.mark);
 
+	Assert.assertTrue(entity.getMarkedAsTypes().contains(TestEntity2.class));
 	Assert.assertTrue(entity.getMarkedAsTypes().contains(TestEntity.class));
+	Assert.assertTrue(entity.isMarkedAsType(TestEntity2.class));
 	Assert.assertTrue(entity.isMarkedAsType(TestEntity.class));
 
+	Assert.assertFalse(entity.markAsType(TestEntity2.class));
 	Assert.assertFalse(entity.markAsType(TestEntity.class));
 
 	entity.unmarkAsType(TestEntity.class);
@@ -277,7 +282,7 @@ public class DefaultEntityTest {
 	Assert.assertFalse(entity.isMarkedAsType(TestEntity.class));
 	Assert.assertTrue(listener.unmark);
 
-	Assert.assertTrue(entity.markAsType(TestEntity.class));
+	Assert.assertTrue(entity.markAsType(TestEntity2.class));
 	entity.unmarkAsAllTypes();
 	Assert.assertTrue(entity.getMarkedAsTypes().isEmpty());
 	Assert.assertFalse(entity.streamMarkedAsTypes().iterator().hasNext());
