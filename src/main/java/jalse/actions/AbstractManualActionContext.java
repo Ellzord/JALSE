@@ -168,6 +168,9 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
 	    throw e;
 	} catch (final Exception e) { // Continue
 	    logger.log(Level.WARNING, "Error performing action", e);
+	    if (!isPeriodicOnException()) {
+		cancelled.set(true);
+	    }
 	} finally {
 	    performing.set(false);
 	    done.set(true);

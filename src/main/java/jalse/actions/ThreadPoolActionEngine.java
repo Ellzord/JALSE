@@ -42,6 +42,9 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
 		cancel(); // Just to be sure
 	    } catch (final Exception e) {
 		logger.log(Level.WARNING, "Error performing action", e);
+		if (!isPeriodicOnException()) {
+		    cancel();
+		}
 	    }
 	}
 

@@ -86,4 +86,12 @@ public interface MutableActionContext<T> extends ActionContext<T>, MutableAction
      *            TimeUnit period is in.
      */
     void setPeriod(long period, TimeUnit unit);
+
+    /**
+     * Sets whether the action continues to reschedule after an exception.
+     *
+     * @param periodicOnException
+     *            Whether the action should continue.
+     */
+    void setPeriodicOnException(boolean periodicOnException);
 }

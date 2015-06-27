@@ -87,4 +87,11 @@ public interface ActionContext<T> extends ActionBindings {
     default boolean isPeriodic() {
 	return getPeriod(TimeUnit.NANOSECONDS) > 0;
     }
+
+    /**
+     * Whether the action will continue to reschedule on exception.
+     *
+     * @return Whether it continues when an exception is thrown.
+     */
+    boolean isPeriodicOnException();
 }

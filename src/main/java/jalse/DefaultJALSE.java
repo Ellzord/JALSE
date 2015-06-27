@@ -59,14 +59,14 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
      */
     public static final class Builder {
 
-	private static final int MINIMUM_PARALLALISM = 1;
-
-	private static final Supplier<UUID> RANDOM_ID_SUPPLIER = UUID::randomUUID;
-
 	private enum EngineType {
 
 	    COMMON, FORKJOIN, MANUAL, THREADPOOL
 	}
+
+	private static final int MINIMUM_PARALLALISM = 1;
+
+	private static final Supplier<UUID> RANDOM_ID_SUPPLIER = UUID::randomUUID;
 
 	private EngineType engineType;
 	private Supplier<UUID> idSupplier;
@@ -146,7 +146,7 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	 * @return This builder.
 	 */
 	public Builder setID(final UUID id) {
-	    this.idSupplier = () -> id;
+	    idSupplier = () -> id;
 	    return this;
 	}
 
@@ -341,11 +341,6 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public Stream<Tag> streamTags() {
-	return tags.stream();
-    }
-
-    @Override
     public int getTreeCount() {
 	return Entities.getEntityCountRecursively(entities);
     }
@@ -434,6 +429,11 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     @Override
     public Stream<Entity> streamEntityTree() {
 	return Entities.walkEntities(entities);
+    }
+
+    @Override
+    public Stream<Tag> streamTags() {
+	return tags.stream();
     }
 
     @Override

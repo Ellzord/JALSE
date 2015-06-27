@@ -16,7 +16,7 @@ public interface Taggable {
      * Gets all tag state information.
      *
      * @return All tags or an empty set if none are found.
-     * 
+     *
      * @see #streamTags()
      */
     default Set<Tag> getTags() {

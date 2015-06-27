@@ -30,7 +30,7 @@ public class MultiActionTest {
 
 	@Test
 	public void testBuilder2() {
-	    List<Action<String>> lst = new ArrayList<>();
+	    final List<Action<String>> lst = new ArrayList<>();
 	    lst.add(new TestAction());
 	    multi = new MultiAction.Builder<String>().addPerform(lst).build();
 	    assertNotNull(multi);
@@ -44,7 +44,7 @@ public class MultiActionTest {
 
 	@Test
 	public void testBuilder4() {
-	    List<Action<String>> lst = new ArrayList<>();
+	    final List<Action<String>> lst = new ArrayList<>();
 	    lst.add(new TestAction());
 	    multi = new MultiAction.Builder<String>().addSchedule(lst).build();
 	    assertNotNull(multi);
@@ -58,7 +58,7 @@ public class MultiActionTest {
 
 	@Test
 	public void testBuilder6() {
-	    List<Action<String>> lst = new ArrayList<>();
+	    final List<Action<String>> lst = new ArrayList<>();
 	    lst.add(new TestAction());
 	    multi = new MultiAction.Builder<String>().addScheduleAndAwait(lst).build();
 	    assertNotNull(multi);
@@ -68,7 +68,7 @@ public class MultiActionTest {
     static class TestAction implements Action<String> {
 
 	@Override
-	public void perform(ActionContext<String> context) throws InterruptedException {}
+	public void perform(final ActionContext<String> context) throws InterruptedException {}
     }
 
     MultiAction<String> multi;
@@ -79,6 +79,15 @@ public class MultiActionTest {
     }
 
     @Test
+    public void testAddOperation() {
+	multi = new MultiAction<String>();
+
+	final MultiAction.ActionOperation<String> op = new MultiAction.ActionOperation<String>(OperationType.PERFORM,
+		new TestAction());
+	multi.addOperation(op);
+    }
+
+    @Test
     public void testBuildChainActionOfSArray() {
 	multi = MultiAction.buildChain(new TestAction());
 	assertTrue(multi.hasOperations());
@@ -86,19 +95,10 @@ public class MultiActionTest {
 
     @Test
     public void testBuildChainListOfQextendsActionOfS() {
-	List<Action<String>> lst = new ArrayList<>();
+	final List<Action<String>> lst = new ArrayList<>();
 	lst.add(new TestAction());
 	multi = MultiAction.buildChain(lst);
 	assertTrue(multi.hasOperations());
-    }
-
-    @Test
-    public void testAddOperation() {
-	multi = new MultiAction<String>();
-
-	MultiAction.ActionOperation<String> op = new MultiAction.ActionOperation<String>(OperationType.PERFORM,
-		new TestAction());
-	multi.addOperation(op);
     }
 
     @Test
@@ -107,7 +107,7 @@ public class MultiActionTest {
 
 	assertFalse(multi.hasOperations());
 
-	MultiAction.ActionOperation<String> op = new MultiAction.ActionOperation<String>(OperationType.PERFORM,
+	final MultiAction.ActionOperation<String> op = new MultiAction.ActionOperation<String>(OperationType.PERFORM,
 		new TestAction());
 	multi.addOperation(op);
 

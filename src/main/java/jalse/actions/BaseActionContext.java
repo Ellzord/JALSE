@@ -5,6 +5,7 @@ import static jalse.actions.Actions.requireNotStopped;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -16,6 +17,7 @@ abstract class BaseActionContext<T> implements MutableActionContext<T> {
     private final AtomicReference<T> actor;
     private final AtomicLong period;
     private final AtomicLong initialDelay;
+    private final AtomicBoolean periodicOnException;
 
     BaseActionContext(final ActionEngine engine, final Action<T> action, final ActionBindings sourceBindings) {
 	this.engine = requireNotStopped(engine);
@@ -24,6 +26,7 @@ abstract class BaseActionContext<T> implements MutableActionContext<T> {
 	actor = new AtomicReference<>();
 	period = new AtomicLong();
 	initialDelay = new AtomicLong();
+	periodicOnException = new AtomicBoolean();
     }
 
     @Override
@@ -54,6 +57,11 @@ abstract class BaseActionContext<T> implements MutableActionContext<T> {
     @Override
     public long getPeriod(final TimeUnit unit) {
 	return unit.convert(period.get(), TimeUnit.NANOSECONDS);
+    }
+
+    @Override
+    public boolean isPeriodicOnException() {
+	return periodicOnException.get();
     }
 
     @Override
@@ -89,6 +97,11 @@ abstract class BaseActionContext<T> implements MutableActionContext<T> {
     @Override
     public void setPeriod(final long period, final TimeUnit unit) {
 	this.period.set(unit.toNanos(period));
+    }
+
+    @Override
+    public void setPeriodicOnException(final boolean periodicOnException) {
+	this.periodicOnException.set(periodicOnException);
     }
 
     @Override

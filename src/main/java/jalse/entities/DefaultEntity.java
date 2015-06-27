@@ -218,11 +218,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public Stream<Tag> streamTags() {
-	return tags.stream();
-    }
-
-    @Override
     public boolean isAlive() {
 	return alive.get();
     }
@@ -440,6 +435,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public Stream<Tag> streamTags() {
+	return tags.stream();
+    }
+
+    @Override
     public boolean transfer(final EntityContainer destination) {
 	return container.transferEntity(id, destination);
     }
@@ -472,9 +472,9 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
 	    // Remove descendants
 	    final Set<Class<? extends Entity>> removedDescendants = new HashSet<>();
-	    Iterator<Class<? extends Entity>> it = types.iterator();
+	    final Iterator<Class<? extends Entity>> it = types.iterator();
 	    while (it.hasNext()) {
-		Class<? extends Entity> dt = it.next();
+		final Class<? extends Entity> dt = it.next();
 		if (isSubtype(dt, type)) {
 		    // Removed descendant
 		    removedDescendants.add(dt);

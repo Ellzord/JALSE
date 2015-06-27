@@ -43,20 +43,12 @@ public class SetAttributeMethod implements EntityMethod {
      * @param optional
      *            Optional return type.
      */
-    public SetAttributeMethod(final NamedAttributeType<Object> namedType, boolean primitive, final boolean optional) {
+    public SetAttributeMethod(final NamedAttributeType<Object> namedType, final boolean primitive,
+	    final boolean optional) {
 	this.namedType = Objects.requireNonNull(namedType);
 	this.primitive = primitive;
 	this.optional = optional;
 	defaultValue = primitive ? defaultValue(toClass(namedType.getType().getValueType())) : null;
-    }
-
-    /**
-     * Whether this is a primitive conversion.
-     * 
-     * @return Whether this is primitive.
-     */
-    public boolean isPrimitive() {
-	return primitive;
     }
 
     /**
@@ -110,5 +102,14 @@ public class SetAttributeMethod implements EntityMethod {
      */
     public boolean isOptional() {
 	return optional;
+    }
+
+    /**
+     * Whether this is a primitive conversion.
+     *
+     * @return Whether this is primitive.
+     */
+    public boolean isPrimitive() {
+	return primitive;
     }
 }

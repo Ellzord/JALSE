@@ -60,6 +60,11 @@ class UnmodifiableDelegateActionContext<T> extends UnmodifiableDelegateActionBin
     }
 
     @Override
+    public boolean isPeriodicOnException() {
+	return delegate != null ? delegate.isPeriodicOnException() : false;
+    }
+
+    @Override
     public void schedule() {
 	throw new UnsupportedOperationException();
     }
@@ -81,6 +86,11 @@ class UnmodifiableDelegateActionContext<T> extends UnmodifiableDelegateActionBin
 
     @Override
     public void setPeriod(final long period, final TimeUnit unit) {
+	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setPeriodicOnException(final boolean periodicOnException) {
 	throw new UnsupportedOperationException();
     }
 }

@@ -48,15 +48,6 @@ public class GetAttributeMethod implements EntityMethod {
     }
 
     /**
-     * Whether this is a primitive conversion.
-     * 
-     * @return Whether this is primitive.
-     */
-    public boolean isPrimitive() {
-	return primitive;
-    }
-
-    /**
      * Gets the attribute name.
      *
      * @return Attribute name.
@@ -107,5 +98,14 @@ public class GetAttributeMethod implements EntityMethod {
      */
     public boolean isOptional() {
 	return optional;
+    }
+
+    /**
+     * Whether this is a primitive conversion.
+     *
+     * @return Whether this is primitive.
+     */
+    public boolean isPrimitive() {
+	return primitive;
     }
 }

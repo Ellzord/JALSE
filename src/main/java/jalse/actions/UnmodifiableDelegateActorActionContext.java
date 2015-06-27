@@ -62,6 +62,11 @@ class UnmodifiableActorDelegateActionContext<T> implements MutableActionContext<
     }
 
     @Override
+    public boolean isPeriodicOnException() {
+	return delegate.isPeriodicOnException();
+    }
+
+    @Override
     public <S> S put(final String key, final S value) {
 	return delegate.put(key, value);
     }
@@ -99,6 +104,11 @@ class UnmodifiableActorDelegateActionContext<T> implements MutableActionContext<
     @Override
     public void setPeriod(final long period, final TimeUnit unit) {
 	delegate.setPeriod(period, unit);
+    }
+
+    @Override
+    public void setPeriodicOnException(final boolean periodicOnException) {
+	throw new UnsupportedOperationException();
     }
 
     @Override

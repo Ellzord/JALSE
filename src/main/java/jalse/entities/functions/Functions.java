@@ -54,67 +54,6 @@ public final class Functions {
     }
 
     /**
-     * Gets the default value for a primitive wrapper.
-     * 
-     * @param type
-     *            Primitive wrapper type.
-     * @return The default value.
-     */
-    public static Object defaultValue(Class<?> type) {
-	Object value = WRAPPER_DEFAULTS.get(Objects.requireNonNull(type));
-	if (value == null) {
-	    throw new IllegalArgumentException("Not primitive wrapper");
-	}
-	return value;
-    }
-
-    /**
-     * Checks to see if the specified type is a primitive wrapper.
-     * 
-     * @param type
-     *            Type to check.
-     * @return Whether the type is a primitive wrapper.
-     */
-    public static boolean isWrapper(Class<?> type) {
-	return unwrap0(type).isPresent();
-    }
-
-    /**
-     * Unwraps the primitive wrapper to the primitive type.
-     * 
-     * @param type
-     *            Wrapper type to unwrap.
-     * @return The unwrapped primitive type.
-     * @throws IllegalArgumentException
-     *             If the type is not a primitive wrapper.
-     */
-    public static Class<?> unwrap(Class<?> type) {
-	return unwrap0(type).orElseThrow(() -> new IllegalArgumentException("Not primitive wrapper"));
-    }
-
-    private static Optional<Class<?>> unwrap0(Class<?> type) {
-	Objects.requireNonNull(type);
-	return PRIMITIVES_WRAPPERS.entrySet().stream().filter(e -> type.equals(e.getValue())).map(Entry::getKey)
-		.findAny();
-    }
-
-    /**
-     * Gets the wrapper type for the primitive type.
-     * 
-     * @param type
-     *            Primitive type to wrap.
-     * @return The primitive wrapper type.
-     * @throws IllegalArgumentException
-     *             If the type is not primitive.
-     */
-    public static Class<?> wrap(Class<?> type) {
-	if (!type.isPrimitive()) {
-	    throw new IllegalArgumentException("Not primitive");
-	}
-	return PRIMITIVES_WRAPPERS.get(type);
-    }
-
-    /**
      * An supplier for random IDs.
      *
      * @see UUID#randomUUID()
@@ -189,6 +128,21 @@ public final class Functions {
 	if (m.isDefault()) {
 	    throw new IllegalArgumentException("Cannot be default");
 	}
+    }
+
+    /**
+     * Gets the default value for a primitive wrapper.
+     *
+     * @param type
+     *            Primitive wrapper type.
+     * @return The default value.
+     */
+    public static Object defaultValue(final Class<?> type) {
+	final Object value = WRAPPER_DEFAULTS.get(Objects.requireNonNull(type));
+	if (value == null) {
+	    throw new IllegalArgumentException("Not primitive wrapper");
+	}
+	return value;
     }
 
     /**
@@ -278,6 +232,17 @@ public final class Functions {
     }
 
     /**
+     * Checks to see if the specified type is a primitive wrapper.
+     *
+     * @param type
+     *            Type to check.
+     * @return Whether the type is a primitive wrapper.
+     */
+    public static boolean isWrapper(final Class<?> type) {
+	return unwrap0(type).isPresent();
+    }
+
+    /**
      * Whether the method return type matches the supplied type.
      *
      * @param m
@@ -328,6 +293,25 @@ public final class Functions {
     }
 
     /**
+     * Unwraps the primitive wrapper to the primitive type.
+     *
+     * @param type
+     *            Wrapper type to unwrap.
+     * @return The unwrapped primitive type.
+     * @throws IllegalArgumentException
+     *             If the type is not a primitive wrapper.
+     */
+    public static Class<?> unwrap(final Class<?> type) {
+	return unwrap0(type).orElseThrow(() -> new IllegalArgumentException("Not primitive wrapper"));
+    }
+
+    private static Optional<Class<?>> unwrap0(final Class<?> type) {
+	Objects.requireNonNull(type);
+	return PRIMITIVES_WRAPPERS.entrySet().stream().filter(e -> type.equals(e.getValue())).map(Entry::getKey)
+		.findAny();
+    }
+
+    /**
      * Validates an {@link EntityID} annotation is correctly formed.
      *
      * @param id
@@ -355,6 +339,22 @@ public final class Functions {
 	    throw new IllegalArgumentException(String.format("%s annotation provides multiple ID source info",
 		    EntityID.class));
 	}
+    }
+
+    /**
+     * Gets the wrapper type for the primitive type.
+     *
+     * @param type
+     *            Primitive type to wrap.
+     * @return The primitive wrapper type.
+     * @throws IllegalArgumentException
+     *             If the type is not primitive.
+     */
+    public static Class<?> wrap(final Class<?> type) {
+	if (!type.isPrimitive()) {
+	    throw new IllegalArgumentException("Not primitive");
+	}
+	return PRIMITIVES_WRAPPERS.get(type);
     }
 
     private Functions() {
