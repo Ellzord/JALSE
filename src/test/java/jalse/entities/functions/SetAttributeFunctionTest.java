@@ -31,7 +31,7 @@ public class SetAttributeFunctionTest {
     interface TestInvalidEntity3 extends Entity {
 
 	@SetAttribute(name = "test")
-	void setTest(boolean test);
+	Optional<Boolean> setTest(boolean test);
     }
 
     interface TestInvalidEntity4 extends Entity {

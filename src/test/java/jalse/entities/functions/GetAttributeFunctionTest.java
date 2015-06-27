@@ -30,17 +30,11 @@ public class GetAttributeFunctionTest {
 
     interface TestInvalidEntity3 extends Entity {
 
-	@GetAttribute(name = "test")
-	boolean getTest();
-    }
-
-    interface TestInvalidEntity4 extends Entity {
-
 	@GetAttribute
 	Boolean getTest(String str);
     }
 
-    interface TestInvalidEntity5 extends Entity {
+    interface TestInvalidEntity4 extends Entity {
 
 	@GetAttribute
 	default Boolean getTest() {
@@ -106,7 +100,7 @@ public class GetAttributeFunctionTest {
     public void testInvalid3() {
 	function = new GetAttributeFunction();
 
-	final Method m = getTestMethod(TestInvalidEntity3.class);
+	final Method m = getTestMethod(TestInvalidEntity3.class, String.class);
 
 	function.apply(m);
     }
@@ -115,16 +109,7 @@ public class GetAttributeFunctionTest {
     public void testInvalid4() {
 	function = new GetAttributeFunction();
 
-	final Method m = getTestMethod(TestInvalidEntity4.class, String.class);
-
-	function.apply(m);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testInvalid5() {
-	function = new GetAttributeFunction();
-
-	final Method m = getTestMethod(TestInvalidEntity5.class);
+	final Method m = getTestMethod(TestInvalidEntity4.class);
 
 	function.apply(m);
     }

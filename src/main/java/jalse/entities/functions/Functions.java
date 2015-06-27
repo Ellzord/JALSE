@@ -5,7 +5,12 @@ import jalse.entities.annotations.EntityID;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -17,6 +22,97 @@ import java.util.function.Supplier;
  *
  */
 public final class Functions {
+
+    private static final Map<Class<?>, Class<?>> PRIMITIVES_WRAPPERS = new HashMap<>();
+
+    private static final Map<Class<?>, Object> WRAPPER_DEFAULTS = new HashMap<>();
+
+    static {
+	/*
+	 * Primitives to wrappers.
+	 */
+	PRIMITIVES_WRAPPERS.put(int.class, Integer.class);
+	PRIMITIVES_WRAPPERS.put(boolean.class, Boolean.class);
+	PRIMITIVES_WRAPPERS.put(short.class, Short.class);
+	PRIMITIVES_WRAPPERS.put(long.class, Long.class);
+	PRIMITIVES_WRAPPERS.put(char.class, Character.class);
+	PRIMITIVES_WRAPPERS.put(byte.class, Byte.class);
+	PRIMITIVES_WRAPPERS.put(double.class, Double.class);
+	PRIMITIVES_WRAPPERS.put(float.class, Float.class);
+
+	/*
+	 * Default primitive values.
+	 */
+	WRAPPER_DEFAULTS.put(Integer.class, 0);
+	WRAPPER_DEFAULTS.put(Boolean.class, false);
+	WRAPPER_DEFAULTS.put(Short.class, (short) 0);
+	WRAPPER_DEFAULTS.put(Long.class, 0L);
+	WRAPPER_DEFAULTS.put(Character.class, '\0');
+	WRAPPER_DEFAULTS.put(Byte.class, (byte) 0);
+	WRAPPER_DEFAULTS.put(Double.class, 0d);
+	WRAPPER_DEFAULTS.put(Float.class, 0f);
+    }
+
+    /**
+     * Gets the default value for a primitive wrapper.
+     * 
+     * @param type
+     *            Primitive wrapper type.
+     * @return The default value.
+     */
+    public static Object defaultValue(Class<?> type) {
+	Object value = WRAPPER_DEFAULTS.get(Objects.requireNonNull(type));
+	if (value == null) {
+	    throw new IllegalArgumentException("Not primitive wrapper");
+	}
+	return value;
+    }
+
+    /**
+     * Checks to see if the specified type is a primitive wrapper.
+     * 
+     * @param type
+     *            Type to check.
+     * @return Whether the type is a primitive wrapper.
+     */
+    public static boolean isWrapper(Class<?> type) {
+	return unwrap0(type).isPresent();
+    }
+
+    /**
+     * Unwraps the primitive wrapper to the primitive type.
+     * 
+     * @param type
+     *            Wrapper type to unwrap.
+     * @return The unwrapped primitive type.
+     * @throws IllegalArgumentException
+     *             If the type is not a primitive wrapper.
+     */
+    public static Class<?> unwrap(Class<?> type) {
+	return unwrap0(type).orElseThrow(() -> new IllegalArgumentException("Not primitive wrapper"));
+    }
+
+    private static Optional<Class<?>> unwrap0(Class<?> type) {
+	Objects.requireNonNull(type);
+	return PRIMITIVES_WRAPPERS.entrySet().stream().filter(e -> type.equals(e.getValue())).map(Entry::getKey)
+		.findAny();
+    }
+
+    /**
+     * Gets the wrapper type for the primitive type.
+     * 
+     * @param type
+     *            Primitive type to wrap.
+     * @return The primitive wrapper type.
+     * @throws IllegalArgumentException
+     *             If the type is not primitive.
+     */
+    public static Class<?> wrap(Class<?> type) {
+	if (!type.isPrimitive()) {
+	    throw new IllegalArgumentException("Not primitive");
+	}
+	return PRIMITIVES_WRAPPERS.get(type);
+    }
 
     /**
      * An supplier for random IDs.
