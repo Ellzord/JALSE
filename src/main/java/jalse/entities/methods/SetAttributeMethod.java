@@ -1,5 +1,7 @@
 package jalse.entities.methods;
 
+import static jalse.entities.functions.Functions.defaultValue;
+import static jalse.entities.functions.Functions.toClass;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
 import jalse.attributes.NamedAttributeType;
@@ -27,19 +29,34 @@ import java.util.Objects;
 public class SetAttributeMethod implements EntityMethod {
 
     private final NamedAttributeType<Object> namedType;
+    private final boolean primitive;
     private final boolean optional;
+    private final Object defaultValue;
 
     /**
      * Creates a new set method
      *
      * @param namedType
      *            Named attribute type.
+     * @param primitive
+     *            Whether this is a primitive conversion.
      * @param optional
      *            Optional return type.
      */
-    public SetAttributeMethod(final NamedAttributeType<Object> namedType, final boolean optional) {
+    public SetAttributeMethod(final NamedAttributeType<Object> namedType, boolean primitive, final boolean optional) {
 	this.namedType = Objects.requireNonNull(namedType);
+	this.primitive = primitive;
 	this.optional = optional;
+	defaultValue = primitive ? defaultValue(toClass(namedType.getType().getValueType())) : null;
+    }
+
+    /**
+     * Whether this is a primitive conversion.
+     * 
+     * @return Whether this is primitive.
+     */
+    public boolean isPrimitive() {
+	return primitive;
     }
 
     /**
@@ -78,7 +95,11 @@ public class SetAttributeMethod implements EntityMethod {
 	if (optional) {
 	    return entity.setOptAttribute(namedType, args[0]);
 	} else {
-	    return entity.setAttribute(namedType, args[0]);
+	    Object result = entity.setAttribute(namedType, args[0]);
+	    if (result == null && primitive) {
+		result = defaultValue;
+	    }
+	    return result;
 	}
     }
 

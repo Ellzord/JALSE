@@ -6,6 +6,8 @@ import static jalse.entities.functions.Functions.firstGenericTypeArg;
 import static jalse.entities.functions.Functions.hasReturnType;
 import static jalse.entities.functions.Functions.isPrimitive;
 import static jalse.entities.functions.Functions.returnTypeIs;
+import static jalse.entities.functions.Functions.toClass;
+import static jalse.entities.functions.Functions.wrap;
 import jalse.attributes.AttributeContainer;
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.annotations.SetAttribute;
@@ -91,11 +93,13 @@ public class SetAttributeFunction implements EntityMethodFunction {
 	    throw new IllegalArgumentException("Attribute name is empty");
 	}
 
-	final Type attrType = m.getGenericParameterTypes()[0];
+	Type attrType = m.getGenericParameterTypes()[0];
+	boolean primitive = false;
 
 	// Check not primitive
 	if (isPrimitive(attrType)) {
-	    throw new IllegalArgumentException("Attribute types cannot be primitive (use wrappers)");
+	    attrType = wrap(toClass(attrType));
+	    primitive = true;
 	}
 
 	// Check return type matches.
@@ -105,6 +109,9 @@ public class SetAttributeFunction implements EntityMethodFunction {
 
 	    // Check optional
 	    if (returnTypeIs(m, Optional.class)) {
+		if (primitive) {
+		    throw new IllegalArgumentException("Optional is not required for primitive types");
+		}
 		returnAttrType = firstGenericTypeArg(returnAttrType);
 	    }
 
@@ -115,6 +122,6 @@ public class SetAttributeFunction implements EntityMethodFunction {
 	}
 
 	// Create set attribute method
-	return new SetAttributeMethod(newNamedUnknownType(name, attrType), optional);
+	return new SetAttributeMethod(newNamedUnknownType(name, attrType), primitive, optional);
     }
 }

@@ -1,5 +1,7 @@
 package jalse.entities.methods;
 
+import static jalse.entities.functions.Functions.defaultValue;
+import static jalse.entities.functions.Functions.toClass;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
 import jalse.attributes.NamedAttributeType;
@@ -25,7 +27,9 @@ import java.util.Objects;
 public class GetAttributeMethod implements EntityMethod {
 
     private final NamedAttributeType<Object> namedType;
+    private final boolean primitive;
     private final boolean optional;
+    private final Object defaultValue;
 
     /**
      * Creates a new get attribute method.
@@ -35,9 +39,21 @@ public class GetAttributeMethod implements EntityMethod {
      * @param optional
      *            Optional return type.
      */
-    public GetAttributeMethod(final NamedAttributeType<Object> namedType, final boolean optional) {
+    public GetAttributeMethod(final NamedAttributeType<Object> namedType, final boolean primitive,
+	    final boolean optional) {
 	this.namedType = Objects.requireNonNull(namedType);
+	this.primitive = primitive;
 	this.optional = optional;
+	defaultValue = primitive ? defaultValue(toClass(namedType.getType().getValueType())) : null;
+    }
+
+    /**
+     * Whether this is a primitive conversion.
+     * 
+     * @return Whether this is primitive.
+     */
+    public boolean isPrimitive() {
+	return primitive;
     }
 
     /**
@@ -76,7 +92,11 @@ public class GetAttributeMethod implements EntityMethod {
 	if (optional) {
 	    return entity.getOptAttribute(namedType);
 	} else {
-	    return entity.getAttribute(namedType);
+	    Object result = entity.getAttribute(namedType);
+	    if (result == null && primitive) {
+		result = defaultValue;
+	    }
+	    return result;
 	}
     }
 

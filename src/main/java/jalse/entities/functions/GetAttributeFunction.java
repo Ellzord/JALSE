@@ -7,6 +7,8 @@ import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.firstGenericTypeArg;
 import static jalse.entities.functions.Functions.isPrimitive;
 import static jalse.entities.functions.Functions.returnTypeIs;
+import static jalse.entities.functions.Functions.toClass;
+import static jalse.entities.functions.Functions.wrap;
 import jalse.attributes.AttributeContainer;
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.annotations.GetAttribute;
@@ -97,10 +99,12 @@ public class GetAttributeFunction implements EntityMethodFunction {
 	}
 
 	Type attrType = m.getGenericReturnType();
+	boolean primitive = false;
 
 	// Check not primitive
 	if (isPrimitive(attrType)) {
-	    throw new IllegalArgumentException("Attribute types cannot be primitive (use wrappers)");
+	    attrType = wrap(toClass(attrType));
+	    primitive = true;
 	}
 
 	// Check is optional
@@ -110,6 +114,6 @@ public class GetAttributeFunction implements EntityMethodFunction {
 	}
 
 	// Create get attribute method
-	return new GetAttributeMethod(newNamedUnknownType(name, attrType), optional);
+	return new GetAttributeMethod(newNamedUnknownType(name, attrType), primitive, optional);
     }
 }
