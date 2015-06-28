@@ -84,13 +84,13 @@ public class MultiActionTest {
 
 	final MultiAction.ActionOperation<String> op = new MultiAction.ActionOperation<String>(OperationType.PERFORM,
 		new TestAction());
-	multi.addOperation(op);
+	multi.add(op);
     }
 
     @Test
     public void testBuildChainActionOfSArray() {
 	multi = MultiAction.buildChain(new TestAction());
-	assertTrue(multi.hasOperations());
+	assertFalse(multi.isEmpty());
     }
 
     @Test
@@ -98,19 +98,19 @@ public class MultiActionTest {
 	final List<Action<String>> lst = new ArrayList<>();
 	lst.add(new TestAction());
 	multi = MultiAction.buildChain(lst);
-	assertTrue(multi.hasOperations());
+	assertFalse(multi.isEmpty());
     }
 
     @Test
     public void testHasOperations() {
 	multi = new MultiAction<String>();
 
-	assertFalse(multi.hasOperations());
+	assertTrue(multi.isEmpty());
 
 	final MultiAction.ActionOperation<String> op = new MultiAction.ActionOperation<String>(OperationType.PERFORM,
 		new TestAction());
-	multi.addOperation(op);
+	multi.add(op);
 
-	assertTrue(multi.hasOperations());
+	assertFalse(multi.isEmpty());
     }
 }
