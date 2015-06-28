@@ -2,13 +2,13 @@ package jalse;
 
 import static jalse.actions.Actions.requireNotStopped;
 import jalse.actions.Action;
+import jalse.actions.ActionBindings;
 import jalse.actions.ActionContext;
 import jalse.actions.ActionEngine;
 import jalse.actions.DefaultActionScheduler;
 import jalse.actions.ForkJoinActionEngine;
 import jalse.actions.ManualActionEngine;
-import jalse.actions.MutableActionBindings;
-import jalse.actions.MutableActionContext;
+import jalse.actions.SchedulableActionContext;
 import jalse.actions.ThreadPoolActionEngine;
 import jalse.attributes.AttributeContainer;
 import jalse.entities.DefaultEntityContainer;
@@ -311,7 +311,7 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public MutableActionBindings getBindings() {
+    public ActionBindings getBindings() {
 	return engine.getBindings();
     }
 
@@ -366,12 +366,12 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public <T> MutableActionContext<T> newContext(final Action<T> action) {
+    public <T> SchedulableActionContext<T> newContext(final Action<T> action) {
 	return engine.newContext(action);
     }
 
     @Override
-    public MutableActionContext<JALSE> newContextForActor(final Action<JALSE> action) {
+    public SchedulableActionContext<JALSE> newContextForActor(final Action<JALSE> action) {
 	return scheduler.newContextForActor(action);
     }
 

@@ -13,15 +13,7 @@ import java.util.concurrent.TimeUnit;
  *            Actor type (can be {@code ?} if no actor).
  *
  */
-public interface MutableActionContext<T> extends ActionContext<T>, MutableActionBindings {
-
-    /**
-     * Awaits the execution (or cancellation of the action).
-     *
-     * @throws InterruptedException
-     *             If the current thread was interrupted.
-     */
-    void await() throws InterruptedException;
+public interface SchedulableActionContext<T> extends ActionContext<T> {
 
     /**
      * Gets the action this context is for.

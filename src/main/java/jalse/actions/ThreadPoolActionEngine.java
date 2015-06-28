@@ -1,5 +1,7 @@
 package jalse.actions;
 
+import static jalse.actions.Actions.unschedulableActionContext;
+
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -23,6 +25,8 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
      */
     public class ThreadPoolContext<T> extends AbstractFutureActionContext<T> implements Runnable {
 
+	private final ActionContext<T> unschedulable;
+
 	/**
 	 * Creates new instance of ThreadPoolContext.
 	 *
@@ -31,12 +35,13 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
 	 */
 	protected ThreadPoolContext(final Action<T> action) {
 	    super(ThreadPoolActionEngine.this, action, getBindings());
+	    unschedulable = unschedulableActionContext(this);
 	}
 
 	@Override
 	public void run() {
 	    try {
-		getAction().perform(this); // Execute action
+		getAction().perform(unschedulable); // Execute action
 	    } catch (final InterruptedException e) {
 		Thread.currentThread().interrupt();
 		cancel(); // Just to be sure

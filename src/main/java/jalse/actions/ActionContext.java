@@ -17,6 +17,14 @@ import java.util.concurrent.TimeUnit;
 public interface ActionContext<T> extends ActionBindings {
 
     /**
+     * Awaits the execution (or cancellation of the action).
+     *
+     * @throws InterruptedException
+     *             If the current thread was interrupted.
+     */
+    void await() throws InterruptedException;
+
+    /**
      * Cancels the associated action.
      *
      * @return Whether the action was cancelled.

@@ -6,7 +6,7 @@ import jalse.actions.Action;
 import jalse.actions.ActionContext;
 import jalse.actions.ActionEngine;
 import jalse.actions.DefaultActionScheduler;
-import jalse.actions.MutableActionContext;
+import jalse.actions.SchedulableActionContext;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeListener;
 import jalse.attributes.DefaultAttributeContainer;
@@ -297,7 +297,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public MutableActionContext<Entity> newContextForActor(final Action<Entity> action) {
+    public SchedulableActionContext<Entity> newContextForActor(final Action<Entity> action) {
 	checkAlive();
 	return scheduler.newContextForActor(action);
     }

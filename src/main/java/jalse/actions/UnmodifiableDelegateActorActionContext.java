@@ -3,11 +3,11 @@ package jalse.actions;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class UnmodifiableActorDelegateActionContext<T> implements MutableActionContext<T> {
+class UnmodifiableActorDelegateActionContext<T> implements SchedulableActionContext<T> {
 
-    private final MutableActionContext<T> delegate;
+    private final SchedulableActionContext<T> delegate;
 
-    UnmodifiableActorDelegateActionContext(final MutableActionContext<T> delegate) {
+    UnmodifiableActorDelegateActionContext(final SchedulableActionContext<T> delegate) {
 	this.delegate = delegate;
     }
 
@@ -108,7 +108,7 @@ class UnmodifiableActorDelegateActionContext<T> implements MutableActionContext<
 
     @Override
     public void setPeriodicOnException(final boolean periodicOnException) {
-	throw new UnsupportedOperationException();
+	delegate.setPeriodicOnException(periodicOnException);
     }
 
     @Override

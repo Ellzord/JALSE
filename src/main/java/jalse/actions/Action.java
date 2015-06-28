@@ -4,7 +4,7 @@ package jalse.actions;
  * Action is the JALSE equivalent of {@link Runnable}. They must be scheduled by
  * {@link ActionEngine} but can also be delegate scheduled referencing a specific actor with
  * {@link ActionScheduler}. Actions are the only non-optional value when creating
- * {@link MutableActionContext} - which are required to build how the Action will be scheduled.
+ * {@link SchedulableActionContext} - which are required to build how the Action will be scheduled.
  *
  * @author Elliot Ford
  *

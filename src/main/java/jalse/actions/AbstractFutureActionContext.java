@@ -8,7 +8,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.StampedLock;
 
 /**
- * An abstract implementation of {@link MutableActionContext} that is designed to be used with
+ * An abstract implementation of {@link SchedulableActionContext} that is designed to be used with
  * {@link ExecutorService}. This is a convenience class for creating an {@link ActionEngine}.
  *
  * @author Elliot Ford

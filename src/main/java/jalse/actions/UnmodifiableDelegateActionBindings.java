@@ -3,18 +3,18 @@ package jalse.actions;
 import java.util.HashMap;
 import java.util.Map;
 
-class UnmodifiableDelegateActionBindings implements MutableActionBindings {
+class UnmodifiableDelegateActionBindings implements ActionBindings {
 
-    private final MutableActionBindings delegate;
+    private final ActionBindings delegate;
 
-    UnmodifiableDelegateActionBindings(final MutableActionBindings delegate) {
+    UnmodifiableDelegateActionBindings(final ActionBindings delegate) {
 	this.delegate = delegate;
     }
 
     @Override
     public <T> T get(final String key) {
 	return delegate != null ? delegate.get(key) : null;
-    };
+    }
 
     @Override
     public <T> T put(final String key, final T value) {
