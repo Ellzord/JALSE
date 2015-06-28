@@ -1,6 +1,7 @@
 package jalse.actions;
 
 import static jalse.actions.Actions.emptyActionBindings;
+import static jalse.actions.Actions.unschedulableActionContext;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,6 +38,7 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
     private final AtomicBoolean done;
     private final AtomicBoolean performing;
     private final AtomicLong estimated;
+    private final ActionContext<T> unschedulable;
 
     /**
      * Creates a new instance of AbstractManualActionContext with the supplied engine and action.
@@ -70,6 +72,7 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
 	performing = new AtomicBoolean();
 	cancelled = new AtomicBoolean();
 	estimated = new AtomicLong();
+	unschedulable = unschedulableActionContext(this);
     }
 
     /**
@@ -162,7 +165,7 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
 	performing.set(true);
 
 	try {
-	    getAction().perform(this); // Execute action
+	    getAction().perform(unschedulable); // Execute action
 	} catch (final InterruptedException e) {
 	    cancelled.set(true);
 	    throw e;

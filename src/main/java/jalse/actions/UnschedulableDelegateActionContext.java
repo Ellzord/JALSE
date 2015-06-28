@@ -14,7 +14,7 @@ class UnschedulableDelegateActionContext<T> implements SchedulableActionContext<
 
     @Override
     public void await() throws InterruptedException {
-	if (delegate != null) {
+	if (delegate == null) {
 	    throw new UnsupportedOperationException();
 	}
 	delegate.await();
@@ -42,7 +42,10 @@ class UnschedulableDelegateActionContext<T> implements SchedulableActionContext<
 
     @Override
     public ActionEngine getEngine() {
-	return delegate != null ? delegate.getEngine() : null;
+	if (delegate == null) {
+	    return Actions.emptyActionEngine();
+	}
+	return delegate.getEngine();
     }
 
     @Override
@@ -72,7 +75,7 @@ class UnschedulableDelegateActionContext<T> implements SchedulableActionContext<
 
     @Override
     public <S> S put(final String key, final S value) {
-	if (delegate != null) {
+	if (delegate == null) {
 	    throw new UnsupportedOperationException();
 	}
 	return delegate.put(key, value);
@@ -80,7 +83,7 @@ class UnschedulableDelegateActionContext<T> implements SchedulableActionContext<
 
     @Override
     public void putAll(final Map<String, ?> map) {
-	if (delegate != null) {
+	if (delegate == null) {
 	    throw new UnsupportedOperationException();
 	}
 	delegate.putAll(map);
@@ -88,7 +91,7 @@ class UnschedulableDelegateActionContext<T> implements SchedulableActionContext<
 
     @Override
     public <S> S remove(final String key) {
-	if (delegate != null) {
+	if (delegate == null) {
 	    throw new UnsupportedOperationException();
 	}
 	return delegate.remove(key);
@@ -96,7 +99,7 @@ class UnschedulableDelegateActionContext<T> implements SchedulableActionContext<
 
     @Override
     public void removeAll() {
-	if (delegate != null) {
+	if (delegate == null) {
 	    throw new UnsupportedOperationException();
 	}
 	delegate.removeAll();

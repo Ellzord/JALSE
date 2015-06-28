@@ -14,7 +14,7 @@ class UnmodifiableDelegateActionBindings implements ActionBindings {
     @Override
     public <T> T get(final String key) {
 	return delegate != null ? delegate.get(key) : null;
-    };
+    }
 
     @Override
     public <T> T put(final String key, final T value) {
