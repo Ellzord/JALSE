@@ -1,11 +1,14 @@
 package jalse.actions;
 
+import jalse.actions.MultiAction.ActionOperation;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * An multi-{@link Action} for creating Actions that chain, schedule or await other actions. This is
@@ -23,7 +26,7 @@ import java.util.Objects;
  * @see ThreadPoolActionEngine
  * @see ManualActionEngine
  */
-public final class MultiAction<T> implements Action<T> {
+public final class MultiAction<T> extends CopyOnWriteArrayList<ActionOperation<T>> implements Action<T> {
 
     /**
      * An {@link Action} operation to be executed by a {@link MultiAction}.
@@ -66,6 +69,20 @@ public final class MultiAction<T> implements Action<T> {
 	    this.actions = actions;
 	}
 
+	@Override
+	public boolean equals(final Object obj) {
+	    if (obj == this) {
+		return true;
+	    }
+
+	    if (!(obj instanceof ActionOperation<?>)) {
+		return false;
+	    }
+
+	    final ActionOperation<?> other = (ActionOperation<?>) obj;
+	    return type == other.type && actions.equals(other.actions);
+	}
+
 	/**
 	 * Gets the actions to execute.
 	 *
@@ -82,6 +99,15 @@ public final class MultiAction<T> implements Action<T> {
 	 */
 	public OperationType getType() {
 	    return type;
+	}
+
+	@Override
+	public int hashCode() {
+	    final int prime = 31;
+	    int result = 1;
+	    result = prime * result + actions.hashCode();
+	    result = prime * result + type.hashCode();
+	    return result;
 	}
     }
 
@@ -183,7 +209,7 @@ public final class MultiAction<T> implements Action<T> {
 	 */
 	public MultiAction<T> build() {
 	    final MultiAction<T> ma = new MultiAction<>();
-	    ma.addOperations(builderOperations);
+	    ma.addAll(builderOperations);
 	    return ma;
 	}
     }
@@ -212,6 +238,8 @@ public final class MultiAction<T> implements Action<T> {
 	SCHEDULE_AWAIT
     }
 
+    private static final long serialVersionUID = 4768157900074722640L;
+
     /**
      * Builds an action that processes a chain of actions.
      *
@@ -235,41 +263,9 @@ public final class MultiAction<T> implements Action<T> {
 	return new Builder<S>().addPerform(actions).build();
     }
 
-    private final List<ActionOperation<T>> operations;
-
-    /**
-     * Creates a new empty Multi-Action.
-     */
-    public MultiAction() {
-	operations = new ArrayList<>();
-    }
-
-    /**
-     * Adds an operation to the multi-action.
-     *
-     * @param operation
-     *            Operation to add.
-     */
-    public void addOperation(final ActionOperation<T> operation) {
-	operations.add(Objects.requireNonNull(operation));
-    }
-
-    private void addOperations(final List<ActionOperation<T>> operations) {
-	this.operations.addAll(operations);
-    }
-
-    /**
-     * Whether the multi-action has any operations.
-     *
-     * @return Whether there are operations.
-     */
-    public boolean hasOperations() {
-	return !operations.isEmpty();
-    }
-
     @Override
     public void perform(final ActionContext<T> context) throws InterruptedException {
-	for (final ActionOperation<T> aao : operations) {
+	for (final ActionOperation<T> aao : this) {
 	    switch (aao.getType()) {
 	    case PERFORM:
 		performAll(context, aao.getActions());
