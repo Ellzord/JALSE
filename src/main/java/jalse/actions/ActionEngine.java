@@ -60,7 +60,7 @@ public interface ActionEngine {
      *            Value.
      * @return Previously assigned value for the key.
      *
-     * @see MutableActionBindings#put(String, Object)
+     * @see ActionBindings#put(String, Object)
      */
     default <T> T putInBindings(final String key, final T value) {
 	return getBindings().put(key, value);
@@ -73,7 +73,7 @@ public interface ActionEngine {
      *            Key.
      * @return The previously assigned value for this key.
      *
-     * @see MutableActionBindings#remove(String)
+     * @see ActionBindings#remove(String)
      */
     default <T> T removeFromBindings(final String key) {
 	return getBindings().remove(key);

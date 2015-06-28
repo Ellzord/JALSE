@@ -18,12 +18,12 @@ public final class Actions {
     public static final ActionEngine EMPTY_ACTIONENGINE = new UnmodifiableDelegateActionEngine(null);
 
     /**
-     * An empty MutableActionBindings instance.
+     * An empty ActionBindings instance.
      */
     public static final ActionBindings EMPTY_ACTIONBINDINGS = new UnmodifiableDelegateActionBindings(null);
 
     /**
-     * An empty MutableActionContext instance.
+     * An empty SchedulableActionContext instance.
      */
     @SuppressWarnings("rawtypes")
     public static final SchedulableActionContext EMPTY_ACTIONCONTEXT = new UnschedulableDelegateActionContext<>(null);
@@ -44,7 +44,7 @@ public final class Actions {
     }
 
     /**
-     * Creates an immutable empty {@link MutableActionBindings}.
+     * Creates an immutable empty {@link ActionBindings}.
      *
      * @return Empty bindings.
      */
@@ -101,7 +101,7 @@ public final class Actions {
     }
 
     /**
-     * Creates an immutable {@link MutableActionBindings}.
+     * Creates an immutable {@link ActionBindings}.
      *
      * @param bindings
      *            Bindings to wrap.

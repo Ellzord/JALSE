@@ -27,20 +27,20 @@ import java.util.concurrent.TimeUnit;
  * <pre>
  * <code>
  * {@code @ScheduleForAction(action = Haunt.class)}
- * {@code MutableActionContext<Entity>} scheduleHaunting();
+ * {@code ActionContext<Entity>} scheduleHaunting();
  * 
  * {@code @ScheduleForAction(action = Haunt.class)}
  * void scheduleHaunting();
  * 
  * {@code @ScheduleForAction(action = Haunt.class, initialDelay = 50, unit = TimeUnit.MILLISECONDS)}
- * {@code MutableActionContext<Entity>} scheduleHaunting();
+ * {@code ActionContext<Entity>} scheduleHaunting();
  * 
  * {@code @ScheduleForAction(action = Haunt.class, initialDelay = 50, unit = TimeUnit.MILLISECONDS)}
  * void scheduleHaunting();
  * 
  * 
  * {@code @ScheduleForAction(action = Haunt.class, initialDelay = 50, period = 200, unit = TimeUnit.MILLISECONDS)}
- * {@code MutableActionContext<Entity>} scheduleHaunting();
+ * {@code ActionContext<Entity>} scheduleHaunting();
  * 
  * {@code @ScheduleForAction(action = Haunt.class, initialDelay = 50, period = 200, unit = TimeUnit.MILLISECONDS)}
  * void scheduleHaunting();

@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * This is a simple yet fully-featured implementation of {@link MutableActionBindings}.<br>
+ * This is a simple yet fully-featured implementation of {@link ActionBindings}.<br>
  * <br>
  * Keys cannot be null or empty.
  *
