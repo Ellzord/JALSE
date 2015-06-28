@@ -39,7 +39,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
      */
     protected final ExecutorService executorService;
 
-    private final MutableActionBindings bindings;
+    private final ActionBindings bindings;
     private final Lock lock;
     private final Condition resumed;
     private final AtomicBoolean paused;
@@ -78,7 +78,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
     }
 
     @Override
-    public MutableActionBindings getBindings() {
+    public ActionBindings getBindings() {
 	return bindings;
     }
 

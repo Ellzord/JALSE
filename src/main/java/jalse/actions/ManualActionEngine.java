@@ -52,7 +52,7 @@ public class ManualActionEngine implements ActionEngine {
     private static final Logger logger = Logger.getLogger(ManualActionEngine.class.getName());
 
     private final ManualWorkQueue<ManualContext<?>> workQueue;
-    private final MutableActionBindings bindings;
+    private final ActionBindings bindings;
     private final AtomicBoolean ticking;
     private final AtomicBoolean stopped;
 
@@ -83,7 +83,7 @@ public class ManualActionEngine implements ActionEngine {
     }
 
     @Override
-    public MutableActionBindings getBindings() {
+    public ActionBindings getBindings() {
 	return bindings;
     }
 

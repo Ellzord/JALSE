@@ -12,10 +12,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A abstract implementation of {@link MutableActionContext} that is designed to be used manually.
- * This class should be used whenever controlling the execution state of work is important. The
- * action should be performed with {@link #performAction()}. This is a convenience class for
- * creating an {@link ActionEngine}.
+ * A abstract implementation of {@link SchedulableActionContext} that is designed to be used
+ * manually. This class should be used whenever controlling the execution state of work is
+ * important. The action should be performed with {@link #performAction()}. This is a convenience
+ * class for creating an {@link ActionEngine}.
  *
  * @author Elliot Ford
  *

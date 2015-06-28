@@ -291,15 +291,15 @@ public final class MultiAction<T> implements Action<T> {
 	}
     }
 
-    private Collection<MutableActionContext<T>> scheduleAll(final ActionContext<T> context,
+    private Collection<SchedulableActionContext<T>> scheduleAll(final ActionContext<T> context,
 	    final Collection<? extends Action<T>> actions) {
-	final Collection<MutableActionContext<T>> newContexts = new ArrayList<>();
+	final Collection<SchedulableActionContext<T>> newContexts = new ArrayList<>();
 
 	final ActionEngine engine = context.getEngine();
 	final T actor = context.getActor();
 
 	for (final Action<T> action : actions) {
-	    final MutableActionContext<T> newContext = engine.newContext(action);
+	    final SchedulableActionContext<T> newContext = engine.newContext(action);
 	    newContext.setActor(actor); // Same actor
 	    newContext.putAll(context.toMap()); // Copy bindings (current)
 	    newContext.schedule();
@@ -312,7 +312,7 @@ public final class MultiAction<T> implements Action<T> {
 
     private void scheduleAwaitAll(final ActionContext<T> context, final Collection<? extends Action<T>> actions)
 	    throws InterruptedException {
-	for (final MutableActionContext<T> newContext : scheduleAll(context, actions)) {
+	for (final SchedulableActionContext<T> newContext : scheduleAll(context, actions)) {
 	    if (!newContext.isDone()) { // Stops us for waiting forever
 		newContext.await();
 	    }

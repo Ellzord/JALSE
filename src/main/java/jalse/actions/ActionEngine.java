@@ -1,6 +1,6 @@
 package jalse.actions;
 
-import static jalse.actions.Actions.unmodifiableActionContext;
+import static jalse.actions.Actions.unschedulableActionContext;
 
 /**
  * An engine for scheduling {@link Action} for execution. Work can be scheduled immediately or with
@@ -21,7 +21,7 @@ public interface ActionEngine {
      *
      * @return Engine bindings.
      */
-    MutableActionBindings getBindings();
+    ActionBindings getBindings();
 
     /**
      * Whether the engine is paused.
@@ -44,7 +44,7 @@ public interface ActionEngine {
      *            Action to create context for.
      * @return Context associated to the action.
      */
-    <T> MutableActionContext<T> newContext(Action<T> action);
+    <T> SchedulableActionContext<T> newContext(Action<T> action);
 
     /**
      * Pauses action processing.
@@ -109,11 +109,11 @@ public interface ActionEngine {
 	    return Actions.emptyActionContext(); // Case of post cancel scheduling
 	}
 
-	final MutableActionContext<T> context = newContext(action);
+	final SchedulableActionContext<T> context = newContext(action);
 	context.setActor(actor);
 	context.schedule();
 
-	return unmodifiableActionContext(context); // Don't allow for mutation (it's running)
+	return unschedulableActionContext(context); // Don't allow for mutation (it's running)
     }
 
     /**

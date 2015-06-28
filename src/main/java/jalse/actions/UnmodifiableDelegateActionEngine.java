@@ -3,16 +3,14 @@ package jalse.actions;
 class UnmodifiableDelegateActionEngine implements ActionEngine {
 
     private final ActionEngine delegate;
-    private final UnmodifiableDelegateActionBindings bindings;
 
     UnmodifiableDelegateActionEngine(final ActionEngine delegate) {
 	this.delegate = delegate;
-	bindings = new UnmodifiableDelegateActionBindings(delegate != null ? delegate.getBindings() : null);
     }
 
     @Override
-    public MutableActionBindings getBindings() {
-	return bindings;
+    public ActionBindings getBindings() {
+	return new UnmodifiableDelegateActionBindings(delegate != null ? delegate.getBindings() : null);
     }
 
     @Override
@@ -22,12 +20,12 @@ class UnmodifiableDelegateActionEngine implements ActionEngine {
 
     @Override
     public boolean isStopped() {
-	return delegate != null ? delegate.isPaused() : true;
+	return delegate != null ? delegate.isStopped() : true;
     }
 
     @Override
-    public <T> MutableActionContext<T> newContext(final Action<T> action) {
-	return new UnmodifiableDelegateActionContext<>(delegate != null ? delegate.newContext(action) : null);
+    public <T> SchedulableActionContext<T> newContext(final Action<T> action) {
+	throw new UnsupportedOperationException();
     }
 
     @Override

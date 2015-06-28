@@ -1,22 +1,23 @@
 package jalse.actions;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class UnmodifiableDelegateActionContext<T> extends UnmodifiableDelegateActionBindings implements
-	MutableActionContext<T> {
+class UnschedulableDelegateActionContext<T> implements SchedulableActionContext<T> {
 
-    private final MutableActionContext<T> delegate;
+    private final SchedulableActionContext<T> delegate;
 
-    UnmodifiableDelegateActionContext(final MutableActionContext<T> delegate) {
-	super(delegate);
+    UnschedulableDelegateActionContext(final SchedulableActionContext<T> delegate) {
 	this.delegate = delegate;
     }
 
     @Override
     public void await() throws InterruptedException {
 	if (delegate != null) {
-	    delegate.await();
+	    throw new UnsupportedOperationException();
 	}
+	delegate.await();
     }
 
     @Override
@@ -25,8 +26,13 @@ class UnmodifiableDelegateActionContext<T> extends UnmodifiableDelegateActionBin
     }
 
     @Override
+    public <S> S get(final String key) {
+	return delegate != null ? delegate.get(key) : null;
+    }
+
+    @Override
     public Action<T> getAction() {
-	return delegate != null ? delegate.getAction() : null;
+	throw new UnsupportedOperationException();
     }
 
     @Override
@@ -65,6 +71,38 @@ class UnmodifiableDelegateActionContext<T> extends UnmodifiableDelegateActionBin
     }
 
     @Override
+    public <S> S put(final String key, final S value) {
+	if (delegate != null) {
+	    throw new UnsupportedOperationException();
+	}
+	return delegate.put(key, value);
+    }
+
+    @Override
+    public void putAll(final Map<String, ?> map) {
+	if (delegate != null) {
+	    throw new UnsupportedOperationException();
+	}
+	delegate.putAll(map);
+    }
+
+    @Override
+    public <S> S remove(final String key) {
+	if (delegate != null) {
+	    throw new UnsupportedOperationException();
+	}
+	return delegate.remove(key);
+    }
+
+    @Override
+    public void removeAll() {
+	if (delegate != null) {
+	    throw new UnsupportedOperationException();
+	}
+	delegate.removeAll();
+    }
+
+    @Override
     public void schedule() {
 	throw new UnsupportedOperationException();
     }
@@ -92,5 +130,10 @@ class UnmodifiableDelegateActionContext<T> extends UnmodifiableDelegateActionBin
     @Override
     public void setPeriodicOnException(final boolean periodicOnException) {
 	throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<String, ?> toMap() {
+	return delegate != null ? delegate.toMap() : Collections.emptyMap();
     }
 }

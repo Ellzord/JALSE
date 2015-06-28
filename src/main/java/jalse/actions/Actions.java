@@ -20,13 +20,13 @@ public final class Actions {
     /**
      * An empty MutableActionBindings instance.
      */
-    public static final MutableActionBindings EMPTY_ACTIONBINDINGS = new UnmodifiableDelegateActionBindings(null);
+    public static final ActionBindings EMPTY_ACTIONBINDINGS = new UnmodifiableDelegateActionBindings(null);
 
     /**
      * An empty MutableActionContext instance.
      */
     @SuppressWarnings("rawtypes")
-    public static final MutableActionContext EMPTY_ACTIONCONTEXT = new UnmodifiableDelegateActionContext<>(null);
+    public static final SchedulableActionContext EMPTY_ACTIONCONTEXT = new UnschedulableDelegateActionContext<>(null);
 
     /**
      * Copies context information to a target context (actor, bindings, initial delay and period).
@@ -36,7 +36,7 @@ public final class Actions {
      * @param target
      *            Target context.
      */
-    public static <T> void copy(final ActionContext<T> source, final MutableActionContext<T> target) {
+    public static <T> void copy(final ActionContext<T> source, final SchedulableActionContext<T> target) {
 	target.setActor(source.getActor());
 	target.putAll(source.toMap());
 	target.setInitialDelay(target.getInitialDelay(TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
@@ -48,17 +48,17 @@ public final class Actions {
      *
      * @return Empty bindings.
      */
-    public static MutableActionBindings emptyActionBindings() {
+    public static ActionBindings emptyActionBindings() {
 	return EMPTY_ACTIONBINDINGS;
     }
 
     /**
-     * Creates an immutable empty {@link MutableActionContext}.
+     * Creates an immutable empty {@link SchedulableActionContext}.
      *
      * @return Empty context.
      */
     @SuppressWarnings("unchecked")
-    public static <T> MutableActionContext<T> emptyActionContext() {
+    public static <T> SchedulableActionContext<T> emptyActionContext() {
 	return EMPTY_ACTIONCONTEXT;
     }
 
@@ -107,20 +107,8 @@ public final class Actions {
      *            Bindings to wrap.
      * @return Immutable bindings.
      */
-    public static MutableActionBindings unmodifiableActionBindings(final MutableActionBindings bindings) {
+    public static ActionBindings unmodifiableActionBindings(final ActionBindings bindings) {
 	return new UnmodifiableDelegateActionBindings(Objects.requireNonNull(bindings));
-    }
-
-    /**
-     * Creates an immutable {@link MutableActionContext} that {@link ActionContext#cancel()} and
-     * {@link MutableActionContext#await()} can still be called.
-     *
-     * @param context
-     *            Context to wrap.
-     * @return Immutable context.
-     */
-    public static <T> MutableActionContext<T> unmodifiableActionContext(final MutableActionContext<T> context) {
-	return new UnmodifiableDelegateActionContext<>(Objects.requireNonNull(context));
     }
 
     /**
@@ -135,14 +123,15 @@ public final class Actions {
     }
 
     /**
-     * Creates an {@link MutableActionContext} which the actor cannot be changed.
+     * Creates an immutable {@link SchedulableActionContext} that {@link ActionContext#cancel()} and
+     * {@link SchedulableActionContext#await()} can still be called.
      *
      * @param context
      *            Context to wrap.
-     * @return Immutable context for actor.
+     * @return Immutable context.
      */
-    public static <T> MutableActionContext<T> unmodifiableActorActionContext(final MutableActionContext<T> context) {
-	return new UnmodifiableActorDelegateActionContext<>(Objects.requireNonNull(context));
+    public static <T> SchedulableActionContext<T> unschedulableActionContext(final SchedulableActionContext<T> context) {
+	return new UnschedulableDelegateActionContext<>(Objects.requireNonNull(context));
     }
 
     private Actions() {

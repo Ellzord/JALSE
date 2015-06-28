@@ -1,8 +1,7 @@
 package jalse.actions;
 
 import static jalse.actions.Actions.emptyActionContext;
-import static jalse.actions.Actions.unmodifiableActionContext;
-import static jalse.actions.Actions.unmodifiableActorActionContext;
+import static jalse.actions.Actions.unschedulableActionContext;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -78,18 +77,18 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
     }
 
     @Override
-    public MutableActionContext<T> newContextForActor(final Action<T> action) {
+    public SchedulableActionContext<T> newContextForActor(final Action<T> action) {
 	// Check engine running
 	if (engine.isStopped()) {
 	    return emptyActionContext();
 	}
 	// New context for actor
-	return unmodifiableActorActionContext(newContextForActor0(action));
+	return new UnmodifiableActorDelegateActionContext<>(newContextForActor0(action));
     }
 
-    private MutableActionContext<T> newContextForActor0(final Action<T> action) {
+    private SchedulableActionContext<T> newContextForActor0(final Action<T> action) {
 	// Create new context
-	final MutableActionContext<T> context = engine.newContext(action);
+	final SchedulableActionContext<T> context = engine.newContext(action);
 	context.setActor(actor);
 
 	// Add then purge
@@ -110,13 +109,13 @@ public class DefaultActionScheduler<T> implements ActionScheduler<T> {
 	}
 
 	// Create new actor context
-	final MutableActionContext<T> context = newContextForActor0(action);
+	final SchedulableActionContext<T> context = newContextForActor0(action);
 	context.setInitialDelay(initialDelay, unit);
 	context.setPeriod(period, unit);
 	context.schedule();
 
 	// Don't allow for mutation (it's running)
-	return unmodifiableActionContext(context);
+	return unschedulableActionContext(context);
     }
 
     /**

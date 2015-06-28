@@ -9,11 +9,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-abstract class BaseActionContext<T> implements MutableActionContext<T> {
+abstract class BaseActionContext<T> implements SchedulableActionContext<T> {
 
     private final ActionEngine engine;
     private final Action<T> action;
-    private final MutableActionBindings bindings;
+    private final ActionBindings bindings;
     private final AtomicReference<T> actor;
     private final AtomicLong period;
     private final AtomicLong initialDelay;

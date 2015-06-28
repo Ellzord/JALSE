@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  */
 @SuppressWarnings("unchecked")
-public class DefaultActionBindings implements MutableActionBindings {
+public class DefaultActionBindings implements ActionBindings {
 
     private static void validateKey(final String key) {
 	if (key == null) {

@@ -3,11 +3,11 @@ package jalse.actions;
 import java.util.HashMap;
 import java.util.Map;
 
-class UnmodifiableDelegateActionBindings implements MutableActionBindings {
+class UnmodifiableDelegateActionBindings implements ActionBindings {
 
-    private final MutableActionBindings delegate;
+    private final ActionBindings delegate;
 
-    UnmodifiableDelegateActionBindings(final MutableActionBindings delegate) {
+    UnmodifiableDelegateActionBindings(final ActionBindings delegate) {
 	this.delegate = delegate;
     }
 
