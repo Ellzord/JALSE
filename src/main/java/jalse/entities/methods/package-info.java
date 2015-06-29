@@ -5,4 +5,3 @@
  * {@link jalse.entities.functions.EntityMethodFunction}).
  */
 package jalse.entities.methods;
-

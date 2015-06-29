@@ -4,17 +4,18 @@ import static jalse.entities.functions.Functions.checkNoParams;
 import static jalse.entities.functions.Functions.checkNoReturnType;
 import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.getIDSuppliers;
+
+import java.lang.reflect.Method;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
+
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
 import jalse.entities.annotations.EntityID;
 import jalse.entities.annotations.KillEntities;
 import jalse.entities.methods.KillEntitiesMethod;
-
-import java.lang.reflect.Method;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * This is a method function for {@link KillEntities} annotation. It will resolve an

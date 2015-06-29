@@ -1,8 +1,8 @@
 package jalse.tags;
 
-import jalse.misc.AbstractIdentifiable;
-
 import java.util.UUID;
+
+import jalse.misc.AbstractIdentifiable;
 
 /**
  * An immutable {@link Tag} used to identify a direct parent.

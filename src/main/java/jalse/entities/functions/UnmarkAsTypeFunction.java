@@ -5,12 +5,13 @@ import static jalse.entities.functions.Functions.checkNoParams;
 import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.hasReturnType;
 import static jalse.entities.functions.Functions.returnTypeIs;
+
+import java.lang.reflect.Method;
+
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.Entity;
 import jalse.entities.annotations.UnmarkAsType;
 import jalse.entities.methods.UnmarkAsTypeMethod;
-
-import java.lang.reflect.Method;
 
 /**
  * This is a method function for {@link UnmarkAsType} annotation. It will resolve an
@@ -22,7 +23,7 @@ import java.lang.reflect.Method;
  * <code>
  * {@code @UnmarkAsType(Ghost.class)}
  * boolean unmarkGhost();
- * 
+ *
  * {@code @UnmarkAsType(Ghost.class)}
  * void unmarkGhost();
  * </code>

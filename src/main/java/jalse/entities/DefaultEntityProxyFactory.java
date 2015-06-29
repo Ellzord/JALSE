@@ -1,6 +1,17 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.isEntitySubtype;
+
+import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Collections;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+
 import jalse.entities.functions.DefaultFunction;
 import jalse.entities.functions.EntityFunction;
 import jalse.entities.functions.EntityFunctionResolver;
@@ -17,16 +28,6 @@ import jalse.entities.functions.SetAttributeFunction;
 import jalse.entities.functions.StreamEntitiesFunction;
 import jalse.entities.functions.UnmarkAsTypeFunction;
 import jalse.entities.methods.EntityMethod;
-
-import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Collections;
-import java.util.Map;
-import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 /**
  * This is the default {@link EntityProxyFactory} implementation for JALSE. This proxy factory will

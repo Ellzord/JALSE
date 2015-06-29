@@ -23,8 +23,8 @@ public interface Identifiable {
      * @return Whether the unique identifiers are equal.
      */
     static boolean equals(final Identifiable a, final Object b) {
-	return a == b || a != null && b instanceof Identifiable
-		&& Objects.equals(a.getID(), ((Identifiable) b).getID());
+	return a == b
+		|| a != null && b instanceof Identifiable && Objects.equals(a.getID(), ((Identifiable) b).getID());
     }
 
     /**
@@ -76,8 +76,8 @@ public interface Identifiable {
     }
 
     /**
-     * Creates a simple to string for the identifiable. This is structured like
-     * {@code <SIMPLE_CLASS_NAME> [id=X]}.
+     * Creates a simple to string for the identifiable. This is structured like {@code 
+     * <SIMPLE_CLASS_NAME> [id=X]}.
      *
      * @param obj
      *            Identifiable to create a string representation for.

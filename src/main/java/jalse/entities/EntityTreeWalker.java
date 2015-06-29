@@ -1,11 +1,11 @@
 package jalse.entities;
 
-import jalse.entities.EntityVisitor.EntityVisitResult;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
+
+import jalse.entities.EntityVisitor.EntityVisitResult;
 
 class EntityTreeWalker {
 

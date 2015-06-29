@@ -5,12 +5,13 @@ import static jalse.entities.functions.Functions.checkNoParams;
 import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.hasReturnType;
 import static jalse.entities.functions.Functions.returnTypeIs;
+
+import java.lang.reflect.Method;
+
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.Entity;
 import jalse.entities.annotations.MarkAsType;
 import jalse.entities.methods.MarkAsTypeMethod;
-
-import java.lang.reflect.Method;
 
 /**
  * This is a method function for {@link MarkAsType} annotation. It will resolve an
@@ -22,7 +23,7 @@ import java.lang.reflect.Method;
  * <code>
  * {@code @MarkAsType(Ghost.class)}
  * boolean markGhost();
- * 
+ *
  * {@code @MarkAsType(Ghost.class)}
  * void markGhost();
  * </code>

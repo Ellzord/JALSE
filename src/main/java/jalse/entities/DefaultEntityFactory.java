@@ -1,9 +1,6 @@
 package jalse.entities;
 
 import static jalse.actions.Actions.requireNotStopped;
-import jalse.actions.ActionEngine;
-import jalse.actions.Actions;
-import jalse.actions.ForkJoinActionEngine;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -14,12 +11,17 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Logger;
 
+import jalse.actions.ActionEngine;
+import jalse.actions.Actions;
+import jalse.actions.ForkJoinActionEngine;
+
 /**
  * A {@link EntityFactory} implementation that creates/kills {@link DefaultEntity}. Default entity
  * factory can have a total entity limit set. When this factory kills an entity it will kill the
  * entity tree under it (can only kill entities his factory has created).<br>
  * <br>
- * This factory assumes all source containers (and when importing target containers) are genuine. <br>
+ * This factory assumes all source containers (and when importing target containers) are genuine.
+ * <br>
  * <br>
  * If no {@link ActionEngine} is supplied {@link ForkJoinActionEngine#commonPoolEngine()} will be
  * used.

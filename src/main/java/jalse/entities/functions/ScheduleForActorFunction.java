@@ -6,17 +6,18 @@ import static jalse.entities.functions.Functions.firstGenericTypeArg;
 import static jalse.entities.functions.Functions.hasReturnType;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import static jalse.entities.functions.Functions.toClass;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.concurrent.TimeUnit;
+
 import jalse.actions.Action;
 import jalse.actions.ActionContext;
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.Entity;
 import jalse.entities.annotations.ScheduleForActor;
 import jalse.entities.methods.ScheduleForActorMethod;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This is a method function for {@link ScheduleForActor} annotation. It will resolve an
@@ -28,20 +29,20 @@ import java.util.concurrent.TimeUnit;
  * <code>
  * {@code @ScheduleForAction(action = Haunt.class)}
  * {@code ActionContext<Entity>} scheduleHaunting();
- * 
+ *
  * {@code @ScheduleForAction(action = Haunt.class)}
  * void scheduleHaunting();
- * 
+ *
  * {@code @ScheduleForAction(action = Haunt.class, initialDelay = 50, unit = TimeUnit.MILLISECONDS)}
  * {@code ActionContext<Entity>} scheduleHaunting();
- * 
+ *
  * {@code @ScheduleForAction(action = Haunt.class, initialDelay = 50, unit = TimeUnit.MILLISECONDS)}
  * void scheduleHaunting();
- * 
- * 
+ *
+ *
  * {@code @ScheduleForAction(action = Haunt.class, initialDelay = 50, period = 200, unit = TimeUnit.MILLISECONDS)}
  * {@code ActionContext<Entity>} scheduleHaunting();
- * 
+ *
  * {@code @ScheduleForAction(action = Haunt.class, initialDelay = 50, period = 200, unit = TimeUnit.MILLISECONDS)}
  * void scheduleHaunting();
  * </code>

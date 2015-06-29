@@ -13,7 +13,8 @@ class UnmodifiableDelegateAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> boolean addAttributeListener(final NamedAttributeType<T> namedType, final AttributeListener<T> listener) {
+    public <T> boolean addAttributeListener(final NamedAttributeType<T> namedType,
+	    final AttributeListener<T> listener) {
 	throw new UnsupportedOperationException();
     }
 

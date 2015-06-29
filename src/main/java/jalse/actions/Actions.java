@@ -130,7 +130,8 @@ public final class Actions {
      *            Context to wrap.
      * @return Immutable context.
      */
-    public static <T> SchedulableActionContext<T> unschedulableActionContext(final SchedulableActionContext<T> context) {
+    public static <T> SchedulableActionContext<T> unschedulableActionContext(
+	    final SchedulableActionContext<T> context) {
 	return new UnschedulableDelegateActionContext<>(Objects.requireNonNull(context));
     }
 

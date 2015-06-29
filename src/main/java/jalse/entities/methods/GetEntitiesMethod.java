@@ -1,10 +1,5 @@
 package jalse.entities.methods;
 
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
-import jalse.entities.annotations.GetEntities;
-import jalse.entities.functions.GetEntitiesFunction;
-
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -12,6 +7,11 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import jalse.entities.Entity;
+import jalse.entities.EntityContainer;
+import jalse.entities.annotations.GetEntities;
+import jalse.entities.functions.GetEntitiesFunction;
 
 /**
  * This is used for mapping calls to:

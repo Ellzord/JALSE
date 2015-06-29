@@ -4,13 +4,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import jalse.entities.Entity;
-import jalse.entities.methods.DefaultMethod;
 
 import java.lang.reflect.Method;
 
 import org.junit.After;
 import org.junit.Test;
+
+import jalse.entities.Entity;
+import jalse.entities.methods.DefaultMethod;
 
 public class DefaultFunctionTest {
 

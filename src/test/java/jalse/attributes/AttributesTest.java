@@ -1,10 +1,10 @@
 package jalse.attributes;
 
-import jalse.entities.Entity;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+
+import jalse.entities.Entity;
 
 public class AttributesTest {
 
@@ -55,8 +55,10 @@ public class AttributesTest {
 		Attributes.newNamedDoubleType("test"));
 	Assert.assertEquals(new NamedAttributeType<>("test", Attributes.CHARACTER_TYPE),
 		Attributes.newNamedCharacterType("test"));
-	Assert.assertEquals(new NamedAttributeType<>("test", Attributes.LONG_TYPE), Attributes.newNamedLongType("test"));
-	Assert.assertEquals(new NamedAttributeType<>("test", Attributes.BYTE_TYPE), Attributes.newNamedByteType("test"));
+	Assert.assertEquals(new NamedAttributeType<>("test", Attributes.LONG_TYPE),
+		Attributes.newNamedLongType("test"));
+	Assert.assertEquals(new NamedAttributeType<>("test", Attributes.BYTE_TYPE),
+		Attributes.newNamedByteType("test"));
 	Assert.assertEquals(new NamedAttributeType<>("test", Attributes.FLOAT_TYPE),
 		Attributes.newNamedFloatType("test"));
 	Assert.assertEquals(new NamedAttributeType<>("test", Attributes.SHORT_TYPE),
@@ -79,6 +81,7 @@ public class AttributesTest {
     public void unmodifiableAttributeContainerTest() {
 	final AttributeContainer container = new DefaultAttributeContainer();
 
-	Assert.assertTrue(Attributes.unmodifiableAttributeContainer(container) instanceof UnmodifiableDelegateAttributeContainer);
+	Assert.assertTrue(
+		Attributes.unmodifiableAttributeContainer(container) instanceof UnmodifiableDelegateAttributeContainer);
     }
 }

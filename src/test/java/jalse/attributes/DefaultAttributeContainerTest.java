@@ -17,8 +17,8 @@ public class DefaultAttributeContainerTest {
 
 	@Test
 	public void attributeBuildTest() {
-	    container = new DefaultAttributeContainer.Builder().setAttribute(Attributes.newNamedBooleanType("scary"),
-		    true).build();
+	    container = new DefaultAttributeContainer.Builder()
+		    .setAttribute(Attributes.newNamedBooleanType("scary"), true).build();
 	}
 
 	@Test
@@ -40,14 +40,14 @@ public class DefaultAttributeContainerTest {
 
 	@Test
 	public void listenerBuilderTest() {
-	    container = new DefaultAttributeContainer.Builder().addListener(Attributes.newNamedIntegerType("score"),
-		    new TestAttributeListener()).build();
+	    container = new DefaultAttributeContainer.Builder()
+		    .addListener(Attributes.newNamedIntegerType("score"), new TestAttributeListener()).build();
 	}
 
 	@Test
 	public void listenerBuilderTest2() {
-	    container = new DefaultAttributeContainer.Builder().addListener("score", Attributes.INTEGER_TYPE,
-		    new TestAttributeListener()).build();
+	    container = new DefaultAttributeContainer.Builder()
+		    .addListener("score", Attributes.INTEGER_TYPE, new TestAttributeListener()).build();
 	}
     }
 

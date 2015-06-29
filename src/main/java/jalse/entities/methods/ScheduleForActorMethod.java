@@ -1,14 +1,14 @@
 package jalse.entities.methods;
 
+import java.lang.reflect.Constructor;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
 import jalse.actions.Action;
 import jalse.actions.ActionScheduler;
 import jalse.entities.Entity;
 import jalse.entities.annotations.ScheduleForActor;
 import jalse.entities.functions.ScheduleForActorFunction;
-
-import java.lang.reflect.Constructor;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This is used for mapping calls to

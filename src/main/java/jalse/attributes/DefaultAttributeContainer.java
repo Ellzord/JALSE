@@ -1,7 +1,5 @@
 package jalse.attributes;
 
-import jalse.misc.ListenerSet;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +12,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
+
+import jalse.misc.ListenerSet;
 
 /**
  * An DefaultAttributeContainer is a thread-safe implementation of {@link AttributeContainer}.<br>
@@ -194,7 +194,8 @@ public class DefaultAttributeContainer implements AttributeContainer {
     }
 
     @Override
-    public <T> boolean addAttributeListener(final NamedAttributeType<T> namedType, final AttributeListener<T> listener) {
+    public <T> boolean addAttributeListener(final NamedAttributeType<T> namedType,
+	    final AttributeListener<T> listener) {
 	Objects.requireNonNull(namedType);
 	Objects.requireNonNull(listener);
 

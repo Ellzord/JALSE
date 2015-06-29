@@ -20,5 +20,5 @@ public @interface EntityIDs {
      *
      * @return Entity IDs.
      */
-    EntityID[] value();
+    EntityID[]value();
 }

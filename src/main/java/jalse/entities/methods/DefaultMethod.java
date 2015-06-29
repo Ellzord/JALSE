@@ -1,10 +1,10 @@
 package jalse.entities.methods;
 
-import jalse.entities.Entity;
-import jalse.entities.functions.DefaultFunction;
-
 import java.lang.invoke.MethodHandle;
 import java.util.Objects;
+
+import jalse.entities.Entity;
+import jalse.entities.functions.DefaultFunction;
 
 /**
  * This is used for mapping {@code default} methods.<br>

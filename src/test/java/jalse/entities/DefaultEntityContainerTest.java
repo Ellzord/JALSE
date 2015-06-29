@@ -1,13 +1,13 @@
 package jalse.entities;
 
-import jalse.attributes.DefaultAttributeContainer;
-
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+
+import jalse.attributes.DefaultAttributeContainer;
 
 public class DefaultEntityContainerTest {
 

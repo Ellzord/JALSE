@@ -1,13 +1,5 @@
 package jalse.entities;
 
-import jalse.actions.Action;
-import jalse.actions.ActionContext;
-import jalse.actions.DefaultActionScheduler;
-import jalse.attributes.AttributeEvent;
-import jalse.attributes.AttributeListener;
-import jalse.attributes.Attributes;
-import jalse.attributes.DefaultAttributeContainer;
-
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +7,14 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+
+import jalse.actions.Action;
+import jalse.actions.ActionContext;
+import jalse.actions.DefaultActionScheduler;
+import jalse.attributes.AttributeEvent;
+import jalse.attributes.AttributeListener;
+import jalse.attributes.Attributes;
+import jalse.attributes.DefaultAttributeContainer;
 
 public class DefaultEntityTest {
 
@@ -97,7 +97,8 @@ public class DefaultEntityTest {
 	Assert.assertFalse(testAttributeListener.present);
 
 	entity.addAttributeListener("test", Attributes.INTEGER_TYPE, testAttributeListener);
-	Assert.assertTrue(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
+	Assert.assertTrue(
+		entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
 	Assert.assertTrue(entity.getAttributeListenerNames().contains("test"));
 	Assert.assertTrue(entity.getAttributeListenerTypes("test").contains(Attributes.INTEGER_TYPE));
 
@@ -113,20 +114,22 @@ public class DefaultEntityTest {
 	Assert.assertFalse(testAttributeListener.present);
 
 	entity.removeAttributeListener("test", Attributes.INTEGER_TYPE, testAttributeListener);
-	Assert.assertFalse(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE)
-		.contains(testAttributeListener));
+	Assert.assertFalse(
+		entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
 
 	entity.addAttributeListener("test", Attributes.INTEGER_TYPE, testAttributeListener);
-	Assert.assertTrue(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
+	Assert.assertTrue(
+		entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
 	entity.removeAttributeListeners("test", Attributes.INTEGER_TYPE);
-	Assert.assertFalse(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE)
-		.contains(testAttributeListener));
+	Assert.assertFalse(
+		entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
 
 	entity.addAttributeListener("test", Attributes.INTEGER_TYPE, testAttributeListener);
-	Assert.assertTrue(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
+	Assert.assertTrue(
+		entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
 	entity.removeAttributeListeners();
-	Assert.assertFalse(entity.getAttributeListeners("test", Attributes.INTEGER_TYPE)
-		.contains(testAttributeListener));
+	Assert.assertFalse(
+		entity.getAttributeListeners("test", Attributes.INTEGER_TYPE).contains(testAttributeListener));
     }
 
     @Test

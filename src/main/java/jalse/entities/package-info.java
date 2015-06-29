@@ -8,4 +8,3 @@
  * @see jalse.entities.DefaultEntityContainer
  */
 package jalse.entities;
-

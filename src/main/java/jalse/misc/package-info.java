@@ -4,4 +4,3 @@
  * @see jalse.misc.Identifiable
  */
 package jalse.misc;
-

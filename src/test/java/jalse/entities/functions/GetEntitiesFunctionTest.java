@@ -6,16 +6,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import jalse.entities.Entity;
-import jalse.entities.annotations.EntityID;
-import jalse.entities.annotations.GetEntities;
-import jalse.entities.methods.GetEntitiesMethod;
 
 import java.lang.reflect.Method;
 import java.util.Set;
 
 import org.junit.After;
 import org.junit.Test;
+
+import jalse.entities.Entity;
+import jalse.entities.annotations.EntityID;
+import jalse.entities.annotations.GetEntities;
+import jalse.entities.methods.GetEntitiesMethod;
 
 public class GetEntitiesFunctionTest {
 

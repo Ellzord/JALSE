@@ -1,14 +1,14 @@
 package jalse.entities.methods;
 
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
-import jalse.entities.annotations.KillEntities;
-import jalse.entities.functions.KillEntitiesFunction;
-
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+
+import jalse.entities.Entity;
+import jalse.entities.EntityContainer;
+import jalse.entities.annotations.KillEntities;
+import jalse.entities.functions.KillEntitiesFunction;
 
 /**
  * This is used for mapping calls to {@link EntityContainer#killEntities()}.

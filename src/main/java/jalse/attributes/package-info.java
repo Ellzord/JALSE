@@ -8,4 +8,3 @@
  * @see jalse.attributes.DefaultAttributeContainer
  */
 package jalse.attributes;
-

@@ -1,5 +1,13 @@
 package jalse;
 
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
+
 import jalse.actions.Action;
 import jalse.actions.ActionContext;
 import jalse.actions.ForkJoinActionEngine;
@@ -9,14 +17,6 @@ import jalse.entities.DefaultEntityFactory;
 import jalse.entities.Entity;
 import jalse.entities.EntityEvent;
 import jalse.entities.EntityListener;
-
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class DefaultJALSETest {
 

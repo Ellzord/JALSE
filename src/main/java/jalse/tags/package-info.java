@@ -6,4 +6,3 @@
  * @see jalse.tags.Parent
  */
 package jalse.tags;
-

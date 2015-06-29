@@ -5,15 +5,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import jalse.entities.Entity;
-import jalse.entities.annotations.SetAttribute;
-import jalse.entities.methods.SetAttributeMethod;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Test;
+
+import jalse.entities.Entity;
+import jalse.entities.annotations.SetAttribute;
+import jalse.entities.methods.SetAttributeMethod;
 
 public class SetAttributeFunctionTest {
 

@@ -2,14 +2,15 @@ package jalse.entities.methods;
 
 import static jalse.entities.functions.Functions.defaultValue;
 import static jalse.entities.functions.Functions.toClass;
+
+import java.util.Objects;
+
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeType;
 import jalse.attributes.NamedAttributeType;
 import jalse.entities.Entity;
 import jalse.entities.annotations.SetAttribute;
 import jalse.entities.functions.SetAttributeFunction;
-
-import java.util.Objects;
 
 /**
  * This is used for mapping calls to:

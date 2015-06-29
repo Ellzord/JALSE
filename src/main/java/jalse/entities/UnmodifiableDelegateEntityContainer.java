@@ -1,11 +1,11 @@
 package jalse.entities;
 
-import jalse.attributes.AttributeContainer;
-
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import jalse.attributes.AttributeContainer;
 
 class UnmodifiableDelegateEntityContainer implements EntityContainer {
 

@@ -1,9 +1,9 @@
 package jalse.entities.functions;
 
-import jalse.entities.methods.EntityMethod;
-
 import java.lang.reflect.Method;
 import java.util.function.Function;
+
+import jalse.entities.methods.EntityMethod;
 
 /**
  * A function for resolving {@link Method} to {@link EntityMethod}.

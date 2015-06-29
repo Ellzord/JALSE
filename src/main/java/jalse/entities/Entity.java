@@ -1,5 +1,10 @@
 package jalse.entities;
 
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import jalse.actions.ActionScheduler;
 import jalse.attributes.AttributeContainer;
 import jalse.attributes.AttributeListener;
@@ -7,11 +12,6 @@ import jalse.attributes.AttributeType;
 import jalse.misc.Identifiable;
 import jalse.misc.ListenerSet;
 import jalse.tags.Taggable;
-
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Entity plays the greatest role in the overall data model. An entity is representative of a single
@@ -31,10 +31,10 @@ import java.util.stream.Stream;
  * <code>
  * public interface Animal extends Entity {}
  * public interface FlyingAnimal extends Animal {}
- * 
+ *
  * Entity e; // Previously created entity.
  * e.markAsType(FlyingAnimal.class);
- * 
+ *
  * assert e.isMarkedAsType(Animal.class);
  * </code>
  * </pre>

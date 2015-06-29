@@ -3,13 +3,14 @@ package jalse.actions;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import jalse.actions.MultiAction.OperationType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
+
+import jalse.actions.MultiAction.OperationType;
 
 public class MultiActionTest {
 

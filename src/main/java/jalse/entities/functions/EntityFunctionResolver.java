@@ -1,8 +1,5 @@
 package jalse.entities.functions;
 
-import jalse.entities.Entity;
-import jalse.entities.methods.EntityMethod;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -14,6 +11,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
+
+import jalse.entities.Entity;
+import jalse.entities.methods.EntityMethod;
 
 /**
  * This is a resolver for {@link Entity} types. It can be given a number of
@@ -166,8 +166,8 @@ public class EntityFunctionResolver {
 		if (em != null) {
 		    // Resolved method
 		    if (methodMap.put(m, em) != null) {
-			throw new IllegalArgumentException(String.format(
-				"Method %s of type %s had multiple function hits", m, type));
+			throw new IllegalArgumentException(
+				String.format("Method %s of type %s had multiple function hits", m, type));
 		    }
 		    // Add dependencies to be resolved
 		    totalDependencies.addAll(em.getDependencies());
@@ -195,8 +195,8 @@ public class EntityFunctionResolver {
 
 	    // Check if entity subclass
 	    if (!Entity.class.isAssignableFrom(parent)) {
-		throw new IllegalArgumentException(String.format("Parent type %s of type %s is not an Entity", parent,
-			type));
+		throw new IllegalArgumentException(
+			String.format("Parent type %s of type %s is not an Entity", parent, type));
 	    }
 
 	    // Resolve dependency

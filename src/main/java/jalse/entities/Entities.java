@@ -1,7 +1,5 @@
 package jalse.entities;
 
-import jalse.entities.EntityVisitor.EntityVisitResult;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Objects;
@@ -17,6 +15,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import jalse.entities.EntityVisitor.EntityVisitResult;
 
 /**
  * A utility for {@link Entity} related functionality (specifically around entity types).<br>
@@ -186,8 +186,8 @@ public final class Entities {
     public static Set<UUID> getEntityIDsRecursively(final EntityContainer container) {
 	final Set<UUID> result = new HashSet<>();
 
-	walkEntityTree(container, e -> result.add(e.getID()) ? EntityVisitResult.CONTINUE
-		: EntityVisitResult.IGNORE_CHILDREN);
+	walkEntityTree(container,
+		e -> result.add(e.getID()) ? EntityVisitResult.CONTINUE : EntityVisitResult.IGNORE_CHILDREN);
 
 	return result;
     }
@@ -277,7 +277,8 @@ public final class Entities {
      *            Ancestor type.
      * @return Whether the descendant is equal or descended from the ancestor type.
      */
-    public static boolean isOrSubtype(final Class<? extends Entity> descendant, final Class<? extends Entity> ancestor) {
+    public static boolean isOrSubtype(final Class<? extends Entity> descendant,
+	    final Class<? extends Entity> ancestor) {
 	return ancestor.isAssignableFrom(descendant);
     }
 
@@ -429,7 +430,8 @@ public final class Entities {
      *
      * @see EntityVisitor
      */
-    public static void walkEntityTree(final EntityContainer container, final int maxDepth, final EntityVisitor visitor) {
+    public static void walkEntityTree(final EntityContainer container, final int maxDepth,
+	    final EntityVisitor visitor) {
 	final EntityTreeWalker walker = new EntityTreeWalker(container, maxDepth, visitor);
 	while (walker.isWalking()) {
 	    walker.walk();

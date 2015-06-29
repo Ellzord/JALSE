@@ -3,6 +3,11 @@ package jalse.entities.functions;
 import static jalse.entities.Entities.isEntitySubtype;
 import static jalse.entities.functions.Functions.checkHasReturnType;
 import static jalse.entities.functions.Functions.checkNotDefault;
+
+import java.lang.reflect.Method;
+import java.util.UUID;
+import java.util.function.Supplier;
+
 import jalse.attributes.AttributeContainer;
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.Entity;
@@ -10,10 +15,6 @@ import jalse.entities.EntityContainer;
 import jalse.entities.annotations.EntityID;
 import jalse.entities.annotations.NewEntity;
 import jalse.entities.methods.NewEntityMethod;
-
-import java.lang.reflect.Method;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * This is a method function for {@link NewEntity} annotation. It will resolve an
@@ -25,7 +26,7 @@ import java.util.function.Supplier;
  * <code>
  * {@code @NewEntity}
  * Ghost newGhost();
- * 
+ *
  * {@code @EntityID(random = true)}
  * {@code @NewEntity}
  * Ghost newGhost();
@@ -38,7 +39,7 @@ import java.util.function.Supplier;
  * <code>
  * {@code @NewEntity}
  * Ghost newGhost(UUID id);
- * 
+ *
  * {@code @EntityID(mostSigBits = 0, leastSigBits = 1)}
  * {@code @NewEntity}
  * Ghost newGhost();
@@ -52,7 +53,7 @@ import java.util.function.Supplier;
  * <code>
  * {@code @NewEntity}
  * Ghost newGhost(UUID id, AttributeContainer container);
- * 
+ *
  * {@code @EntityID(mostSigBits = 0, leastSigBits = 1)}
  * {@code @NewEntity}
  * Ghost newGhost(AttributeContainer container);
@@ -65,7 +66,7 @@ import java.util.function.Supplier;
  * <pre>
  * <code>
  * {@code @NewEntity} Ghost newGhost(AttributeContainer container);
- * 
+ *
  * {@code @EntityID(random = true)}
  * {@code @NewEntity}
  * Ghost newGhost(AttributeContainer container);
@@ -127,8 +128,8 @@ public class NewEntityFunction implements EntityMethodFunction {
 
 	// Wether it is a container method
 	final boolean idParam = params.length == 2 || params.length == 1 && UUID.class.equals(params[0]);
-	final boolean containerParam = params.length == 2 || params.length == 1
-		&& AttributeContainer.class.equals(params[0]);
+	final boolean containerParam = params.length == 2
+		|| params.length == 1 && AttributeContainer.class.equals(params[0]);
 
 	// Create new entity method
 	final NewEntityMethod nem = new NewEntityMethod((Class<? extends Entity>) returnType);

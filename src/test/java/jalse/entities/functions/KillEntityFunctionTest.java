@@ -3,16 +3,17 @@ package jalse.entities.functions;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
-import jalse.entities.Entity;
-import jalse.entities.annotations.EntityID;
-import jalse.entities.annotations.KillEntity;
-import jalse.entities.methods.KillEntityMethod;
 
 import java.lang.reflect.Method;
 import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Test;
+
+import jalse.entities.Entity;
+import jalse.entities.annotations.EntityID;
+import jalse.entities.annotations.KillEntity;
+import jalse.entities.methods.KillEntityMethod;
 
 public class KillEntityFunctionTest {
 

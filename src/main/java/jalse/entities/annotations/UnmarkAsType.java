@@ -1,13 +1,13 @@
 package jalse.entities.annotations;
 
-import jalse.entities.Entity;
-import jalse.entities.functions.UnmarkAsTypeFunction;
-import jalse.entities.methods.UnmarkAsTypeMethod;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import jalse.entities.Entity;
+import jalse.entities.functions.UnmarkAsTypeFunction;
+import jalse.entities.methods.UnmarkAsTypeMethod;
 
 /**
  * An {@link Entity} type annotation for {@link Entity#unmarkAsType(Class)}.<br>
@@ -28,5 +28,5 @@ public @interface UnmarkAsType {
      *
      * @return Entity type.
      */
-    Class<? extends Entity> value();
+    Class<? extends Entity>value();
 }

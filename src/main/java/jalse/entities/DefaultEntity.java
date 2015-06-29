@@ -2,6 +2,20 @@ package jalse.entities;
 
 import static jalse.entities.Entities.getTypeAncestry;
 import static jalse.entities.Entities.isSubtype;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Stream;
+
 import jalse.actions.Action;
 import jalse.actions.ActionContext;
 import jalse.actions.ActionEngine;
@@ -17,19 +31,6 @@ import jalse.misc.ListenerSet;
 import jalse.tags.Parent;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Stream;
 
 /**
  * A simple yet fully featured {@link Entity} implementation.<br>
@@ -104,7 +105,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T> boolean addAttributeListener(final NamedAttributeType<T> namedType, final AttributeListener<T> listener) {
+    public <T> boolean addAttributeListener(final NamedAttributeType<T> namedType,
+	    final AttributeListener<T> listener) {
 	return attributes.addAttributeListener(namedType, listener);
     }
 
@@ -309,7 +311,8 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
-    public <T extends Entity> T newEntity(final UUID id, final Class<T> type, final AttributeContainer sourceContainer) {
+    public <T extends Entity> T newEntity(final UUID id, final Class<T> type,
+	    final AttributeContainer sourceContainer) {
 	checkAlive();
 	return entities.newEntity(id, type, sourceContainer);
     }

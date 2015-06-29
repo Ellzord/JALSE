@@ -23,7 +23,7 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
      * @param <T>
      *            Actor type.
      */
-    public class ThreadPoolContext<T> extends AbstractFutureActionContext<T> implements Runnable {
+    public class ThreadPoolContext<T> extends AbstractFutureActionContext<T>implements Runnable {
 
 	private final ActionContext<T> unschedulable;
 

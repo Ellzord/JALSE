@@ -8,14 +8,15 @@ import static jalse.entities.functions.Functions.isPrimitive;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import static jalse.entities.functions.Functions.toClass;
 import static jalse.entities.functions.Functions.wrap;
-import jalse.attributes.AttributeContainer;
-import jalse.entities.DefaultEntityProxyFactory;
-import jalse.entities.annotations.SetAttribute;
-import jalse.entities.methods.SetAttributeMethod;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Optional;
+
+import jalse.attributes.AttributeContainer;
+import jalse.entities.DefaultEntityProxyFactory;
+import jalse.entities.annotations.SetAttribute;
+import jalse.entities.methods.SetAttributeMethod;
 
 /**
  * This is a method function for {@link SetAttribute} annotation. It will resolve an
@@ -29,7 +30,7 @@ import java.util.Optional;
  * <code>
  * {@code @SetAttribute(name = "scary")}
  * Boolean setScary(Boolean scary);
- * 
+ *
  * {@code @SetAttribute}
  * void setScary(Boolean scary);
  * </code>

@@ -1,8 +1,8 @@
 package jalse.entities;
 
-import jalse.actions.ActionEngine;
-
 import java.util.UUID;
+
+import jalse.actions.ActionEngine;
 
 /**
  * An entity factory is used to control the creation, transfer and killing of {@link Entity} within

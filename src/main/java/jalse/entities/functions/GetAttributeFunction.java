@@ -9,14 +9,15 @@ import static jalse.entities.functions.Functions.isPrimitive;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import static jalse.entities.functions.Functions.toClass;
 import static jalse.entities.functions.Functions.wrap;
-import jalse.attributes.AttributeContainer;
-import jalse.entities.DefaultEntityProxyFactory;
-import jalse.entities.annotations.GetAttribute;
-import jalse.entities.methods.GetAttributeMethod;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Optional;
+
+import jalse.attributes.AttributeContainer;
+import jalse.entities.DefaultEntityProxyFactory;
+import jalse.entities.annotations.GetAttribute;
+import jalse.entities.methods.GetAttributeMethod;
 
 /**
  * This is a method function for {@link GetAttribute} annotation. It will resolve an
@@ -30,7 +31,7 @@ import java.util.Optional;
  * <code>
  * {@code @GetAttribute(name = "scary")}
  * Boolean isScary();
- * 
+ *
  * {@code @GetAttribute}
  * Boolean isScary();
  * </code>
@@ -44,7 +45,7 @@ import java.util.Optional;
  * <code>
  * {@code @GetAttribute(name = "scary")}
  * Optional{@code <Boolean>} isScary();
- * 
+ *
  * {@code @GetAttribute}
  * Optional{@code <Boolean>} isScary();
  * </code>

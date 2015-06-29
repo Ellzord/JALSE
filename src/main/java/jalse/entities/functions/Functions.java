@@ -1,7 +1,5 @@
 package jalse.entities.functions;
 
-import jalse.entities.annotations.EntityID;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -14,6 +12,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+
+import jalse.entities.annotations.EntityID;
 
 /**
  * A utility for creating {@link EntityFunction} implementations.
@@ -307,8 +307,9 @@ public final class Functions {
 
     private static Optional<Class<?>> unwrap0(final Class<?> type) {
 	Objects.requireNonNull(type);
-	return PRIMITIVES_WRAPPERS.entrySet().stream().filter(e -> type.equals(e.getValue())).map(Entry::getKey)
-		.findAny();
+	final Optional<Entry<Class<?>, Class<?>>> op = PRIMITIVES_WRAPPERS.entrySet().stream()
+		.filter(e -> type.equals(e.getValue())).findAny();
+	return op.map(e -> e.getValue());
     }
 
     /**
@@ -320,7 +321,8 @@ public final class Functions {
     public static void validateEntityID(final EntityID id) {
 	int changes = 0;
 	// Changed new UUID(m, l)
-	if (id.mostSigBits() != EntityID.DEFAULT_MOST_SIG_BITS || id.leastSigBits() != EntityID.DEFAULT_LEAST_SIG_BITS) {
+	if (id.mostSigBits() != EntityID.DEFAULT_MOST_SIG_BITS
+		|| id.leastSigBits() != EntityID.DEFAULT_LEAST_SIG_BITS) {
 	    changes++;
 	}
 
@@ -336,8 +338,8 @@ public final class Functions {
 
 	// Check changed more than once
 	if (changes > 1) {
-	    throw new IllegalArgumentException(String.format("%s annotation provides multiple ID source info",
-		    EntityID.class));
+	    throw new IllegalArgumentException(
+		    String.format("%s annotation provides multiple ID source info", EntityID.class));
 	}
     }
 

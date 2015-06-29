@@ -1,14 +1,14 @@
 package jalse.entities.functions;
 
-import jalse.entities.Entity;
-import jalse.entities.methods.EntityMethod;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+
+import jalse.entities.Entity;
+import jalse.entities.methods.EntityMethod;
 
 /**
  * A function for a specific {@link Entity} type. This can beused by an {@link InvocationHandler} to

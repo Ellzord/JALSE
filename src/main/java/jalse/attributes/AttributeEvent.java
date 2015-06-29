@@ -1,9 +1,9 @@
 package jalse.attributes;
 
-import jalse.misc.AbstractIdentifiable;
-
 import java.util.Objects;
 import java.util.Optional;
+
+import jalse.misc.AbstractIdentifiable;
 
 /**
  * Attribute change event for {@link AttributeListener}. This is a unique event that contains the

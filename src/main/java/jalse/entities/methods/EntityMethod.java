@@ -1,12 +1,12 @@
 package jalse.entities.methods;
 
-import jalse.entities.Entity;
-import jalse.entities.functions.EntityFunctionResolver;
-import jalse.entities.functions.EntityMethodFunction;
-
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
+
+import jalse.entities.Entity;
+import jalse.entities.functions.EntityFunctionResolver;
+import jalse.entities.functions.EntityMethodFunction;
 
 /**
  * This is used to map from a {@link Method} called on an {@link Entity} type to a desired function.

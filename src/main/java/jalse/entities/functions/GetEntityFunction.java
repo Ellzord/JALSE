@@ -7,18 +7,19 @@ import static jalse.entities.functions.Functions.firstGenericTypeArg;
 import static jalse.entities.functions.Functions.getSingleIDSupplier;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import static jalse.entities.functions.Functions.toClass;
-import jalse.entities.DefaultEntityProxyFactory;
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
-import jalse.entities.annotations.EntityID;
-import jalse.entities.annotations.GetEntity;
-import jalse.entities.methods.GetEntityMethod;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+
+import jalse.entities.DefaultEntityProxyFactory;
+import jalse.entities.Entity;
+import jalse.entities.EntityContainer;
+import jalse.entities.annotations.EntityID;
+import jalse.entities.annotations.GetEntity;
+import jalse.entities.methods.GetEntityMethod;
 
 /**
  * This is a method function for {@link GetEntity} annotation. It will resolve an
@@ -30,7 +31,7 @@ import java.util.function.Supplier;
  * <code>
  * {@code @GetEntity}
  * Entity getGhost(UUID id);
- * 
+ *
  * {@code @EntityID}
  * {@code @GetEntity}
  * Entity getGhost();
@@ -43,7 +44,7 @@ import java.util.function.Supplier;
  * <code>
  * {@code @GetEntity}
  * {@code Optional<Entity>} getGhost(UUID id);
- * 
+ *
  * {@code @EntityID}
  * {@code @GetEntity}
  * {@code Optional<Entity>} getGhost();
@@ -56,7 +57,7 @@ import java.util.function.Supplier;
  * <code>
  * {@code @GetEntity}
  * Ghost getGhost(UUID id);
- * 
+ *
  * {@code @EntityID}
  * {@code @GetEntity}
  * Ghost getGhost();
@@ -70,7 +71,7 @@ import java.util.function.Supplier;
  * <code>
  * {@code @GetEntity}
  * {@code Optional<Ghost>} getGhost(UUID id);
- * 
+ *
  * {@code @EntityID}
  * {@code @GetEntity}
  * {@code Optional<Ghost>} getGhost();

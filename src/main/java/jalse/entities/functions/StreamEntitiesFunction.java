@@ -8,12 +8,6 @@ import static jalse.entities.functions.Functions.firstGenericTypeArg;
 import static jalse.entities.functions.Functions.getIDSuppliers;
 import static jalse.entities.functions.Functions.returnTypeIs;
 import static jalse.entities.functions.Functions.toClass;
-import jalse.entities.DefaultEntityProxyFactory;
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
-import jalse.entities.annotations.EntityID;
-import jalse.entities.annotations.StreamEntities;
-import jalse.entities.methods.StreamEntitiesMethod;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -21,6 +15,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import jalse.entities.DefaultEntityProxyFactory;
+import jalse.entities.Entity;
+import jalse.entities.EntityContainer;
+import jalse.entities.annotations.EntityID;
+import jalse.entities.annotations.StreamEntities;
+import jalse.entities.methods.StreamEntitiesMethod;
 
 /**
  * This is a method function for {@link StreamEntities} annotation. It will resolve an

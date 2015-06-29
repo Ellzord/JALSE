@@ -1,6 +1,15 @@
 package jalse;
 
 import static jalse.actions.Actions.requireNotStopped;
+
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import jalse.actions.Action;
 import jalse.actions.ActionBindings;
 import jalse.actions.ActionContext;
@@ -21,14 +30,6 @@ import jalse.entities.EntityListener;
 import jalse.misc.AbstractIdentifiable;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
-
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * A {@link JALSE} implementation that using default implementations.<br>
@@ -381,7 +382,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public <T extends Entity> T newEntity(final UUID id, final Class<T> type, final AttributeContainer sourceContainer) {
+    public <T extends Entity> T newEntity(final UUID id, final Class<T> type,
+	    final AttributeContainer sourceContainer) {
 	return entities.newEntity(id, type, sourceContainer);
     }
 
@@ -411,8 +413,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     }
 
     @Override
-    public ActionContext<JALSE> scheduleForActor(final Action<JALSE> action, final long initialDelay,
-	    final long period, final TimeUnit unit) {
+    public ActionContext<JALSE> scheduleForActor(final Action<JALSE> action, final long initialDelay, final long period,
+	    final TimeUnit unit) {
 	return scheduler.scheduleForActor(action, initialDelay, period, unit);
     }
 

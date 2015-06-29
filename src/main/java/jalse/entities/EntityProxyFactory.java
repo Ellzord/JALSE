@@ -1,8 +1,8 @@
 package jalse.entities;
 
-import jalse.entities.functions.EntityFunctionResolver;
-
 import java.lang.reflect.InvocationHandler;
+
+import jalse.entities.functions.EntityFunctionResolver;
 
 /**
  * This defines a factory for creating {@link Entity} proxies. Making a proxy of an {@link Entity}

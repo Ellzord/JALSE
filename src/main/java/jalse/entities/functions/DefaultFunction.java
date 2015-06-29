@@ -1,12 +1,12 @@
 package jalse.entities.functions;
 
-import jalse.entities.DefaultEntityProxyFactory;
-import jalse.entities.methods.DefaultMethod;
-
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+
+import jalse.entities.DefaultEntityProxyFactory;
+import jalse.entities.methods.DefaultMethod;
 
 /**
  * This is a method function for {@code default} methods. It will resolve an {@link DefaultMethod}

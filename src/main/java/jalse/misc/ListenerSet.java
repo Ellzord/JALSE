@@ -19,7 +19,7 @@ import java.util.Set;
  * @param <T>
  *            Listener {@code interface}.
  */
-public class ListenerSet<T> extends HashSet<T> implements InvocationHandler {
+public class ListenerSet<T> extends HashSet<T>implements InvocationHandler {
 
     private static final long serialVersionUID = 1437345792255852480L;
 

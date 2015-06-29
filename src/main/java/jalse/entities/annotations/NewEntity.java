@@ -1,15 +1,15 @@
 package jalse.entities.annotations;
 
-import jalse.attributes.AttributeContainer;
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
-import jalse.entities.methods.NewEntityMethod;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.UUID;
+
+import jalse.attributes.AttributeContainer;
+import jalse.entities.Entity;
+import jalse.entities.EntityContainer;
+import jalse.entities.methods.NewEntityMethod;
 
 /**
  * An {@link Entity} type annotation for:

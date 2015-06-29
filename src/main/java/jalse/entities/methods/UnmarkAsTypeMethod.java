@@ -1,12 +1,12 @@
 package jalse.entities.methods;
 
-import jalse.entities.Entity;
-import jalse.entities.annotations.UnmarkAsType;
-import jalse.entities.functions.UnmarkAsTypeFunction;
-
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+
+import jalse.entities.Entity;
+import jalse.entities.annotations.UnmarkAsType;
+import jalse.entities.functions.UnmarkAsTypeFunction;
 
 /**
  * This is used for mapping calls to {@link Entity#unmarkAsType(Class)}.

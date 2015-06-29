@@ -1,9 +1,9 @@
 package jalse.entities;
 
-import jalse.misc.AbstractIdentifiable;
-
 import java.util.Objects;
 import java.util.Optional;
+
+import jalse.misc.AbstractIdentifiable;
 
 /**
  * Entity change event for {@link EntityListener}. This is a unique event that contains the relevant

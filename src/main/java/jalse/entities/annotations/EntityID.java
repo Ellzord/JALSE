@@ -1,14 +1,14 @@
 package jalse.entities.annotations;
 
-import jalse.entities.Entity;
-import jalse.entities.functions.Functions;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.UUID;
+
+import jalse.entities.Entity;
+import jalse.entities.functions.Functions;
 
 /**
  * An {@link Entity} type annotation to represent a {@link UUID}. <br>

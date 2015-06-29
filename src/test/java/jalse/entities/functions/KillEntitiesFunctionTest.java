@@ -4,15 +4,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import jalse.entities.Entity;
-import jalse.entities.annotations.EntityID;
-import jalse.entities.annotations.KillEntities;
-import jalse.entities.methods.KillEntitiesMethod;
 
 import java.lang.reflect.Method;
 
 import org.junit.After;
 import org.junit.Test;
+
+import jalse.entities.Entity;
+import jalse.entities.annotations.EntityID;
+import jalse.entities.annotations.KillEntities;
+import jalse.entities.methods.KillEntitiesMethod;
 
 public class KillEntitiesFunctionTest {
 

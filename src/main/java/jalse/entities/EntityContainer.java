@@ -2,8 +2,6 @@ package jalse.entities;
 
 import static jalse.attributes.Attributes.EMPTY_ATTRIBUTECONTAINER;
 import static jalse.entities.Entities.asType;
-import jalse.attributes.AttributeContainer;
-import jalse.misc.ListenerSet;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -13,6 +11,9 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import jalse.attributes.AttributeContainer;
+import jalse.misc.ListenerSet;
 
 /**
  * This is an {@link Entity} collection. Entities can only be added to a container by creating them

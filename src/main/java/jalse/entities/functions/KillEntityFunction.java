@@ -3,15 +3,16 @@ package jalse.entities.functions;
 import static jalse.entities.functions.Functions.checkNotDefault;
 import static jalse.entities.functions.Functions.hasReturnType;
 import static jalse.entities.functions.Functions.returnTypeIs;
+
+import java.lang.reflect.Method;
+import java.util.UUID;
+import java.util.function.Supplier;
+
 import jalse.entities.DefaultEntityProxyFactory;
 import jalse.entities.EntityContainer;
 import jalse.entities.annotations.EntityID;
 import jalse.entities.annotations.KillEntity;
 import jalse.entities.methods.KillEntityMethod;
-
-import java.lang.reflect.Method;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * This is a method function for {@link KillEntity} annotation. It will resolve an
@@ -23,14 +24,14 @@ import java.util.function.Supplier;
  * <code>
  * {@code @KillEntity}
  * boolean killGhost(UUID id);
- * 
+ *
  * {@code @KillEntity}
  * void killGhost(UUID id);
- * 
+ *
  * {@code @EntityID}
  * {@code @KillEntity}
  * boolean killGhost();
- * 
+ *
  * {@code @EntityID}
  * {@code @KillEntity}
  * void killGhost();

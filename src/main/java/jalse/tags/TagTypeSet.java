@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * @see Object#hashCode()
  *
  */
-public class TagTypeSet extends AbstractSet<Tag> implements Serializable {
+public class TagTypeSet extends AbstractSet<Tag>implements Serializable {
 
     private static final long serialVersionUID = 4251919034814631329L;
 

@@ -1,14 +1,14 @@
 package jalse.entities.annotations;
 
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
-import jalse.entities.functions.KillEntitiesFunction;
-import jalse.entities.methods.KillEntitiesMethod;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import jalse.entities.Entity;
+import jalse.entities.EntityContainer;
+import jalse.entities.functions.KillEntitiesFunction;
+import jalse.entities.methods.KillEntitiesMethod;
 
 /**
  * An {@link Entity} type annotation for {@link EntityContainer#killEntities()}.<br>

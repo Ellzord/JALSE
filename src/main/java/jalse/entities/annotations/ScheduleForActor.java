@@ -1,16 +1,16 @@
 package jalse.entities.annotations;
 
-import jalse.actions.Action;
-import jalse.actions.ActionScheduler;
-import jalse.entities.Entity;
-import jalse.entities.functions.ScheduleForActorFunction;
-import jalse.entities.methods.ScheduleForActorMethod;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.TimeUnit;
+
+import jalse.actions.Action;
+import jalse.actions.ActionScheduler;
+import jalse.entities.Entity;
+import jalse.entities.functions.ScheduleForActorFunction;
+import jalse.entities.methods.ScheduleForActorMethod;
 
 /**
  * An {@link Entity} type annotation for
@@ -48,7 +48,7 @@ public @interface ScheduleForActor {
      * @return Action type.
      *
      */
-    Class<? extends Action<Entity>> action();
+    Class<? extends Action<Entity>>action();
 
     /**
      * Initial delay before executing.

@@ -1,5 +1,10 @@
 package jalse;
 
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import jalse.actions.Action;
 import jalse.actions.ActionEngine;
 import jalse.actions.ActionScheduler;
@@ -8,11 +13,6 @@ import jalse.entities.Entity;
 import jalse.entities.EntityContainer;
 import jalse.misc.Identifiable;
 import jalse.tags.Taggable;
-
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * JALSE is the overall parent container and engine for each simulation. It provides the ability to

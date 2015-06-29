@@ -1,7 +1,5 @@
 package jalse.actions;
 
-import jalse.actions.MultiAction.ActionOperation;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import jalse.actions.MultiAction.ActionOperation;
 
 /**
  * An multi-{@link Action} for creating Actions that chain, schedule or await other actions. This is
@@ -26,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see ThreadPoolActionEngine
  * @see ManualActionEngine
  */
-public final class MultiAction<T> extends CopyOnWriteArrayList<ActionOperation<T>> implements Action<T> {
+public final class MultiAction<T> extends CopyOnWriteArrayList<ActionOperation<T>>implements Action<T> {
 
     /**
      * An {@link Action} operation to be executed by a {@link MultiAction}.

@@ -183,7 +183,8 @@ public interface AttributeContainer {
      *
      * @see #getAttributeListeners(NamedAttributeType)
      */
-    default <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name, final AttributeType<T> type) {
+    default <T> Set<? extends AttributeListener<T>> getAttributeListeners(final String name,
+	    final AttributeType<T> type) {
 	return getAttributeListeners(new NamedAttributeType<>(name, type));
     }
 
@@ -318,7 +319,8 @@ public interface AttributeContainer {
      *            Listener to check presence of.
      * @return Whether the attribute has any listeners.
      */
-    default <T> boolean hasAttributeListener(final NamedAttributeType<T> namedType, final AttributeListener<T> listener) {
+    default <T> boolean hasAttributeListener(final NamedAttributeType<T> namedType,
+	    final AttributeListener<T> listener) {
 	return getAttributeListeners(namedType).contains(listener);
     }
 

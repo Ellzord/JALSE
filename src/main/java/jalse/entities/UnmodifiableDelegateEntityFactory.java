@@ -1,8 +1,8 @@
 package jalse.entities;
 
-import jalse.actions.ActionEngine;
-
 import java.util.UUID;
+
+import jalse.actions.ActionEngine;
 
 class UnmodifiableDelegateEntityFactory implements EntityFactory {
 

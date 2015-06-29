@@ -1,14 +1,14 @@
 package jalse.entities.annotations;
 
-import jalse.entities.Entity;
-import jalse.entities.EntityContainer;
-import jalse.entities.functions.StreamEntitiesFunction;
-import jalse.entities.methods.StreamEntitiesMethod;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import jalse.entities.Entity;
+import jalse.entities.EntityContainer;
+import jalse.entities.functions.StreamEntitiesFunction;
+import jalse.entities.methods.StreamEntitiesMethod;
 
 /**
  * An {@link Entity} type annotation for:

@@ -1,8 +1,6 @@
 package jalse.entities;
 
 import static jalse.entities.Entities.asType;
-import jalse.attributes.AttributeContainer;
-import jalse.misc.ListenerSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +13,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
+
+import jalse.attributes.AttributeContainer;
+import jalse.misc.ListenerSet;
 
 /**
  * An DefaultEntityContainer is a thread-safe implementation of {@link EntityContainer}. <br>
@@ -207,7 +208,8 @@ public class DefaultEntityContainer implements EntityContainer {
     }
 
     @Override
-    public <T extends Entity> T newEntity(final UUID id, final Class<T> type, final AttributeContainer sourceContainer) {
+    public <T extends Entity> T newEntity(final UUID id, final Class<T> type,
+	    final AttributeContainer sourceContainer) {
 	Objects.requireNonNull(type);
 	return asType(newEntity0(id, type, sourceContainer), type);
     }

@@ -5,17 +5,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import jalse.actions.Action;
-import jalse.actions.ActionContext;
-import jalse.entities.Entity;
-import jalse.entities.annotations.ScheduleForActor;
-import jalse.entities.methods.ScheduleForActorMethod;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Test;
+
+import jalse.actions.Action;
+import jalse.actions.ActionContext;
+import jalse.entities.Entity;
+import jalse.entities.annotations.ScheduleForActor;
+import jalse.entities.methods.ScheduleForActorMethod;
 
 public class ScheduleForActorFunctionTest {
 

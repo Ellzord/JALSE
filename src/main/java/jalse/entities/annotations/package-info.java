@@ -4,4 +4,3 @@
  * {@link jalse.entities.Entity} types.
  */
 package jalse.entities.annotations;
-

@@ -1,12 +1,12 @@
 package jalse.entities.methods;
 
-import jalse.entities.Entity;
-import jalse.entities.annotations.MarkAsType;
-import jalse.entities.functions.MarkAsTypeFunction;
-
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+
+import jalse.entities.Entity;
+import jalse.entities.annotations.MarkAsType;
+import jalse.entities.functions.MarkAsTypeFunction;
 
 /**
  * This is used for mapping calls to {@link Entity#markAsType(Class)}.

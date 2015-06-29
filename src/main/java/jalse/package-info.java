@@ -6,4 +6,3 @@
  * @see jalse.DefaultJALSE
  */
 package jalse;
-

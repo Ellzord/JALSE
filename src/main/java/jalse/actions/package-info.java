@@ -10,4 +10,3 @@
  * @see jalse.actions.Actions
  */
 package jalse.actions;
-
