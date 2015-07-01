@@ -5,6 +5,7 @@ import static jalse.entities.Entities.asType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -32,159 +33,44 @@ import jalse.misc.ListenerSet;
  *
  */
 public class DefaultEntityContainer implements EntityContainer {
-    
+
     /**
-     * A {@link DefaultEntityContainer} instance builder that uses the provided {@link EntityFactory}
-     * and delegate {@link EntityContainer}.<br>
+     * A {@link DefaultEntityContainer} instance builder that uses the provided
+     * {@link EntityFactory} and delegate {@link EntityContainer}.<br>
      *
      * @author Dennis Ting
-     * 
+     *
      */
     public static final class Builder {
-	
-	private final Set<EntityListener> listeners;
-	private final Map<UUID, EntityStub> entities;
-	
-	private EntityFactory factory;
-	private EntityContainer delegateContainer;
-	
+
+	private class EntityStub {
+
+	    private final UUID id;
+	    private final Class<? extends Entity> type;
+	    private final AttributeContainer sourceContainer;
+
+	    public EntityStub(final UUID id, final Class<? extends Entity> type,
+		    final AttributeContainer sourceContainer) {
+		this.id = id;
+		this.type = type;
+		this.sourceContainer = sourceContainer;
+	    }
+	}
+
+	private final Set<EntityListener> builderListeners;
+	private final List<EntityStub> builderEntities;
+	private EntityFactory builderFactory;
+	private EntityContainer builderDelegateContainer;
+
 	/**
 	 * Creates a new Builder instance.
 	 */
-	public Builder() {	
-	    listeners = new HashSet<>();
-	    entities = new HashMap<>();     
+	public Builder() {
+	    builderFactory = new DefaultEntityFactory();
+	    builderListeners = new HashSet<>();
+	    builderEntities = new ArrayList<>();
 	}
-	
-	/**
-	 * Builds an instance of DefaultEntityContainer with the supplied parameters.
-	 *
-	 * @return Newly created DefaultEntityContainer instance.
-	 */
-	public DefaultEntityContainer build() {
-	    DefaultEntityContainer container;
-	    if (factory == null && delegateContainer == null) {
-		container = new DefaultEntityContainer();
-	    } else if (delegateContainer == null) {
-		container = new DefaultEntityContainer(factory);
-	    } else {
-		container = new DefaultEntityContainer(factory, delegateContainer);
-	    }
-	    entities.forEach((id, entityStub) -> {
-		final Class<? extends Entity> type = entityStub.getType();
-		final AttributeContainer sourceContainer = entityStub.getContainer();
-		if (type == null && sourceContainer == null) {
-		    container.newEntity(id);
-		} else if (sourceContainer == null) {
-		    container.newEntity(id, type);
-		} else if (type == null) {
-		    container.newEntity(id, sourceContainer);
-		} else {
-		    container.newEntity(id, type, sourceContainer);
-		}
-	    });
-	    listeners.forEach(container::addEntityListener);
-	    return container;
-	}
-	
-	/**
-	 * Sets EntityFactory.
-	 *
-	 * @param factory
-	 *            Entity creation/death factory.
-	 * @return This builder.
-	 */
-	public Builder setFactory(final EntityFactory factory) {
-	    this.factory = factory;
-	    return this;
-	}
-	
-	/**
-	 * Sets EntityFactory and DelegateContainer.
-	 *
-	 * @param factory
-	 *            Entity creation/death factory.
-	 * @param delegateContainer
-	 *            Delegate container for events and entity creation.
-	 * @return This builder.
-	 */
-	public Builder setFactoryAndDelegateContainer(final EntityFactory factory, 
-		final EntityContainer delegateContainer) {
-	    setFactory(factory);
-	    this.delegateContainer = delegateContainer;
-	    return this;
-	}
-	
-	/**
-	 * Adds an Entity to be created when building.
-	 *
-	 * @param id
-	 *            ID for Entity.
-	 * @return This builder.
-	 * @throws IllegalArgumentException
-	 */
-	public Builder newEntity(final UUID id) {
-	    if (entities.containsKey(id)) {
-		throw new IllegalArgumentException(String.format("Entity %s is already added", id));
-	    }
-	    entities.put(id, new EntityStub());
-	    return this;
-	}
-	
-	/**
-	 * Adds an Entity to be created when building.
-	 *
-	 * @param id
-	 *            ID for Entity.
-	 * @param sourceContainer
-	 *            AttributeContainer for entity.
-	 * @return This builder.
-	 * @throws IllegalArgumentException
-	 */
-	public Builder newEntity(final UUID id, final AttributeContainer sourceContainer) {
-	    if (entities.containsKey(id)) {
-		throw new IllegalArgumentException(String.format("Entity %s is already added", id));
-	    }
-	    entities.put(id, new EntityStub(sourceContainer));
-	    return this;
-	}
-	
-	/**
-	 * Adds an Entity to be created when building.
-	 *
-	 * @param id
-	 *            ID for Entity.
-	 * @param type
-	 * 	      Class for Entity.
-	 * @return This builder.
-	 * @throws IllegalArgumentException
-	 */
-	public <T extends Entity> Builder newEntity(final UUID id, final Class<T> type) {
-	    if (entities.containsKey(id)) {
-		throw new IllegalArgumentException(String.format("Entity %s is already added", id));
-	    }
-	    entities.put(id, new EntityStub(type));
-	    return this;
-	}
-	
-	/**
-	 * Adds an Entity to be created when building.
-	 *
-	 * @param id
-	 *            ID for Entity.
-	 * @param type
-	 * 	      Class for Entity.
-	 * @param sourceContainer
-	 *            AttributeContainer for entity.
-	 * @return This builder.
-	 * @throws IllegalArgumentException
-	 */
-	public <T extends Entity> Builder newEntity(final UUID id, final Class<T> type, 
-		final AttributeContainer sourceContainer) {
-	    entities.put(id, new EntityStub(type, sourceContainer));
-	    return this;
-	}
-	
+
 	/**
 	 * Adds new EntityListener.
 	 *
@@ -193,40 +79,114 @@ public class DefaultEntityContainer implements EntityContainer {
 	 * @return This builder.
 	 */
 	public Builder addListener(final EntityListener listener) {
-	    listeners.add(listener);
+	    builderListeners.add(listener);
 	    return this;
 	}
-	
-	public static class EntityStub {
 
-	    private final Class<? extends Entity> type;
-	    private final AttributeContainer sourceContainer;
-	    
-	    public EntityStub() {
-		this(null, null);
+	/**
+	 * Builds an instance of DefaultEntityContainer with the supplied parameters.
+	 *
+	 * @return Newly created DefaultEntityContainer instance.
+	 */
+	public DefaultEntityContainer build() {
+	    DefaultEntityContainer container;
+	    if (builderDelegateContainer == null) {
+		container = new DefaultEntityContainer(builderFactory);
+	    } else {
+		container = new DefaultEntityContainer(builderFactory, builderDelegateContainer);
 	    }
-	    
-	    public EntityStub(final Class<? extends Entity> type) {
-		this(type, null);
-	    }
-	    
-	    public EntityStub(final AttributeContainer sourceContainer) {
-		this(null, sourceContainer);
-	    }
-	    
-	    public EntityStub(final Class<? extends Entity> type, 
-		    final AttributeContainer sourceContainer) {
-		this.type = type;
-		this.sourceContainer = sourceContainer;
-	    }
-	    
-	    public Class<? extends Entity> getType() {
-		return type;
-	    }
-	    
-	    public AttributeContainer getContainer() {
-		return sourceContainer;
-	    }
+	    builderEntities.forEach(entity -> {
+		if (entity.sourceContainer != null) {
+		    container.newEntity0(entity.id, entity.type, entity.sourceContainer);
+		} else if (entity.type != null) {
+		    container.newEntity(entity.id, entity.type);
+		} else {
+		    container.newEntity(entity.id);
+		}
+	    });
+	    builderListeners.forEach(container::addEntityListener);
+	    return container;
+	}
+
+	/**
+	 * Adds an Entity to be created when building.
+	 *
+	 * @param id
+	 *            ID for Entity.
+	 * @return This builder.
+	 */
+	public Builder newEntity(final UUID id) {
+	    builderEntities.add(new EntityStub(id, null, null));
+	    return this;
+	}
+
+	/**
+	 * Adds an Entity to be created when building.
+	 *
+	 * @param id
+	 *            ID for Entity.
+	 * @param sourceContainer
+	 *            AttributeContainer for entity.
+	 * @return This builder.
+	 */
+	public Builder newEntity(final UUID id, final AttributeContainer sourceContainer) {
+	    builderEntities.add(new EntityStub(id, null, sourceContainer));
+	    return this;
+	}
+
+	/**
+	 * Adds an Entity to be created when building.
+	 *
+	 * @param id
+	 *            ID for Entity.
+	 * @param type
+	 *            Class for Entity.
+	 * @return This builder.
+	 */
+	public <T extends Entity> Builder newEntity(final UUID id, final Class<T> type) {
+	    builderEntities.add(new EntityStub(id, type, null));
+	    return this;
+	}
+
+	/**
+	 * Adds an Entity to be created when building.
+	 *
+	 * @param id
+	 *            ID for Entity.
+	 * @param type
+	 *            Class for Entity.
+	 * @param sourceContainer
+	 *            AttributeContainer for entity.
+	 * @return This builder.
+	 */
+	public <T extends Entity> Builder newEntity(final UUID id, final Class<T> type,
+		final AttributeContainer sourceContainer) {
+	    builderEntities.add(new EntityStub(id, type, sourceContainer));
+	    return this;
+	}
+
+	/**
+	 * Sets DelegateContainer.
+	 *
+	 * @param delegateContainer
+	 *            Delegate container for events and entity creation.
+	 * @return This builder.
+	 */
+	public Builder setDelegateContainer(final EntityContainer delegateContainer) {
+	    builderDelegateContainer = delegateContainer;
+	    return this;
+	}
+
+	/**
+	 * Sets EntityFactory.
+	 *
+	 * @param factory
+	 *            Entity creation/death factory.
+	 * @return This builder.
+	 */
+	public Builder setFactory(final EntityFactory factory) {
+	    builderFactory = factory;
+	    return this;
 	}
     }
 

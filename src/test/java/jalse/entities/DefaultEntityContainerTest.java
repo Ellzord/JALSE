@@ -38,12 +38,20 @@ public class DefaultEntityContainerTest {
 	@Test
 	public void buildTest3() {
 	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
-	    builder.setFactoryAndDelegateContainer(new DefaultEntityFactory(), new DefaultEntityContainer());
+	    builder.setDelegateContainer(new DefaultEntityContainer());
+	    container = builder.build();
+	}
+	
+	@Test
+	public void buildTest4() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    builder.setFactory(new DefaultEntityFactory());
+	    builder.setDelegateContainer(new DefaultEntityContainer());
 	    container = builder.build();
 	}
 
 	@Test
-	public void buildTest4() {
+	public void buildTest5() {
 	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
 	    builder.newEntity(new UUID(0, 0));
 	    container = builder.build();
@@ -52,7 +60,7 @@ public class DefaultEntityContainerTest {
 	}
 
 	@Test
-	public void buildTest5() {
+	public void buildTest6() {
 	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
 	    builder.newEntity(new UUID(0, 0), TestEntity.class);
 	    container = builder.build();
@@ -60,7 +68,7 @@ public class DefaultEntityContainerTest {
 	}
 
 	@Test
-	public void buildTest6() {
+	public void buildTest7() {
 	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
 	    builder.newEntity(new UUID(0, 0), TestEntity.class, new DefaultAttributeContainer());
 	    container = builder.build();
@@ -68,7 +76,7 @@ public class DefaultEntityContainerTest {
 	}
 
 	@Test
-	public void buildTest7() {
+	public void buildTest8() {
 	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
 	    builder.addListener(new EntityListener() {});
 	    container = builder.build();
@@ -81,6 +89,7 @@ public class DefaultEntityContainerTest {
 	    final UUID id = new UUID(0, 0);
 	    builder.newEntity(id);
 	    builder.newEntity(id, TestEntity.class);
+	    builder.build();
 	}
     }
 

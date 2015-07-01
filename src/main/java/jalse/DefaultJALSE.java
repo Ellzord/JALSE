@@ -297,8 +297,7 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	factory.setEngine(engine);
 	scheduler = new DefaultActionScheduler<>(this);
 	scheduler.setEngine(engine);
-	entities = new DefaultEntityContainer.Builder()
-		.setFactoryAndDelegateContainer(factory, this).build();
+	entities = new DefaultEntityContainer(factory, this);
 	tags = new TagTypeSet();
     }
 
