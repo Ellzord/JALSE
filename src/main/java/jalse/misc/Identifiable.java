@@ -76,7 +76,7 @@ public interface Identifiable {
     }
 
     /**
-     * Creates a simple to string for the identifiable. This is structured like {@code 
+     * Creates a simple to string for the identifiable. This is structured like {@code
      * <SIMPLE_CLASS_NAME> [id=X]}.
      *
      * @param obj

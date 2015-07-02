@@ -10,7 +10,7 @@ import org.junit.Test;
 import jalse.attributes.DefaultAttributeContainer;
 
 public class DefaultEntityContainerTest {
-    
+
     public static class BuilderTest {
 
 	DefaultEntityContainer container = null;
@@ -18,6 +18,15 @@ public class DefaultEntityContainerTest {
 	@After
 	public void after() {
 	    container = null;
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void buildDuplicateId() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    final UUID id = new UUID(0, 0);
+	    builder.newEntity(id);
+	    builder.newEntity(id, TestEntity.class);
+	    builder.build();
 	}
 
 	@Test
@@ -41,7 +50,7 @@ public class DefaultEntityContainerTest {
 	    builder.setDelegateContainer(new DefaultEntityContainer());
 	    container = builder.build();
 	}
-	
+
 	@Test
 	public void buildTest4() {
 	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
@@ -81,15 +90,6 @@ public class DefaultEntityContainerTest {
 	    builder.addListener(new EntityListener() {});
 	    container = builder.build();
 	    Assert.assertFalse(container.getEntityListeners().isEmpty());
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void buildDuplicateId() {
-	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
-	    final UUID id = new UUID(0, 0);
-	    builder.newEntity(id);
-	    builder.newEntity(id, TestEntity.class);
-	    builder.build();
 	}
     }
 

@@ -50,9 +50,9 @@ public class DefaultEntityContainer implements EntityContainer {
 	    private final Class<? extends Entity> type;
 	    private final AttributeContainer sourceContainer;
 
-	    public EntityStub(final UUID id, final Class<? extends Entity> type,
+	    private EntityStub(final UUID id, final Class<? extends Entity> type,
 		    final AttributeContainer sourceContainer) {
-		this.id = id;
+		this.id = Objects.requireNonNull(id);
 		this.type = type;
 		this.sourceContainer = sourceContainer != null ? sourceContainer : EMPTY_ATTRIBUTECONTAINER;
 	    }
@@ -69,7 +69,8 @@ public class DefaultEntityContainer implements EntityContainer {
 	public Builder() {
 	    builderListeners = new HashSet<>();
 	    builderEntities = new ArrayList<>();
-	    builderFactory = new DefaultEntityFactory();
+	    builderFactory = null;
+	    builderDelegateContainer = null;
 	}
 
 	/**
@@ -80,7 +81,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	 * @return This builder.
 	 */
 	public Builder addListener(final EntityListener listener) {
-	    builderListeners.add(listener);
+	    builderListeners.add(Objects.requireNonNull(listener));
 	    return this;
 	}
 
@@ -90,8 +91,9 @@ public class DefaultEntityContainer implements EntityContainer {
 	 * @return Newly created DefaultEntityContainer instance.
 	 */
 	public DefaultEntityContainer build() {
-	    final DefaultEntityContainer container = new DefaultEntityContainer(builderFactory,
-		    builderDelegateContainer, builderListeners);
+	    final EntityFactory factory = builderFactory != null ? builderFactory : new DefaultEntityFactory();
+	    final DefaultEntityContainer container = new DefaultEntityContainer(factory, builderDelegateContainer,
+		    builderListeners);
 	    builderEntities.forEach(e -> container.newEntity0(e.id, e.type, e.sourceContainer));
 	    return container;
 	}
@@ -118,7 +120,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	 * @return This builder.
 	 */
 	public Builder newEntity(final UUID id, final AttributeContainer sourceContainer) {
-	    builderEntities.add(new EntityStub(id, null, sourceContainer));
+	    builderEntities.add(new EntityStub(id, null, Objects.requireNonNull(sourceContainer)));
 	    return this;
 	}
 
@@ -132,7 +134,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	 * @return This builder.
 	 */
 	public <T extends Entity> Builder newEntity(final UUID id, final Class<T> type) {
-	    builderEntities.add(new EntityStub(id, type, null));
+	    builderEntities.add(new EntityStub(id, Objects.requireNonNull(type), null));
 	    return this;
 	}
 
@@ -149,7 +151,8 @@ public class DefaultEntityContainer implements EntityContainer {
 	 */
 	public <T extends Entity> Builder newEntity(final UUID id, final Class<T> type,
 		final AttributeContainer sourceContainer) {
-	    builderEntities.add(new EntityStub(id, type, sourceContainer));
+	    builderEntities
+		    .add(new EntityStub(id, Objects.requireNonNull(type), Objects.requireNonNull(sourceContainer)));
 	    return this;
 	}
 
@@ -161,7 +164,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	 * @return This builder.
 	 */
 	public Builder setDelegateContainer(final EntityContainer delegateContainer) {
-	    builderDelegateContainer = delegateContainer;
+	    builderDelegateContainer = Objects.requireNonNull(delegateContainer);
 	    return this;
 	}
 
@@ -173,7 +176,7 @@ public class DefaultEntityContainer implements EntityContainer {
 	 * @return This builder.
 	 */
 	public Builder setFactory(final EntityFactory factory) {
-	    builderFactory = factory;
+	    builderFactory = Objects.requireNonNull(factory);
 	    return this;
 	}
     }
