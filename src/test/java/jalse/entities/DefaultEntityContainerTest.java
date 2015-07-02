@@ -10,6 +10,88 @@ import org.junit.Test;
 import jalse.attributes.DefaultAttributeContainer;
 
 public class DefaultEntityContainerTest {
+    
+    public static class BuilderTest {
+
+	DefaultEntityContainer container = null;
+
+	@After
+	public void after() {
+	    container = null;
+	}
+
+	@Test
+	public void buildTest1() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    container = builder.build();
+	    Assert.assertTrue(container.getEntityListeners().isEmpty());
+	    Assert.assertTrue(container.getEntities().isEmpty());
+	}
+
+	@Test
+	public void buildTest2() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    builder.setFactory(new DefaultEntityFactory());
+	    container = builder.build();
+	}
+
+	@Test
+	public void buildTest3() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    builder.setDelegateContainer(new DefaultEntityContainer());
+	    container = builder.build();
+	}
+	
+	@Test
+	public void buildTest4() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    builder.setFactory(new DefaultEntityFactory());
+	    builder.setDelegateContainer(new DefaultEntityContainer());
+	    container = builder.build();
+	}
+
+	@Test
+	public void buildTest5() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    builder.newEntity(new UUID(0, 0));
+	    container = builder.build();
+	    Assert.assertFalse(container.getEntities().isEmpty());
+	    Assert.assertTrue(container.getEntitiesOfType(TestEntity.class).isEmpty());
+	}
+
+	@Test
+	public void buildTest6() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    builder.newEntity(new UUID(0, 0), TestEntity.class);
+	    container = builder.build();
+	    Assert.assertFalse(container.getEntitiesOfType(TestEntity.class).isEmpty());
+	}
+
+	@Test
+	public void buildTest7() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    builder.newEntity(new UUID(0, 0), TestEntity.class, new DefaultAttributeContainer());
+	    container = builder.build();
+	    Assert.assertFalse(container.getEntitiesOfType(TestEntity.class).isEmpty());
+	}
+
+	@Test
+	public void buildTest8() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    builder.addListener(new EntityListener() {});
+	    container = builder.build();
+	    Assert.assertFalse(container.getEntityListeners().isEmpty());
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void buildDuplicateId() {
+	    final DefaultEntityContainer.Builder builder = new DefaultEntityContainer.Builder();
+	    final UUID id = new UUID(0, 0);
+	    builder.newEntity(id);
+	    builder.newEntity(id, TestEntity.class);
+	    builder.build();
+	}
+    }
 
     private interface TestEntity extends Entity {}
 

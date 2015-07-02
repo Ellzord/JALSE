@@ -1,10 +1,12 @@
 package jalse.entities;
 
+import static jalse.attributes.Attributes.EMPTY_ATTRIBUTECONTAINER;
 import static jalse.entities.Entities.asType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -33,10 +35,153 @@ import jalse.misc.ListenerSet;
  */
 public class DefaultEntityContainer implements EntityContainer {
 
+    /**
+     * A {@link DefaultEntityContainer} instance builder that uses the provided
+     * {@link EntityFactory} and delegate {@link EntityContainer}.<br>
+     *
+     * @author Dennis Ting
+     *
+     */
+    public static final class Builder {
+
+	private class EntityStub {
+
+	    private final UUID id;
+	    private final Class<? extends Entity> type;
+	    private final AttributeContainer sourceContainer;
+
+	    public EntityStub(final UUID id, final Class<? extends Entity> type,
+		    final AttributeContainer sourceContainer) {
+		this.id = id;
+		this.type = type;
+		this.sourceContainer = sourceContainer != null ? sourceContainer : EMPTY_ATTRIBUTECONTAINER;
+	    }
+	}
+
+	private final Set<EntityListener> builderListeners;
+	private final List<EntityStub> builderEntities;
+	private EntityFactory builderFactory;
+	private EntityContainer builderDelegateContainer;
+
+	/**
+	 * Creates a new Builder instance.
+	 */
+	public Builder() {
+	    builderListeners = new HashSet<>();
+	    builderEntities = new ArrayList<>();
+	    builderFactory = new DefaultEntityFactory();
+	}
+
+	/**
+	 * Adds new EntityListener.
+	 *
+	 * @param listener
+	 *            EntityListener.
+	 * @return This builder.
+	 */
+	public Builder addListener(final EntityListener listener) {
+	    builderListeners.add(listener);
+	    return this;
+	}
+
+	/**
+	 * Builds an instance of DefaultEntityContainer with the supplied parameters.
+	 *
+	 * @return Newly created DefaultEntityContainer instance.
+	 */
+	public DefaultEntityContainer build() {
+	    final DefaultEntityContainer container = new DefaultEntityContainer(builderFactory,
+		    builderDelegateContainer, builderListeners);
+	    builderEntities.forEach(e -> container.newEntity0(e.id, e.type, e.sourceContainer));
+	    return container;
+	}
+
+	/**
+	 * Adds an Entity to be created when building.
+	 *
+	 * @param id
+	 *            ID for Entity.
+	 * @return This builder.
+	 */
+	public Builder newEntity(final UUID id) {
+	    builderEntities.add(new EntityStub(id, null, null));
+	    return this;
+	}
+
+	/**
+	 * Adds an Entity to be created when building.
+	 *
+	 * @param id
+	 *            ID for Entity.
+	 * @param sourceContainer
+	 *            AttributeContainer for entity.
+	 * @return This builder.
+	 */
+	public Builder newEntity(final UUID id, final AttributeContainer sourceContainer) {
+	    builderEntities.add(new EntityStub(id, null, sourceContainer));
+	    return this;
+	}
+
+	/**
+	 * Adds an Entity to be created when building.
+	 *
+	 * @param id
+	 *            ID for Entity.
+	 * @param type
+	 *            Class for Entity.
+	 * @return This builder.
+	 */
+	public <T extends Entity> Builder newEntity(final UUID id, final Class<T> type) {
+	    builderEntities.add(new EntityStub(id, type, null));
+	    return this;
+	}
+
+	/**
+	 * Adds an Entity to be created when building.
+	 *
+	 * @param id
+	 *            ID for Entity.
+	 * @param type
+	 *            Class for Entity.
+	 * @param sourceContainer
+	 *            AttributeContainer for entity.
+	 * @return This builder.
+	 */
+	public <T extends Entity> Builder newEntity(final UUID id, final Class<T> type,
+		final AttributeContainer sourceContainer) {
+	    builderEntities.add(new EntityStub(id, type, sourceContainer));
+	    return this;
+	}
+
+	/**
+	 * Sets DelegateContainer.
+	 *
+	 * @param delegateContainer
+	 *            Delegate container for events and entity creation.
+	 * @return This builder.
+	 */
+	public Builder setDelegateContainer(final EntityContainer delegateContainer) {
+	    builderDelegateContainer = delegateContainer;
+	    return this;
+	}
+
+	/**
+	 * Sets EntityFactory.
+	 *
+	 * @param factory
+	 *            Entity creation/death factory.
+	 * @return This builder.
+	 */
+	public Builder setFactory(final EntityFactory factory) {
+	    builderFactory = factory;
+	    return this;
+	}
+    }
+
     private final Map<UUID, Entity> entities;
     private final ListenerSet<EntityListener> listeners;
     private final EntityFactory factory;
-    private EntityContainer delegateContainer;
+    private final EntityContainer delegateContainer;
     private final Lock read;
     private final Lock write;
 
@@ -55,13 +200,7 @@ public class DefaultEntityContainer implements EntityContainer {
      *            Entity creation/death factory.
      */
     public DefaultEntityContainer(final EntityFactory factory) {
-	this.factory = Objects.requireNonNull(factory);
-	delegateContainer = this;
-	entities = new HashMap<>();
-	listeners = new ListenerSet<>(EntityListener.class);
-	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-	read = rwLock.readLock();
-	write = rwLock.writeLock();
+	this(factory, null, null);
     }
 
     /**
@@ -73,8 +212,21 @@ public class DefaultEntityContainer implements EntityContainer {
      *            Delegate container for events and entity creation.
      */
     public DefaultEntityContainer(final EntityFactory factory, final EntityContainer delegateContainer) {
-	this(factory);
-	setDelegateContainer(delegateContainer);
+	this(factory, Objects.requireNonNull(delegateContainer), null);
+    }
+
+    private DefaultEntityContainer(final EntityFactory factory, final EntityContainer delegateContainer,
+	    final Set<EntityListener> listeners) {
+	this.factory = Objects.requireNonNull(factory);
+	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
+	entities = new HashMap<>();
+	this.listeners = new ListenerSet<>(EntityListener.class);
+	if (listeners != null) {
+	    this.listeners.addAll(listeners);
+	}
+	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	read = rwLock.readLock();
+	write = rwLock.writeLock();
     }
 
     @Override
@@ -294,10 +446,6 @@ public class DefaultEntityContainer implements EntityContainer {
 	} finally {
 	    write.unlock();
 	}
-    }
-
-    private void setDelegateContainer(final EntityContainer delegateContainer) {
-	this.delegateContainer = Objects.requireNonNull(delegateContainer);
     }
 
     @Override
