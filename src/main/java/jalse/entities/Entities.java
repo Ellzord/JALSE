@@ -314,8 +314,25 @@ public final class Entities {
      * @return Random entity (if found).
      */
     public static Optional<Entity> randomEntity(final EntityContainer container) {
-	return container.streamEntities().skip(ThreadLocalRandom.current().nextInt(container.getEntityCount()))
-		.findFirst();
+	int size = container.getEntityCount();
+	return size > 0 ? container.streamEntities().skip(ThreadLocalRandom.current().nextInt(size)).findFirst()
+		: Optional.empty();
+    }
+
+    /**
+     * Gets a random entity from the container of the given type (if there is one).
+     *
+     * @param container
+     *            Source container.
+     * @param type
+     *            Entity type.
+     * @return Random entity (if found).
+     */
+    public static <T extends Entity> Optional<T> randomEntityOfType(final EntityContainer container, Class<T> type) {
+	Set<T> entities = container.getEntitiesOfType(type);
+	int size = entities.size();
+	return size > 0 ? entities.stream().skip(ThreadLocalRandom.current().nextInt(size)).findFirst()
+		: Optional.empty();
     }
 
     public static void setProxyFactory(final EntityProxyFactory newFactory) {
