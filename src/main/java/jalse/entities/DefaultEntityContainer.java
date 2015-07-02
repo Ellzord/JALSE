@@ -1,5 +1,6 @@
 package jalse.entities;
 
+import static jalse.attributes.Attributes.EMPTY_ATTRIBUTECONTAINER;
 import static jalse.entities.Entities.asType;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class DefaultEntityContainer implements EntityContainer {
 		    final AttributeContainer sourceContainer) {
 		this.id = id;
 		this.type = type;
-		this.sourceContainer = sourceContainer;
+		this.sourceContainer = sourceContainer != null ? sourceContainer : EMPTY_ATTRIBUTECONTAINER;
 	    }
 	}
 
@@ -66,9 +67,9 @@ public class DefaultEntityContainer implements EntityContainer {
 	 * Creates a new Builder instance.
 	 */
 	public Builder() {
-	    builderFactory = new DefaultEntityFactory();
 	    builderListeners = new HashSet<>();
 	    builderEntities = new ArrayList<>();
+	    builderFactory = new DefaultEntityFactory();
 	}
 
 	/**
@@ -89,22 +90,9 @@ public class DefaultEntityContainer implements EntityContainer {
 	 * @return Newly created DefaultEntityContainer instance.
 	 */
 	public DefaultEntityContainer build() {
-	    DefaultEntityContainer container;
-	    if (builderDelegateContainer == null) {
-		container = new DefaultEntityContainer(builderFactory);
-	    } else {
-		container = new DefaultEntityContainer(builderFactory, builderDelegateContainer);
-	    }
-	    builderEntities.forEach(entity -> {
-		if (entity.sourceContainer != null) {
-		    container.newEntity0(entity.id, entity.type, entity.sourceContainer);
-		} else if (entity.type != null) {
-		    container.newEntity(entity.id, entity.type);
-		} else {
-		    container.newEntity(entity.id);
-		}
-	    });
-	    builderListeners.forEach(container::addEntityListener);
+	    final DefaultEntityContainer container = new DefaultEntityContainer(builderFactory,
+		    builderDelegateContainer, builderListeners);
+	    builderEntities.forEach(e -> container.newEntity0(e.id, e.type, e.sourceContainer));
 	    return container;
 	}
 
@@ -193,7 +181,7 @@ public class DefaultEntityContainer implements EntityContainer {
     private final Map<UUID, Entity> entities;
     private final ListenerSet<EntityListener> listeners;
     private final EntityFactory factory;
-    private EntityContainer delegateContainer;
+    private final EntityContainer delegateContainer;
     private final Lock read;
     private final Lock write;
 
@@ -212,13 +200,7 @@ public class DefaultEntityContainer implements EntityContainer {
      *            Entity creation/death factory.
      */
     public DefaultEntityContainer(final EntityFactory factory) {
-	this.factory = Objects.requireNonNull(factory);
-	delegateContainer = this;
-	entities = new HashMap<>();
-	listeners = new ListenerSet<>(EntityListener.class);
-	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-	read = rwLock.readLock();
-	write = rwLock.writeLock();
+	this(factory, null, null);
     }
 
     /**
@@ -230,8 +212,21 @@ public class DefaultEntityContainer implements EntityContainer {
      *            Delegate container for events and entity creation.
      */
     public DefaultEntityContainer(final EntityFactory factory, final EntityContainer delegateContainer) {
-	this(factory);
-	setDelegateContainer(delegateContainer);
+	this(factory, Objects.requireNonNull(delegateContainer), null);
+    }
+
+    private DefaultEntityContainer(final EntityFactory factory, final EntityContainer delegateContainer,
+	    final Set<EntityListener> listeners) {
+	this.factory = Objects.requireNonNull(factory);
+	this.delegateContainer = delegateContainer != null ? delegateContainer : this;
+	entities = new HashMap<>();
+	this.listeners = new ListenerSet<>(EntityListener.class);
+	if (listeners != null) {
+	    this.listeners.addAll(listeners);
+	}
+	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	read = rwLock.readLock();
+	write = rwLock.writeLock();
     }
 
     @Override
@@ -451,10 +446,6 @@ public class DefaultEntityContainer implements EntityContainer {
 	} finally {
 	    write.unlock();
 	}
-    }
-
-    private void setDelegateContainer(final EntityContainer delegateContainer) {
-	this.delegateContainer = Objects.requireNonNull(delegateContainer);
     }
 
     @Override
