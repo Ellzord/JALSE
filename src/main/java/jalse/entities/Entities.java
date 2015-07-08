@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -293,6 +294,32 @@ public final class Entities {
      */
     public static boolean isSubtype(final Class<? extends Entity> descendant, final Class<? extends Entity> ancestor) {
 	return !ancestor.equals(descendant) && ancestor.isAssignableFrom(descendant);
+    }
+
+    /**
+     * Creates a recursive entity listener for the supplied entity listener supplier with
+     * Integer.MAX_VALUE recursion limit.
+     *
+     * @param supplier
+     *            Supplier of the entity listener to be added to created entities.
+     * @return Recursive entity listener with Integer.MAX_VALUE recursion limit.
+     */
+    public static EntityListener newRecursiveEntityListener(final Supplier<EntityListener> supplier) {
+	return newRecursiveEntityListener(supplier, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Creates a recursive entity listener for the supplied entity listener supplier and specified
+     * recursion limit.
+     *
+     * @param supplier
+     *            Supplier of the entity listener to be added to created entities.
+     * @param depth
+     *            The recursion limit of the listener.
+     * @return Recursive entity listener with specified recursion limit.
+     */
+    public static EntityListener newRecursiveEntityListener(final Supplier<EntityListener> supplier, final int depth) {
+	return new RecursiveEntityListener(supplier, depth);
     }
 
     /**
