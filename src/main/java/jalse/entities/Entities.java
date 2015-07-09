@@ -17,6 +17,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import jalse.attributes.AttributeListener;
+import jalse.attributes.NamedAttributeType;
 import jalse.entities.EntityVisitor.EntityVisitResult;
 
 /**
@@ -294,6 +296,38 @@ public final class Entities {
      */
     public static boolean isSubtype(final Class<? extends Entity> descendant, final Class<? extends Entity> ancestor) {
 	return !ancestor.equals(descendant) && ancestor.isAssignableFrom(descendant);
+    }
+
+    /**
+     * Creates an recursive entity listener for named attribute type and the supplied attribute
+     * listener supplier with Integer.MAX_VALUE recursion limit.
+     *
+     * @param namedType
+     *            Named attribute type being listened for by supplier's listeners.
+     * @param supplier
+     *            Supplier of the attribute listener to be added to created entities.
+     * @return Recursive attribute listener for named type and supplier.
+     */
+    public static <T> EntityListener newRecursiveAttributeListener(final NamedAttributeType<T> namedType,
+	    final Supplier<AttributeListener<T>> supplier) {
+	return newRecursiveAttributeListener(namedType, supplier, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Creates an recursive entity listener for named attribute type and the supplied attribute
+     * listener supplier with specified recursion limit.
+     *
+     * @param namedType
+     *            Named attribute type being listened for by supplier's listeners.
+     * @param supplier
+     *            Supplier of the attribute listener to be added to created entities.
+     * @param depth
+     *            The recursion limit of the listener.
+     * @return Recursive attribute listener for named type and supplier.
+     */
+    public static <T> EntityListener newRecursiveAttributeListener(final NamedAttributeType<T> namedType,
+	    final Supplier<AttributeListener<T>> supplier, final int depth) {
+	return new RecursiveAttributeListener<>(namedType, supplier, depth);
     }
 
     /**
