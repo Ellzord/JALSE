@@ -19,17 +19,12 @@ class RecursiveAttributeListener<T> implements EntityListener {
 	this.depth = depth;
     }
 
-    /**
-     * Add attribute listener from supplier and recursive listener to created entity.
-     *
-     * @param event
-     *            The entity event for this trigger.
-     */
     @Override
     public void entityCreated(final EntityEvent event) {
 	if (depth > 0) {
-	    event.getEntity().addAttributeListener(namedType, supplier.get());
-	    event.getEntity().addEntityListener(new RecursiveAttributeListener<>(namedType, supplier, depth - 1));
+	    final Entity e = event.getEntity();
+	    e.addAttributeListener(namedType, supplier.get());
+	    e.addEntityListener(new RecursiveAttributeListener<>(namedType, supplier, depth - 1));
 	}
     }
 }

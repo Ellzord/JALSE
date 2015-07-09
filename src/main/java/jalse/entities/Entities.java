@@ -327,6 +327,9 @@ public final class Entities {
      */
     public static <T> EntityListener newRecursiveAttributeListener(final NamedAttributeType<T> namedType,
 	    final Supplier<AttributeListener<T>> supplier, final int depth) {
+	if (depth <= 0) {
+	    throw new IllegalArgumentException();
+	}
 	return new RecursiveAttributeListener<>(namedType, supplier, depth);
     }
 
@@ -353,6 +356,9 @@ public final class Entities {
      * @return Recursive entity listener with specified recursion limit.
      */
     public static EntityListener newRecursiveEntityListener(final Supplier<EntityListener> supplier, final int depth) {
+	if (depth <= 0) {
+	    throw new IllegalArgumentException();
+	}
 	return new RecursiveEntityListener(supplier, depth);
     }
 

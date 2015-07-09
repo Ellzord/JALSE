@@ -1,7 +1,6 @@
 package jalse.entities;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,20 +15,12 @@ public class EntitiesTest {
 
 	private class TestAttributeListener implements AttributeListener<Integer> {}
 
-	private class TestAttributeListenerSupplier implements Supplier<AttributeListener<Integer>> {
-
-	    @Override
-	    public AttributeListener<Integer> get() {
-		return new TestAttributeListener();
-	    }
-	}
-
 	@Test
 	public void createRecursiveAttributeListenerTest() {
-	    final EntityListener listener = Entities.newRecursiveAttributeListener(
-		    Attributes.newNamedIntegerType("Test"), new TestAttributeListenerSupplier());
+	    final EntityListener listener = Entities
+		    .newRecursiveAttributeListener(Attributes.newNamedIntegerType("Test"), TestAttributeListener::new);
 	    final EntityListener depthLimitedListener = Entities.newRecursiveAttributeListener(
-		    Attributes.newNamedIntegerType("Test"), new TestAttributeListenerSupplier(), 3);
+		    Attributes.newNamedIntegerType("Test"), TestAttributeListener::new, 3);
 
 	    Assert.assertTrue(Objects.nonNull(listener));
 	    Assert.assertTrue(Objects.nonNull(depthLimitedListener));
@@ -39,8 +30,8 @@ public class EntitiesTest {
 	public void recursionTest() {
 	    final NamedAttributeType<Integer> testType = Attributes.newNamedIntegerType("Test");
 	    final EntityContainer container = new DefaultEntityContainer.Builder().build();
-	    final EntityListener listener = Entities.newRecursiveAttributeListener(testType,
-		    new TestAttributeListenerSupplier(), 2);
+	    final EntityListener listener = Entities.newRecursiveAttributeListener(testType, TestAttributeListener::new,
+		    2);
 
 	    container.addEntityListener(listener);
 	    final Entity entityDepth1 = container.newEntity();
@@ -61,19 +52,10 @@ public class EntitiesTest {
 
 	private class TestEntityListener implements EntityListener {}
 
-	private class TestEntityListenerSupplier implements Supplier<EntityListener> {
-
-	    @Override
-	    public EntityListener get() {
-		return new TestEntityListener();
-	    }
-	}
-
 	@Test
 	public void createRecursiveEntityListenerTest() {
-	    final EntityListener listener = Entities.newRecursiveEntityListener(new TestEntityListenerSupplier());
-	    final EntityListener depthLimitedListener = Entities
-		    .newRecursiveEntityListener(new TestEntityListenerSupplier(), 3);
+	    final EntityListener listener = Entities.newRecursiveEntityListener(TestEntityListener::new);
+	    final EntityListener depthLimitedListener = Entities.newRecursiveEntityListener(TestEntityListener::new, 3);
 
 	    Assert.assertTrue(Objects.nonNull(listener));
 	    Assert.assertTrue(Objects.nonNull(depthLimitedListener));
@@ -82,7 +64,7 @@ public class EntitiesTest {
 	@Test
 	public void recursionTest() {
 	    final EntityContainer container = new DefaultEntityContainer.Builder().build();
-	    final EntityListener listener = Entities.newRecursiveEntityListener(new TestEntityListenerSupplier(), 2);
+	    final EntityListener listener = Entities.newRecursiveEntityListener(TestEntityListener::new, 2);
 
 	    container.addEntityListener(listener);
 	    final Entity entityDepth1 = container.newEntity();

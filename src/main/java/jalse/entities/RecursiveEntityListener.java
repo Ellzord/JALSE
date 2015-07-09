@@ -13,17 +13,12 @@ class RecursiveEntityListener implements EntityListener {
 	this.depth = depth;
     }
 
-    /**
-     * Add listener from supplier and recursive listener to created entity.
-     *
-     * @param event
-     *            The entity event for this trigger.
-     */
     @Override
     public void entityCreated(final EntityEvent event) {
 	if (depth > 0) {
-	    event.getEntity().addEntityListener(supplier.get());
-	    event.getEntity().addEntityListener(new RecursiveEntityListener(supplier, depth - 1));
+	    final Entity e = event.getEntity();
+	    e.addEntityListener(supplier.get());
+	    e.addEntityListener(new RecursiveEntityListener(supplier, depth - 1));
 	}
     }
 }
