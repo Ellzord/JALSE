@@ -28,9 +28,14 @@ import jalse.attributes.NamedAttributeType;
 import jalse.misc.AbstractIdentifiable;
 import jalse.misc.Identifiable;
 import jalse.misc.ListenerSet;
-import jalse.tags.Parent;
+import jalse.tags.Created;
+import jalse.tags.OriginContainer;
+import jalse.tags.RootContainer;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
+import jalse.tags.Taggable;
+import jalse.tags.TreeDepth;
+import jalse.tags.TreeMember;
 
 /**
  * A simple yet fully featured {@link Entity} implementation.<br>
@@ -110,6 +115,42 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	return attributes.addAttributeListener(namedType, listener);
     }
 
+    /**
+     * Adds tree based tags for when a non-null container is set.
+     *
+     * @see TreeMember
+     * @see RootContainer
+     * @see TreeDepth
+     */
+    protected void addContainerTags() {
+	int currentDepth = 1;
+
+	// Populate tree information
+	if (container instanceof Taggable) {
+	    final Taggable tagContainer = (Taggable) container;
+
+	    // Root container
+	    final TreeMember containerMember = tagContainer.getSingletonTag(TreeMember.class);
+	    if (containerMember == TreeMember.ROOT && container instanceof Identifiable) {
+		tags.add(new RootContainer(Identifiable.getID(container)));
+	    } else {
+		final RootContainer root = tagContainer.getSingletonTag(RootContainer.class);
+		if (root != null) {
+		    tags.add(root);
+		}
+	    }
+
+	    // Tree depth
+	    final TreeDepth depth = tagContainer.getSingletonTag(TreeDepth.class);
+	    if (depth != null) {
+		currentDepth = depth.getValue() + 1;
+	    }
+	}
+
+	// Current depth
+	tags.add(new TreeDepth(currentDepth));
+    }
+
     @Override
     public boolean addEntityListener(final EntityListener listener) {
 	return entities.addEntityListener(listener);
@@ -127,10 +168,25 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	}
     }
 
-    private void addParentTag() {
+    /**
+     * Adds the default tags.
+     *
+     * @see Created
+     * @see TreeMember
+     * @see OriginContainer
+     * @see #addContainerTags()
+     */
+    protected void addTags() {
+	tags.add(new Created());
+	tags.add(TreeMember.LEAF);
+
+	// Origin even if transfered
 	if (container instanceof Identifiable) {
-	    tags.add(new Parent(Identifiable.getID(container)));
+	    tags.add(new OriginContainer(Identifiable.getID(container)));
 	}
+
+	// Tree related tags
+	addContainerTags();
     }
 
     @Override
@@ -220,6 +276,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     }
 
     @Override
+    public <T extends Tag> Set<T> getTagsOfType(final Class<T> type) {
+	return tags.getOfType(type);
+    }
+
+    @Override
     public boolean isAlive() {
 	return alive.get();
     }
@@ -253,9 +314,10 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      * Marks the entity as alive.
      *
      * @return Whether the core was alive.
+     * @see #addTags()
      */
     protected boolean markAsAlive() {
-	addParentTag();
+	addTags();
 	return alive.getAndSet(true);
     }
 
@@ -263,9 +325,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      * Marks the entity as dead.
      *
      * @return Whether the core was alive.
+     *
+     * @see #removeContainerTags()
      */
     protected boolean markAsDead() {
-	tags.removeOfType(Parent.class);
+	removeContainerTags();
 	return alive.getAndSet(false);
     }
 
@@ -348,6 +412,19 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	attributes.removeAttributes();
     }
 
+    /**
+     * Removes tree based tags for when a null container is set.
+     *
+     * @see TreeMember
+     * @see RootContainer
+     * @see TreeDepth
+     */
+    protected void removeContainerTags() {
+	tags.removeOfType(TreeMember.class);
+	tags.removeOfType(RootContainer.class);
+	tags.removeOfType(TreeDepth.class);
+    }
+
     @Override
     public boolean removeEntityListener(final EntityListener listener) {
 	return entities.removeEntityListener(listener);
@@ -401,8 +478,14 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     protected void setContainer(final EntityContainer container) {
 	if (!Objects.equals(this.container, container)) {
 	    this.container = container;
-	    if (container != null && isAlive()) {
-		addParentTag();
+	    if (!isAlive()) {
+		return;
+	    }
+	    // Fix container based tags
+	    if (container == null) {
+		removeContainerTags();
+	    } else {
+		addContainerTags();
 	    }
 	}
     }
@@ -415,6 +498,14 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      */
     protected void setEngine(final ActionEngine engine) {
 	scheduler.setEngine(engine);
+    }
+
+    private void setTreeMember() {
+	if (entities.hasEntities()) {
+	    tags.add(TreeMember.NODE);
+	} else {
+	    tags.add(TreeMember.LEAF);
+	}
     }
 
     @Override
@@ -439,6 +530,11 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Stream<Tag> streamTags() {
+	/*
+	 * Ensure most up to member tag (listener could create another entity before this is
+	 * wrapped).
+	 */
+	setTreeMember();
 	return tags.stream();
     }
 

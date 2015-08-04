@@ -84,7 +84,7 @@ public interface Identifiable {
      * @return String representation of the identifiable.
      */
     static String toString(final Identifiable obj) {
-	return obj.getClass().getSimpleName() + " [id=" + obj.getID() + "]";
+	return obj.getClass().getSimpleName() + " [" + obj.getID() + "]";
     }
 
     /**

@@ -76,6 +76,6 @@ public final class NamedAttributeType<T> {
 
     @Override
     public String toString() {
-	return "NamedAttributeType [name=" + name + " type=" + type + "]";
+	return "NamedAttributeType [" + name + ":" + type.getValueType().getTypeName() + "]";
     }
 }

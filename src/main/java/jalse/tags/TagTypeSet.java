@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 
 /**
  * A tag set is a thread-safe {@link Set} implementation for {@link Tag}. A tag set will allow
- * multiple tags of the same type as long as none of them are considered equal. It is possible to
- * query and remove tags by type as well as by instance.
+ * multiple tags of the same type as long as none of them are considered equal (unless
+ * {@link SingletonTag} is present on the {@link Tag}). It is possible to query and remove tags by
+ * type as well as by instance.
  *
  * @author Elliot Ford
  *
- * @see Object#equals(Object)
- * @see Object#hashCode()
+ * @see SingletonTag
  *
  */
 public class TagTypeSet extends AbstractSet<Tag>implements Serializable {
@@ -44,8 +44,15 @@ public class TagTypeSet extends AbstractSet<Tag>implements Serializable {
     public boolean add(final Tag e) {
 	write.lock();
 	try {
-	    final Set<Tag> tagsOfType = tags.computeIfAbsent(e.getClass(),
+	    final Class<?> tagType = e.getClass();
+	    final Set<Tag> tagsOfType = tags.computeIfAbsent(tagType,
 		    k -> Collections.newSetFromMap(new ConcurrentHashMap<>()));
+
+	    // Only allow one of each singleton
+	    if (!tagsOfType.isEmpty() && tagType.isAnnotationPresent(SingletonTag.class)) {
+		tagsOfType.clear();
+	    }
+
 	    return tagsOfType.add(e);
 	} finally {
 	    write.unlock();

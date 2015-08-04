@@ -105,6 +105,6 @@ public abstract class AttributeType<T> {
 
     @Override
     public String toString() {
-	return "AttributeType [valueType=" + valueType.getTypeName() + "]";
+	return "AttributeType [" + valueType.getTypeName() + "]";
     }
 }

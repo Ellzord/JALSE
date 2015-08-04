@@ -463,7 +463,7 @@ public class DefaultEntityContainer implements EntityContainer {
 
     @Override
     public String toString() {
-	return "DefaultEntityContainer [entityIDs=" + getEntityIDs() + "]";
+	return "DefaultEntityContainer [" + getEntityIDs() + "]";
     }
 
     @Override

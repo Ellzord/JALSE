@@ -195,6 +195,10 @@ public final class Entities {
 	return result;
     }
 
+    public static EntityProxyFactory getProxyFactory() {
+	return proxyFactory.get();
+    }
+
     /**
      * Gets the highest level parent of this container.
      *
@@ -202,20 +206,16 @@ public final class Entities {
      *            Container to get parent for.
      * @return Highest level parent (or this container if it has no parent).
      */
-    public static EntityContainer getHighestParent(final EntityContainer container) {
+    public static EntityContainer getRootContainer(final EntityContainer container) {
 	Objects.requireNonNull(container);
 
 	if (container instanceof Entity) {
 	    final EntityContainer parent = ((Entity) container).getContainer();
 	    if (parent != null) {
-		return getHighestParent(parent);
+		return getRootContainer(parent);
 	    }
 	}
 	return container;
-    }
-
-    public static EntityProxyFactory getProxyFactory() {
-	return proxyFactory.get();
     }
 
     /**
@@ -534,10 +534,10 @@ public final class Entities {
      *            Container to check.
      * @return Whether the container is within the same tree as the other container.
      *
-     * @see #getHighestParent(EntityContainer)
+     * @see #getRootContainer(EntityContainer)
      */
     public static boolean withinSameTree(final EntityContainer one, final EntityContainer two) {
-	return Objects.equals(getHighestParent(one), getHighestParent(two));
+	return Objects.equals(getRootContainer(one), getRootContainer(two));
     }
 
     private Entities() {
