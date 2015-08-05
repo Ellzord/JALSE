@@ -49,8 +49,15 @@ public class TagTypeSet extends AbstractSet<Tag>implements Serializable {
 		    k -> Collections.newSetFromMap(new ConcurrentHashMap<>()));
 
 	    // Only allow one of each singleton
-	    if (!tagsOfType.isEmpty() && tagType.isAnnotationPresent(SingletonTag.class)) {
-		tagsOfType.clear();
+	    if (tagType.isAnnotationPresent(SingletonTag.class)) {
+		final Iterator<Tag> it = tagsOfType.iterator();
+		if (it.hasNext()) {
+		    if (it.next().equals(e)) {
+			return false;
+		    } else {
+			it.remove();
+		    }
+		}
 	    }
 
 	    return tagsOfType.add(e);

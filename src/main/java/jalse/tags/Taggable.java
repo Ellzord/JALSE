@@ -29,7 +29,7 @@ public interface Taggable {
 	if (!type.isAnnotationPresent(SingletonTag.class)) {
 	    throw new IllegalArgumentException(String.format("%s is not marked with SingletonTag", type));
 	}
-	Iterator<T> it = getTagsOfType(type).iterator();
+	final Iterator<T> it = getTagsOfType(type).iterator();
 	return it.hasNext() ? it.next() : null;
     }
 

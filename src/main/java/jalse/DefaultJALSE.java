@@ -1,6 +1,9 @@
 package jalse;
 
 import static jalse.actions.Actions.requireNotStopped;
+import static jalse.tags.Tags.setCreated;
+import static jalse.tags.Tags.setRootDepth;
+import static jalse.tags.Tags.setRootMember;
 
 import java.util.Objects;
 import java.util.Set;
@@ -322,9 +325,9 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
      * @see TreeDepth
      */
     protected void addTags() {
-	tags.add(new Created());
-	tags.add(TreeMember.ROOT);
-	tags.add(new TreeDepth(0));
+	setCreated(tags);
+	setRootMember(tags);
+	setRootDepth(tags);
     }
 
     @Override

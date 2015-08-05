@@ -21,5 +21,26 @@ public final class TreeDepth extends AbstractValueTag<Integer> {
      */
     public TreeDepth(final int depth) {
 	super(depth);
+	if (depth < 0) {
+	    throw new IllegalArgumentException();
+	}
+    }
+
+    /**
+     * Creates an decremented tree depth.
+     *
+     * @return a new decremented tree depth.
+     */
+    public TreeDepth decrement() {
+	return new TreeDepth(getValue() - 1);
+    }
+
+    /**
+     * Creates an incremented tree depth.
+     *
+     * @return a new incremented tree depth.
+     */
+    public TreeDepth increment() {
+	return new TreeDepth(getValue() + 1);
     }
 }
