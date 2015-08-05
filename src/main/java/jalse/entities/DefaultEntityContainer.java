@@ -493,7 +493,7 @@ public class DefaultEntityContainer implements EntityContainer {
 
 	    if (!destination.receiveEntity(e)) {
 		if (exported) {
-		    throw new IllegalStateException(String.format("Entity %s exported but not transfered", id));
+		    throw new IllegalStateException(String.format("Entity %s exported but not transferred", id));
 		}
 		return false;
 	    }

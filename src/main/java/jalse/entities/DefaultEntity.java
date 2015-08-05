@@ -180,7 +180,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	tags.add(new Created());
 	tags.add(TreeMember.LEAF);
 
-	// Origin even if transfered
+	// Origin even if transferred
 	if (container instanceof Identifiable) {
 	    tags.add(new OriginContainer(Identifiable.getID(container)));
 	}

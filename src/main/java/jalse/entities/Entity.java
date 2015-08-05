@@ -202,7 +202,7 @@ public interface Entity extends EntityContainer, Identifiable, AttributeContaine
      *
      * @param destination
      *            Target container.
-     * @return Whether the entity was transfered.
+     * @return Whether the entity was transferred.
      *
      */
     boolean transfer(EntityContainer destination);

@@ -24,12 +24,12 @@ public interface Taggable {
      *
      * @see SingletonTag
      */
-    @SuppressWarnings("unchecked")
     default <T extends Tag> T getSingletonTag(final Class<T> type) {
 	if (!type.isAnnotationPresent(SingletonTag.class)) {
 	    throw new IllegalArgumentException(String.format("%s is not marked with SingletonTag", type));
 	}
-	return (T) streamTags().filter(t -> type.equals(t.getClass())).findAny().orElse(null);
+	Set<T> tags = getTagsOfType(type);
+	return tags.isEmpty() ? null : tags.iterator().next();
     }
 
     /**

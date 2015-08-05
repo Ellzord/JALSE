@@ -6,7 +6,7 @@ import jalse.entities.EntityContainer;
 
 /**
  * A {@link Tag} to show the origin {@link EntityContainer} ID for an {@link Entity} (as it can be
- * transfered).
+ * transferred).
  *
  * @author Elliot Ford
  *
