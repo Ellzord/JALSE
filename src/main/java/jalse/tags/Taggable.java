@@ -1,5 +1,6 @@
 package jalse.tags;
 
+import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,8 +29,8 @@ public interface Taggable {
 	if (!type.isAnnotationPresent(SingletonTag.class)) {
 	    throw new IllegalArgumentException(String.format("%s is not marked with SingletonTag", type));
 	}
-	Set<T> tags = getTagsOfType(type);
-	return tags.isEmpty() ? null : tags.iterator().next();
+	Iterator<T> it = getTagsOfType(type).iterator();
+	return it.hasNext() ? it.next() : null;
     }
 
     /**
