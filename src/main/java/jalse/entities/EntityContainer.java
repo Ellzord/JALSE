@@ -427,7 +427,7 @@ public interface EntityContainer {
      *
      * @param destination
      *            Destination to transfer to.
-     * @return Entities that could not be transfered.
+     * @return Entities that could not be transferred.
      *
      * @see #transferEntities(Set, EntityContainer)
      */
@@ -442,7 +442,7 @@ public interface EntityContainer {
      *            Predicate to filter entities.
      * @param destination
      *            Destination to transfer to.
-     * @return Entities that could not be transfered.
+     * @return Entities that could not be transferred.
      */
     default Set<UUID> transferEntities(final Predicate<Entity> predicate, final EntityContainer destination) {
 	return transferEntities(streamEntities().filter(predicate).map(Entity::getID).collect(Collectors.toSet()),
@@ -456,18 +456,18 @@ public interface EntityContainer {
      *            Entities to transfer.
      * @param destination
      *            Destination to transfer to.
-     * @return Entities that could not be transfered.
+     * @return Entities that could not be transferred.
      */
     default Set<UUID> transferEntities(final Set<UUID> entityIDs, final EntityContainer destination) {
 	Objects.requireNonNull(destination);
 
-	final Set<UUID> notTransfered = new HashSet<>();
+	final Set<UUID> notTransferred = new HashSet<>();
 	for (final UUID id : entityIDs) {
 	    if (!transferEntity(id, destination)) {
-		notTransfered.add(id);
+		notTransferred.add(id);
 	    }
 	}
-	return notTransfered;
+	return notTransferred;
     }
 
     /**
@@ -477,7 +477,7 @@ public interface EntityContainer {
      *            Entity ID.
      * @param destination
      *            Target container.
-     * @return Whether the entity was transfered.
+     * @return Whether the entity was transferred.
      *
      * @see #receiveEntity(Entity)
      */

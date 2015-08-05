@@ -448,6 +448,6 @@ public class DefaultAttributeContainer implements AttributeContainer {
 
     @Override
     public String toString() {
-	return "DefaultAttributeContainer [listeners=" + listeners + ", attributes=" + attributes + "]";
+	return "DefaultAttributeContainer [" + getAttributeTypes() + "]";
     }
 }

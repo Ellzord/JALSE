@@ -274,7 +274,7 @@ public class DefaultJALSETest {
     @Test
     public void tagTest() {
 	jalse = new DefaultJALSE(new UUID(0, 0), ForkJoinActionEngine.commonPoolEngine(), new DefaultEntityFactory());
-	Assert.assertTrue(jalse.getTags().isEmpty());
+	Assert.assertFalse(jalse.getTags().isEmpty());
     }
 
     @Test

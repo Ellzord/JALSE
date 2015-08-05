@@ -28,8 +28,11 @@ import jalse.entities.EntityContainer;
 import jalse.entities.EntityFactory;
 import jalse.entities.EntityListener;
 import jalse.misc.AbstractIdentifiable;
+import jalse.tags.Created;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
+import jalse.tags.TreeDepth;
+import jalse.tags.TreeMember;
 
 /**
  * A {@link JALSE} implementation that using default implementations.<br>
@@ -39,6 +42,8 @@ import jalse.tags.TagTypeSet;
  * {@link ActionEngine} are provided.<br>
  *
  * @author Elliot Ford
+ *
+ * @see #addTags()
  *
  */
 public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
@@ -289,6 +294,8 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
      * @param factory
      *            Entity factory to create/kill child entities.
      *
+     * @see #addTags()
+     *
      */
     public DefaultJALSE(final UUID id, final ActionEngine engine, final EntityFactory factory) {
 	super(id);
@@ -299,11 +306,25 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
 	scheduler.setEngine(engine);
 	entities = new DefaultEntityContainer(factory, this);
 	tags = new TagTypeSet();
+	addTags();
     }
 
     @Override
     public boolean addEntityListener(final EntityListener listener) {
 	return entities.addEntityListener(listener);
+    }
+
+    /**
+     * Sets the default tags.
+     *
+     * @see Created
+     * @see TreeMember
+     * @see TreeDepth
+     */
+    protected void addTags() {
+	tags.add(new Created());
+	tags.add(TreeMember.ROOT);
+	tags.add(new TreeDepth(0));
     }
 
     @Override
@@ -339,6 +360,11 @@ public class DefaultJALSE extends AbstractIdentifiable implements JALSE {
     @Override
     public Set<UUID> getIDsInTree() {
 	return Entities.getEntityIDsRecursively(entities);
+    }
+
+    @Override
+    public <T extends Tag> Set<T> getTagsOfType(final Class<T> type) {
+	return tags.getOfType(type);
     }
 
     @Override

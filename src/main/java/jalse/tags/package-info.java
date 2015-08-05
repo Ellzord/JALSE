@@ -3,6 +3,6 @@
  * can change during runtime.
  *
  * @see jalse.tags.TagTypeSet
- * @see jalse.tags.Parent
+ * @see jalse.tags.SingletonTag
  */
 package jalse.tags;

@@ -93,6 +93,6 @@ public class DefaultActionBindings implements ActionBindings {
 
     @Override
     public String toString() {
-	return "DefaultActionBindings [bindings=" + bindings + "]";
+	return "DefaultActionBindings [" + bindings + "]";
     }
 }
