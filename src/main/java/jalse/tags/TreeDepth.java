@@ -14,6 +14,11 @@ import jalse.entities.EntityContainer;
 public final class TreeDepth extends AbstractValueTag<Integer> {
 
     /**
+     * Tree depth of zero.
+     */
+    public static final TreeDepth ROOT = new TreeDepth(0);
+
+    /**
      * Creates a new tree depth.
      *
      * @param depth

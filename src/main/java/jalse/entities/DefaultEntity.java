@@ -125,10 +125,14 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      * @see TreeDepth
      */
     protected void addContainerTags() {
-	tags.add(getRootContainer(container));
+	// Only add root if we aren't it
+	final RootContainer rc = getRootContainer(container);
+	if (rc != null) {
+	    tags.add(rc);
+	}
 
 	final TreeDepth parentDepth = getTreeDepth(container);
-	tags.add(parentDepth.increment());
+	tags.add(parentDepth != null ? parentDepth.increment() : TreeDepth.ROOT);
     }
 
     @Override

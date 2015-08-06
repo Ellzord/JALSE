@@ -23,12 +23,17 @@ public final class Tags {
      * @return Root container for the supplied container.
      */
     public static RootContainer getRootContainer(final EntityContainer container) {
+	// Root must be identifable
+	if (!(container instanceof Identifiable)) {
+	    return null;
+	}
+
 	EntityContainer parent = container instanceof Entity ? ((Entity) container).getContainer() : null;
 	UUID rootID = null;
 
 	// Check not root
 	if (parent == null) {
-	    rootID = Identifiable.getID(container);
+	    rootID = ((Identifiable) container).getID();
 	}
 	// Get parents root
 	else if (container instanceof Taggable) {
@@ -46,9 +51,9 @@ public final class Tags {
 		rootID = e.getID();
 		parent = e.getContainer();
 	    }
-	    // Container root
-	    if (parent != null) {
-		rootID = Identifiable.getID(parent);
+	    // Container root (null, container or JALSE)
+	    if (!(parent instanceof Identifiable)) {
+		return null;
 	    }
 	}
 
@@ -63,11 +68,16 @@ public final class Tags {
      * @return Tree depth tag.
      */
     public static TreeDepth getTreeDepth(final EntityContainer container) {
+	// Must be identifiable to be in the tree
+	if (!(container instanceof Identifiable)) {
+	    return null;
+	}
+
 	EntityContainer parent = container instanceof Entity ? ((Entity) container).getContainer() : null;
 
 	// Check not root
 	if (parent == null) {
-	    return new TreeDepth(0);
+	    return TreeDepth.ROOT;
 	}
 
 	// Increment parents depth
@@ -78,12 +88,19 @@ public final class Tags {
 	    }
 	}
 
-	// Calculate depth
 	int depth = 1;
+
+	// Calculate entity tree depth
 	while (parent instanceof Entity) {
 	    parent = ((Entity) parent).getContainer();
 	    depth++;
 	}
+
+	// Check if root is not null but identifable
+	if (parent instanceof Identifiable) {
+	    depth++;
+	}
+
 	return new TreeDepth(depth);
     }
 
@@ -95,11 +112,20 @@ public final class Tags {
      * @return The member enum.
      */
     public static TreeMember getTreeMember(final EntityContainer container) {
+	// Must be identifiable to be a tree member
+	if (!(container instanceof Identifiable)) {
+	    return null;
+	}
+	// Entity with no identifable parent (or JALSE).
 	if (!(container instanceof Entity) || ((Entity) container).getContainer() == null) {
 	    return TreeMember.ROOT;
-	} else if (container.hasEntities()) {
+	}
+	// Entity with children
+	else if (container.hasEntities()) {
 	    return TreeMember.NODE;
-	} else {
+	}
+	// Entity with no children
+	else {
 	    return TreeMember.LEAF;
 	}
     }
@@ -133,8 +159,9 @@ public final class Tags {
      *            Possible origin container.
      */
     public static void setOriginContainer(final Set<Tag> tags, final EntityContainer container) {
-	if (container instanceof Identifiable) {
-	    tags.add(new OriginContainer(Identifiable.getID(container)));
+	final UUID id = Identifiable.getID(container);
+	if (id != null) {
+	    tags.add(new OriginContainer(id));
 	}
     }
 
@@ -145,7 +172,7 @@ public final class Tags {
      *            Tag set.
      */
     public static void setRootDepth(final Set<Tag> tags) {
-	tags.add(new TreeDepth(0));
+	tags.add(TreeDepth.ROOT);
     }
 
     /**
