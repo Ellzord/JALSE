@@ -2,6 +2,11 @@ package jalse.entities;
 
 import static jalse.entities.Entities.getTypeAncestry;
 import static jalse.entities.Entities.isSubtype;
+import static jalse.tags.Tags.getRootContainer;
+import static jalse.tags.Tags.getTreeDepth;
+import static jalse.tags.Tags.getTreeMember;
+import static jalse.tags.Tags.setCreated;
+import static jalse.tags.Tags.setOriginContainer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,14 +31,12 @@ import jalse.attributes.AttributeListener;
 import jalse.attributes.DefaultAttributeContainer;
 import jalse.attributes.NamedAttributeType;
 import jalse.misc.AbstractIdentifiable;
-import jalse.misc.Identifiable;
 import jalse.misc.ListenerSet;
 import jalse.tags.Created;
 import jalse.tags.OriginContainer;
 import jalse.tags.RootContainer;
 import jalse.tags.Tag;
 import jalse.tags.TagTypeSet;
-import jalse.tags.Taggable;
 import jalse.tags.TreeDepth;
 import jalse.tags.TreeMember;
 
@@ -118,37 +121,18 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
     /**
      * Adds tree based tags for when a non-null container is set.
      *
-     * @see TreeMember
      * @see RootContainer
      * @see TreeDepth
      */
     protected void addContainerTags() {
-	int currentDepth = 1;
-
-	// Populate tree information
-	if (container instanceof Taggable) {
-	    final Taggable tagContainer = (Taggable) container;
-
-	    // Root container
-	    final TreeMember containerMember = tagContainer.getSingletonTag(TreeMember.class);
-	    if (containerMember == TreeMember.ROOT && container instanceof Identifiable) {
-		tags.add(new RootContainer(Identifiable.getID(container)));
-	    } else {
-		final RootContainer root = tagContainer.getSingletonTag(RootContainer.class);
-		if (root != null) {
-		    tags.add(root);
-		}
-	    }
-
-	    // Tree depth
-	    final TreeDepth depth = tagContainer.getSingletonTag(TreeDepth.class);
-	    if (depth != null) {
-		currentDepth = depth.getValue() + 1;
-	    }
+	// Only add root if we aren't it
+	final RootContainer rc = getRootContainer(container);
+	if (rc != null) {
+	    tags.add(rc);
 	}
 
-	// Current depth
-	tags.add(new TreeDepth(currentDepth));
+	final TreeDepth parentDepth = getTreeDepth(container);
+	tags.add(parentDepth != null ? parentDepth.increment() : TreeDepth.ROOT);
     }
 
     @Override
@@ -172,20 +156,12 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
      * Adds the default tags.
      *
      * @see Created
-     * @see TreeMember
      * @see OriginContainer
      * @see #addContainerTags()
      */
     protected void addTags() {
-	tags.add(new Created());
-	tags.add(TreeMember.LEAF);
-
-	// Origin even if transferred
-	if (container instanceof Identifiable) {
-	    tags.add(new OriginContainer(Identifiable.getID(container)));
-	}
-
-	// Tree related tags
+	setCreated(tags);
+	setOriginContainer(tags, container);
 	addContainerTags();
     }
 
@@ -500,14 +476,6 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	scheduler.setEngine(engine);
     }
 
-    private void setTreeMember() {
-	if (entities.hasEntities()) {
-	    tags.add(TreeMember.NODE);
-	} else {
-	    tags.add(TreeMember.LEAF);
-	}
-    }
-
     @Override
     public Stream<?> streamAttributes() {
 	return attributes.streamAttributes();
@@ -534,7 +502,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	 * Ensure most up to member tag (listener could create another entity before this is
 	 * wrapped).
 	 */
-	setTreeMember();
+	tags.add(getTreeMember(this));
 	return tags.stream();
     }
 
