@@ -9,12 +9,14 @@ import java.util.Date;
  *
  */
 @SingletonTag
-public final class Created extends AbstractDateValueTag {
+public final class Created extends AbstractValueTag<Date> {
 
     /**
      * New created (now).
      */
-    public Created() {}
+    public Created() {
+	super(new Date());
+    }
 
     /**
      * New created with defined date.

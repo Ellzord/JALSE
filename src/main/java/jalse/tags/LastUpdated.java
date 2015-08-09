@@ -9,12 +9,14 @@ import java.util.Date;
  *
  */
 @SingletonTag
-public final class LastUpdated extends AbstractDateValueTag {
+public final class LastUpdated extends AbstractValueTag<Date> {
 
     /**
      * New last updated (now).
      */
-    public LastUpdated() {}
+    public LastUpdated() {
+	super(new Date());
+    }
 
     /**
      * New last updated with defined date.
