@@ -165,6 +165,14 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 	addContainerTags();
     }
 
+    protected void addTreeMember() {
+	/*
+	 * Ensure this is called before read: If this was added after creating an entity the
+	 * listener could try and read this tag and it might not be up to date.
+	 */
+	tags.add(getTreeMember(this));
+    }
+
     @Override
     public void cancelAllScheduledForActor() {
 	scheduler.cancelAllScheduledForActor();
@@ -253,6 +261,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public <T extends Tag> Set<T> getTagsOfType(final Class<T> type) {
+	addTreeMember();
 	return tags.getOfType(type);
     }
 
@@ -498,11 +507,7 @@ public class DefaultEntity extends AbstractIdentifiable implements Entity {
 
     @Override
     public Stream<Tag> streamTags() {
-	/*
-	 * Ensure most up to member tag (listener could create another entity before this is
-	 * wrapped).
-	 */
-	tags.add(getTreeMember(this));
+	addTreeMember();
 	return tags.stream();
     }
 
