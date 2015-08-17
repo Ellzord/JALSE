@@ -36,7 +36,6 @@ public class DefaultEntityFactory implements EntityFactory {
     private final int entityLimit;
     private final Set<UUID> entityIDs;
     private ActionEngine engine;
-    private int entityCount;
     private final Lock read;
     private final Lock write;
 
@@ -60,7 +59,6 @@ public class DefaultEntityFactory implements EntityFactory {
 	this.entityLimit = entityLimit;
 	entityIDs = new HashSet<>();
 	engine = ForkJoinActionEngine.commonPoolEngine(); // Defaults use common engine
-	entityCount = 0;
 	final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	read = rwLock.readLock();
 	write = rwLock.writeLock();
@@ -84,6 +82,7 @@ public class DefaultEntityFactory implements EntityFactory {
 	    de.setContainer(null); // Remove parent reference.
 
 	    Entities.walkEntities(e).map(DefaultEntity.class::cast).forEach(ce -> {
+		entityIDs.remove(ce.getID());
 		ce.cancelAllScheduledForActor();
 		ce.setEngine(emptyEngine);
 	    });
@@ -116,7 +115,7 @@ public class DefaultEntityFactory implements EntityFactory {
     public int getEntityCount() {
 	read.lock();
 	try {
-	    return entityCount;
+	    return entityIDs.size();
 	} finally {
 	    read.unlock();
 	}
@@ -138,7 +137,7 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	write.lock();
 	try {
-	    if (entityCount >= entityLimit) {
+	    if (entityIDs.size() >= entityLimit) {
 		throw new IllegalStateException(String.format("Entity limit of %d has been reached", entityLimit));
 	    }
 
@@ -150,8 +149,6 @@ public class DefaultEntityFactory implements EntityFactory {
 	    final DefaultEntity e = new DefaultEntity(id, this, target);
 	    e.setEngine(engine);
 	    e.markAsAlive();
-
-	    entityCount++;
 
 	    logger.fine(String.format("Entity %s created", id));
 
@@ -176,7 +173,7 @@ public class DefaultEntityFactory implements EntityFactory {
 
     @Override
     public String toString() {
-	return "DefaultEntityFactory [entityLimit=" + entityLimit + ", entityCount=" + entityCount + "]";
+	return "DefaultEntityFactory [entityLimit=" + entityLimit + ", entityCount=" + getEntityCount() + "]";
     }
 
     @Override
@@ -190,11 +187,13 @@ public class DefaultEntityFactory implements EntityFactory {
 	    }
 
 	    final DefaultEntity de = (DefaultEntity) e;
-
 	    de.setEngine(engine);
 	    de.setContainer(target);
 
-	    Entities.walkEntities(de).map(DefaultEntity.class::cast).forEach(ve -> ve.setEngine(engine));
+	    Entities.walkEntities(de).map(DefaultEntity.class::cast).forEach(ve -> {
+		entityIDs.add(eID);
+		ve.setEngine(engine);
+	    });
 
 	    logger.fine(String.format("Entity %s imported", eID));
 
@@ -219,8 +218,6 @@ public class DefaultEntityFactory implements EntityFactory {
 	    de.markAsDead();
 	    de.cancelAllScheduledForActor();
 	    de.setEngine(null);
-
-	    entityCount--;
 
 	    de.killEntities(); // Kill tree
 
