@@ -3,7 +3,7 @@ package jalse.misc;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -19,7 +19,7 @@ import java.util.Set;
  * @param <T>
  *            Listener {@code interface}.
  */
-public class ListenerSet<T> extends HashSet<T>implements InvocationHandler {
+public class ListenerSet<T> extends LinkedHashSet<T>implements InvocationHandler {
 
     private static final long serialVersionUID = 1437345792255852480L;
 
