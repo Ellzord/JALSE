@@ -130,6 +130,21 @@ public class DefaultEntityFactory implements EntityFactory {
 	return entityLimit;
     }
 
+    /**
+     * This is a hook for extending this factory to allow this factory to maintain subclasses of
+     * {@link DefaultEntity}. The code for this is equivalent to:
+     * {@code new DefaultEntity(id, this, target)}.
+     *
+     * @param id
+     *            ID of the entity.
+     * @param target
+     *            Parent container.
+     * @return Newly created default entity.
+     */
+    protected DefaultEntity newDefaultEntity(final UUID id, final EntityContainer target) {
+	return new DefaultEntity(id, this, target);
+    }
+
     @Override
     public DefaultEntity newEntity(final UUID id, final EntityContainer target) {
 	Objects.requireNonNull(id);
@@ -146,7 +161,7 @@ public class DefaultEntityFactory implements EntityFactory {
 		throw new IllegalArgumentException(String.format("Entity %s is already associated", id));
 	    }
 
-	    final DefaultEntity e = new DefaultEntity(id, this, target);
+	    final DefaultEntity e = newDefaultEntity(id, target);
 	    e.setEngine(engine);
 	    e.markAsAlive();
 
