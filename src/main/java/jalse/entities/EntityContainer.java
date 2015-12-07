@@ -326,12 +326,18 @@ public interface EntityContainer {
     }
 
     /**
-     * explain why we made it a Entity, rather than T
-     * justify that if it has multiple types in the beginning, it's arbitrary which one
-     * to return etc etc
+     * Creates a new entity with a specified ID and a Collection of types that it should 
+     * be marked as.
+     * 
      * @param id
+     * 			Entity ID
      * @param types
+     * 			Collection of Entity types. Can be empty
      * @return
+     * 			Returns Entity instead of T to account for an 
+     * 			Empty Collection of types. If there are multiple 
+     * 			types in the beginning, it's arbitrary which one 
+     * 			to return
      */
     default Entity newEntity(final UUID id, final Collection<Class<? extends Entity>> types) {
 	    Iterator<Class<? extends Entity>> iter = types.iterator();
