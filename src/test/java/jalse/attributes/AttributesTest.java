@@ -8,7 +8,7 @@ import jalse.entities.Entity;
 
 public class AttributesTest {
 
-    AttributeType<?> attributeType = null;
+    AttributeType<?> attributeType;
 
     @After
     public void after() {

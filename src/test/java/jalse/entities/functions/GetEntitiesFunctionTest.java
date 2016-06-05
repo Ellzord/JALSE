@@ -85,7 +85,7 @@ public class GetEntitiesFunctionTest {
 	Set<TestEntity> getTest();
     }
 
-    GetEntitiesFunction function = null;
+    GetEntitiesFunction function;
 
     @After
     public void after() {

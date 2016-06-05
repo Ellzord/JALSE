@@ -104,7 +104,7 @@ public class GetEntityFunctionTest {
 	Optional<TestEntity> getTest(UUID id);
     }
 
-    GetEntityFunction function = null;
+    GetEntityFunction function;
 
     @After
     public void after() {

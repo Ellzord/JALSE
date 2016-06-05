@@ -25,7 +25,7 @@ public class DefaultFunctionTest {
 	default void testMethod() {}
     }
 
-    DefaultFunction function = null;
+    DefaultFunction function;
 
     @After
     public void after() {

@@ -61,7 +61,7 @@ public class GetAttributeFunctionTest {
 	Boolean getTest();
     }
 
-    GetAttributeFunction function = null;
+    GetAttributeFunction function;
 
     @After
     public void after() {

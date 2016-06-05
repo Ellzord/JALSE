@@ -13,7 +13,7 @@ public class DefaultEntityContainerTest {
 
     public static class BuilderTest {
 
-	DefaultEntityContainer container = null;
+	DefaultEntityContainer container;
 
 	@After
 	public void after() {
@@ -97,7 +97,7 @@ public class DefaultEntityContainerTest {
 
     private class TestEntityListener implements EntityListener {
 
-	public boolean killed = false;
+	public boolean killed;
 
 	@Override
 	public void entityCreated(final EntityEvent event) {}
@@ -114,7 +114,7 @@ public class DefaultEntityContainerTest {
 	public void entityTransferred(final EntityEvent event) {}
     }
 
-    DefaultEntityContainer container = null;
+    DefaultEntityContainer container;
 
     @Test
     public void addEntityTest() {

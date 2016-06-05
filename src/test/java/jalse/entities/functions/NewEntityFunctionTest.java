@@ -104,7 +104,7 @@ public class NewEntityFunctionTest {
 	Entity newTest(AttributeContainer container);
     }
 
-    NewEntityFunction function = null;
+    NewEntityFunction function;
 
     @After
     public void after() {

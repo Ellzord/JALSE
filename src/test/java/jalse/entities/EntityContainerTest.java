@@ -30,7 +30,7 @@ public class EntityContainerTest {
 	public void entityTransferred(final EntityEvent event) {}
     }
 
-    EntityContainer container = null;
+    EntityContainer container;
 
     @Test
     public void addEntityTest() {
