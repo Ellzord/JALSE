@@ -31,7 +31,7 @@ import jalse.actions.ForkJoinActionEngine;
  */
 public class DefaultEntityFactory implements EntityFactory {
 
-    private static final Logger logger = Logger.getLogger(DefaultEntityFactory.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DefaultEntityFactory.class.getName());
 
     private final int entityLimit;
     private final Set<UUID> entityIDs;
@@ -87,7 +87,7 @@ public class DefaultEntityFactory implements EntityFactory {
 		ce.setEngine(emptyEngine);
 	    });
 
-	    logger.fine(String.format("Entity %s exported", eID));
+	    LOGGER.fine(String.format("Entity %s exported", eID));
 	} finally {
 	    write.unlock();
 	}
@@ -165,7 +165,7 @@ public class DefaultEntityFactory implements EntityFactory {
 	    e.setEngine(engine);
 	    e.markAsAlive();
 
-	    logger.fine(String.format("Entity %s created", id));
+	    LOGGER.fine(String.format("Entity %s created", id));
 
 	    return e;
 	} finally {
@@ -179,7 +179,7 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	write.lock();
 	try {
-	    logger.fine(String.format("Switching engine type %s to %s", this.engine.getClass(), engine.getClass()));
+	    LOGGER.fine(String.format("Switching engine type %s to %s", this.engine.getClass(), engine.getClass()));
 	    this.engine = requireNotStopped(engine);
 	} finally {
 	    write.unlock();
@@ -210,7 +210,7 @@ public class DefaultEntityFactory implements EntityFactory {
 		ve.setEngine(engine);
 	    });
 
-	    logger.fine(String.format("Entity %s imported", eID));
+	    LOGGER.fine(String.format("Entity %s imported", eID));
 
 	    return true;
 	} finally {
@@ -236,7 +236,7 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	    de.killEntities(); // Kill tree
 
-	    logger.fine(String.format("Entity %s killed", eID));
+	    LOGGER.fine(String.format("Entity %s killed", eID));
 
 	    return true;
 	} finally {
@@ -256,7 +256,7 @@ public class DefaultEntityFactory implements EntityFactory {
 
 	    ((DefaultEntity) e).setContainer(target);
 
-	    logger.fine(String.format("Entity %s taken from tree", eID));
+	    LOGGER.fine(String.format("Entity %s taken from tree", eID));
 
 	    return true;
 	} finally {

@@ -46,7 +46,7 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
 		Thread.currentThread().interrupt();
 		cancel(); // Just to be sure
 	    } catch (final Exception e) {
-		logger.log(Level.WARNING, "Error performing action", e);
+		LOGGER.log(Level.WARNING, "Error performing action", e);
 		if (!isPeriodicOnException()) {
 		    cancel();
 		}
@@ -69,7 +69,7 @@ public class ThreadPoolActionEngine extends AbstractActionEngine {
 	}
     }
 
-    private static final Logger logger = Logger.getLogger(ThreadPoolActionEngine.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ThreadPoolActionEngine.class.getName());
 
     /**
      * Creates a new instance of ThreadPoolActionEngine with the supplied core pool size.

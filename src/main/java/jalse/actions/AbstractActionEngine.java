@@ -32,7 +32,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
     public static long TERMINATION_TIMEOUT = Long
 	    .valueOf(System.getProperty("jalse.actions.termination_timeout", "2000"));
 
-    private static final Logger logger = Logger.getLogger(AbstractActionEngine.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AbstractActionEngine.class.getName());
 
     /**
      * Executor service to be used for action scheduling.
@@ -97,7 +97,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
 	requireNotShutdown(executorService);
 
 	if (!paused.getAndSet(true)) {
-	    logger.info("Engine paused");
+	    LOGGER.info("Engine paused");
 	}
     }
 
@@ -112,7 +112,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
 	    } finally {
 		lock.unlock();
 	    }
-	    logger.info("Engine resumed");
+	    LOGGER.info("Engine resumed");
 	}
     }
 
@@ -126,9 +126,9 @@ public abstract class AbstractActionEngine implements ActionEngine {
 		executorService.shutdownNow(); // Uh-oh
 	    }
 	} catch (final InterruptedException e) {
-	    logger.log(Level.WARNING, "Error terminating executor", e);
+	    LOGGER.log(Level.WARNING, "Error terminating executor", e);
 	    Thread.currentThread().interrupt();
 	}
-	logger.info("Engine shutdown");
+	LOGGER.info("Engine shutdown");
     }
 }

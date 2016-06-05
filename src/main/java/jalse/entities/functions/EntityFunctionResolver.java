@@ -33,7 +33,7 @@ import jalse.entities.methods.EntityMethod;
  */
 public class EntityFunctionResolver {
 
-    private static final Logger logger = Logger.getLogger(EntityFunctionResolver.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(EntityFunctionResolver.class.getName());
 
     private final Map<Class<? extends Entity>, EntityFunction> resolved;
     private final Set<EntityMethodFunction> functions;
@@ -131,7 +131,7 @@ public class EntityFunctionResolver {
 	}
 
 	// Log type
-	logger.info(String.format("Resolving type %s", type));
+	LOGGER.info(String.format("Resolving type %s", type));
 
 	// Check not entity
 	if (Entity.class.equals(type)) {
@@ -160,7 +160,7 @@ public class EntityFunctionResolver {
 	    // Process functions
 	    for (final EntityMethodFunction methodFunction : functions) {
 		// Log method
-		logger.fine(String.format("Resolving method %s with function %s", m, methodFunction.getClass()));
+		LOGGER.fine(String.format("Resolving method %s with function %s", m, methodFunction.getClass()));
 		// Resolve method
 		final EntityMethod em = methodFunction.apply(m);
 		if (em != null) {
