@@ -22,7 +22,7 @@ public interface Identifiable {
      *            Second object.
      * @return Whether the unique identifiers are equal.
      */
-    static boolean equals(final Identifiable a, final Object b) {
+    static boolean areEqual(final Identifiable a, final Object b) {
 	return a == b
 		|| a != null && b instanceof Identifiable && Objects.equals(a.getID(), ((Identifiable) b).getID());
     }
@@ -56,10 +56,10 @@ public interface Identifiable {
      *            Identifiable to check for.
      * @return Predicate of {@code true} if the identifiable is equal or {@code false} if it is not.
      *
-     * @see Identifiable#equals(Identifiable, Object)
+     * @see Identifiable#areEqual(Identifiable, Object)
      */
     static Predicate<Identifiable> is(final Identifiable obj) {
-	return i -> equals(obj, i);
+	return i -> areEqual(obj, i);
     }
 
     /**

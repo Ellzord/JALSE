@@ -9,7 +9,7 @@ import java.util.UUID;
  *
  * @author Elliot Ford
  *
- * @see Identifiable#equals(Identifiable, Object)
+ * @see Identifiable#areEqual(Identifiable, Object)
  * @see Identifiable#hashCode(Identifiable)
  * @see Identifiable#toString(Identifiable)
  *
@@ -42,7 +42,7 @@ public abstract class AbstractIdentifiable implements Identifiable {
 
     @Override
     public boolean equals(final Object obj) {
-	return Identifiable.equals(this, obj);
+	return Identifiable.areEqual(this, obj);
     }
 
     @Override
