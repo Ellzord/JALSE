@@ -29,7 +29,7 @@ public abstract class AbstractActionEngine implements ActionEngine {
      * How long the engine will wait until it times out and interrupts running threads on shutdown
      * (configured via {@code jalse.actions.termination_timeout} system property).
      */
-    public static long TERMINATION_TIMEOUT = Long
+    public static final long TERMINATION_TIMEOUT = Long
 	    .valueOf(System.getProperty("jalse.actions.termination_timeout", "2000"));
 
     private static final Logger logger = Logger.getLogger(AbstractActionEngine.class.getName());

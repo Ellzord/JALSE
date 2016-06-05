@@ -47,12 +47,12 @@ public final class Entities {
     /**
      * An empty EntityContainer.
      */
-    public static EntityContainer EMPTY_ENTITYCONTAINER = new UnmodifiableDelegateEntityContainer(null);
+    public static final EntityContainer EMPTY_ENTITYCONTAINER = new UnmodifiableDelegateEntityContainer(null);
 
     /**
      * An empty EntityFactory.
      */
-    public static EntityFactory EMPTY_ENTITYFACTORY = new UnmodifiableDelegateEntityFactory(null);
+    public static final EntityFactory EMPTY_ENTITYFACTORY = new UnmodifiableDelegateEntityFactory(null);
 
     private static AtomicReference<EntityProxyFactory> proxyFactory = new AtomicReference<>(
 	    new DefaultEntityProxyFactory());
