@@ -50,8 +50,8 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
     public boolean addWaitingWork(final T context) {
 	write.lock();
 	try {
-	    boolean result;
-	    if (result = !waitingWork.contains(context)) {
+	    boolean result = !waitingWork.contains(context);
+	    if (result) {
 		waitingWork.add(context);
 		workChanged.signalAll(); // Wake up!
 	    }
@@ -177,8 +177,8 @@ public class ManualWorkQueue<T extends AbstractManualActionContext<?>> {
     public boolean removeWaitingWork(final T context) {
 	write.lock();
 	try {
-	    boolean result;
-	    if (result = waitingWork.remove(context)) {
+	    boolean result = waitingWork.remove(context);
+	    if (result) {
 		workChanged.signalAll();
 	    }
 	    return result;

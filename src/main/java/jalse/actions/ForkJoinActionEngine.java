@@ -167,8 +167,8 @@ public class ForkJoinActionEngine extends AbstractActionEngine {
     protected boolean addWork(final ForkJoinContext<?> context) {
 	requireNotStopped(this);
 
-	final boolean result;
-	if (result = workQueue.addWaitingWork(context)) {
+	final boolean result = workQueue.addWaitingWork(context);
+	if (result) {
 	    addWorkerIfNeeded();
 	}
 
