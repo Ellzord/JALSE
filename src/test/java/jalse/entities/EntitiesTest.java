@@ -10,6 +10,8 @@ import jalse.attributes.Attributes;
 import jalse.attributes.NamedAttributeType;
 
 public class EntitiesTest {
+    
+    private EntitiesTest() {}
 
     public static class RecursiveAttributeListenerTest {
 
