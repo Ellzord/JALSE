@@ -11,7 +11,7 @@ public class AttributeContainerTest {
 
     private class TestAttributeListener implements AttributeListener<Integer> {
 
-	public boolean changed = false;
+	public boolean changed;
 
 	@Override
 	public void attributeAdded(final AttributeEvent<Integer> event) {}
@@ -25,7 +25,7 @@ public class AttributeContainerTest {
 	public void attributeRemoved(final AttributeEvent<Integer> event) {}
     }
 
-    DefaultAttributeContainer container = null;
+    DefaultAttributeContainer container;
 
     @Test
     public void addFromContainerTest() {

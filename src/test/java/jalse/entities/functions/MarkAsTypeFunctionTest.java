@@ -59,7 +59,7 @@ public class MarkAsTypeFunctionTest {
 	void markTest();
     }
 
-    MarkAsTypeFunction function = null;
+    MarkAsTypeFunction function;
 
     @After
     public void after() {

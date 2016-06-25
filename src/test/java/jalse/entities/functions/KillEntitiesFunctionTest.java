@@ -53,7 +53,7 @@ public class KillEntitiesFunctionTest {
 	void killTest();
     }
 
-    KillEntitiesFunction function = null;
+    KillEntitiesFunction function;
 
     @After
     public void after() {

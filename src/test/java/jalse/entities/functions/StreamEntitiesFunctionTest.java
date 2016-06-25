@@ -85,7 +85,7 @@ public class StreamEntitiesFunctionTest {
 	Stream<TestEntity> streamTest();
     }
 
-    StreamEntitiesFunction function = null;
+    StreamEntitiesFunction function;
 
     @After
     public void after() {

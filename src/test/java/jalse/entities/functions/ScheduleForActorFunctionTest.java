@@ -79,7 +79,7 @@ public class ScheduleForActorFunctionTest {
 	void scheduleTest();
     }
 
-    ScheduleForActorFunction function = null;
+    ScheduleForActorFunction function;
 
     @After
     public void after() {

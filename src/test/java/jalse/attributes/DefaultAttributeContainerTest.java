@@ -8,7 +8,7 @@ public class DefaultAttributeContainerTest {
 
     public static class BuilderTest {
 
-	DefaultAttributeContainer container = null;
+	DefaultAttributeContainer container;
 
 	@After
 	public void after() {
@@ -53,9 +53,9 @@ public class DefaultAttributeContainerTest {
 
     private static class TestAttributeListener implements AttributeListener<Integer> {
 
-	public boolean added = false;
-	public boolean changed = false;
-	public boolean removed = false;
+	public boolean added;
+	public boolean changed;
+	public boolean removed;
 
 	@Override
 	public void attributeAdded(final AttributeEvent<Integer> event) {
@@ -73,7 +73,7 @@ public class DefaultAttributeContainerTest {
 	}
     }
 
-    DefaultAttributeContainer container = null;
+    DefaultAttributeContainer container;
 
     @After
     public void after() {

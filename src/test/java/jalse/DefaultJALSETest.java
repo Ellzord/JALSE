@@ -22,7 +22,7 @@ public class DefaultJALSETest {
 
     public static class BuilderTest {
 
-	JALSE jalse = null;
+	JALSE jalse;
 
 	@After
 	public void after() {
@@ -89,7 +89,7 @@ public class DefaultJALSETest {
 
     private class TestAction implements Action<JALSE> {
 
-	public int actCount = 0;
+	public int actCount;
 
 	@Override
 	public void perform(final ActionContext<JALSE> context) throws InterruptedException {
@@ -101,8 +101,8 @@ public class DefaultJALSETest {
 
     private class TestEntityListener implements EntityListener {
 
-	public boolean created = false;
-	public boolean killed = false;
+	public boolean created;
+	public boolean killed;
 
 	@Override
 	public void entityCreated(final EntityEvent event) {
@@ -121,7 +121,7 @@ public class DefaultJALSETest {
 	public void entityTransferred(final EntityEvent event) {}
     }
 
-    JALSE jalse = null;
+    JALSE jalse;
 
     @After
     public void after() {

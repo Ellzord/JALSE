@@ -87,7 +87,7 @@ public class KillEntityFunctionTest {
 	void killTest();
     }
 
-    KillEntityFunction function = null;
+    KillEntityFunction function;
 
     @After
     public void after() {

@@ -26,8 +26,8 @@ public class DefaultEntityTest {
 
     private class TestAttributeListener implements AttributeListener<Integer> {
 
-	public boolean present = false;
-	public int val = 0;
+	public boolean present;
+	public int val;
 
 	@Override
 	public void attributeAdded(final AttributeEvent<Integer> event) {
@@ -67,9 +67,9 @@ public class DefaultEntityTest {
 
     private class TestEntityTypeListener implements EntityTypeListener {
 
-	boolean unmark = false;
+	boolean unmark;
 
-	boolean mark = false;
+	boolean mark;
 
 	@Override
 	public void entityMarkedAsType(final EntityTypeEvent event) {
@@ -82,7 +82,7 @@ public class DefaultEntityTest {
 	}
     }
 
-    DefaultEntity entity = null;
+    DefaultEntity entity;
 
     @After
     public void after() {

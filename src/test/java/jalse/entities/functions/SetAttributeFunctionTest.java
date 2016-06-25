@@ -71,7 +71,7 @@ public class SetAttributeFunctionTest {
 	void setTest(Boolean test);
     }
 
-    SetAttributeFunction function = null;
+    SetAttributeFunction function;
 
     @After
     public void after() {
