@@ -64,7 +64,8 @@ public class DefaultAttributeContainer implements AttributeContainer {
 
 	    Set<AttributeListener<?>> lst = builderListeners.get(namedType);
 	    if (lst == null) {
-		builderAttributes.put(namedType, lst = new HashSet<>());
+	        lst = new HashSet<>();
+	        builderAttributes.put(namedType, lst);
 	    }
 
 	    lst.add(listener);
@@ -206,7 +207,8 @@ public class DefaultAttributeContainer implements AttributeContainer {
 
 	    if (lst == null) {
 		// No existing listeners
-		listeners.put(namedType, lst = new ListenerSet<>(AttributeListener.class));
+	        lst = new ListenerSet<>(AttributeListener.class);
+	        listeners.put(namedType, lst);
 	    }
 
 	    return lst.add(listener);
