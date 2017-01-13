@@ -85,6 +85,53 @@ public class DefaultJALSETest {
 	    jalse = builder.build();
 	    Assert.assertNotNull(jalse);
 	}
+	
+	@Test
+	public void buildTest9() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setManualEngine();
+	    jalse = builder.build();
+	    Assert.assertNotNull(jalse);
+	}
+	
+	@Test
+	public void buildTest10() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setCommonPoolEngine();
+	    jalse = builder.build();
+	    Assert.assertNotNull(jalse);
+	}
+	
+	@Test
+	public void buildTest11() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setID(new UUID(0, 0));
+	    jalse = builder.build();
+	    Assert.assertNotNull(jalse);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void buildTest12() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setParallelism(0);
+	    jalse = builder.build();
+	}
+	
+	@Test
+	public void buildTest13() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setSingleThread();
+	    jalse = builder.build();
+	    Assert.assertNotNull(jalse);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void buildTest14() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setTotalEntityLimit(0);
+	    jalse = builder.build();
+	}
+	
+	@Test
+	public void buildTest15() {
+	    final DefaultJALSE.Builder builder = new DefaultJALSE.Builder().setTotalEntityLimit(1);
+	    jalse = builder.build();
+	    Assert.assertNotNull(jalse);
+	}
     }
 
     private class TestAction implements Action<JALSE> {

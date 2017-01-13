@@ -3,14 +3,15 @@ package jalse.actions;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import jalse.actions.MultiAction.OperationType;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
-
-import jalse.actions.MultiAction.OperationType;
 
 public class MultiActionTest {
 
@@ -71,14 +72,14 @@ public class MultiActionTest {
 	@Override
 	public void perform(final ActionContext<String> context) throws InterruptedException {}
     }
-
+    
     MultiAction<String> multi;
 
     @After
     public void after() {
 	multi = null;
     }
-
+    
     @Test
     public void testAddOperation() {
 	multi = new MultiAction<String>();
@@ -113,5 +114,22 @@ public class MultiActionTest {
 	multi.add(op);
 
 	assertFalse(multi.isEmpty());
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testActionOperationConstructorWithEmptyCollection() {
+	Collection<TestAction> emptyList = Collections.emptyList();
+	new MultiAction.ActionOperation<String>(OperationType.PERFORM, emptyList);
+    }
+    
+    @Test
+    public void testPerform() throws InterruptedException {
+	multi = new MultiAction<String>();
+	final MultiAction.ActionOperation<String> op = new MultiAction.ActionOperation<String>(OperationType.PERFORM,
+		new TestAction());
+	multi.add(op);
+	
+	UnschedulableDelegateActionContext<String> actionContext = new UnschedulableDelegateActionContext<>(null);
+	multi.perform(actionContext);
     }
 }
