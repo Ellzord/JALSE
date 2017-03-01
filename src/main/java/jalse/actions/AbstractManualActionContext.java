@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 public abstract class AbstractManualActionContext<T> extends BaseActionContext<T>
 	implements Comparable<AbstractManualActionContext<?>> {
 
-    private static final Logger logger = Logger.getLogger(AbstractManualActionContext.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AbstractManualActionContext.class.getName());
 
     private final Lock lock;
     private final Condition ran;
@@ -170,7 +170,7 @@ public abstract class AbstractManualActionContext<T> extends BaseActionContext<T
 	    cancelled.set(true);
 	    throw e;
 	} catch (final Exception e) { // Continue
-	    logger.log(Level.WARNING, "Error performing action", e);
+	    LOGGER.log(Level.WARNING, "Error performing action", e);
 	    if (!isPeriodicOnException()) {
 		cancelled.set(true);
 	    }

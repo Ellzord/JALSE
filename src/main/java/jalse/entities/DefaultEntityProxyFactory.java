@@ -116,7 +116,7 @@ public class DefaultEntityProxyFactory implements EntityProxyFactory {
 	}
 
 	private Object newEntityProxy(final Entity e, final Class<?> type) {
-	    logger.fine(String.format("Creating proxy of type %s for entity %s", type, e.getID()));
+	    LOGGER.fine(String.format("Creating proxy of type %s for entity %s", type, e.getID()));
 	    return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] { type },
 		    new EntityProxyHandler(e));
 	}
@@ -183,7 +183,7 @@ public class DefaultEntityProxyFactory implements EntityProxyFactory {
 	}
     }
 
-    private static final Logger logger = Logger.getLogger(DefaultEntityProxyFactory.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DefaultEntityProxyFactory.class.getName());
 
     /**
      * Resolver for entity types.

@@ -49,7 +49,7 @@ public class ManualActionEngine implements ActionEngine {
 	}
     }
 
-    private static final Logger logger = Logger.getLogger(ManualActionEngine.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ManualActionEngine.class.getName());
 
     private final ManualWorkQueue<ManualContext<?>> workQueue;
     private final ActionBindings bindings;
@@ -151,7 +151,7 @@ public class ManualActionEngine implements ActionEngine {
 		} catch (final InterruptedException e) {
 		    Thread.currentThread().interrupt();
 		} catch (final Exception e) {
-		    logger.log(Level.WARNING, "Error performing action", e);
+		    LOGGER.log(Level.WARNING, "Error performing action", e);
 		}
 	    });
 	} finally {
