@@ -3,7 +3,9 @@ package jalse.entities;
 import static jalse.attributes.Attributes.EMPTY_ATTRIBUTECONTAINER;
 import static jalse.entities.Entities.asType;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -323,6 +325,29 @@ public interface EntityContainer {
 	return newEntity(id, type, EMPTY_ATTRIBUTECONTAINER);
     }
 
+    /**
+     * Creates a new entity with a specified ID and a Collection of types that it should 
+     * be marked as.
+     * 
+     * @param id
+     * 			Entity ID
+     * @param types
+     * 			Collection of Entity types. Can be empty
+     * @return
+     * 			Returns Entity instead of T to account for an 
+     * 			Empty Collection of types. If there are multiple 
+     * 			types in the beginning, it's arbitrary which one 
+     * 			to return
+     */
+    default Entity newEntity(final UUID id, final Collection<Class<? extends Entity>> types) {
+	    Iterator<Class<? extends Entity>> iter = types.iterator();
+	    Entity myEntity = newEntity(id, EMPTY_ATTRIBUTECONTAINER);
+	    while(iter.hasNext()) {
+	      myEntity.markAsType(iter.next());
+	    }
+	    return myEntity;
+	}
+    
     /**
      * Creates new entity with the specified ID. This entity is marked as the specified entity type
      * and then wrapped to it.

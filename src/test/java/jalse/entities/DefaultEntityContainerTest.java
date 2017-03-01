@@ -1,5 +1,7 @@
 package jalse.entities;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -320,5 +322,20 @@ public class DefaultEntityContainerTest {
 	// Try transferring an entity that the container no longer contains.
 	Assert.assertFalse(container.transferEntity(id, otherContainer));
 
+    }
+    
+    private interface T1 extends Entity {};
+
+    @Test
+    public void multiTypeEntityTest() {
+    	final UUID id = new UUID(0, 0);
+    	EntityContainer container = new DefaultEntityContainer();
+    	Collection<Class<? extends Entity>> types = new ArrayList<Class<? extends Entity>>();
+    	types.add(TestEntity.class);
+    	types.add(T1.class);
+    	Entity e = container.newEntity(id, types);
+    	
+    	Assert.assertTrue(e.isMarkedAsType(T1.class));
+    	Assert.assertTrue(e.isMarkedAsType(TestEntity.class));
     }
 }
