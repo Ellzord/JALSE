@@ -107,7 +107,6 @@ uploadArchives {
           developer {
             id 'Ellzord'
             name 'Elliot Ford'
-            email 'ElliotFord@Live.co.uk'
           }
         }
       }
